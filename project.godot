@@ -1,0 +1,37 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+[application]
+
+config/name="OpenScadGraphEditor"
+run/main_scene="res://GraphEditor.tscn"
+config/icon="res://icon.png"
+
+[autoload]
+
+NodeFactory="*res://Nodes/NodeFactory.cs"
+
+[display]
+
+window/size/width=1920
+window/size/height=1080
+
+[gui]
+
+theme/use_hidpi=true
+theme/custom="res://ui_theme.tres"
+
+[physics]
+
+common/enable_pause_aware_picking=true
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"

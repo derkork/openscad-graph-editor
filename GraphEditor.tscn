@@ -1,0 +1,58 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://GraphEditor.cs" type="Script" id=1]
+[ext_resource path="res://Nodes/Start.cs" type="Script" id=2]
+[ext_resource path="res://Widgets/AddDialog/AddDialog.tscn" type="PackedScene" id=3]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AddDialog" parent="." instance=ExtResource( 3 )]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="GraphEdit" type="GraphEdit" parent="VBoxContainer"]
+margin_right = 1920.0
+margin_bottom = 872.0
+size_flags_vertical = 3
+right_disconnects = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Start" type="GraphNode" parent="VBoxContainer/GraphEdit"]
+margin_left = 200.0
+margin_top = 200.0
+margin_right = 264.0
+margin_bottom = 260.0
+mouse_filter = 1
+offset = Vector2( 200, 200 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="VBoxContainer"]
+margin_top = 880.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+rect_min_size = Vector2( 0, 200 )
+readonly = true
+syntax_highlighting = true
+context_menu_enabled = false
+shortcut_keys_enabled = false
+virtual_keyboard_enabled = false
+selecting_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}

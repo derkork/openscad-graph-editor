@@ -1,0 +1,12 @@
+[gd_resource type="Theme" load_steps=3 format=2]
+
+[ext_resource path="res://Fonts/Lato-Regular.ttf" type="DynamicFontData" id=1]
+
+[sub_resource type="DynamicFont" id=1]
+size = 25
+font_data = ExtResource( 1 )
+
+[resource]
+default_font = SubResource( 1 )
+GraphNode/constants/port_offset = 20
+GraphNode/constants/separation = 5
