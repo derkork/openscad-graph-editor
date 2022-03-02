@@ -35,9 +35,15 @@ namespace OpenScadGraphEditor.Nodes
                 .ToList();
         }
 
-        public static GraphNode MakeOne(GraphNode node)
+        public static ScadNode MakeOne(ScadNode node)
         {
-            return (GraphNode) node.GetType().New();
+            return (ScadNode) node.GetType().New();
         }
+
+        public static ScadNode FromScript(string scriptPath)
+        {
+            return (ScadNode) GD.Load<CSharpScript>(scriptPath)?.New();
+        }
+        
     }
 }

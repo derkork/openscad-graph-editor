@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using JetBrains.Annotations;
 using Object = Godot.Object;
 
 namespace OpenScadGraphEditor.Utils
@@ -15,7 +16,7 @@ namespace OpenScadGraphEditor.Utils
 
         /// Returns a new instance of the script.
         /// workaround for https://github.com/godotengine/godot/issues/38191
-        public static T New<T>() where T : Object
+        public static T New<[MeansImplicitUse] T>() where T : Object
         {
             return (T) New(typeof(T));
         }

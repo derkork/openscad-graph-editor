@@ -1,4 +1,7 @@
+using System.Linq;
 using Godot;
+using Godot.Collections;
+using GodotExt;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
@@ -35,6 +38,56 @@ namespace OpenScadGraphEditor.Nodes
 
             connected = default;
             return false;
+        }
+
+        public void Load(SavedGraph graph)
+        {
+            _graphEdit.ClearConnections();
+            _graphEdit.GetChildNodes<ScadNode>().ForAll(it => it.RemoveAndFree());
+
+            foreach (var savedNode in graph.Nodes)
+            {
+                var instance = NodeFactory.FromScript(savedNode.Script);
+                instance.MoveToNewParent(_graphEdit);
+                instance.LoadFrom(savedNode);
+            }
+
+            foreach (var savedConnection in graph.Connections)
+            {
+                _graphEdit.ConnectNode(savedConnection.FromId, savedConnection.FromPort, savedConnection.ToId,
+                    savedConnection.ToPort);
+            }
+        }
+
+        public SavedGraph Save()
+        {
+            var result = Prefabs.New<SavedGraph>();
+            result.Nodes = new Array<SavedNode>(
+                _graphEdit
+                    .GetChildNodes<ScadNode>()
+                    .Select(it =>
+                    {
+                        var savedNode = Prefabs.New<SavedNode>();
+                        it.SaveInto(savedNode);
+                        return savedNode;
+                    })
+            );
+
+            result.Connections = new Array<SavedConnection>(
+                _graphEdit
+                    .GetConnections()
+                    .Select(it =>
+                    {
+                        var savedConnection = Prefabs.New<SavedConnection>();
+                        savedConnection.FromId = it.From;
+                        savedConnection.FromPort = it.FromPort;
+                        savedConnection.ToId = it.To;
+                        savedConnection.ToPort = it.ToPort;
+                        return savedConnection;
+                    })
+            );
+
+            return result;
         }
     }
 }

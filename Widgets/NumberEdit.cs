@@ -1,3 +1,4 @@
+using System.Globalization;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
@@ -16,18 +17,16 @@ namespace OpenScadGraphEditor.Widgets
             Text = "0";
         }
 
-        public override string Value
-        {
-            get => Text;
-            set => Text = value;
-        }
+        public override string RenderedValue => Text;
 
         private void OnFocusExited()
         {
-            if (!double.TryParse(Text, out _))
+            if (!double.TryParse(Text, out var result))
             {
                 Text = "0";
             }   
+            
+            Text = result.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

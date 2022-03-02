@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "Construct Vector3";
         public override string NodeDescription => "Constructs a Vector3 from its components.";
 
-        public override void _Ready()
+        public ConstructVector3()
         {
             InputPorts
                 .Number("X")
@@ -17,8 +17,6 @@ namespace OpenScadGraphEditor.Nodes
 
             OutputPorts
                 .Vector3(allowLiteral: false);
-
-            base._Ready();
         }
 
         public override string Render(ScadContext scadContext)

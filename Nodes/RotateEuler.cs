@@ -1,18 +1,17 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class RotateEuler : ScadNode
+    public sealed class RotateEuler : ScadNode
     {
         public override string NodeTitle => "Rotate (Euler angles)";
 
         public override string NodeDescription =>
             "Rotates the next elements\nalong the given Euler angles.";
 
-        public override void _Ready()
+        public RotateEuler()
         {
             InputPorts
                 .Flow()
@@ -20,8 +19,6 @@ namespace OpenScadGraphEditor.Nodes
 
             OutputPorts
                 .Flow();
-            
-            base._Ready();
         }
 
         public override string Render(ScadContext scadContext)

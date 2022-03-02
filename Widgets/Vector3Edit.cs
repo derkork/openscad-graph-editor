@@ -13,10 +13,18 @@ namespace OpenScadGraphEditor.Widgets
         [Signal]
         public delegate void Changed();
 
-        public string Value
+        public string RenderedValue => $"[{_x.RenderedValue}, {_y.RenderedValue}, {_z.RenderedValue}]";
+
+        public string SerializedValue
         {
-            get => $"[{_x.Value}, {_y.Value}, {_z.Value}]";
-            set { }
+            get => $"{_x.RenderedValue}|{_y.RenderedValue}|{_z.RenderedValue}";
+            set
+            {
+                var parts = value.Split('|');
+                _x.SerializedValue = parts[0];
+                _y.SerializedValue = parts[1];
+                _z.SerializedValue = parts[2];
+            }
         }
 
         public void SetEnabled(bool enabled)
@@ -44,7 +52,7 @@ namespace OpenScadGraphEditor.Widgets
             xLabel.Text = "X";
             xLabel.MoveToNewParent(this);
             _x.MoveToNewParent(this);
-            
+
 
             var yLabel = new Label();
             yLabel.Text = "Y";
@@ -61,6 +69,5 @@ namespace OpenScadGraphEditor.Widgets
         {
             return this.Connect(nameof(Changed));
         }
-
     }
 }

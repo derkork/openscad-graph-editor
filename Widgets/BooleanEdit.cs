@@ -9,11 +9,9 @@ namespace OpenScadGraphEditor.Widgets
         [Signal]
         public delegate void Changed();
         
-        public string Value
-        {
-            get => Pressed ? "true" : "false";
-            set => Pressed = value == "true";
-        }
+        public string RenderedValue => Pressed ? "true" : "false";
+
+        public string SerializedValue { get => Pressed.ToString(); set => Pressed = bool.Parse(value); }
 
         public void SetEnabled(bool enabled)
         {

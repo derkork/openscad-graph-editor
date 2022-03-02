@@ -9,7 +9,9 @@ namespace OpenScadGraphEditor.Widgets
         [Signal]
         public delegate void Changed();
         
-        public abstract string Value { get; set; }
+        public abstract string RenderedValue { get; }
+
+        public string SerializedValue { get => Text; set => Text = value; }
 
         public ConnectExt.ConnectBinding ConnectChanged()
         {

@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription =>
             "Performs a test to determine\nif the actions in a sub scope\nshould be performed or not.";
 
-        public override void _Ready()
+        public Branch()
         {
             InputPorts
                 .Flow("In")
@@ -20,8 +20,6 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts
                 .Flow("True")
                 .Flow("False");
-                
-            base._Ready();
         }
 
         public override string Render(ScadContext scadContext)

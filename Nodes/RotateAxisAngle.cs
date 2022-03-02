@@ -12,7 +12,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription =>
             "Rotates the next elements\nalong the given axis and angle.";
 
-        public override void _Ready()
+
+        public RotateAxisAngle()
         {
             InputPorts
                 .Flow()
@@ -21,8 +22,6 @@ namespace OpenScadGraphEditor.Nodes
 
             OutputPorts
                 .Flow();
-            
-            base._Ready();
         }
 
         public override string Render(ScadContext scadContext)

@@ -12,5 +12,15 @@ namespace OpenScadGraphEditor.Utils
                 perform(item);
             }
         }
+
+        public static IEnumerable<int> Indices<T>(this IEnumerable<T> self)
+        {
+            var index = 0;
+            foreach (var item in self)
+            {
+                yield return index;
+                index++;
+            }
+        }
     }
 }

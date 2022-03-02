@@ -43,8 +43,9 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
 
             _itemList.Clear();
-            foreach (var node in _supportedNodes.Where(node => (node.NodeTitle.ContainsIgnoreCase(searchTerm) ||
-                                                                node.NodeDescription.ContainsIgnoreCase(searchTerm))
+            foreach (var node in _supportedNodes.Where(it => (it.NodeTitle.ContainsIgnoreCase(searchTerm) ||
+                                                                it.NodeDescription.ContainsIgnoreCase(searchTerm)) &&
+                                                               _contextFilter(it)
                                                                ))
             {
                 _itemList.AddItem(node.NodeTitle);

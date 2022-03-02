@@ -14,38 +14,99 @@ __meta__ = {
 
 [node name="AddDialog" parent="." instance=ExtResource( 3 )]
 
+[node name="FileDialog" type="FileDialog" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -438.5
+margin_top = -269.0
+margin_right = 438.5
+margin_bottom = 269.0
+rect_min_size = Vector2( 400, 140 )
+window_title = "Open a File"
+mode = 0
+access = 2
+filters = PoolStringArray( "*.graph.tres; OpenSCAD graphs" )
+current_dir = "/home/kork/devel/OpenScadGraphEditor"
+current_path = "/home/kork/devel/OpenScadGraphEditor/"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
+custom_constants/separation = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GraphEdit" type="GraphEdit" parent="VBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer"]
 margin_right = 1920.0
-margin_bottom = 872.0
-size_flags_vertical = 3
-right_disconnects = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+margin_bottom = 65.0
 
-[node name="Start" type="GraphNode" parent="VBoxContainer/GraphEdit"]
-margin_left = 200.0
-margin_top = 200.0
-margin_right = 264.0
-margin_bottom = 260.0
-mouse_filter = 1
-offset = Vector2( 200, 200 )
-script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer"]
+margin_left = 14.0
+margin_top = 14.0
+margin_right = 1906.0
+margin_bottom = 51.0
 
-[node name="TextEdit" type="TextEdit" parent="VBoxContainer"]
-margin_top = 880.0
+[node name="NewButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_right = 73.0
+margin_bottom = 37.0
+text = "New"
+
+[node name="OpenButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 81.0
+margin_right = 164.0
+margin_bottom = 37.0
+text = "Open"
+
+[node name="SaveAsButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 172.0
+margin_right = 295.0
+margin_bottom = 37.0
+text = "Save as..."
+
+[node name="Spacer" type="Control" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 303.0
+margin_right = 996.0
+margin_bottom = 37.0
+size_flags_horizontal = 3
+
+[node name="FileNameLabel" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 1004.0
+margin_top = 6.0
+margin_right = 1698.0
+margin_bottom = 31.0
+size_flags_horizontal = 3
+text = "<not yet saved to a file>"
+align = 2
+clip_text = true
+
+[node name="ForceSaveButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 1706.0
+margin_right = 1774.0
+margin_bottom = 37.0
+text = "[ ... ]"
+
+[node name="PreviewButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 1782.0
+margin_right = 1892.0
+margin_bottom = 37.0
+toggle_mode = true
+text = "Preview"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+margin_top = 65.0
 margin_right = 1920.0
 margin_bottom = 1080.0
+size_flags_vertical = 3
+
+[node name="TextEdit" type="TextEdit" parent="VBoxContainer/MarginContainer"]
+margin_right = 1920.0
+margin_bottom = 1015.0
 rect_min_size = Vector2( 0, 200 )
 readonly = true
 syntax_highlighting = true
@@ -56,3 +117,30 @@ selecting_enabled = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="GraphEdit" type="GraphEdit" parent="VBoxContainer/MarginContainer"]
+margin_right = 1920.0
+margin_bottom = 1015.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+right_disconnects = true
+scroll_offset = Vector2( -454, 0 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Start" type="GraphNode" parent="VBoxContainer/MarginContainer/GraphEdit"]
+margin_left = 654.0
+margin_top = 200.0
+margin_right = 718.0
+margin_bottom = 260.0
+mouse_filter = 1
+offset = Vector2( 200, 200 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+autostart = true

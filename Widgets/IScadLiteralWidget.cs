@@ -7,7 +7,9 @@ namespace OpenScadGraphEditor.Widgets
 
         void SetEnabled(bool enabled);
         
-        string Value { get; set; }
+        string RenderedValue { get; }
+        
+        string SerializedValue { get; set; }
 
         ConnectExt.ConnectBinding ConnectChanged();
     }

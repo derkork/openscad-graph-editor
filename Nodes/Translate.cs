@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription =>
             "Translates (moves) its child\nelements along the specified offset.";
 
-        public override void _Ready()
+        public Translate()
         {
             InputPorts
                 .Flow()
@@ -19,8 +19,6 @@ namespace OpenScadGraphEditor.Nodes
 
             OutputPorts
                 .Flow();
-            
-            base._Ready();
         }
 
         public override string Render(ScadContext scadContext)

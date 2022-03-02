@@ -1,75 +1,90 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace OpenScadGraphEditor.Nodes
 {
     public readonly struct PortDefinition
     {
-        private PortDefinition(PortType portType, string name, bool allowLiteral)
+        private PortDefinition(PortType portType, string name, bool allowLiteral, bool autoCoerce)
         {
             PortType = portType;
             Name = name;
             AllowLiteral = allowLiteral;
+            AutoCoerce = autoCoerce;
         }
 
         public PortType PortType { get; }
         public string Name { get; }
         
         public bool AllowLiteral { get; }
+        public bool AutoCoerce { get; }
 
 
-        public static PortDefinition Boolean(string name= "", bool allowLiteral = true)
+        public static PortDefinition Boolean(string name= "", bool allowLiteral = true, bool autoCoerce = false)
         {
-            return new PortDefinition(PortType.Boolean, name, allowLiteral);
+            return new PortDefinition(PortType.Boolean, name, allowLiteral, autoCoerce);
         }
 
 
-        public static PortDefinition Number(string name = "",  bool allowLiteral = true)
+        public static PortDefinition Number(string name = "",  bool allowLiteral = true, bool autoCoerce = false)
         {
-            return new PortDefinition(PortType.Number, name, allowLiteral);
+            return new PortDefinition(PortType.Number, name, allowLiteral, autoCoerce);
+        }
+
+        public static PortDefinition String(string name = "",  bool allowLiteral = true, bool autoCoerce = false)
+        {
+            return new PortDefinition(PortType.String, name, allowLiteral, autoCoerce);
+        }
+
+        public static PortDefinition Any(string name = "")
+        {
+            return new PortDefinition(PortType.Any, name, false, false);
         }
         
-        public static PortDefinition Vector3(string name = "", bool allowLiteral = true)
+        public static PortDefinition Vector3(string name = "", bool allowLiteral = true, bool autoCoerce = false)
         {
-            return new PortDefinition(PortType.Vector3, name, allowLiteral);
+            return new PortDefinition(PortType.Vector3, name, allowLiteral, autoCoerce);
         }
         
         public static PortDefinition Flow(string name = "")
         {
-            return new PortDefinition(PortType.Flow, name, false);
+            return new PortDefinition(PortType.Flow, name, false, false);
         }
 
-        public static List<PortDefinition> Of(params PortDefinition[] ports)
-        {
-            return ports.ToList();
-        }
-
-        public static List<PortDefinition> None()
-        {
-            return Of();
-        } 
     }
 
     public static class PortDefinitionExt
     {
         public static List<PortDefinition> Number(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true)
+            bool allowLiteral = true, bool autoCoerce = false)
         {
-            self.Add(PortDefinition.Number(name, allowLiteral));
+            self.Add(PortDefinition.Number(name, allowLiteral, autoCoerce));
             return self;
         }
 
         public static List<PortDefinition> Vector3(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true)
+            bool allowLiteral = true, bool autoCoerce = false)
         {
-            self.Add(PortDefinition.Vector3(name, allowLiteral));
+            self.Add(PortDefinition.Vector3(name, allowLiteral, autoCoerce));
             return self;
         }
 
         public static List<PortDefinition> Boolean(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true)
+            bool allowLiteral = true, bool autoCoerce = false)
         {
-            self.Add(PortDefinition.Boolean(name, allowLiteral));
+            self.Add(PortDefinition.Boolean(name, allowLiteral, autoCoerce));
+            return self;
+        }
+        
+        public static List<PortDefinition> Any(this List<PortDefinition> self, string name = "")
+        {
+            self.Add(PortDefinition.Any(name));
+            return self;
+        }
+
+        public static List<PortDefinition> String(this List<PortDefinition> self, string name = "",
+            bool allowLiteral = true, bool autoCoerce = false)
+        {
+            self.Add(PortDefinition.String(name, allowLiteral, autoCoerce));
             return self;
         }
 

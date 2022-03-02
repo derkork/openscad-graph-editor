@@ -1,20 +1,9 @@
 namespace OpenScadGraphEditor.Nodes
 {
-    public abstract class BinaryNumericOperator : ScadExpressionNode
+    public abstract class BinaryOperator : ScadExpressionNode
     {
         
         protected abstract string OperatorSign { get; }
-        
-        public override void _Ready()
-        {
-            InputPorts
-                .Number()
-                .Number();
-
-            OutputPorts
-                .Number(allowLiteral: false);
-            base._Ready();
-        }
 
         public override string Render(ScadContext scadContext)
         {

@@ -28,6 +28,10 @@ window/size/height=1080
 theme/use_hidpi=true
 theme/custom="res://ui_theme.tres"
 
+[mono]
+
+unhandled_exception_policy=1
+
 [physics]
 
 common/enable_pause_aware_picking=true

@@ -29,6 +29,35 @@ namespace OpenScadGraphEditor.Nodes
             new Dictionary<int, IScadLiteralWidget>();
 
 
+        public void SaveInto(SavedNode node)
+        {
+            node.Id = Name;
+            node.Script = ((CSharpScript) GetScript()).ResourcePath;
+            node.Position = Offset;
+            InputPorts
+                .Indices()
+                .Where(i => _inputLiteralWidgets.ContainsKey(i))
+                .ForAll(i => node.SetData($"input_widget_value.{i}", _inputLiteralWidgets[i].SerializedValue));
+            OutputPorts
+                .Indices()
+                .Where(i => _outputLiteralWidgets.ContainsKey(i))
+                .ForAll(i => node.SetData($"output_widget_value.{i}", _outputLiteralWidgets[i].SerializedValue));
+        }
+
+        public void LoadFrom(SavedNode node)
+        {
+            Name = node.Id;
+            Offset = node.Position;
+            InputPorts
+                .Indices()
+                .Where(i => _inputLiteralWidgets.ContainsKey(i))
+                .ForAll(i => _inputLiteralWidgets[i].SerializedValue = node.GetData($"input_widget_value.{i}"));
+            OutputPorts
+                .Indices()
+                .Where(i => _outputLiteralWidgets.ContainsKey(i))
+                .ForAll(i => _outputLiteralWidgets[i].SerializedValue = node.GetData($"output_widget_value.{i}"));
+        }
+
         public void PortConnected(int port, bool isLeft)
         {
             if (isLeft)
@@ -50,27 +79,26 @@ namespace OpenScadGraphEditor.Nodes
                 }
             }
         }
-        
-        
-        
-        public bool HasInputOfType(PortType type)
+
+
+        public bool HasInputThatCanConnect(PortType type)
         {
-            return InputPorts.Any(it => it.PortType == type);
+            return InputPorts.Any(it => it.PortType.CanConnect(type) || (type != PortType.Flow && it.AutoCoerce));
         }
 
-        public bool HasOutputOfType(PortType type)
+        public bool HasOutputThatCanConnect(PortType type)
         {
-            return OutputPorts.Any(it => it.PortType == type);
-        }
-        
-        public int GetFirstInputPortOfType(PortType portType)
-        {
-            return InputPorts.FindIndex(it => it.PortType == portType);
+            return OutputPorts.Any(it => it.PortType.CanConnect(type));
         }
 
-        public int GetFirstOutputPortOfType(PortType portType)
+        public int GetFirstInputThatCanConnect(PortType type)
         {
-            return OutputPorts.FindIndex(it => it.PortType == portType);
+            return InputPorts.FindIndex(it => it.PortType.CanConnect(type) || (type != PortType.Flow && it.AutoCoerce));
+        }
+
+        public int GetFirstOutputThatCanConnect(PortType type)
+        {
+            return OutputPorts.FindIndex(it => it.PortType.CanConnect(type));
         }
 
         public PortType GetInputPortType(int index)
@@ -96,7 +124,7 @@ namespace OpenScadGraphEditor.Nodes
             // try rendering the widget
             if (_inputLiteralWidgets.TryGetValue(index, out var widget))
             {
-                return widget.Value;
+                return widget.RenderedValue;
             }
 
             // otherwise return nothing
@@ -105,16 +133,19 @@ namespace OpenScadGraphEditor.Nodes
 
         protected string RenderOutput(ScadContext scadContext, int index)
         {
-            // if we have a node connected, render the node
-            if (scadContext.TryGetOutputNode(this, index, out var node))
+            // if we have a flow node connected render this.
+            if (GetOutputPortType(index) == PortType.Flow)
             {
-                return node.Render(scadContext);
+                if (scadContext.TryGetOutputNode(this, index, out var node))
+                {
+                    return node.Render(scadContext);
+                }
             }
 
             // try rendering the widget
             if (_outputLiteralWidgets.TryGetValue(index, out var widget))
             {
-                return widget.Value;
+                return widget.RenderedValue;
             }
 
             // otherwise return nothing
@@ -127,12 +158,6 @@ namespace OpenScadGraphEditor.Nodes
             Title = NodeTitle;
             HintTooltip = NodeDescription;
             RectMinSize = new Vector2(200, 120);
-
-            ClearAllSlots();
-            foreach (var childNode in this.GetChildNodes())
-            {
-                childNode.RemoveAndFree();
-            }
 
             var maxPorts = Mathf.Max(InputPorts.Count, OutputPorts.Count);
 
@@ -158,17 +183,18 @@ namespace OpenScadGraphEditor.Nodes
 
         private void BuildPort(Container container, int idx, PortDefinition portDefinition, bool isLeft)
         {
+            var connectorPortType = portDefinition.AutoCoerce ? PortType.Any : portDefinition.PortType;
             if (isLeft)
             {
                 SetSlotEnabledLeft(idx, true);
-                SetSlotColorLeft(idx, ColorFor(portDefinition.PortType));
-                SetSlotTypeLeft(idx, (int) portDefinition.PortType);
+                SetSlotColorLeft(idx, ColorFor(connectorPortType));
+                SetSlotTypeLeft(idx, (int) connectorPortType);
             }
             else
             {
                 SetSlotEnabledRight(idx, true);
-                SetSlotColorRight(idx, ColorFor(portDefinition.PortType));
-                SetSlotTypeRight(idx, (int) portDefinition.PortType);
+                SetSlotColorRight(idx, ColorFor(connectorPortType));
+                SetSlotTypeRight(idx, (int) connectorPortType);
             }
 
             IScadLiteralWidget literalWidget = null;
@@ -212,11 +238,9 @@ namespace OpenScadGraphEditor.Nodes
                 literalWidget.ConnectChanged().To(this, nameof(NotifyChanged));
             }
 
-            // TODO: this is sort of a hack, better clone this stuff somewhere
             var portContainer = Prefabs.InstantiateFromScene<PortContainer>();
-            portContainer._Ready();
-            portContainer.Setup(isLeft, portDefinition.Name, (Control) literalWidget);
             portContainer.MoveToNewParent(container);
+            portContainer.Setup(isLeft, portDefinition.Name, (Control) literalWidget);
         }
 
 
@@ -239,7 +263,7 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Range:
                     return new Color(.2f, 0.2f, 1f);
                 case PortType.Any:
-                    return new Color(0, 0f, 0f);
+                    return new Color(1, 0f, 1f);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
             }

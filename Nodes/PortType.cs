@@ -11,4 +11,14 @@ namespace OpenScadGraphEditor.Nodes
         Range = 7,
         Any = 8
     }
+
+    public static class PortTypeExt
+    {
+        public static bool CanConnect(this PortType self, PortType other)
+        {
+            return self == other ||
+                   self == PortType.Any && other != PortType.Flow ||
+                   self != PortType.Flow && other == PortType.Any;
+        }
+    }
 }

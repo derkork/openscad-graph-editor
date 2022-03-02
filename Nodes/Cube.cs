@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription =>
             "Creates a cube in the first octant. When center is true, the cube is centered on the origin.";
 
-        public override void _Ready()
+        public Cube()
         {
             InputPorts
                 .Flow()
@@ -21,8 +21,6 @@ namespace OpenScadGraphEditor.Nodes
 
             OutputPorts
                 .Flow();
-            
-            base._Ready();
         }
 
         public override string Render(ScadContext scadContext)

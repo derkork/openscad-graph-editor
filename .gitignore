@@ -1,3 +1,8 @@
 /.idea/
 /.mono/
 /.import/
+
+mono_crash*
+*graph.tres*
+
+*.DotSettings.user
