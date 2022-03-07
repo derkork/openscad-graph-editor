@@ -48,6 +48,7 @@ namespace OpenScadGraphEditor.Nodes
             foreach (var savedNode in graph.Nodes)
             {
                 var instance = NodeFactory.FromScript(savedNode.Script);
+                instance.PrepareForLoad(savedNode);
                 instance.MoveToNewParent(_graphEdit);
                 instance.LoadFrom(savedNode);
             }

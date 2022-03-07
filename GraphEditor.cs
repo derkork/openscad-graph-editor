@@ -119,7 +119,7 @@ namespace OpenScadGraphEditor
                 return;
             }
 
-            var savedGraph = ResourceLoader.Load<SavedGraph>(filename);
+            var savedGraph = ResourceLoader.Load<SavedGraph>(filename, noCache: true);
             if (savedGraph == null)
             {
                 GD.Print("Cannot load file!");

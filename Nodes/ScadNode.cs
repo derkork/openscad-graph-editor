@@ -29,7 +29,7 @@ namespace OpenScadGraphEditor.Nodes
             new Dictionary<int, IScadLiteralWidget>();
 
 
-        public void SaveInto(SavedNode node)
+        public virtual void SaveInto(SavedNode node)
         {
             node.Id = Name;
             node.Script = ((CSharpScript) GetScript()).ResourcePath;
@@ -44,7 +44,11 @@ namespace OpenScadGraphEditor.Nodes
                 .ForAll(i => node.SetData($"output_widget_value.{i}", _outputLiteralWidgets[i].SerializedValue));
         }
 
-        public void LoadFrom(SavedNode node)
+        public virtual void PrepareForLoad(SavedNode node)
+        {
+        }
+        
+        public virtual void LoadFrom(SavedNode node)
         {
             Name = node.Id;
             Offset = node.Position;

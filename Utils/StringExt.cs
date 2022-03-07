@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text;
 
 namespace OpenScadGraphEditor.Utils
@@ -17,6 +18,11 @@ namespace OpenScadGraphEditor.Utils
             return haystack.IndexOf(needle, StringComparison.CurrentCultureIgnoreCase) > -1;
         }
 
+        public static string AsBlock(this string input)
+        {
+            return input.Length == 0 ? input : $" {{\n{input.Indent()}\n}}\n";
+        }
+        
         public static string AppendLines(this string source, params string[] lines)
         {
             if (lines.Length == 0)

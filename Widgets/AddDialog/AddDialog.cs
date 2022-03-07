@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
@@ -17,7 +18,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         private LineEdit _lineEdit;
         private ItemList _itemList;
-        private List<ScadNode> _supportedNodes;
+        private List<AddDialogEntry> _supportedNodes;
         private Predicate<ScadNode> _contextFilter = node => true;
 
         public override void _Ready()
@@ -33,7 +34,16 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             _itemList.Connect("item_activated")
                 .To(this, nameof(OnItemActivated));
 
-            _supportedNodes = NodeFactory.GetAllNodes();
+// todo: the list of available stuff is dynamic and we need a function to refresh it.
+            var languageLevelNodes = NodeFactory.GetAllNodes()
+                .Select(it => new AddDialogEntry(() => NodeFactory.Duplicate(it)))
+                .ToList();
+
+            var libraryNodes = InvokableLibrary.GetDescriptions()
+                .Select(it => new AddDialogEntry(() => InvokableLibrary.FromDescription(it)))
+                .ToList();
+
+            _supportedNodes = languageLevelNodes.Union(libraryNodes).ToList();
         }
 
 
@@ -43,13 +53,14 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
 
             _itemList.Clear();
-            foreach (var node in _supportedNodes.Where(it => (it.NodeTitle.ContainsIgnoreCase(searchTerm) ||
-                                                                it.NodeDescription.ContainsIgnoreCase(searchTerm)) &&
-                                                               _contextFilter(it)
-                                                               ))
+            foreach (var entry in _supportedNodes.Where(it =>
+                         (it.ExampleNode.NodeTitle.ContainsIgnoreCase(searchTerm) ||
+                          it.ExampleNode.NodeDescription.ContainsIgnoreCase(searchTerm)) &&
+                         _contextFilter(it.ExampleNode)
+                     ))
             {
-                _itemList.AddItem(node.NodeTitle);
-                _itemList.SetItemMetadata(_itemList.GetItemCount() - 1, node);
+                _itemList.AddItem(entry.ExampleNode.NodeTitle);
+                _itemList.SetItemMetadata(_itemList.GetItemCount() - 1, _supportedNodes.IndexOf(entry));
             }
 
             if (_itemList.GetItemCount() > 0)
@@ -82,15 +93,15 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
                 return;
             }
 
-            var node = _itemList.GetItemMetadata(selectedItems[0]) as ScadNode;
-            EmitSignal(nameof(NodeSelected), node.Clone());
+            var entry = _supportedNodes[(int) _itemList.GetItemMetadata(selectedItems[0])];
+            EmitSignal(nameof(NodeSelected), entry.CreateCopy());
             Visible = false;
         }
 
         private void OnItemActivated(int index)
         {
-            var node = _itemList.GetItemMetadata(index) as ScadNode;
-            EmitSignal(nameof(NodeSelected), NodeFactory.MakeOne(node));
+            var entry = _supportedNodes[(int) _itemList.GetItemMetadata(index)];
+            EmitSignal(nameof(NodeSelected), entry.CreateCopy());
             Visible = false;
         }
     }

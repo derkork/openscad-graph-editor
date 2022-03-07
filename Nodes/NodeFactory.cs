@@ -8,13 +8,16 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    [UsedImplicitly]
-    public class NodeFactory : Node
+    public class NodeFactory
     {
         private static NodeFactory _instance;
 
         private readonly List<Type> _nodeTypes;
 
+        static NodeFactory()
+        {
+            _instance = new NodeFactory();
+        }
 
         private NodeFactory()
         {
@@ -25,17 +28,21 @@ namespace OpenScadGraphEditor.Nodes
                 .ToList();
         }
 
+        /// <summary>
+        /// Returns all language-level nodes.
+        /// </summary>
+        /// <returns></returns>
         public static List<ScadNode> GetAllNodes()
         {
             return _instance
                 ._nodeTypes
-                .Where(it => it != typeof(Start))
+                .Where(it => it != typeof(Start) && it != typeof(ModuleInvocation))
                 .Select(it => it.New())
                 .Cast<ScadNode>()
                 .ToList();
         }
 
-        public static ScadNode MakeOne(ScadNode node)
+        public static ScadNode Duplicate(ScadNode node)
         {
             return (ScadNode) node.GetType().New();
         }

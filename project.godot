@@ -14,10 +14,6 @@ config/name="OpenScadGraphEditor"
 run/main_scene="res://GraphEditor.tscn"
 config/icon="res://icon.png"
 
-[autoload]
-
-NodeFactory="*res://Nodes/NodeFactory.cs"
-
 [display]
 
 window/size/width=1920

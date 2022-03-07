@@ -35,29 +35,15 @@ namespace OpenScadGraphEditor.Nodes
                     return "";
                 }
 
-                return $@"if (!({condition})) {{"
-                    .AppendLines(
-                        elseBranch.Indent(),
-                        "}"
-                    );
+                return $@"if (!({condition}))" + elseBranch.AsBlock();
             }
 
             if (elseBranch.Length == 0)
             {
-                return $@"if ({condition}) {{"
-                    .AppendLines(
-                        ifBranch.Indent(),
-                        "}"
-                    );
+                return $@"if ({condition})" + ifBranch.AsBlock();
             }
-
-            return $@"if ({condition}) {{"
-                .AppendLines(
-                    ifBranch.Indent(),
-                    "} else {",
-                    elseBranch.Indent(),
-                    "}"
-                );
+            
+            return $@"if ({condition})" + ifBranch.AsBlock() + "else" + elseBranch.AsBlock();
         }
     }
 }
