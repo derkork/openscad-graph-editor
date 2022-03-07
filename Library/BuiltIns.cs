@@ -37,6 +37,13 @@ namespace OpenScadGraphEditor.Library
                     .WithChildren()
                     .Build(),
             };
+            
+            Functions = new List<FunctionDescription>()
+            {
+              FunctionBuilder.NewBuiltInFunction("abs", "Abs", PortType.Number)
+                  .WithParameter("", PortType.Number)
+                  .Build()
+            };
         }
     }
 }

@@ -25,13 +25,13 @@ namespace OpenScadGraphEditor.Library
         /// name the node.
         /// </summary>
         [Export]
-        public string NodeName { get; set; }
+        public string NodeName { get; set; } = "";
 
         /// <summary>
         /// A description of the invokable.
         /// </summary>
         [Export]
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
 
         /// <summary>
         /// Whether this description originated from an external source.

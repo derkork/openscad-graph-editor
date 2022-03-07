@@ -36,7 +36,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             return _instance
                 ._nodeTypes
-                .Where(it => it != typeof(Start) && it != typeof(ModuleInvocation))
+                .Where(it => it != typeof(Start) && it != typeof(ModuleInvocation) && it != typeof(FunctionInvocation))
                 .Select(it => it.New())
                 .Cast<ScadNode>()
                 .ToList();

@@ -1,5 +1,4 @@
 using System.Linq;
-using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 

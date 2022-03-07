@@ -12,6 +12,6 @@ namespace OpenScadGraphEditor.Library
         /// The hinted return type of the function.
         /// </summary>
         [Export]
-        public PortType ReturnTypeHint { get; } = PortType.Any;
+        public PortType ReturnTypeHint { get; set; } = PortType.Any;
     }
 }
