@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
@@ -22,11 +23,11 @@ namespace OpenScadGraphEditor.Nodes
                 .Flow("False");
         }
 
-        public override string Render(ScadContext scadContext)
+        public override string Render(ScadInvokableContext scadInvokableContext)
         {
-            var condition = RenderInput(scadContext, 1);
-            var ifBranch = RenderOutput(scadContext, 0);
-            var elseBranch = RenderOutput(scadContext, 1);
+            var condition = RenderInput(scadInvokableContext, 1);
+            var ifBranch = RenderOutput(scadInvokableContext, 0);
+            var elseBranch = RenderOutput(scadInvokableContext, 1);
 
             if (ifBranch.Length == 0)
             {

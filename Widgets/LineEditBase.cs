@@ -1,6 +1,5 @@
 using Godot;
 using GodotExt;
-using JetBrains.Annotations;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -8,10 +7,8 @@ namespace OpenScadGraphEditor.Widgets
     {
         [Signal]
         public delegate void Changed();
-        
-        public abstract string RenderedValue { get; }
 
-        public string SerializedValue { get => Text; set => Text = value; }
+        private bool _hasSelectedAll;
 
         public ConnectExt.ConnectBinding ConnectChanged()
         {
@@ -25,19 +22,23 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void _Ready()
         {
-            this.Connect("text_changed")
-                .To(this, nameof(NotifyChanged));
             // select everything on focus
             this.Connect("focus_entered")
                 .To(this, nameof(SelectOnFocusEntered));
-            // deselect when losing focus
-            this.Connect("focus_exited")
-                .To(this, nameof(DeselectOnFocusExited));
         }
 
-        private void NotifyChanged([UsedImplicitly] string _)
+        public override void _GuiInput(InputEvent evt)
         {
-            EmitSignal(nameof(Changed));
+            if (!(evt is InputEventMouseButton) || _hasSelectedAll)
+            {
+                return;
+            }
+            
+            // select all when you click on it. We need to do this because otherwise
+            // clicking on it will kill the selection. We only do this once while having
+            // focus, so you can select text with a second click.
+            SelectAll();
+            _hasSelectedAll = true;
         }
 
         private void SelectOnFocusEntered()
@@ -45,8 +46,9 @@ namespace OpenScadGraphEditor.Widgets
             CallDeferred("select_all");
         }
 
-        private void DeselectOnFocusExited()
+        protected void DeselectAll()
         {
+            _hasSelectedAll = false;
             CallDeferred("deselect");
         }
     }

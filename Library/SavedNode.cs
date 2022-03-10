@@ -1,7 +1,7 @@
 using Godot;
 using Godot.Collections;
 
-namespace OpenScadGraphEditor.Nodes
+namespace OpenScadGraphEditor.Library
 {
     /// <summary>
     /// This resource represents a saved graph
@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Nodes
     public class SavedNode : Resource
     {
         [Export]
-        public string Script;
+        public string Type;
 
         [Export]
         public Vector2 Position;
@@ -22,12 +22,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public string GetData(string key)
         {
-            if (StoredData.TryGetValue(key, out var result))
-            {
-                return result;
-            }
-
-            return "";
+            return StoredData.TryGetValue(key, out var result) ? result : "";
         }
 
         public void SetData(string key, string value)

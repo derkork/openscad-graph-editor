@@ -2,86 +2,91 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using GodotExt;
+using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
-using OpenScadGraphEditor.Widgets;
-using OpenScadGraphEditor.Widgets.PortContainer;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public abstract class ScadNode : GraphNode
+    public abstract class ScadNode
     {
-        [Signal]
-        public delegate void Changed();
-
         public abstract string NodeTitle { get; }
 
         public abstract string NodeDescription { get; }
 
+        public string Id { get; private set; } = Guid.NewGuid().ToString();
 
-        protected readonly List<PortDefinition> InputPorts = new List<PortDefinition>();
-        protected readonly List<PortDefinition> OutputPorts = new List<PortDefinition>();
-
-        private readonly Dictionary<int, IScadLiteralWidget> _inputLiteralWidgets =
-            new Dictionary<int, IScadLiteralWidget>();
-
-        private readonly Dictionary<int, IScadLiteralWidget> _outputLiteralWidgets =
-            new Dictionary<int, IScadLiteralWidget>();
+        public Vector2 Offset { get; set; }
 
 
+        public readonly List<PortDefinition> InputPorts = new List<PortDefinition>();
+        public readonly List<PortDefinition> OutputPorts = new List<PortDefinition>();
+
+        private readonly Dictionary<int, IScadLiteral> _inputLiterals =
+            new Dictionary<int, IScadLiteral>();
+
+        private readonly Dictionary<int, IScadLiteral> _outputLiterals =
+            new Dictionary<int, IScadLiteral>();
+
+
+        public IScadLiteral GetInputLiteral(int index)
+        {
+            return _inputLiterals.TryGetValue(index, out var result) ? result : default;
+        }
+        
+        public IScadLiteral GetOutputLiteral(int index)
+        {
+            return _outputLiterals.TryGetValue(index, out var result) ? result : default;
+        }
+        
         public virtual void SaveInto(SavedNode node)
         {
-            node.Id = Name;
-            node.Script = ((CSharpScript) GetScript()).ResourcePath;
+            node.Id = Id;
+            node.Type = GetType().FullName;
             node.Position = Offset;
             InputPorts
                 .Indices()
-                .Where(i => _inputLiteralWidgets.ContainsKey(i))
-                .ForAll(i => node.SetData($"input_widget_value.{i}", _inputLiteralWidgets[i].SerializedValue));
+                .Where(i => _inputLiterals.ContainsKey(i))
+                .ForAll(i => node.SetData($"input_literal_value.{i}", _inputLiterals[i].SerializedValue));
             OutputPorts
                 .Indices()
-                .Where(i => _outputLiteralWidgets.ContainsKey(i))
-                .ForAll(i => node.SetData($"output_widget_value.{i}", _outputLiteralWidgets[i].SerializedValue));
+                .Where(i => _outputLiterals.ContainsKey(i))
+                .ForAll(i => node.SetData($"output_literal_value.{i}", _outputLiterals[i].SerializedValue));
         }
 
-        public virtual void PrepareForLoad(SavedNode node)
+
+        public void PreparePorts()
         {
+            var maxPorts = Mathf.Max(InputPorts.Count, OutputPorts.Count);
+            var idx = 0;
+            while (idx < maxPorts)
+            {
+                if (InputPorts.Count > idx)
+                {
+                    BuildPort(idx, InputPorts[idx], true);
+                }
+
+                if (OutputPorts.Count > idx)
+                {
+                    BuildPort(idx, OutputPorts[idx], false);
+                }
+
+                idx++;
+            }
         }
-        
+
         public virtual void LoadFrom(SavedNode node)
         {
-            Name = node.Id;
+            PreparePorts();
+            Id = node.Id;
             Offset = node.Position;
             InputPorts
                 .Indices()
-                .Where(i => _inputLiteralWidgets.ContainsKey(i))
-                .ForAll(i => _inputLiteralWidgets[i].SerializedValue = node.GetData($"input_widget_value.{i}"));
+                .Where(i => _inputLiterals.ContainsKey(i))
+                .ForAll(i => _inputLiterals[i].SerializedValue = node.GetData($"input_literal_value.{i}"));
             OutputPorts
                 .Indices()
-                .Where(i => _outputLiteralWidgets.ContainsKey(i))
-                .ForAll(i => _outputLiteralWidgets[i].SerializedValue = node.GetData($"output_widget_value.{i}"));
-        }
-
-        public void PortConnected(int port, bool isLeft)
-        {
-            if (isLeft)
-            {
-                if (_inputLiteralWidgets.TryGetValue(port, out var widget))
-                {
-                    widget.SetEnabled(false);
-                }
-            }
-        }
-
-        public void PortDisconnected(int port, bool isLeft)
-        {
-            if (isLeft)
-            {
-                if (_inputLiteralWidgets.TryGetValue(port, out var widget))
-                {
-                    widget.SetEnabled(true);
-                }
-            }
+                .Where(i => _outputLiterals.ContainsKey(i))
+                .ForAll(i => _outputLiterals[i].SerializedValue = node.GetData($"output_literal_value.{i}"));
         }
 
 
@@ -115,41 +120,41 @@ namespace OpenScadGraphEditor.Nodes
             return OutputPorts[index].PortType;
         }
 
-        public abstract string Render(ScadContext scadContext);
+        public abstract string Render(ScadInvokableContext scadInvokableContext);
 
-        protected string RenderInput(ScadContext scadContext, int index)
+        protected string RenderInput(ScadInvokableContext scadInvokableContext, int index)
         {
             // if we have a node connected, render the node
-            if (scadContext.TryGetInputNode(this, index, out var node))
+            if (scadInvokableContext.TryGetInputNode(this, index, out var node))
             {
-                return node.Render(scadContext);
+                return node.Render(scadInvokableContext);
             }
 
-            // try rendering the widget
-            if (_inputLiteralWidgets.TryGetValue(index, out var widget))
+            // try rendering the literal
+            if (_inputLiterals.TryGetValue(index, out var literal))
             {
-                return widget.RenderedValue;
+                return literal.LiteralValue;
             }
 
             // otherwise return nothing
             return "";
         }
 
-        protected string RenderOutput(ScadContext scadContext, int index)
+        protected string RenderOutput(ScadInvokableContext scadInvokableContext, int index)
         {
             // if we have a flow node connected render this.
             if (GetOutputPortType(index) == PortType.Flow)
             {
-                if (scadContext.TryGetOutputNode(this, index, out var node))
+                if (scadInvokableContext.TryGetOutputNode(this, index, out var node))
                 {
-                    return node.Render(scadContext);
+                    return node.Render(scadInvokableContext);
                 }
             }
 
-            // try rendering the widget
-            if (_outputLiteralWidgets.TryGetValue(index, out var widget))
+            // try rendering the literal
+            if (_outputLiterals.TryGetValue(index, out var literal))
             {
-                return widget.RenderedValue;
+                return literal.LiteralValue;
             }
 
             // otherwise return nothing
@@ -157,130 +162,48 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
-        public override void _Ready()
+        private void BuildPort(int idx, PortDefinition portDefinition, bool isLeft)
         {
-            Title = NodeTitle;
-            HintTooltip = NodeDescription;
-            RectMinSize = new Vector2(200, 120);
-
-            var maxPorts = Mathf.Max(InputPorts.Count, OutputPorts.Count);
-
-            var idx = 0;
-            while (idx < maxPorts)
+            if (!portDefinition.AllowLiteral)
             {
-                var container = new HBoxContainer();
-                AddChild(container);
-
-                if (InputPorts.Count > idx)
-                {
-                    BuildPort(container, idx, InputPorts[idx], true);
-                }
-
-                if (OutputPorts.Count > idx)
-                {
-                    BuildPort(container, idx, OutputPorts[idx], false);
-                }
-
-                idx++;
+                return;
             }
-        }
 
-        private void BuildPort(Container container, int idx, PortDefinition portDefinition, bool isLeft)
-        {
-            var connectorPortType = portDefinition.AutoCoerce ? PortType.Any : portDefinition.PortType;
+            IScadLiteral literal;
+            switch (portDefinition.PortType)
+            {
+                case PortType.Boolean:
+                    literal = new BooleanLiteral();
+                    break;
+                case PortType.Number:
+                    literal = new NumberLiteral();
+                    break;
+                case PortType.String:
+                    literal = new StringLiteral();
+                    break;
+                case PortType.Vector3:
+                    literal = new Vector3Literal();
+                    break;
+                case PortType.Array:
+                    throw new ArgumentException("Not implemented!");
+                case PortType.Range:
+                    throw new ArgumentException("Not implemented!");
+                case PortType.Flow:
+                case PortType.Any:
+                    throw new ArgumentException(
+                        $"Port type {portDefinition.PortType} cannot have a literal input.");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             if (isLeft)
             {
-                SetSlotEnabledLeft(idx, true);
-                SetSlotColorLeft(idx, ColorFor(connectorPortType));
-                SetSlotTypeLeft(idx, (int) connectorPortType);
+                _inputLiterals[idx] = literal;
             }
             else
             {
-                SetSlotEnabledRight(idx, true);
-                SetSlotColorRight(idx, ColorFor(connectorPortType));
-                SetSlotTypeRight(idx, (int) connectorPortType);
+                _outputLiterals[idx] = literal;
             }
-
-            IScadLiteralWidget literalWidget = null;
-            if (portDefinition.AllowLiteral)
-            {
-                switch (portDefinition.PortType)
-                {
-                    case PortType.Boolean:
-                        literalWidget = Prefabs.New<BooleanEdit>();
-                        break;
-                    case PortType.Number:
-                        literalWidget = Prefabs.New<NumberEdit>();
-                        break;
-                    case PortType.String:
-                        literalWidget = Prefabs.New<StringEdit>();
-                        break;
-                    case PortType.Vector3:
-                        literalWidget = Prefabs.New<Vector3Edit>();
-                        break;
-                    case PortType.Array:
-                        throw new ArgumentException("Not implemented!");
-                    case PortType.Range:
-                        throw new ArgumentException("Not implemented!");
-                    case PortType.Flow:
-                    case PortType.Any:
-                        throw new ArgumentException(
-                            $"Port type {portDefinition.PortType} cannot have a literal input.");
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                if (isLeft)
-                {
-                    _inputLiteralWidgets[idx] = literalWidget;
-                }
-                else
-                {
-                    _outputLiteralWidgets[idx] = literalWidget;
-                }
-
-                literalWidget.ConnectChanged().To(this, nameof(NotifyChanged));
-            }
-
-            var portContainer = Prefabs.InstantiateFromScene<PortContainer>();
-            portContainer.MoveToNewParent(container);
-            portContainer.Setup(isLeft, portDefinition.Name, (Control) literalWidget);
-        }
-
-
-        private Color ColorFor(PortType portType)
-        {
-            switch (portType)
-            {
-                case PortType.Flow:
-                    return new Color(1, 1, 1);
-                case PortType.Boolean:
-                    return new Color(1, 0.4f, 0.4f);
-                case PortType.Number:
-                    return new Color(1, 0.8f, 0.4f);
-                case PortType.Vector3:
-                    return new Color(.8f, 0.8f, 1f);
-                case PortType.Array:
-                    return new Color(.2f, 0.2f, 1f);
-                case PortType.String:
-                    return new Color(1f, 1f, 0f);
-                case PortType.Range:
-                    return new Color(.2f, 0.2f, 1f);
-                case PortType.Any:
-                    return new Color(1, 0f, 1f);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
-            }
-        }
-
-        public ConnectExt.ConnectBinding ConnectChanged()
-        {
-            return this.Connect(nameof(Changed));
-        }
-
-        private void NotifyChanged()
-        {
-            EmitSignal(nameof(Changed));
         }
     }
 }

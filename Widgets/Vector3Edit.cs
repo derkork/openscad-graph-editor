@@ -1,5 +1,6 @@
 using Godot;
 using GodotExt;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
@@ -10,21 +11,18 @@ namespace OpenScadGraphEditor.Widgets
         private NumberEdit _y;
         private NumberEdit _z;
 
+        // this is a crude hack but i really don't feel like reimplementing the number edit here.
+        private NumberLiteral _xLiteral; 
+        private NumberLiteral _yLiteral; 
+        private NumberLiteral _zLiteral;
+        private Vector3Literal _vector3Literal;
+
         [Signal]
         public delegate void Changed();
-
-        public string RenderedValue => $"[{_x.RenderedValue}, {_y.RenderedValue}, {_z.RenderedValue}]";
-
-        public string SerializedValue
+        
+        public ConnectExt.ConnectBinding ConnectChanged()
         {
-            get => $"{_x.RenderedValue}|{_y.RenderedValue}|{_z.RenderedValue}";
-            set
-            {
-                var parts = value.Split('|');
-                _x.SerializedValue = parts[0];
-                _y.SerializedValue = parts[1];
-                _z.SerializedValue = parts[2];
-            }
+            return this.Connect(nameof(Changed));
         }
 
         public void SetEnabled(bool enabled)
@@ -36,16 +34,40 @@ namespace OpenScadGraphEditor.Widgets
 
         public void NotifyChanged()
         {
+            _vector3Literal.X = _xLiteral.Value;
+            _vector3Literal.Y = _yLiteral.Value;
+            _vector3Literal.Z = _zLiteral.Value;
+            
             EmitSignal(nameof(Changed));
         }
 
+        public void BindTo(Vector3Literal vector3Literal)
+        {
+            _vector3Literal = vector3Literal;
+        } 
+        
         public override void _Ready()
         {
+            // we use some fake number literals to drive the number edits and then forward
+            // the changes to the vector3 literal.
+            _xLiteral = new NumberLiteral();
+            _yLiteral = new NumberLiteral();
+            _zLiteral = new NumberLiteral();
+
+            _xLiteral.Value = _vector3Literal.X;
+            _yLiteral.Value = _vector3Literal.Y;
+            _zLiteral.Value = _vector3Literal.Z;
+            
             _x = Prefabs.New<NumberEdit>();
+            _x.BindTo(_xLiteral);
             _x.ConnectChanged().To(this, nameof(NotifyChanged));
+
             _y = Prefabs.New<NumberEdit>();
+            _y.BindTo(_yLiteral);
             _y.ConnectChanged().To(this, nameof(NotifyChanged));
+            
             _z = Prefabs.New<NumberEdit>();
+            _z.BindTo(_zLiteral);
             _z.ConnectChanged().To(this, nameof(NotifyChanged));
 
             var xLabel = new Label();
@@ -63,11 +85,6 @@ namespace OpenScadGraphEditor.Widgets
             zLabel.Text = "Z";
             zLabel.MoveToNewParent(this);
             _z.MoveToNewParent(this);
-        }
-
-        public ConnectExt.ConnectBinding ConnectChanged()
-        {
-            return this.Connect(nameof(Changed));
         }
     }
 }

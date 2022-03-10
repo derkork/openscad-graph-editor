@@ -1,3 +1,5 @@
+using OpenScadGraphEditor.Library;
+
 namespace OpenScadGraphEditor.Nodes
 {
     public sealed class StringConstant : ScadExpressionNode
@@ -12,9 +14,9 @@ namespace OpenScadGraphEditor.Nodes
                 .String();
         }
 
-        public override string Render(ScadContext scadContext)
+        public override string Render(ScadInvokableContext scadInvokableContext)
         {
-            return RenderOutput(scadContext, 0);
+            return RenderOutput(scadInvokableContext, 0);
         }
     }
 }

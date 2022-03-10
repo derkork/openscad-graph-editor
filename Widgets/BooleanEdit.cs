@@ -1,17 +1,16 @@
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {
     public class BooleanEdit : CheckBox, IScadLiteralWidget
     {
+        private BooleanLiteral _booleanLiteral;
+
         [Signal]
         public delegate void Changed();
-        
-        public string RenderedValue => Pressed ? "true" : "false";
-
-        public string SerializedValue { get => Pressed.ToString(); set => Pressed = bool.Parse(value); }
 
         public void SetEnabled(bool enabled)
         {
@@ -29,9 +28,15 @@ namespace OpenScadGraphEditor.Widgets
                 .To(this, nameof(NotifyChanged));
         }
 
-        private void NotifyChanged([UsedImplicitly] bool _)
+        private void NotifyChanged([UsedImplicitly] bool value)
         {
+            _booleanLiteral.Value = value;
             EmitSignal(nameof(Changed));   
+        }
+
+        public void BindTo(BooleanLiteral booleanLiteral)
+        {
+            _booleanLiteral = booleanLiteral;
         }
     }
 }

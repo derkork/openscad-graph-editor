@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Library
         private static InvokableLibrary _instance;
 
 
+        // TODO: merge this somehow with NodeFactory
         static InvokableLibrary()
         {
             _instance = new InvokableLibrary();
@@ -27,14 +28,16 @@ namespace OpenScadGraphEditor.Library
             {
                 case ModuleDescription moduleDescription:
                 {
-                    var moduleNode = Prefabs.New<ModuleInvocation>();
+                    var moduleNode = new ModuleInvocation();
                     moduleNode.Setup(moduleDescription);
+                    moduleNode.PreparePorts();
                     return moduleNode;
                 }
                 case FunctionDescription functionDescription:
                 {
-                    var functionNode = Prefabs.New<FunctionInvocation>();
+                    var functionNode = new FunctionInvocation();
                     functionNode.Setup(functionDescription);
+                    functionNode.PreparePorts();
                     return functionNode;
                 }
                 default:

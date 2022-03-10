@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -19,9 +20,9 @@ namespace OpenScadGraphEditor.Nodes
                 .Vector3(allowLiteral: false);
         }
 
-        public override string Render(ScadContext scadContext)
+        public override string Render(ScadInvokableContext scadInvokableContext)
         {
-            return $"[{RenderInput(scadContext, 0)}, {RenderInput(scadContext, 1)}, {RenderInput(scadContext, 2)}]";
+            return $"[{RenderInput(scadInvokableContext, 0)}, {RenderInput(scadInvokableContext, 1)}, {RenderInput(scadInvokableContext, 2)}]";
         }
     }
 }

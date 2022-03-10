@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Text;
 
 namespace OpenScadGraphEditor.Utils
 {
@@ -21,28 +19,6 @@ namespace OpenScadGraphEditor.Utils
         public static string AsBlock(this string input)
         {
             return input.Length == 0 ? input : $" {{\n{input.Indent()}\n}}\n";
-        }
-        
-        public static string AppendLines(this string source, params string[] lines)
-        {
-            if (lines.Length == 0)
-            {
-                return source;
-            }
-
-            var builder = new StringBuilder(source);
-            foreach (var line in lines)
-            {
-                if (line.Length <= 0)
-                {
-                    continue;
-                }
-
-                builder.AppendLine();
-                builder.Append(line);
-            }
-
-            return builder.ToString();
         }
     }
 }

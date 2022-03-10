@@ -1,3 +1,5 @@
+using OpenScadGraphEditor.Library;
+
 namespace OpenScadGraphEditor.Nodes
 {
     public abstract class BinaryOperator : ScadExpressionNode
@@ -5,10 +7,10 @@ namespace OpenScadGraphEditor.Nodes
         
         protected abstract string OperatorSign { get; }
 
-        public override string Render(ScadContext scadContext)
+        public override string Render(ScadInvokableContext scadInvokableContext)
         {
-            var left = RenderInput(scadContext, 0);
-            var right = RenderInput(scadContext, 1);
+            var left = RenderInput(scadInvokableContext, 0);
+            var right = RenderInput(scadInvokableContext, 1);
 
             return $"({left} {OperatorSign} {right})";
         }

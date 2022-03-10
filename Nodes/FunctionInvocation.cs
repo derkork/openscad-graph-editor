@@ -20,10 +20,11 @@ namespace OpenScadGraphEditor.Nodes
             node.SetData("function_description_id", _description.Id);
         }
 
-        public override void PrepareForLoad(SavedNode node)
+        public override void LoadFrom(SavedNode node)
         {
             var functionDescriptionId = node.GetData("function_description_id");
             Setup(InvokableLibrary.ForFunctionDescriptionId(functionDescriptionId));
+            base.LoadFrom(node);
         }
 
         public void Setup(FunctionDescription description)
@@ -42,7 +43,7 @@ namespace OpenScadGraphEditor.Nodes
                     .OfType(description.ReturnTypeHint, allowLiteral: false);
         }
 
-        public override string Render(ScadContext scadContext)
+        public override string Render(ScadInvokableContext scadInvokableContext)
         {
             
             var parameters = string.Join(", ",
@@ -51,7 +52,7 @@ namespace OpenScadGraphEditor.Nodes
                     .Select(it =>
                     {
                         var parameterName = _description.Parameters[it].Name;
-                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(scadContext, it)}" : RenderInput(scadContext, it);
+                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(scadInvokableContext, it)}" : RenderInput(scadInvokableContext, it);
                     })
             );
             return $"{_description.Name}({parameters})";

@@ -7,7 +7,7 @@ namespace OpenScadGraphEditor.Utils
 {
     public static class Prefabs 
     {
-        public static T InstantiateFromScene<T>() where T : Node
+        public static T InstantiateFromScene<[MeansImplicitUse] T>() where T : Node
         {
             // ReSharper disable once StringLiteralTypo
             var path = $"res://{typeof(T).Namespace?.Replace("OpenScadGraphEditor.", "").Replace(".", "/")}/{typeof(T).Name}.tscn";

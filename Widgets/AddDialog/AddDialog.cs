@@ -13,13 +13,11 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     [UsedImplicitly]
     public class AddDialog : WindowDialog
     {
-        [Signal]
-        public delegate void NodeSelected(ScadNode node);
-
         private LineEdit _lineEdit;
         private ItemList _itemList;
         private List<AddDialogEntry> _supportedNodes;
         private Predicate<ScadNode> _contextFilter = node => true;
+        private Action<ScadNode> _callback;
 
         public override void _Ready()
         {
@@ -70,8 +68,9 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         }
 
 
-        public void Open(Predicate<ScadNode> contextFilter = null)
+        public void Open(Action<ScadNode> callback, Predicate<ScadNode> contextFilter = null)
         {
+            _callback = callback;
             _contextFilter = contextFilter ?? (node => true);
             _lineEdit.Text = "";
             Refresh();
@@ -94,14 +93,14 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             }
 
             var entry = _supportedNodes[(int) _itemList.GetItemMetadata(selectedItems[0])];
-            EmitSignal(nameof(NodeSelected), entry.CreateCopy());
+            _callback(entry.CreateCopy());
             Visible = false;
         }
 
         private void OnItemActivated(int index)
         {
             var entry = _supportedNodes[(int) _itemList.GetItemMetadata(index)];
-            EmitSignal(nameof(NodeSelected), entry.CreateCopy());
+            _callback(entry.CreateCopy());
             Visible = false;
         }
     }

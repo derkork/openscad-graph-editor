@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Godot;
-using JetBrains.Annotations;
-using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Nodes;
 
-namespace OpenScadGraphEditor.Nodes
+namespace OpenScadGraphEditor.Library
 {
     public class NodeFactory
     {
@@ -37,19 +35,26 @@ namespace OpenScadGraphEditor.Nodes
             return _instance
                 ._nodeTypes
                 .Where(it => it != typeof(Start) && it != typeof(ModuleInvocation) && it != typeof(FunctionInvocation))
-                .Select(it => it.New())
+                .Select(Activator.CreateInstance)
                 .Cast<ScadNode>()
+                .Select(it =>
+                {
+                    it.PreparePorts();
+                    return it;
+                })
                 .ToList();
         }
 
         public static ScadNode Duplicate(ScadNode node)
         {
-            return (ScadNode) node.GetType().New();
+            var duplicate = (ScadNode) Activator.CreateInstance(node.GetType());
+            duplicate.PreparePorts();
+            return duplicate;
         }
 
-        public static ScadNode FromScript(string scriptPath)
+        public static ScadNode FromType(string type)
         {
-            return (ScadNode) GD.Load<CSharpScript>(scriptPath)?.New();
+            return (ScadNode) Activator.CreateInstance(Assembly.GetExecutingAssembly().GetType(type));
         }
         
     }

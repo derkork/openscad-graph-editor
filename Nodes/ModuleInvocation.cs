@@ -17,10 +17,11 @@ namespace OpenScadGraphEditor.Nodes
             node.SetData("module_description_id", _description.Id);
         }
 
-        public override void PrepareForLoad(SavedNode node)
+        public override void LoadFrom(SavedNode node)
         {
             var moduleDescriptionId = node.GetData("module_description_id");
             Setup(InvokableLibrary.ForModuleDescriptionId(moduleDescriptionId));
+            base.LoadFrom(node);
         }
 
         public void Setup(ModuleDescription description)
@@ -51,17 +52,17 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(ScadContext scadContext)
+        public override string Render(ScadInvokableContext scadInvokableContext)
         {
             var parameters = string.Join(", ",
                 InputPorts
                     .Indices()
                     .Skip(1)
-                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(scadContext, it)}")
+                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(scadInvokableContext, it)}")
             );
             var result = $"{_description.Name}({parameters})";
-            var childNodes = _description.SupportsChildren ? RenderOutput(scadContext, 0) : "";
-            var nextNodes = RenderOutput(scadContext, _description.SupportsChildren ? 1 : 0);
+            var childNodes = _description.SupportsChildren ? RenderOutput(scadInvokableContext, 0) : "";
+            var nextNodes = RenderOutput(scadInvokableContext, _description.SupportsChildren ? 1 : 0);
             if (childNodes.Length > 0)
             {
                 return result + childNodes.AsBlock() + ";" + nextNodes;
