@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="LICENSE" />
   </ItemGroup>
   <ItemGroup>
     <Antlr4 Update="OpenSCAD.g4">
