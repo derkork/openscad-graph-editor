@@ -20,9 +20,9 @@ namespace OpenScadGraphEditor.Nodes
                 .Vector3(allowLiteral: false);
         }
 
-        public override string Render(ScadInvokableContext scadInvokableContext)
+        public override string Render(IScadGraph context)
         {
-            return $"[{RenderInput(scadInvokableContext, 0)}, {RenderInput(scadInvokableContext, 1)}, {RenderInput(scadInvokableContext, 2)}]";
+            return $"[{RenderInput(context, 0)}, {RenderInput(context, 1)}, {RenderInput(context, 2)}]";
         }
     }
 }

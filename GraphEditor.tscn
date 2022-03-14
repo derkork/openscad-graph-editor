@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
+[ext_resource path="res://Widgets/ScadNodeList/ScadNodeList.cs" type="Script" id=2]
 [ext_resource path="res://Widgets/AddDialog/AddDialog.tscn" type="PackedScene" id=3]
 
 [node name="Control" type="Control"]
@@ -169,6 +170,7 @@ margin_top = 45.0
 margin_right = 222.0
 margin_bottom = 240.0
 size_flags_vertical = 3
+script = ExtResource( 2 )
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 248.0
@@ -193,6 +195,7 @@ margin_top = 293.0
 margin_right = 222.0
 margin_bottom = 489.0
 size_flags_vertical = 3
+script = ExtResource( 2 )
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 497.0
@@ -217,6 +220,7 @@ margin_top = 542.0
 margin_right = 222.0
 margin_bottom = 738.0
 size_flags_vertical = 3
+script = ExtResource( 2 )
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 746.0
@@ -241,6 +245,7 @@ margin_top = 791.0
 margin_right = 222.0
 margin_bottom = 987.0
 size_flags_vertical = 3
+script = ExtResource( 2 )
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
 margin_left = 266.0

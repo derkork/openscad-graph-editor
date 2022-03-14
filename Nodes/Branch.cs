@@ -23,11 +23,11 @@ namespace OpenScadGraphEditor.Nodes
                 .Flow("False");
         }
 
-        public override string Render(ScadInvokableContext scadInvokableContext)
+        public override string Render(IScadGraph context)
         {
-            var condition = RenderInput(scadInvokableContext, 1);
-            var ifBranch = RenderOutput(scadInvokableContext, 0);
-            var elseBranch = RenderOutput(scadInvokableContext, 1);
+            var condition = RenderInput(context, 1);
+            var ifBranch = RenderOutput(context, 0);
+            var elseBranch = RenderOutput(context, 1);
 
             if (ifBranch.Length == 0)
             {

@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using JetBrains.Annotations;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -8,11 +9,8 @@ namespace OpenScadGraphEditor.Library
     /// </summary>
     public class SavedGraph : Resource
     {
-        /// <summary>
-        /// The name of the function or module.
-        /// </summary>
         [Export]
-        public string Name;
+        public InvokableDescription Description;
         
         [Export]
         public Array<SavedNode> Nodes = new Array<SavedNode>();

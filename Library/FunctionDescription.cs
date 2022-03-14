@@ -13,5 +13,10 @@ namespace OpenScadGraphEditor.Library
         /// </summary>
         [Export]
         public PortType ReturnTypeHint { get; set; } = PortType.Any;
+
+        public override bool CanUse(ScadNode node)
+        {
+            return node is ScadExpressionNode;
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace OpenScadGraphEditor.Nodes
     /// <summary>
     /// A function invocation.
     /// </summary>
-    public class FunctionInvocation : ScadExpressionNode
+    public class FunctionInvocation : ScadExpressionNode, ICannotBeCreated
     {
         private FunctionDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -20,11 +20,11 @@ namespace OpenScadGraphEditor.Nodes
             node.SetData("function_description_id", _description.Id);
         }
 
-        public override void LoadFrom(SavedNode node)
+        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
         {
             var functionDescriptionId = node.GetData("function_description_id");
-            Setup(InvokableLibrary.ForFunctionDescriptionId(functionDescriptionId));
-            base.LoadFrom(node);
+            Setup(referenceResolver.ResolveFunctionReference(functionDescriptionId));
+            base.LoadFrom(node, referenceResolver);
         }
 
         public void Setup(FunctionDescription description)
@@ -43,7 +43,7 @@ namespace OpenScadGraphEditor.Nodes
                     .OfType(description.ReturnTypeHint, allowLiteral: false);
         }
 
-        public override string Render(ScadInvokableContext scadInvokableContext)
+        public override string Render(IScadGraph context)
         {
             
             var parameters = string.Join(", ",
@@ -52,7 +52,7 @@ namespace OpenScadGraphEditor.Nodes
                     .Select(it =>
                     {
                         var parameterName = _description.Parameters[it].Name;
-                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(scadInvokableContext, it)}" : RenderInput(scadInvokableContext, it);
+                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(context, it)}" : RenderInput(context, it);
                     })
             );
             return $"{_description.Name}({parameters})";

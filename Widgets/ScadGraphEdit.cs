@@ -26,9 +26,8 @@ namespace OpenScadGraphEditor.Widgets
         private ScadNode _lastSourceNode;
         private ScadNode _lastDestinationNode;
         private int _lastPort;
-        private string _name;
 
-        public string InvokableName => _name;
+        public InvokableDescription Description { get; private set; }
 
         private readonly Dictionary<ScadNode, ScadNodeWidget> _widgets = new Dictionary<ScadNode, ScadNodeWidget>();
 
@@ -60,10 +59,31 @@ namespace OpenScadGraphEditor.Widgets
                 .To(this, nameof(OnDeleteSelection));
         }
 
+        public override bool CanDropData(Vector2 position, object data)
+        {
+            if (!(data is Reference reference))
+            {
+                return false;
+            }
+
+            return reference.TryGetBeer(out ScadNode _);
+        }
+
+        public override void DropData(Vector2 position, object data)
+        {
+            if (!(data is Reference reference) || !reference.TryGetBeer(out ScadNode node))
+            {
+                return;
+            }
+
+            _lastReleasePosition = position;
+            OnNodeAdded(node);
+        }
+
         private void CreateWidgetFor(ScadNode node)
         {
             var widget = Prefabs.New<ScadNodeWidget>();
-            
+
             widget.ConnectChanged()
                 .To(this, nameof(NotifyUpdateRequired));
 
@@ -72,33 +92,25 @@ namespace OpenScadGraphEditor.Widgets
             widget.BindTo(node);
         }
 
-        
-        public void Blank(string name, ScadNode entryPoint)
-        {
-            Clear();
-            _name = Name;
-            _entryPoint = entryPoint;
-            CreateWidgetFor(entryPoint);
-        }
 
         public void Setup(AddDialog.AddDialog addDialog)
         {
             _addDialog = addDialog;
         }
 
-        public void LoadFrom(SavedGraph graph, ScadInvokableContext context)
+        public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
             Clear();
 
-            _name = graph.Name;
+            Description = graph.Description;
 
             foreach (var savedNode in graph.Nodes)
             {
                 var node = NodeFactory.FromType(savedNode.Type);
-                node.LoadFrom(savedNode);
+                node.LoadFrom(savedNode, resolver);
                 CreateWidgetFor(node);
 
-                if (node is IGraphEntryPoint)
+                if (node is EntryPoint)
                 {
                     _entryPoint = node;
                 }
@@ -110,13 +122,15 @@ namespace OpenScadGraphEditor.Widgets
                 // node for the given IDs and then the widget
                 var fromNode = _widgets.Keys.First(it => it.Id == connection.FromId);
                 var toNode = _widgets.Keys.First(it => it.Id == connection.ToId);
-                
+
                 ConnectNode(_widgets[fromNode].Name, connection.FromPort, _widgets[toNode].Name, connection.ToPort);
             }
         }
 
         public void SaveInto(SavedGraph graph)
         {
+            graph.Description = Description;
+            
             foreach (var node in _widgets.Keys)
             {
                 var savedNode = Prefabs.New<SavedNode>();
@@ -138,7 +152,8 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
         {
-            DoDisconnect(new ScadConnection(ScadNodeForWidgetName(fromWidgetName), fromSlot, ScadNodeForWidgetName(toWidgetName), toSlot));
+            DoDisconnect(new ScadConnection(ScadNodeForWidgetName(fromWidgetName), fromSlot,
+                ScadNodeForWidgetName(toWidgetName), toSlot));
             NotifyUpdateRequired();
         }
 
@@ -148,7 +163,7 @@ namespace OpenScadGraphEditor.Widgets
             _lastSourceNode = ScadNodeForWidgetName(fromWidgetName);
             _lastPort = fromPort;
             _lastReleasePosition = releasePosition;
-            _addDialog.Open(OnNodeAdded,  it => it.HasInputThatCanConnect(_lastSourceNode.GetOutputPortType(fromPort)));
+            _addDialog.Open(OnNodeAdded, it =>  Description.CanUse(it) && it.HasInputThatCanConnect(_lastSourceNode.GetOutputPortType(fromPort)));
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
@@ -156,7 +171,8 @@ namespace OpenScadGraphEditor.Widgets
             _lastDestinationNode = ScadNodeForWidgetName(toWidgetName);
             _lastPort = toPort;
             _lastReleasePosition = releasePosition;
-            _addDialog.Open(OnNodeAdded, it => it.HasOutputThatCanConnect(_lastDestinationNode.GetInputPortType(toPort)));
+            _addDialog.Open(OnNodeAdded,
+                it => Description.CanUse(it) && it.HasOutputThatCanConnect(_lastDestinationNode.GetInputPortType(toPort)));
         }
 
         private void OnNodeSelected(ScadNodeWidget node)
@@ -174,9 +190,9 @@ namespace OpenScadGraphEditor.Widgets
             foreach (var widget in _selection)
             {
                 var scadNode = widget.BoundNode;
-                if (scadNode == _entryPoint)
+                if (scadNode is ICannotBeDeleted)
                 {
-                    continue; // don't allow to delete the start node
+                    continue; // don't allow to delete certain nodes (e.g. the entry point and return nodes).
                 }
 
                 // disconnect all connections which involve the given node.
@@ -270,12 +286,6 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        public ScadNode GetEntrypoint()
-        {
-            return _entryPoint;
-        }
-
-
         public IEnumerable<IScadConnection> GetAllConnections()
         {
             return GetConnectionList()
@@ -321,6 +331,11 @@ namespace OpenScadGraphEditor.Widgets
                 To = to;
                 ToPort = toPort;
             }
+        }
+
+        public string Render()
+        {
+            return _entryPoint.Render(this);
         }
     }
 }

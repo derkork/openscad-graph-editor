@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class ModuleInvocation : ScadNode
+    public class ModuleInvocation : ScadNode, ICannotBeCreated
     {
         private ModuleDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -17,11 +17,11 @@ namespace OpenScadGraphEditor.Nodes
             node.SetData("module_description_id", _description.Id);
         }
 
-        public override void LoadFrom(SavedNode node)
+        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
         {
             var moduleDescriptionId = node.GetData("module_description_id");
-            Setup(InvokableLibrary.ForModuleDescriptionId(moduleDescriptionId));
-            base.LoadFrom(node);
+            Setup(referenceResolver.ResolveModuleReference(moduleDescriptionId));
+            base.LoadFrom(node, referenceResolver);
         }
 
         public void Setup(ModuleDescription description)
@@ -52,17 +52,17 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(ScadInvokableContext scadInvokableContext)
+        public override string Render(IScadGraph context)
         {
             var parameters = string.Join(", ",
                 InputPorts
                     .Indices()
                     .Skip(1)
-                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(scadInvokableContext, it)}")
+                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(context, it)}")
             );
             var result = $"{_description.Name}({parameters})";
-            var childNodes = _description.SupportsChildren ? RenderOutput(scadInvokableContext, 0) : "";
-            var nextNodes = RenderOutput(scadInvokableContext, _description.SupportsChildren ? 1 : 0);
+            var childNodes = _description.SupportsChildren ? RenderOutput(context, 0) : "";
+            var nextNodes = RenderOutput(context, _description.SupportsChildren ? 1 : 0);
             if (childNodes.Length > 0)
             {
                 return result + childNodes.AsBlock() + ";" + nextNodes;

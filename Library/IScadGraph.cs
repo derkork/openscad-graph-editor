@@ -1,21 +1,14 @@
 using System.Collections.Generic;
-using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
-    public interface IScadGraph
+    public interface IScadGraph : ICanBeRendered
     {
-        string InvokableName { get; }
-
-        void Blank(string name, ScadNode entryPoint);
+        InvokableDescription Description { get; }
         
-        void LoadFrom(SavedGraph graph, ScadInvokableContext context);
+        void LoadFrom(SavedGraph graph, IReferenceResolver resolver);
+        
         void SaveInto(SavedGraph graph);
-
-        /// <summary>
-        /// Returns the entrypoint node of the graph.
-        /// </summary>
-        ScadNode GetEntrypoint();
 
         IEnumerable<IScadConnection> GetAllConnections();
 

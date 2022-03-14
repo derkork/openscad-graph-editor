@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -13,5 +14,10 @@ namespace OpenScadGraphEditor.Library
         /// </summary>
         [Export]
         public bool SupportsChildren { get; set; }
+
+        public override bool CanUse(ScadNode node)
+        {
+            return true;
+        }
     }
 }

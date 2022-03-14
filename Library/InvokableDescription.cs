@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -57,10 +58,14 @@ namespace OpenScadGraphEditor.Library
         [Export]
         public Array<ParameterDescription> Parameters { get; set; } = new Array<ParameterDescription>();
 
-
         /// <summary>
         /// Returns the display name if set, or the name otherwise.
         /// </summary>
         public string NodeNameOrFallback => NodeName.Length > 0 ? NodeName : Name;
+
+        /// <summary>
+        /// Returns true if the given node can be used in this type of invokable.
+        /// </summary>
+        public abstract bool CanUse(ScadNode node);
     }
 }

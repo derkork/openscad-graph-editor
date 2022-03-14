@@ -37,8 +37,8 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
                 .Select(it => new AddDialogEntry(() => NodeFactory.Duplicate(it)))
                 .ToList();
 
-            var libraryNodes = InvokableLibrary.GetDescriptions()
-                .Select(it => new AddDialogEntry(() => InvokableLibrary.FromDescription(it)))
+            var libraryNodes = BuiltIns.Modules.Union<InvokableDescription>(BuiltIns.Functions)
+                .Select(it => new AddDialogEntry(() => NodeFactory.FromDescription(it)))
                 .ToList();
 
             _supportedNodes = languageLevelNodes.Union(libraryNodes).ToList();

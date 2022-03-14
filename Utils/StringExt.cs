@@ -11,6 +11,16 @@ namespace OpenScadGraphEditor.Utils
             return IndentString + source.Replace("\n", "\n" + IndentString);
         }
 
+        public static string PrefixUnlessEmpty(this string source, string prefix)
+        {
+            if (source.Length == 0)
+            {
+                return source;
+            }
+
+            return prefix + source;
+        }
+        
         public static bool ContainsIgnoreCase(this string haystack, string needle)
         {
             return haystack.IndexOf(needle, StringComparison.CurrentCultureIgnoreCase) > -1;

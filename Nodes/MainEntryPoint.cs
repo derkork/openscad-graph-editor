@@ -2,18 +2,17 @@ using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public sealed class StringConstant : ScadExpressionNode
+    public class MainEntryPoint : EntryPoint
     {
-        public override string NodeTitle => "String constant";
-        public override string NodeDescription => "A string constant";
+        public override string NodeTitle => "<main>";
+        public override string NodeDescription => "The main entry point.";
 
-
-        public StringConstant()
+        public MainEntryPoint()
         {
             OutputPorts
-                .String();
+                .Flow();
         }
-
+        
         public override string Render(IScadGraph context)
         {
             return RenderOutput(context, 0);

@@ -34,7 +34,8 @@ namespace OpenScadGraphEditor.Library
         {
             return _instance
                 ._nodeTypes
-                .Where(it => it != typeof(Start) && it != typeof(ModuleInvocation) && it != typeof(FunctionInvocation))
+                // only nodes which can be directly created
+                .Where(it => !typeof(ICannotBeCreated).IsAssignableFrom(it))
                 .Select(Activator.CreateInstance)
                 .Cast<ScadNode>()
                 .Select(it =>
@@ -56,6 +57,33 @@ namespace OpenScadGraphEditor.Library
         {
             return (ScadNode) Activator.CreateInstance(Assembly.GetExecutingAssembly().GetType(type));
         }
-        
+
+        /// <summary>
+        /// Builds a ScadNode from the given description.
+        /// </summary>
+        /// <param name="description"></param>
+        /// <returns></returns>
+        public static ScadNode FromDescription(InvokableDescription description)
+        {
+            switch (description)
+            {
+                case ModuleDescription moduleDescription:
+                {
+                    var moduleNode = new ModuleInvocation();
+                    moduleNode.Setup(moduleDescription);
+                    moduleNode.PreparePorts();
+                    return moduleNode;
+                }
+                case FunctionDescription functionDescription:
+                {
+                    var functionNode = new FunctionInvocation();
+                    functionNode.Setup(functionDescription);
+                    functionNode.PreparePorts();
+                    return functionNode;
+                }
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
 }

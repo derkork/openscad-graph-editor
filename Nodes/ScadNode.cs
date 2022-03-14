@@ -26,7 +26,7 @@ namespace OpenScadGraphEditor.Nodes
 
         private readonly Dictionary<int, IScadLiteral> _outputLiterals =
             new Dictionary<int, IScadLiteral>();
-
+        
 
         public IScadLiteral GetInputLiteral(int index)
         {
@@ -74,7 +74,7 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public virtual void LoadFrom(SavedNode node)
+        public virtual void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
         {
             PreparePorts();
             Id = node.Id;
@@ -120,14 +120,19 @@ namespace OpenScadGraphEditor.Nodes
             return OutputPorts[index].PortType;
         }
 
-        public abstract string Render(ScadInvokableContext scadInvokableContext);
+        public abstract string Render(IScadGraph context);
 
-        protected string RenderInput(ScadInvokableContext scadInvokableContext, int index)
+        protected string RenderInput(IScadGraph context, int index)
         {
             // if we have a node connected, render the node
-            if (scadInvokableContext.TryGetInputNode(this, index, out var node))
+            if (context.TryGetIncomingNode(this, index, out var node))
             {
-                return node.Render(scadInvokableContext);
+                if (node is IMultiExpressionOutputNode multiNode)
+                {
+                    return multiNode.RenderExpressionOutput(context, index);
+                }
+                
+                return node.Render(context);
             }
 
             // try rendering the literal
@@ -140,14 +145,14 @@ namespace OpenScadGraphEditor.Nodes
             return "";
         }
 
-        protected string RenderOutput(ScadInvokableContext scadInvokableContext, int index)
+        protected string RenderOutput(IScadGraph context, int index)
         {
             // if we have a flow node connected render this.
             if (GetOutputPortType(index) == PortType.Flow)
             {
-                if (scadInvokableContext.TryGetOutputNode(this, index, out var node))
+                if (context.TryGetOutgoingNode(this, index, out var node))
                 {
-                    return node.Render(scadInvokableContext);
+                    return node.Render(context);
                 }
             }
 

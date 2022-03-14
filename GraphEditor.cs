@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
@@ -5,6 +6,7 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.ScadNodeList;
 
 namespace OpenScadGraphEditor
 {
@@ -15,6 +17,10 @@ namespace OpenScadGraphEditor
         private Control _editingInterface;
         private TextEdit _textEdit;
         private FileDialog _fileDialog;
+        private ScadNodeList _modulesList;
+        private ScadNodeList _functionsList;
+        private ScadNodeList _variablesList;
+        private ScadNodeList _localVariablesList;
 
         private string _currentFile;
 
@@ -22,11 +28,13 @@ namespace OpenScadGraphEditor
         private Button _forceSaveButton;
         private Label _fileNameLabel;
         private TabContainer _tabContainer;
-        private ScadProjectContext _currentProject;
+        private ScadProject _currentProject;
+        private GlobalLibrary _rootResolver;
 
         public override void _Ready()
         {
             OS.LowProcessorUsageMode = true;
+            _rootResolver = new GlobalLibrary();
             
             _tabContainer = this.WithName<TabContainer>("TabContainer");
 
@@ -38,7 +46,12 @@ namespace OpenScadGraphEditor
             _forceSaveButton = this.WithName<Button>("ForceSaveButton");
             _forceSaveButton.Connect("pressed")
                 .To(this, nameof(SaveChanges));
+            
 
+            _modulesList = this.WithName<ScadNodeList>("ModulesList");
+            _functionsList = this.WithName<ScadNodeList>("FunctionsList");
+            _variablesList = this.WithName<ScadNodeList>("VariablesList");
+            _localVariablesList = this.WithName<ScadNodeList>("LocalVariablesList");
 
 
             this.WithName<Button>("NewButton")
@@ -56,6 +69,10 @@ namespace OpenScadGraphEditor
             this.WithName<Button>("SaveAsButton")
                 .Connect("pressed")
                 .To(this, nameof(OnSaveAsPressed));
+
+            this.WithName<Button>("AddFunctionButton")
+                .Connect("pressed")
+                .To(this, nameof(OnAddFunctionPressed));
             
             
             MarkDirty();
@@ -74,14 +91,57 @@ namespace OpenScadGraphEditor
             _fileNameLabel.Text = "<not yet saved to a file>";
         }
 
+
+        private void RefreshLists()
+        {
+
+            _functionsList.Setup(
+                _currentProject.Functions
+                    .Select(it => new ScadNodeListEntry(it.Description.Name,
+                        () => Open(it), 
+                        new DragData($"Call function {it.Description.Name}", it.Description)))
+            );
+            
+            _modulesList.Setup(
+                _currentProject.Modules
+                    .Select(it => new ScadNodeListEntry(it.Description.Name,
+                        () => Open(it), 
+                        new DragData($"Call module {it.Description.Name}", it.Description)))
+                    .Append(new ScadNodeListEntry(_currentProject.MainModule.Description.Name, () => Open(_currentProject.MainModule)))
+            );
+            
+        }
+
+        private void Open(IScadGraph toOpen)
+        {
+            // check if it is already open
+            for (var i = 0; i < _tabContainer.GetChildCount(); i++)
+            {
+                if (_tabContainer.GetChild<ScadGraphEdit>(i).Description.Id == toOpen.Description.Id)
+                {
+                    _tabContainer.CurrentTab = i;
+                    return;
+                }
+            }
+            
+            // if not, open a new tab
+            var editor = Prefabs.New<ScadGraphEdit>();
+            AttachTo(editor);
+            editor.Name = toOpen.Description.NodeNameOrFallback;
+            editor.MoveToNewParent(_tabContainer);
+            _currentProject.TransferData(toOpen, editor);
+        }
+
+        private void OnAddFunctionPressed()
+        {
+        }
+        
         private void OnNewButtonPressed()
         {
             Clear();
-            _currentProject = new ScadProjectContext();
-            var editor = Prefabs.New<ScadGraphEdit>();
-            AttachTo(editor);
-            editor.MoveToNewParent(_tabContainer);
-            _currentProject.MainModule.TransferTo(editor);
+            _currentProject = new ScadProject(_rootResolver);
+            Open(_currentProject.MainModule);
+            RefreshLists();
         }
 
         private void AttachTo(ScadGraphEdit editor)
@@ -117,13 +177,13 @@ namespace OpenScadGraphEditor
 
             Clear();
 
-            _currentProject = new ScadProjectContext();
+            _currentProject = new ScadProject(_rootResolver);
             _currentProject.Load(savedProject);
             
             var editor = Prefabs.New<ScadGraphEdit>();
             editor.MoveToNewParent(_tabContainer);
             AttachTo(editor);
-            _currentProject.MainModule.TransferTo(editor);
+            _currentProject.TransferData(_currentProject.MainModule, editor);
             _currentFile = filename;
             _fileNameLabel.Text = _currentFile;
             
