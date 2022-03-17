@@ -2,7 +2,7 @@ using System;
 
 namespace OpenScadGraphEditor.Widgets.ScadNodeList
 {
-    public readonly struct ScadNodeListEntry
+    public class ScadNodeListEntry
     {
         public readonly string Title;
         public readonly Action WhenItemActivated;

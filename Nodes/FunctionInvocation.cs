@@ -1,4 +1,5 @@
 using System.Linq;
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
@@ -7,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     /// <summary>
     /// A function invocation.
     /// </summary>
-    public class FunctionInvocation : ScadExpressionNode, ICannotBeCreated
+    public class FunctionInvocation : ScadExpressionNode, IReferToAnInvokable
     {
         private FunctionDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -27,20 +28,21 @@ namespace OpenScadGraphEditor.Nodes
             base.LoadFrom(node, referenceResolver);
         }
 
-        public void Setup(FunctionDescription description)
+        public void Setup(InvokableDescription description)
         {
-            _description = description;
+            GdAssert.That(description is FunctionDescription, "Needs a function description");
+            
+            _description = (FunctionDescription) description;
 
-            foreach (var parameter in description.Parameters)
+            foreach (var parameter in _description.Parameters)
             {
                 var type = parameter.TypeHint;
                 InputPorts
-                    .OfType(type, parameter.LabelOrFallback, type != PortType.Any && type != PortType.Flow,
-                        parameter.IsAutoCoerced);
+                    .OfType(type, parameter.LabelOrFallback, true, parameter.IsAutoCoerced);
             }
 
             OutputPorts
-                    .OfType(description.ReturnTypeHint, allowLiteral: false);
+                    .OfType( _description.ReturnTypeHint, allowLiteral: false);
         }
 
         public override string Render(IScadGraph context)

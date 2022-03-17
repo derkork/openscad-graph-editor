@@ -1,8 +1,9 @@
+using GodotExt;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class FunctionReturn : ScadNode, ICannotBeDeleted, ICannotBeCreated
+    public class FunctionReturn : ScadNode, ICannotBeDeleted, IReferToAnInvokable
     {
         private FunctionDescription _description;
 
@@ -23,9 +24,11 @@ namespace OpenScadGraphEditor.Nodes
             base.LoadFrom(node, referenceResolver);
         }
 
-        public void Setup(FunctionDescription description)
+        public void Setup(InvokableDescription description)
         {
-            _description = description;
+            GdAssert.That(description is FunctionDescription, "need a function description");
+            _description = (FunctionDescription) description;
+            
             InputPorts
                 .Flow()
                 .OfType(_description.ReturnTypeHint, "Result");
@@ -33,7 +36,8 @@ namespace OpenScadGraphEditor.Nodes
         
         public override string Render(IScadGraph context)
         {
-            return RenderInput(context, 1);
+            var input = RenderInput(context, 1);
+            return input.Length == 0 ? "undef" : input;
         }
     }
 }

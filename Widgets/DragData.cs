@@ -1,8 +1,6 @@
-using System;
-
 namespace OpenScadGraphEditor.Widgets
 {
-    public readonly struct DragData
+    public class DragData
     {
         public DragData(string name, object data)
         {

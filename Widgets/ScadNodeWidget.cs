@@ -142,11 +142,11 @@ namespace OpenScadGraphEditor.Widgets
                 }
 
                 literalWidget.ConnectChanged().To(this, nameof(NotifyChanged));
-
-                var portContainer = Prefabs.InstantiateFromScene<PortContainer.PortContainer>();
-                portContainer.MoveToNewParent(container);
-                portContainer.Setup(isLeft, portDefinition.Name, (Control) literalWidget);
             }
+
+            var portContainer = Prefabs.InstantiateFromScene<PortContainer.PortContainer>();
+            portContainer.MoveToNewParent(container);
+            portContainer.Setup(isLeft, portDefinition.Name, (Control) literalWidget);
         }
 
 

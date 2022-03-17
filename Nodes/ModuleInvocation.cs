@@ -1,10 +1,11 @@
 using System.Linq;
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class ModuleInvocation : ScadNode, ICannotBeCreated
+    public class ModuleInvocation : ScadNode, IReferToAnInvokable
     {
         private ModuleDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -24,9 +25,10 @@ namespace OpenScadGraphEditor.Nodes
             base.LoadFrom(node, referenceResolver);
         }
 
-        public void Setup(ModuleDescription description)
+        public void Setup(InvokableDescription description)
         {
-            _description = description;
+            GdAssert.That(description is ModuleDescription, "needs a module description");
+            _description = (ModuleDescription) description;
 
             InputPorts
                 .Flow();
@@ -35,11 +37,10 @@ namespace OpenScadGraphEditor.Nodes
             {
                 var type = parameter.TypeHint;
                 InputPorts
-                    .OfType(type, parameter.LabelOrFallback, type != PortType.Any && type != PortType.Flow,
-                        parameter.IsAutoCoerced);
+                    .OfType(type, parameter.LabelOrFallback, true, parameter.IsAutoCoerced);
             }
 
-            if (description.SupportsChildren)
+            if (_description.SupportsChildren)
             {
                 OutputPorts
                     .Flow("Children")

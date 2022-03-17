@@ -7,6 +7,6 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "*";
         public override string NodeDescription => "Multiplies the given inputs.";
-        protected override string OperatorSign => "+";
+        protected override string OperatorSign => "*";
     }
 }

@@ -27,7 +27,6 @@ namespace OpenScadGraphEditor.Nodes
         private readonly Dictionary<int, IScadLiteral> _outputLiterals =
             new Dictionary<int, IScadLiteral>();
         
-
         public IScadLiteral GetInputLiteral(int index)
         {
             return _inputLiterals.TryGetValue(index, out var result) ? result : default;
@@ -125,11 +124,11 @@ namespace OpenScadGraphEditor.Nodes
         protected string RenderInput(IScadGraph context, int index)
         {
             // if we have a node connected, render the node
-            if (context.TryGetIncomingNode(this, index, out var node))
+            if (context.TryGetIncomingNode(this, index, out var node, out var fromPort))
             {
                 if (node is IMultiExpressionOutputNode multiNode)
                 {
-                    return multiNode.RenderExpressionOutput(context, index);
+                    return multiNode.RenderExpressionOutput(context, fromPort);
                 }
                 
                 return node.Render(context);
@@ -150,7 +149,7 @@ namespace OpenScadGraphEditor.Nodes
             // if we have a flow node connected render this.
             if (GetOutputPortType(index) == PortType.Flow)
             {
-                if (context.TryGetOutgoingNode(this, index, out var node))
+                if (context.TryGetOutgoingNode(this, index, out var node, out _))
                 {
                     return node.Render(context);
                 }

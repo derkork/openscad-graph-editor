@@ -2,13 +2,20 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using OpenScadGraphEditor.Utils;
-using OpenScadGraphEditor.Widgets.AddDialog;
+using GodotExt;
 
 namespace OpenScadGraphEditor.Widgets.ScadNodeList
 {
     public class ScadNodeList : ItemList
     {
         private List<ScadNodeListEntry> _entries;
+
+
+        public override void _Ready()
+        {
+            this.Connect("item_activated")
+                .To(this, nameof(OnItemActivated));
+        }
 
         public void Setup(IEnumerable<ScadNodeListEntry> entries)
         {
@@ -41,6 +48,11 @@ namespace OpenScadGraphEditor.Widgets.ScadNodeList
             label.Text = entry.Title;
             SetDragPreview(label);
             return entry.DragActions.HoldMyBeer();
+        }
+
+        private void OnItemActivated(int index)
+        {
+            _entries[index].WhenItemActivated();
         }
     }
 }

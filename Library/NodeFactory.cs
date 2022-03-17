@@ -1,89 +1,46 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using GodotExt;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
-    public class NodeFactory
+    public static class NodeFactory
     {
-        private static NodeFactory _instance;
-
-        private readonly List<Type> _nodeTypes;
-
-        static NodeFactory()
+        /// <summary>
+        /// Builds a node of the given type, using the given invokable description if necessary.
+        /// </summary>
+        public static ScadNode Build<[MeansImplicitUse] T>(InvokableDescription description = null) where T : ScadNode
         {
-            _instance = new NodeFactory();
-        }
-
-        private NodeFactory()
-        {
-            _instance = this;
-            _nodeTypes = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => typeof(ScadNode).IsAssignableFrom(t) && !t.IsAbstract)
-                .ToList();
+            return Build(typeof(T), description);
         }
 
         /// <summary>
-        /// Returns all language-level nodes.
+        /// Builds a node of the given type, using the given invokable description if necessary.
         /// </summary>
-        /// <returns></returns>
-        public static List<ScadNode> GetAllNodes()
+        public static ScadNode Build(Type nodeType, InvokableDescription description = null)
         {
-            return _instance
-                ._nodeTypes
-                // only nodes which can be directly created
-                .Where(it => !typeof(ICannotBeCreated).IsAssignableFrom(it))
-                .Select(Activator.CreateInstance)
-                .Cast<ScadNode>()
-                .Select(it =>
-                {
-                    it.PreparePorts();
-                    return it;
-                })
-                .ToList();
-        }
-
-        public static ScadNode Duplicate(ScadNode node)
-        {
-            var duplicate = (ScadNode) Activator.CreateInstance(node.GetType());
-            duplicate.PreparePorts();
-            return duplicate;
-        }
-
-        public static ScadNode FromType(string type)
-        {
-            return (ScadNode) Activator.CreateInstance(Assembly.GetExecutingAssembly().GetType(type));
-        }
-
-        /// <summary>
-        /// Builds a ScadNode from the given description.
-        /// </summary>
-        /// <param name="description"></param>
-        /// <returns></returns>
-        public static ScadNode FromDescription(InvokableDescription description)
-        {
-            switch (description)
+            var node = (ScadNode) Activator.CreateInstance(nodeType);
+            if (node is IReferToAnInvokable invokableReference)
             {
-                case ModuleDescription moduleDescription:
-                {
-                    var moduleNode = new ModuleInvocation();
-                    moduleNode.Setup(moduleDescription);
-                    moduleNode.PreparePorts();
-                    return moduleNode;
-                }
-                case FunctionDescription functionDescription:
-                {
-                    var functionNode = new FunctionInvocation();
-                    functionNode.Setup(functionDescription);
-                    functionNode.PreparePorts();
-                    return functionNode;
-                }
-                default:
-                    throw new NotImplementedException();
+                GdAssert.That(description != null, "Need an invokable description to create an instance.");
+                invokableReference.Setup(description);
             }
+
+            node.PreparePorts();
+            return node;
+        }
+
+
+        /// <summary>
+        /// Loads a scad node from a saved node representation.
+        /// </summary>
+        public static ScadNode FromSavedNode(SavedNode savedNode, IReferenceResolver resolver)
+        {
+            var node = (ScadNode) Activator.CreateInstance(Assembly.GetExecutingAssembly().GetType(savedNode.Type));
+            node.LoadFrom(savedNode, resolver);
+            return node;
         }
     }
 }

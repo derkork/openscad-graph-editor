@@ -3,9 +3,11 @@ using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Refactoring;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 using OpenScadGraphEditor.Widgets.ScadNodeList;
 
 namespace OpenScadGraphEditor
@@ -30,6 +32,7 @@ namespace OpenScadGraphEditor
         private TabContainer _tabContainer;
         private ScadProject _currentProject;
         private GlobalLibrary _rootResolver;
+        private InvokableRefactorDialog _refactorDialog;
 
         public override void _Ready()
         {
@@ -39,6 +42,10 @@ namespace OpenScadGraphEditor
             _tabContainer = this.WithName<TabContainer>("TabContainer");
 
             _addDialog = this.WithName<AddDialog>("AddDialog");
+            _refactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
+            _refactorDialog.Connect(nameof(InvokableRefactorDialog.RefactoringRequested))
+                .To(this, nameof(OnRefactoringRequested));
+            
             _editingInterface = this.WithName<Control>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");
             _fileDialog = this.WithName<FileDialog>("FileDialog");
@@ -130,10 +137,25 @@ namespace OpenScadGraphEditor
             editor.Name = toOpen.Description.NodeNameOrFallback;
             editor.MoveToNewParent(_tabContainer);
             _currentProject.TransferData(toOpen, editor);
+            _tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
+            editor.FocusEntryPoint();
         }
 
         private void OnAddFunctionPressed()
         {
+            _refactorDialog.OpenForNewFunction();
+        }
+
+        private void OnRefactoringRequested(Refactoring.Refactoring refactoring)
+        {
+            if (refactoring is IntroduceInvokableRefactoring introduceInvokableRefactoring)
+            {
+                var invokableDescription = introduceInvokableRefactoring.Description;
+                var graph = _currentProject.AddInvokable(invokableDescription);
+                RefreshLists();
+                Open(graph);
+            }
+            
         }
         
         private void OnNewButtonPressed()
@@ -177,16 +199,15 @@ namespace OpenScadGraphEditor
 
             Clear();
 
+            _currentFile = filename;
+            _fileNameLabel.Text = filename;
+
             _currentProject = new ScadProject(_rootResolver);
             _currentProject.Load(savedProject);
-            
-            var editor = Prefabs.New<ScadGraphEdit>();
-            editor.MoveToNewParent(_tabContainer);
-            AttachTo(editor);
-            _currentProject.TransferData(_currentProject.MainModule, editor);
-            _currentFile = filename;
-            _fileNameLabel.Text = _currentFile;
-            
+
+            Open(_currentProject.MainModule);
+            RefreshLists();
+           
             RenderScadOutput();
         }
         

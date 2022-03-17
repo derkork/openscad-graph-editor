@@ -1,18 +1,31 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
     /// <summary>
-    /// This class contains all built-in modules an functions.
+    /// This class contains all built-in modules, functions and nodes.
     /// </summary>
     public static class BuiltIns
     {
         public static IReadOnlyCollection<ModuleDescription> Modules { get; }
         public static IReadOnlyCollection<FunctionDescription> Functions { get; }
+        
+        public static IReadOnlyCollection<Type> LanguageLevelNodes { get; }
 
         static BuiltIns()
         {
+            LanguageLevelNodes = Assembly.GetExecutingAssembly()
+                    .GetTypes()
+                    .Where(t => typeof(ScadNode).IsAssignableFrom(t) && !t.IsAbstract)
+                    // only nodes which can be directly created
+                    .Where(it => !typeof(ICannotBeCreated).IsAssignableFrom(it))
+                    .ToList();
+
+            
             Modules = new List<ModuleDescription>()
             {
                 ModuleBuilder.NewBuiltInModule("cube", "Cube")

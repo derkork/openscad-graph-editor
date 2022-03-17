@@ -33,6 +33,8 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void _Ready()
         {
+            RightDisconnects = true;
+            
             // allow to connect "Any" nodes to anything else, except "Flow" nodes.
             Enum.GetValues(typeof(PortType))
                 .Cast<int>()
@@ -66,18 +68,30 @@ namespace OpenScadGraphEditor.Widgets
                 return false;
             }
 
-            return reference.TryGetBeer(out ScadNode _);
+            return reference.TryGetBeer(out DragData[] _);
         }
 
         public override void DropData(Vector2 position, object data)
         {
-            if (!(data is Reference reference) || !reference.TryGetBeer(out ScadNode node))
+            if (!(data is Reference reference) || !reference.TryGetBeer(out DragData[] dragData))
             {
                 return;
             }
 
             _lastReleasePosition = position;
-            OnNodeAdded(node);
+
+            if (dragData.Length == 1)
+            {
+                switch (dragData[0].Data)
+                {
+                    case FunctionDescription functionDescription:
+                        OnNodeAdded(NodeFactory.Build<FunctionInvocation>(functionDescription));
+                        break;
+                    case ModuleDescription moduleDescription:
+                        OnNodeAdded(NodeFactory.Build<ModuleInvocation>(moduleDescription));
+                        break;
+                }
+            }
         }
 
         private void CreateWidgetFor(ScadNode node)
@@ -98,6 +112,12 @@ namespace OpenScadGraphEditor.Widgets
             _addDialog = addDialog;
         }
 
+        public void FocusEntryPoint()
+        {
+            var widget = _widgets[_entryPoint];
+            ScrollOffset = widget.Offset - new Vector2(100, 100);
+        }
+        
         public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
             Clear();
@@ -106,8 +126,7 @@ namespace OpenScadGraphEditor.Widgets
 
             foreach (var savedNode in graph.Nodes)
             {
-                var node = NodeFactory.FromType(savedNode.Type);
-                node.LoadFrom(savedNode, resolver);
+                var node = NodeFactory.FromSavedNode(savedNode, resolver);
                 CreateWidgetFor(node);
 
                 if (node is EntryPoint)
@@ -223,7 +242,7 @@ namespace OpenScadGraphEditor.Widgets
 
             // if the source node is not an expression node then delete all connections
             // from the source port
-            if (!(fromNode is ScadExpressionNode))
+            if (!(fromNode is ScadExpressionNode) && !(fromNode is IMultiExpressionOutputNode multiNode && multiNode.IsExpressionPort(fromPort)))
             {
                 GetAllConnections()
                     .Where(it => it.IsFrom(fromNode, fromPort))
@@ -244,7 +263,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void DoDisconnect(IScadConnection connection)
         {
-            DisconnectNode(connection.From.Id, connection.FromPort, connection.To.Id, connection.ToPort);
+            DisconnectNode(_widgets[connection.From].Name, connection.FromPort, _widgets[connection.To].Name, connection.ToPort);
 
             // notify nodes
             _widgets[connection.From].PortDisconnected(connection.FromPort, false);

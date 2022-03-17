@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             PortType = portType;
             Name = name;
-            AllowLiteral = allowLiteral;
+            AllowLiteral = allowLiteral && portType != PortType.Any && portType != PortType.Flow;
             AutoCoerce = autoCoerce;
         }
 

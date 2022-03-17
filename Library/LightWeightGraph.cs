@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenScadGraphEditor.Nodes;
@@ -11,13 +12,12 @@ namespace OpenScadGraphEditor.Library
     /// </summary>
     public class LightWeightGraph : IScadGraph
     {
-
         private ScadNode _entryPoint;
         private readonly List<ScadConnection> _connections = new List<ScadConnection>();
         private readonly List<ScadNode> _nodes = new List<ScadNode>();
 
         public InvokableDescription Description { get; private set; }
-        
+
         public string Render()
         {
             return _entryPoint.Render(this);
@@ -27,27 +27,30 @@ namespace OpenScadGraphEditor.Library
         {
             Clear();
             Description = Prefabs.New<MainModuleDescription>();
-            _entryPoint = new MainEntryPoint();
+            _entryPoint = NodeFactory.Build<MainEntryPoint>();
             _nodes.Add(_entryPoint);
         }
 
-        public void NewFunction(string name, PortType returnType)
+        public void NewFromDescription(InvokableDescription description)
         {
             Clear();
-            var functionDescription = Prefabs.New<FunctionDescription>();
-            Description = functionDescription;
-            functionDescription.Name = name;
-            functionDescription.ReturnTypeHint = returnType;
-            var functionEntryPoint = new FunctionEntryPoint();
-            functionEntryPoint.Setup(functionDescription);
-            
-            var returnNode = new FunctionReturn();
-            returnNode.Setup(functionDescription);
+            Description = description;
 
-            _entryPoint = functionEntryPoint;
-            _nodes.Add(_entryPoint);
-            _nodes.Add(returnNode);
-            _connections.Add(new ScadConnection(functionEntryPoint, 0, returnNode, 0));
+            switch (description)
+            {
+                case FunctionDescription functionDescription:
+                    _entryPoint = NodeFactory.Build<FunctionEntryPoint>(functionDescription);
+                    var returnNode = NodeFactory.Build<FunctionReturn>(functionDescription);
+
+                    _nodes.Add(_entryPoint);
+                    _nodes.Add(returnNode);
+                    _connections.Add(new ScadConnection(_entryPoint, 0, returnNode, 0));
+
+                    break;
+                case ModuleDescription moduleDescription:
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private void Clear()
@@ -67,11 +70,10 @@ namespace OpenScadGraphEditor.Library
             Clear();
 
             Description = graph.Description;
-            
+
             foreach (var savedNode in graph.Nodes)
             {
-                var node = NodeFactory.FromType(savedNode.Type);
-                node.LoadFrom(savedNode, resolver);
+                var node = NodeFactory.FromSavedNode(savedNode, resolver);
                 _nodes.Add(node);
 
                 if (node is EntryPoint)
@@ -83,14 +85,15 @@ namespace OpenScadGraphEditor.Library
             foreach (var connection in graph.Connections)
             {
                 var target = Lookup(connection.ToId);
-                _connections.Add(new ScadConnection(Lookup(connection.FromId), connection.FromPort, target, connection.ToPort));
+                _connections.Add(new ScadConnection(Lookup(connection.FromId), connection.FromPort, target,
+                    connection.ToPort));
             }
         }
 
         public void SaveInto(SavedGraph graph)
         {
             graph.Description = Description;
-            
+
             foreach (var node in (IEnumerable<ScadNode>) _nodes)
             {
                 var savedNode = Prefabs.New<SavedNode>();
@@ -118,6 +121,4 @@ namespace OpenScadGraphEditor.Library
         {
         }
     }
-
-    // TODO merge with ScadGrapEdit's ScadConnection
 }

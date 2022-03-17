@@ -161,5 +161,26 @@ namespace OpenScadGraphEditor.Library
             _functions.ForAll(it => it.Discard());
             MainModule?.Discard();
         }
+
+        public IScadGraph AddInvokable(InvokableDescription invokableDescription)
+        {
+            var graph = new LightWeightGraph();
+            graph.NewFromDescription(invokableDescription);
+            switch (invokableDescription)
+            {
+                case FunctionDescription functionDescription:
+                    _functions.Add(graph);
+                    _projectFunctionDescriptions[functionDescription.Id] = functionDescription;
+                    break;
+                case ModuleDescription moduleDescription:
+                    _modules.Add(graph);
+                    _projectModuleDescriptions[moduleDescription.Id] = moduleDescription;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return graph;
+        }
     }
 }

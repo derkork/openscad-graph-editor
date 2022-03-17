@@ -1,18 +1,20 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/ScadNodeList/ScadNodeList.cs" type="Script" id=2]
 [ext_resource path="res://Widgets/AddDialog/AddDialog.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Widgets/InvokableRefactorDialog/InvokableRefactorDialog.tscn" type="PackedScene" id=4]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="AddDialog" parent="." instance=ExtResource( 3 )]
+
+[node name="InvokableRefactorDialog" parent="." instance=ExtResource( 4 )]
+margin_right = 500.0
+margin_bottom = 250.0
 
 [node name="FileDialog" type="FileDialog" parent="."]
 anchor_left = 0.5

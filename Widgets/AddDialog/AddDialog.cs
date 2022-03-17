@@ -32,16 +32,20 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             _itemList.Connect("item_activated")
                 .To(this, nameof(OnItemActivated));
 
-// todo: the list of available stuff is dynamic and we need a function to refresh it.
-            var languageLevelNodes = NodeFactory.GetAllNodes()
-                .Select(it => new AddDialogEntry(() => NodeFactory.Duplicate(it)))
-                .ToList();
+            // todo: the list of available stuff is dynamic and we need a function to refresh it.
 
-            var libraryNodes = BuiltIns.Modules.Union<InvokableDescription>(BuiltIns.Functions)
-                .Select(it => new AddDialogEntry(() => NodeFactory.FromDescription(it)))
-                .ToList();
+            var languageLevelNodes = 
+                BuiltIns.LanguageLevelNodes.Select(it => new AddDialogEntry(() => NodeFactory.Build(it)));
+            var libraryModules =
+                BuiltIns.Modules.Select(it => new AddDialogEntry(() => NodeFactory.Build<ModuleInvocation>(it)));
+            var libraryFunctions =
+                BuiltIns.Functions.Select(it => new AddDialogEntry(() => NodeFactory.Build<FunctionInvocation>(it)));
 
-            _supportedNodes = languageLevelNodes.Union(libraryNodes).ToList();
+
+            _supportedNodes = languageLevelNodes
+                .Union(libraryModules)
+                .Union(libraryFunctions)
+                .ToList();
         }
 
 
