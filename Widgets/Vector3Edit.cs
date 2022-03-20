@@ -50,9 +50,9 @@ namespace OpenScadGraphEditor.Widgets
         {
             // we use some fake number literals to drive the number edits and then forward
             // the changes to the vector3 literal.
-            _xLiteral = new NumberLiteral();
-            _yLiteral = new NumberLiteral();
-            _zLiteral = new NumberLiteral();
+            _xLiteral = new NumberLiteral(0);
+            _yLiteral = new NumberLiteral(0);
+            _zLiteral = new NumberLiteral(0);
 
             _xLiteral.Value = _vector3Literal.X;
             _yLiteral.Value = _vector3Literal.Y;

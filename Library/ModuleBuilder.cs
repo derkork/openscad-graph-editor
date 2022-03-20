@@ -40,9 +40,9 @@ namespace OpenScadGraphEditor.Library
             return this;
         }
 
-        public ModuleBuilder WithChildren()
+        public ModuleBuilder WithChildren(bool value = true)
         {
-            _currentModuleDescription.SupportsChildren = true;
+            _currentModuleDescription.SupportsChildren = value;
             return this;
         }
 

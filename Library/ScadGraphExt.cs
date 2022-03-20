@@ -5,9 +5,11 @@ namespace OpenScadGraphEditor.Library
 {
     public static class ScadGraphExt
     {
-        public static bool TryGetIncomingNode(this IScadGraph self,  ScadNode node, int port, out ScadNode result, out int originatingPort)
+        public static bool TryGetIncomingNode(this IScadGraph self, ScadNode node, int port, out ScadNode result,
+            out int originatingPort)
         {
-            foreach (var connection in self.GetAllConnections().Where(connection => connection.To == node && connection.ToPort == port))
+            foreach (var connection in self.GetAllConnections()
+                         .Where(connection => connection.To == node && connection.ToPort == port))
             {
                 result = connection.From;
                 originatingPort = connection.FromPort;
@@ -19,9 +21,16 @@ namespace OpenScadGraphEditor.Library
             return false;
         }
 
-        public static bool TryGetOutgoingNode(this IScadGraph self, ScadNode node, int port, out ScadNode result, out int targetPort)
+        public static bool IsOutputConnected(this IScadGraph self, ScadNode node, int port)
         {
-            foreach (var connection in self.GetAllConnections().Where(connection => connection.From == node && connection.FromPort == port))
+            return self.GetAllConnections().Any(it => it.From == node && it.FromPort == port);
+        }
+
+        public static bool TryGetOutgoingNode(this IScadGraph self, ScadNode node, int port, out ScadNode result,
+            out int targetPort)
+        {
+            foreach (var connection in self.GetAllConnections()
+                         .Where(connection => connection.From == node && connection.FromPort == port))
             {
                 result = connection.To;
                 targetPort = connection.ToPort;

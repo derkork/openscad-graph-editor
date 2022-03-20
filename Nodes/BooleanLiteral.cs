@@ -4,6 +4,11 @@ namespace OpenScadGraphEditor.Nodes
     {
         public bool Value { get; set; }
 
+        public BooleanLiteral(bool value)
+        {
+            Value = value;
+        }
+
         public string LiteralValue => Value ? "true" : "false";
 
         public string SerializedValue

@@ -45,11 +45,13 @@ namespace OpenScadGraphEditor.Library
                     _nodes.Add(_entryPoint);
                     _nodes.Add(returnNode);
                     _connections.Add(new ScadConnection(_entryPoint, 0, returnNode, 0));
-
                     break;
                 case ModuleDescription moduleDescription:
+                    _entryPoint = NodeFactory.Build<ModuleEntryPoint>(moduleDescription);
+                    _nodes.Add(_entryPoint);
+                    break;
                 default:
-                    throw new NotImplementedException();
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

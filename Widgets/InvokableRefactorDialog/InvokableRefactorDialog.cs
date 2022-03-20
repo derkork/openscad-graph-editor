@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
-using Godot.Collections;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
@@ -24,6 +22,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;
         private OptionButton _returnTypeOptionButton;
+        private Label _allowChildrenLabel;
+        private CheckBox _allowChildrenCheckbox;
         private InvokableDescription _baseDescription;
         private LineEdit _templateParameterName;
         private OptionButton _templateParameterTypeHint;
@@ -32,7 +32,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private Button _templateParameterDeleteButton;
         private GridContainer _parameterGrid;
         private readonly List<ParameterLine> _parameterLines = new List<ParameterLine>();
-        private readonly System.Collections.Generic.Dictionary<PortType, int> _indexByPortTypes = new System.Collections.Generic.Dictionary<PortType, int>();
+        private readonly Dictionary<PortType, int> _indexByPortTypes = new Dictionary<PortType, int>();
 
         private DialogMode _mode = DialogMode.Edit;
 
@@ -43,6 +43,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _nameEdit = this.WithName<LineEdit>("NameEdit");
             _returnTypeLabel = this.WithName<Label>("ReturnTypeLabel");
             _returnTypeOptionButton = this.WithName<OptionButton>("ReturnTypeSelector");
+            
+            _allowChildrenLabel = this.WithName<Label>("AllowChildrenLabel");
+            _allowChildrenCheckbox = this.WithName<CheckBox>("AllowChildrenCheckbox");
+            
             
             _templateParameterName = this.WithName<LineEdit>("TemplateParameterName");
             _templateParameterName.Visible = false;
@@ -76,12 +80,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             
             _templateParameterTypeHint.AddItem("Array", (int) PortType.Array);
             _returnTypeOptionButton.AddItem("Array", (int) PortType.Array);
-            _indexByPortTypes[PortType.Array] = index++;
+            _indexByPortTypes[PortType.Array] = index; // no ++ here since it is the last
             
-            _templateParameterTypeHint.AddItem("Range", (int) PortType.Range);
-            _returnTypeOptionButton.AddItem("Range", (int) PortType.Range);
-            _indexByPortTypes[PortType.Range] = index;
-
             _templateParameterUpButton = this.WithName<Button>("TemplateParameterUpButton");
             _templateParameterUpButton.Visible = false;
             _templateParameterDownButton = this.WithName<Button>("TemplateParameterDownButton");
@@ -111,6 +111,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeLabel.Visible = true;
             _returnTypeOptionButton.Visible = true;
             _returnTypeOptionButton.Select(_indexByPortTypes[PortType.Any]);
+            _allowChildrenLabel.Visible = false;
+            _allowChildrenCheckbox.Visible = false;
             PopupCentered();
         }
 
@@ -120,6 +122,9 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _mode = DialogMode.CreateModule;
             _returnTypeLabel.Visible = false;
             _returnTypeOptionButton.Visible = false;
+            _allowChildrenLabel.Visible = true;
+            _allowChildrenCheckbox.Visible = true;
+            _allowChildrenCheckbox.Pressed = true;
             PopupCentered();
         }
 
@@ -130,16 +135,24 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _mode = DialogMode.Edit;
 
             _nameEdit.Text = description.Name;
-            if (description is FunctionDescription functionDescription)
+            switch (description)
             {
-                _returnTypeLabel.Visible = true;
-                _returnTypeOptionButton.Visible = true;
-                _returnTypeOptionButton.Select(_indexByPortTypes[functionDescription.ReturnTypeHint]);
-            }
-            else
-            {
-                _returnTypeLabel.Visible = false;
-                _returnTypeOptionButton.Visible = false;
+                case FunctionDescription functionDescription:
+                    _returnTypeLabel.Visible = true;
+                    _returnTypeOptionButton.Visible = true;
+                    _allowChildrenLabel.Visible = false;
+                    _allowChildrenCheckbox.Visible = false;
+                    _returnTypeOptionButton.Select(_indexByPortTypes[functionDescription.ReturnTypeHint]);
+                    break;
+                case ModuleDescription moduleDescription:                    
+                    _returnTypeLabel.Visible = false;
+                    _returnTypeOptionButton.Visible = false;
+                    _allowChildrenLabel.Visible = true;
+                    _allowChildrenCheckbox.Visible = true;
+                    _allowChildrenCheckbox.Pressed = moduleDescription.SupportsChildren;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             foreach (var parameter in description.Parameters)
@@ -175,7 +188,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
                 case DialogMode.CreateModule:
                     var moduleDescription = ModuleBuilder
-                        .NewModule(_nameEdit.Text);
+                        .NewModule(_nameEdit.Text)
+                        .WithChildren(_allowChildrenCheckbox.Pressed);
                         
                     foreach (var line in _parameterLines)
                     {

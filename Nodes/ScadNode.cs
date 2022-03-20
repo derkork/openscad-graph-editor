@@ -177,21 +177,18 @@ namespace OpenScadGraphEditor.Nodes
             switch (portDefinition.PortType)
             {
                 case PortType.Boolean:
-                    literal = new BooleanLiteral();
+                    literal = new BooleanLiteral(portDefinition.DefaultValueAsBoolean);
                     break;
                 case PortType.Number:
-                    literal = new NumberLiteral();
+                    literal = new NumberLiteral(portDefinition.DefaultValueAsDouble);
                     break;
                 case PortType.String:
-                    literal = new StringLiteral();
+                    literal = new StringLiteral(portDefinition.DefaultValueAsString);
                     break;
                 case PortType.Vector3:
                     literal = new Vector3Literal();
                     break;
                 case PortType.Array:
-                    throw new ArgumentException("Not implemented!");
-                case PortType.Range:
-                    throw new ArgumentException("Not implemented!");
                 case PortType.Flow:
                 case PortType.Any:
                     throw new ArgumentException(

@@ -77,6 +77,11 @@ namespace OpenScadGraphEditor
                 .Connect("pressed")
                 .To(this, nameof(OnSaveAsPressed));
 
+            this.WithName<Button>("AddModuleButton")
+                .Connect("pressed")
+                .To(this, nameof(OnAddModulePressed));
+
+
             this.WithName<Button>("AddFunctionButton")
                 .Connect("pressed")
                 .To(this, nameof(OnAddFunctionPressed));
@@ -146,6 +151,11 @@ namespace OpenScadGraphEditor
             _refactorDialog.OpenForNewFunction();
         }
 
+        private void OnAddModulePressed()
+        {
+            _refactorDialog.OpenForNewModule();
+        }
+
         private void OnRefactoringRequested(Refactoring.Refactoring refactoring)
         {
             if (refactoring is IntroduceInvokableRefactoring introduceInvokableRefactoring)
@@ -155,7 +165,6 @@ namespace OpenScadGraphEditor
                 RefreshLists();
                 Open(graph);
             }
-            
         }
         
         private void OnNewButtonPressed()
