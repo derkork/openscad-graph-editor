@@ -9,7 +9,8 @@ namespace OpenScadGraphEditor.Nodes
         Vector3 = 4,
         Array = 5,
         String = 6,
-        Any = 8
+        Any = 8,
+        Reroute = 9
     }
 
     public static class PortTypeExt
@@ -17,6 +18,7 @@ namespace OpenScadGraphEditor.Nodes
         public static bool CanConnect(this PortType self, PortType other)
         {
             return self == other ||
+                   self == PortType.Reroute || other == PortType.Reroute ||
                    self == PortType.Any && other != PortType.Flow ||
                    self != PortType.Flow && other == PortType.Any;
         }

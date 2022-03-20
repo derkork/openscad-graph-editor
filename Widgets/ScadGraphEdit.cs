@@ -44,6 +44,17 @@ namespace OpenScadGraphEditor.Widgets
                     AddValidConnectionType((int) PortType.Any, x);
                     AddValidConnectionType(x, (int) PortType.Any);
                 });
+            
+            // allow to connect "Reroute" nodes to anything else
+            Enum.GetValues(typeof(PortType))
+                .Cast<int>()
+                .Where(x => x != (int) PortType.Reroute)
+                .ForAll(x =>
+                {
+                    AddValidConnectionType((int) PortType.Reroute, x);
+                    AddValidConnectionType(x, (int) PortType.Reroute);
+                });
+            
 
             this.Connect("connection_request")
                 .To(this, nameof(OnConnectionRequest));
@@ -96,7 +107,9 @@ namespace OpenScadGraphEditor.Widgets
 
         private void CreateWidgetFor(ScadNode node)
         {
-            var widget = Prefabs.New<ScadNodeWidget>();
+            var widget = node is RerouteNode 
+                ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>() 
+                : Prefabs.New<ScadNodeWidget>();
 
             widget.ConnectChanged()
                 .To(this, nameof(NotifyUpdateRequired));
@@ -180,6 +193,7 @@ namespace OpenScadGraphEditor.Widgets
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
             _lastSourceNode = ScadNodeForWidgetName(fromWidgetName);
+            _lastDestinationNode = null;
             _lastPort = fromPort;
             _lastReleasePosition = releasePosition;
             _addDialog.Open(OnNodeAdded, it =>  Description.CanUse(it) && it.HasInputThatCanConnect(_lastSourceNode.GetOutputPortType(fromPort)));
@@ -187,6 +201,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
+            _lastSourceNode = null;
             _lastDestinationNode = ScadNodeForWidgetName(toWidgetName);
             _lastPort = toPort;
             _lastReleasePosition = releasePosition;
@@ -254,6 +269,24 @@ namespace OpenScadGraphEditor.Widgets
                 .Where(it => it.IsTo(toNode, toPort))
                 .ForAll(DoDisconnect);
 
+            // Reroute nodes work like this:
+            // if a reroute node that is untyped is connected to a non-reroute node, the non-reroute node
+            // connection type wins. 
+            // if a reroute node is connected to another reroute node, the most specific
+            // connection wins (e.g. is less specific than anything else).
+
+            var fromType = fromNode.GetOutputPortType(fromPort);
+            var toType = toNode.GetInputPortType(toPort);
+
+            if (fromType == PortType.Reroute)
+            {
+                SwitchRerouteNodeType((RerouteNode) fromNode, toType);
+            }
+
+            if (toType == PortType.Reroute)
+            {
+                SwitchRerouteNodeType((RerouteNode) toNode, fromType);
+            }
 
             ConnectNode(_widgets[fromNode].Name, fromPort, _widgets[toNode].Name, toPort);
             _widgets[fromNode].PortConnected(fromPort, false);
@@ -261,10 +294,45 @@ namespace OpenScadGraphEditor.Widgets
             NotifyUpdateRequired();
         }
 
-        private void DoDisconnect(IScadConnection connection)
+        /// <summary>
+        /// Switches the reroute node to a new connection type. Cleans up all non-matching connections.
+        /// </summary>
+        private void SwitchRerouteNodeType(RerouteNode node, PortType newConnectionType)
+        {
+            var currentConnectionType = node.GetInputPortType(0);
+            if (currentConnectionType == newConnectionType)
+            {
+                return; // nothing to do
+            }
+
+            // update the port type
+            node.UpdatePortType(newConnectionType);
+            
+            // then drop all connections from or to this reroute node
+            GetAllConnections()
+                .Where(it => it.InvolvesNode(node))
+                .ForAll(DoDisconnect);
+            
+            
+        }
+
+        private void DoDisconnect(ScadConnection connection)
         {
             DisconnectNode(_widgets[connection.From].Name, connection.FromPort, _widgets[connection.To].Name, connection.ToPort);
 
+            if (connection.From is RerouteNode fromReroute && !GetAllConnections().Any(it => it.InvolvesNode(connection.From)))
+            {
+                // change back to Reroute
+                fromReroute.UpdatePortType(PortType.Reroute);
+            }
+
+            if (connection.To is RerouteNode toReroute && !GetAllConnections().Any(it => it.InvolvesNode(connection.To)))
+            {
+                // change back to Reroute
+                toReroute.UpdatePortType(PortType.Reroute);
+            }
+     
+            
             // notify nodes
             _widgets[connection.From].PortDisconnected(connection.FromPort, false);
             _widgets[connection.To].PortDisconnected(connection.ToPort, true);
@@ -299,13 +367,11 @@ namespace OpenScadGraphEditor.Widgets
                 }
             }
 
-            _lastSourceNode = null;
-            _lastDestinationNode = null;
             NotifyUpdateRequired();
         }
 
 
-        public IEnumerable<IScadConnection> GetAllConnections()
+        public IEnumerable<ScadConnection> GetAllConnections()
         {
             return GetConnectionList()
                 .Cast<Godot.Collections.Dictionary>()
@@ -314,8 +380,7 @@ namespace OpenScadGraphEditor.Widgets
                     (int) item["from_port"],
                     ScadNodeForWidgetName((string) item["to"]),
                     (int) item["to_port"]
-                ))
-                .Cast<IScadConnection>();
+                ));
         }
 
         public void Discard()
@@ -335,22 +400,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             EmitSignal(nameof(NeedsUpdate));
         }
-
-        private readonly struct ScadConnection : IScadConnection
-        {
-            public ScadNode From { get; }
-            public int FromPort { get; }
-            public ScadNode To { get; }
-            public int ToPort { get; }
-
-            public ScadConnection(ScadNode from, int fromPort, ScadNode to, int toPort)
-            {
-                From = from;
-                FromPort = fromPort;
-                To = to;
-                ToPort = toPort;
-            }
-        }
+        
 
         public string Render()
         {

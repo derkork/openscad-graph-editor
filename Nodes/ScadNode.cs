@@ -17,15 +17,18 @@ namespace OpenScadGraphEditor.Nodes
 
         public Vector2 Offset { get; set; }
 
-
-        public readonly List<PortDefinition> InputPorts = new List<PortDefinition>();
-        public readonly List<PortDefinition> OutputPorts = new List<PortDefinition>();
+        public int InputPortCount => InputPorts.Count;
+        public int OutputPortCount => OutputPorts.Count;
+        
+        protected readonly List<PortDefinition> InputPorts = new List<PortDefinition>();
+        protected readonly List<PortDefinition> OutputPorts = new List<PortDefinition>();
 
         private readonly Dictionary<int, IScadLiteral> _inputLiterals =
             new Dictionary<int, IScadLiteral>();
 
         private readonly Dictionary<int, IScadLiteral> _outputLiterals =
             new Dictionary<int, IScadLiteral>();
+        
         
         public IScadLiteral GetInputLiteral(int index)
         {
@@ -35,6 +38,16 @@ namespace OpenScadGraphEditor.Nodes
         public IScadLiteral GetOutputLiteral(int index)
         {
             return _outputLiterals.TryGetValue(index, out var result) ? result : default;
+        }
+
+        public PortDefinition GetInputPortDefinition(int index)
+        {
+            return InputPorts[index];
+        }
+
+        public PortDefinition GetOutputPortDefinition(int index)
+        {
+            return OutputPorts[index];
         }
         
         public virtual void SaveInto(SavedNode node)

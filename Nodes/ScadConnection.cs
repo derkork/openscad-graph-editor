@@ -1,8 +1,6 @@
-using OpenScadGraphEditor.Nodes;
-
-namespace OpenScadGraphEditor.Library
+namespace OpenScadGraphEditor.Nodes
 {
-    internal class ScadConnection : IScadConnection
+    public class ScadConnection
     {
         public ScadNode From { get; }
         public int FromPort { get; }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -10,7 +11,7 @@ namespace OpenScadGraphEditor.Library
         
         void SaveInto(SavedGraph graph);
 
-        IEnumerable<IScadConnection> GetAllConnections();
+        IEnumerable<ScadConnection> GetAllConnections();
 
         void Discard();
 

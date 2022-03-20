@@ -4,7 +4,7 @@ using Godot;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public readonly struct PortDefinition
+    public class PortDefinition
     {
         private PortDefinition(PortType portType, string name, bool allowLiteral, bool autoCoerce, object defaultValue = default)
         {

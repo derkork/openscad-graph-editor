@@ -114,7 +114,7 @@ namespace OpenScadGraphEditor.Library
             }
         }
 
-        public IEnumerable<IScadConnection> GetAllConnections()
+        public IEnumerable<ScadConnection> GetAllConnections()
         {
             return _connections;
         }

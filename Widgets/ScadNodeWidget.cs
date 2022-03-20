@@ -30,9 +30,9 @@ namespace OpenScadGraphEditor.Widgets
             NotifyChanged();
         }
         
-        public ScadNode BoundNode { get; private set; }
+        public ScadNode BoundNode { get; protected set; }
 
-        public void BindTo(ScadNode node)
+        public virtual void BindTo(ScadNode node)
         {
             BoundNode = node;
             Title = node.NodeTitle;
@@ -40,7 +40,7 @@ namespace OpenScadGraphEditor.Widgets
             RectMinSize = new Vector2(200, 120);
             Offset = node.Offset;
 
-            var maxPorts = Mathf.Max(node.InputPorts.Count, node.OutputPorts.Count);
+            var maxPorts = Mathf.Max(node.InputPortCount, node.OutputPortCount);
 
             var idx = 0;
             while (idx < maxPorts)
@@ -48,21 +48,21 @@ namespace OpenScadGraphEditor.Widgets
                 var container = new HBoxContainer();
                 AddChild(container);
 
-                if (node.InputPorts.Count > idx)
+                if (node.InputPortCount > idx)
                 {
-                    BuildPort(container, idx, node.InputPorts[idx], true, node);
+                    BuildPort(container, idx, node.GetInputPortDefinition(idx), true, node);
                 }
 
-                if (node.OutputPorts.Count > idx)
+                if (node.OutputPortCount > idx)
                 {
-                    BuildPort(container, idx, node.OutputPorts[idx], false, node);
+                    BuildPort(container, idx, node.GetOutputPortDefinition(idx), false, node);
                 }
 
                 idx++;
             }
         }
 
-        public void PortConnected(int port, bool isLeft)
+        public virtual void PortConnected(int port, bool isLeft)
         {
             if (isLeft)
             {
@@ -73,7 +73,7 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
-        public void PortDisconnected(int port, bool isLeft)
+        public virtual void PortDisconnected(int port, bool isLeft)
         {
             if (isLeft)
             {
@@ -150,7 +150,7 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        private Color ColorFor(PortType portType)
+        protected Color ColorFor(PortType portType)
         {
             switch (portType)
             {
@@ -168,6 +168,8 @@ namespace OpenScadGraphEditor.Widgets
                     return new Color(1f, 1f, 0f);
                 case PortType.Any:
                     return new Color(1, 0f, 1f);
+                case PortType.Reroute:
+                    return new Color(0, 0.8f, 0);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
             }

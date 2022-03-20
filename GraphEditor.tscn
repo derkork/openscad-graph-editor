@@ -26,12 +26,12 @@ margin_top = -269.0
 margin_right = 438.5
 margin_bottom = 269.0
 rect_min_size = Vector2( 400, 140 )
-window_title = "Open a File"
+window_title = "Datei öffnen"
 mode = 0
 access = 2
 filters = PoolStringArray( "*.graph.tres; OpenSCAD graphs" )
-current_dir = "/home/kork/devel/OpenScadGraphEditor"
-current_path = "/home/kork/devel/OpenScadGraphEditor/"
+current_dir = "/home/kork/devel/openscad-graph-editor"
+current_path = "/home/kork/devel/openscad-graph-editor/"
 __meta__ = {
 "_edit_use_anchors_": false
 }
