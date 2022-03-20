@@ -40,5 +40,6 @@ namespace OpenScadGraphEditor.Utils
             
             return $"var{index}{Regex.Replace(Convert.ToBase64String(Guid.Parse(id).ToByteArray()), "[/+=]", "")}";
         }
+
     }
 }

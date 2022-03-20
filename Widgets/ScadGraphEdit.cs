@@ -84,6 +84,9 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void DropData(Vector2 position, object data)
         {
+            _lastSourceNode = null;
+            _lastDestinationNode = null;
+            
             if (!(data is Reference reference) || !reference.TryGetBeer(out DragData[] dragData))
             {
                 return;
@@ -196,7 +199,15 @@ namespace OpenScadGraphEditor.Widgets
             _lastDestinationNode = null;
             _lastPort = fromPort;
             _lastReleasePosition = releasePosition;
-            _addDialog.Open(OnNodeAdded, it =>  Description.CanUse(it) && it.HasInputThatCanConnect(_lastSourceNode.GetOutputPortType(fromPort)));
+
+            if (Input.IsKeyPressed((int) KeyList.Shift))
+            {
+                OnNodeAdded(NodeFactory.Build<RerouteNode>());
+            }
+            else
+            {
+                _addDialog.Open(OnNodeAdded, it =>  Description.CanUse(it) && it.HasInputThatCanConnect(_lastSourceNode.GetOutputPortType(fromPort)));
+            }
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
