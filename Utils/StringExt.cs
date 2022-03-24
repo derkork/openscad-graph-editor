@@ -1,7 +1,4 @@
 using System;
-using System.IO;
-using System.IO.Compression;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace OpenScadGraphEditor.Utils
@@ -32,7 +29,7 @@ namespace OpenScadGraphEditor.Utils
 
         public static string AsBlock(this string input)
         {
-            return input.Length == 0 ? input : $" {{\n{input.Indent()}\n}}\n";
+            return input.Length == 0 ? ";" : $" {{\n{input.Indent()}\n}}\n";
         }
 
         public static string UniqueStableVariableName(this string id, int index)

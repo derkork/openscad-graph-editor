@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GodotExt;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
@@ -29,6 +30,11 @@ namespace OpenScadGraphEditor.Library
             Description = Prefabs.New<MainModuleDescription>();
             _entryPoint = NodeFactory.Build<MainEntryPoint>();
             _nodes.Add(_entryPoint);
+        }
+
+        public ScadNode ById(string id)
+        {
+            return _nodes.First(it => it.Id == id);
         }
 
         public void NewFromDescription(InvokableDescription description)
@@ -121,6 +127,19 @@ namespace OpenScadGraphEditor.Library
 
         public void Discard()
         {
+        }
+
+        public void Remove(ScadConnection connection)
+        {
+            var removed = _connections.Remove(connection);
+            GdAssert.That(removed, "Tried to remove non-existing connection.");
+        }
+
+        public void Add(ScadConnection connection)
+        {
+            GdAssert.That(_nodes.Contains(connection.From), "Tried to add connection from non-existing node.");
+            GdAssert.That(_nodes.Contains(connection.To), "Tried to add connection to non-existing node.");
+            _connections.Add(connection);
         }
     }
 }

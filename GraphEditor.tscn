@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/ScadNodeList/ScadNodeList.cs" type="Script" id=2]
 [ext_resource path="res://Widgets/AddDialog/AddDialog.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Widgets/InvokableRefactorDialog/InvokableRefactorDialog.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Widgets/RefactoringPopup.cs" type="Script" id=5]
+[ext_resource path="res://Widgets/VariableRefactorDialog/VariableRefactorDialog.tscn" type="PackedScene" id=6]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -12,9 +14,17 @@ script = ExtResource( 1 )
 
 [node name="AddDialog" parent="." instance=ExtResource( 3 )]
 
+[node name="RefactoringPopup" type="PopupMenu" parent="."]
+margin_right = 144.0
+margin_bottom = 131.0
+script = ExtResource( 5 )
+
 [node name="InvokableRefactorDialog" parent="." instance=ExtResource( 4 )]
+visible = false
 margin_right = 500.0
 margin_bottom = 250.0
+
+[node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
 
 [node name="FileDialog" type="FileDialog" parent="."]
 anchor_left = 0.5
@@ -26,12 +36,12 @@ margin_top = -269.0
 margin_right = 438.5
 margin_bottom = 269.0
 rect_min_size = Vector2( 400, 140 )
-window_title = "Datei öffnen"
+window_title = "Open a File"
 mode = 0
 access = 2
 filters = PoolStringArray( "*.graph.tres; OpenSCAD graphs" )
-current_dir = "/home/kork/devel/openscad-graph-editor"
-current_path = "/home/kork/devel/openscad-graph-editor/"
+current_dir = "/home/kork/devel/OpenScadGraphEditor"
+current_path = "/home/kork/devel/OpenScadGraphEditor/"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -126,10 +136,8 @@ margin_bottom = 1015.0
 rect_min_size = Vector2( 0, 200 )
 readonly = true
 syntax_highlighting = true
-context_menu_enabled = false
-shortcut_keys_enabled = false
+show_line_numbers = true
 virtual_keyboard_enabled = false
-selecting_enabled = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -170,14 +178,14 @@ text = "+"
 [node name="ModulesList" type="ItemList" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 45.0
 margin_right = 222.0
-margin_bottom = 240.0
+margin_bottom = 323.0
 size_flags_vertical = 3
 script = ExtResource( 2 )
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 248.0
+margin_top = 331.0
 margin_right = 222.0
-margin_bottom = 285.0
+margin_bottom = 368.0
 
 [node name="Functions" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer2"]
 margin_top = 6.0
@@ -193,16 +201,16 @@ margin_bottom = 37.0
 text = "+"
 
 [node name="FunctionsList" type="ItemList" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 293.0
+margin_top = 376.0
 margin_right = 222.0
-margin_bottom = 489.0
+margin_bottom = 655.0
 size_flags_vertical = 3
 script = ExtResource( 2 )
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 497.0
+margin_top = 663.0
 margin_right = 222.0
-margin_bottom = 534.0
+margin_bottom = 700.0
 
 [node name="Variables" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer3"]
 margin_top = 6.0
@@ -211,39 +219,14 @@ margin_bottom = 31.0
 size_flags_horizontal = 3
 text = "Variables"
 
-[node name="AddVariablesButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer3"]
+[node name="AddVariableButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer3"]
 margin_left = 185.0
 margin_right = 222.0
 margin_bottom = 37.0
 text = "+"
 
 [node name="VariablesList" type="ItemList" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 542.0
-margin_right = 222.0
-margin_bottom = 738.0
-size_flags_vertical = 3
-script = ExtResource( 2 )
-
-[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 746.0
-margin_right = 222.0
-margin_bottom = 783.0
-
-[node name="Local Variables" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer4"]
-margin_top = 6.0
-margin_right = 177.0
-margin_bottom = 31.0
-size_flags_horizontal = 3
-text = "Local variables"
-
-[node name="AddVariablesButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer4"]
-margin_left = 185.0
-margin_right = 222.0
-margin_bottom = 37.0
-text = "+"
-
-[node name="LocalVariablesList" type="ItemList" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 791.0
+margin_top = 708.0
 margin_right = 222.0
 margin_bottom = 987.0
 size_flags_vertical = 3

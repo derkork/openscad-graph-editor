@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
 
@@ -9,29 +8,40 @@ namespace OpenScadGraphEditor.Library
     public static class NodeFactory
     {
         /// <summary>
-        /// Builds a node of the given type, using the given invokable description if necessary.
+        /// Builds a node of the given type.
         /// </summary>
-        public static ScadNode Build<[MeansImplicitUse] T>(InvokableDescription description = null) where T : ScadNode
+        public static ScadNode Build<[MeansImplicitUse] T>() where T : ScadNode
         {
-            return Build(typeof(T), description);
+            return Build(typeof(T));
+        }
+
+        public static ScadNode Build<[MeansImplicitUse] T>(InvokableDescription description)
+            where T : ScadNode, IReferToAnInvokable
+        {
+            var node = (T) Activator.CreateInstance(typeof(T));
+            node.Setup(description);
+            node.PreparePortLiterals();
+            return node;
+        }
+
+        public static ScadNode Build<[MeansImplicitUse] T>(VariableDescription description)
+            where T : ScadNode, IReferToAVariable
+        {
+            var node = (T) Activator.CreateInstance(typeof(T));
+            node.Setup(description);
+            node.PreparePortLiterals();
+            return node;
         }
 
         /// <summary>
         /// Builds a node of the given type, using the given invokable description if necessary.
         /// </summary>
-        public static ScadNode Build(Type nodeType, InvokableDescription description = null)
+        public static ScadNode Build(Type nodeType)
         {
             var node = (ScadNode) Activator.CreateInstance(nodeType);
-            if (node is IReferToAnInvokable invokableReference)
-            {
-                GdAssert.That(description != null, "Need an invokable description to create an instance.");
-                invokableReference.Setup(description);
-            }
-
-            node.PreparePorts();
+            node.PreparePortLiterals();
             return node;
         }
-
 
         /// <summary>
         /// Loads a scad node from a saved node representation.

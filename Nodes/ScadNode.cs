@@ -66,7 +66,7 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
-        public void PreparePorts()
+        public void PreparePortLiterals()
         {
             var maxPorts = Mathf.Max(InputPorts.Count, OutputPorts.Count);
             var idx = 0;
@@ -74,12 +74,12 @@ namespace OpenScadGraphEditor.Nodes
             {
                 if (InputPorts.Count > idx)
                 {
-                    BuildPort(idx, InputPorts[idx], true);
+                    BuildPortLiteral(idx, InputPorts[idx], true);
                 }
 
                 if (OutputPorts.Count > idx)
                 {
-                    BuildPort(idx, OutputPorts[idx], false);
+                    BuildPortLiteral(idx, OutputPorts[idx], false);
                 }
 
                 idx++;
@@ -88,7 +88,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public virtual void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
         {
-            PreparePorts();
+            PreparePortLiterals();
             Id = node.Id;
             Offset = node.Position;
             InputPorts
@@ -179,7 +179,7 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
-        private void BuildPort(int idx, PortDefinition portDefinition, bool isLeft)
+        private void BuildPortLiteral(int idx, PortDefinition portDefinition, bool isLeft)
         {
             if (!portDefinition.AllowLiteral)
             {

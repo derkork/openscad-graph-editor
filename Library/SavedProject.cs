@@ -22,6 +22,11 @@ namespace OpenScadGraphEditor.Library
         /// The main module.
         /// </summary>
         [Export] public SavedGraph MainModule;
-        
+
+        /// <summary>
+        /// All defined variables.
+        /// </summary>
+        [Export] public Array<VariableDescription> Variables = new Array<VariableDescription>();
+
     }
 }

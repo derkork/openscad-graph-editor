@@ -22,7 +22,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(IScadGraph context)
         {
             var index = RenderInput(context, 1);
-            return $"children({index});";
+            var next = RenderOutput(context, 0);
+            return $"children({index});\n{next}";
         }
     }
 }

@@ -78,7 +78,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             _contextFilter = contextFilter ?? (node => true);
             _lineEdit.Text = "";
             Refresh();
-            Show();
+            ShowModal();
 
             _lineEdit.GrabFocus();
         }

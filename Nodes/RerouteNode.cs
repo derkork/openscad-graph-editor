@@ -21,13 +21,13 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("reroute_type", ((int) GetInputPortType(0)).ToString());
+            node.SetData("reroute_type", (int) GetInputPortType(0));
             base.SaveInto(node);
         }
 
         public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
         {
-            var type = (PortType) int.Parse(node.GetData("reroute_type"));
+            var type = (PortType) node.GetDataInt("reroute_type");
             UpdatePortType(type);
             base.LoadFrom(node, referenceResolver);
         }

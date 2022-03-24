@@ -18,23 +18,20 @@ namespace OpenScadGraphEditor.Widgets
         private ScadNode _entryPoint;
         private readonly HashSet<ScadNodeWidget> _selection = new HashSet<ScadNodeWidget>();
         private AddDialog.AddDialog _addDialog;
+        private RefactoringPopup _refactoringPopup;
 
         [Signal]
-        public delegate void NeedsUpdate();
-
-        private Vector2 _lastReleasePosition;
-        private ScadNode _lastSourceNode;
-        private ScadNode _lastDestinationNode;
-        private int _lastPort;
+        public delegate void NeedsUpdate(bool codeChange);
 
         public InvokableDescription Description { get; private set; }
+
 
         private readonly Dictionary<ScadNode, ScadNodeWidget> _widgets = new Dictionary<ScadNode, ScadNodeWidget>();
 
         public override void _Ready()
         {
             RightDisconnects = true;
-            
+
             // allow to connect "Any" nodes to anything else, except "Flow" nodes.
             Enum.GetValues(typeof(PortType))
                 .Cast<int>()
@@ -44,7 +41,7 @@ namespace OpenScadGraphEditor.Widgets
                     AddValidConnectionType((int) PortType.Any, x);
                     AddValidConnectionType(x, (int) PortType.Any);
                 });
-            
+
             // allow to connect "Reroute" nodes to anything else
             Enum.GetValues(typeof(PortType))
                 .Cast<int>()
@@ -54,7 +51,7 @@ namespace OpenScadGraphEditor.Widgets
                     AddValidConnectionType((int) PortType.Reroute, x);
                     AddValidConnectionType(x, (int) PortType.Reroute);
                 });
-            
+
 
             this.Connect("connection_request")
                 .To(this, nameof(OnConnectionRequest));
@@ -70,6 +67,8 @@ namespace OpenScadGraphEditor.Widgets
                 .To(this, nameof(OnNodeUnselected));
             this.Connect("delete_nodes_request")
                 .To(this, nameof(OnDeleteSelection));
+            this.Connect("popup_request")
+                .To(this, nameof(OnPopupRequest));
         }
 
         public override bool CanDropData(Vector2 position, object data)
@@ -84,34 +83,22 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void DropData(Vector2 position, object data)
         {
-            _lastSourceNode = null;
-            _lastDestinationNode = null;
-            
+
             if (!(data is Reference reference) || !reference.TryGetBeer(out DragData[] dragData))
             {
                 return;
             }
 
-            _lastReleasePosition = position;
-
             if (dragData.Length == 1)
             {
-                switch (dragData[0].Data)
-                {
-                    case FunctionDescription functionDescription:
-                        OnNodeAdded(NodeFactory.Build<FunctionInvocation>(functionDescription));
-                        break;
-                    case ModuleDescription moduleDescription:
-                        OnNodeAdded(NodeFactory.Build<ModuleInvocation>(moduleDescription));
-                        break;
-                }
+                OnNodeAdded(dragData[0].Data(), NodeAddContext.AtPosition(position));
             }
         }
 
         private void CreateWidgetFor(ScadNode node)
         {
-            var widget = node is RerouteNode 
-                ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>() 
+            var widget = node is RerouteNode
+                ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>()
                 : Prefabs.New<ScadNodeWidget>();
 
             widget.ConnectChanged()
@@ -123,9 +110,10 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        public void Setup(AddDialog.AddDialog addDialog)
+        public void Setup(AddDialog.AddDialog addDialog, RefactoringPopup refactoringPopup)
         {
             _addDialog = addDialog;
+            _refactoringPopup = refactoringPopup;
         }
 
         public void FocusEntryPoint()
@@ -133,7 +121,7 @@ namespace OpenScadGraphEditor.Widgets
             var widget = _widgets[_entryPoint];
             ScrollOffset = widget.Offset - new Vector2(100, 100);
         }
-        
+
         public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
             Clear();
@@ -159,13 +147,16 @@ namespace OpenScadGraphEditor.Widgets
                 var toNode = _widgets.Keys.First(it => it.Id == connection.ToId);
 
                 ConnectNode(_widgets[fromNode].Name, connection.FromPort, _widgets[toNode].Name, connection.ToPort);
+                // restore literal visibility
+                _widgets[fromNode].PortConnected(connection.FromPort, false);
+                _widgets[toNode].PortConnected(connection.ToPort, true);
             }
         }
 
         public void SaveInto(SavedGraph graph)
         {
             graph.Description = Description;
-            
+
             foreach (var node in _widgets.Keys)
             {
                 var savedNode = Prefabs.New<SavedNode>();
@@ -184,40 +175,61 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
+        private void OnPopupRequest(Vector2 position)
+        {
+            var relativePosition = position - RectGlobalPosition;
+            relativePosition *= Zoom;
+
+            var matchingWidgets = _widgets.Values
+                .Where(it =>
+                    new Rect2((it.Offset - ScrollOffset) * Zoom, it.RectSize * Zoom).HasPoint(relativePosition));
+
+            foreach (var widget in matchingWidgets)
+            {
+                _refactoringPopup.Open(position, this, widget.BoundNode);
+                break;
+            }
+        }
+
 
         private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
         {
             DoDisconnect(new ScadConnection(ScadNodeForWidgetName(fromWidgetName), fromSlot,
                 ScadNodeForWidgetName(toWidgetName), toSlot));
-            NotifyUpdateRequired();
+            NotifyUpdateRequired(true);
         }
 
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            _lastSourceNode = ScadNodeForWidgetName(fromWidgetName);
-            _lastDestinationNode = null;
-            _lastPort = fromPort;
-            _lastReleasePosition = releasePosition;
+            var context = NodeAddContext.From(releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
 
             if (Input.IsKeyPressed((int) KeyList.Shift))
             {
-                OnNodeAdded(NodeFactory.Build<RerouteNode>());
+                OnNodeAdded(NodeFactory.Build<RerouteNode>(), context);
             }
             else
             {
-                _addDialog.Open(OnNodeAdded, it =>  Description.CanUse(it) && it.HasInputThatCanConnect(_lastSourceNode.GetOutputPortType(fromPort)));
+                _addDialog.Open(it => OnNodeAdded(it, context),
+                    it => Description.CanUse(it) &&
+                          it.HasInputThatCanConnect(context.SourceNode.GetOutputPortType(fromPort)));
             }
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
-            _lastSourceNode = null;
-            _lastDestinationNode = ScadNodeForWidgetName(toWidgetName);
-            _lastPort = toPort;
-            _lastReleasePosition = releasePosition;
-            _addDialog.Open(OnNodeAdded,
-                it => Description.CanUse(it) && it.HasOutputThatCanConnect(_lastDestinationNode.GetInputPortType(toPort)));
+            
+            var context = NodeAddContext.To(releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
+            if (Input.IsKeyPressed((int) KeyList.Shift))
+            {
+                OnNodeAdded(NodeFactory.Build<RerouteNode>(), context);
+            }
+            else
+            {
+                _addDialog.Open(it => OnNodeAdded(it, context),
+                    it => Description.CanUse(it) &&
+                          it.HasOutputThatCanConnect(context.DestinationNode.GetInputPortType(toPort)));
+            }
         }
 
         private void OnNodeSelected(ScadNodeWidget node)
@@ -250,7 +262,7 @@ namespace OpenScadGraphEditor.Widgets
             }
 
             _selection.Clear();
-            NotifyUpdateRequired();
+            NotifyUpdateRequired(true);
         }
 
 
@@ -268,7 +280,8 @@ namespace OpenScadGraphEditor.Widgets
 
             // if the source node is not an expression node then delete all connections
             // from the source port
-            if (!(fromNode is ScadExpressionNode) && !(fromNode is IMultiExpressionOutputNode multiNode && multiNode.IsExpressionPort(fromPort)))
+            if (!(fromNode is ScadExpressionNode) && !(fromNode is IMultiExpressionOutputNode multiNode &&
+                                                       multiNode.IsExpressionPort(fromPort)))
             {
                 GetAllConnections()
                     .Where(it => it.IsFrom(fromNode, fromPort))
@@ -302,7 +315,7 @@ namespace OpenScadGraphEditor.Widgets
             ConnectNode(_widgets[fromNode].Name, fromPort, _widgets[toNode].Name, toPort);
             _widgets[fromNode].PortConnected(fromPort, false);
             _widgets[toNode].PortConnected(toPort, true);
-            NotifyUpdateRequired();
+            NotifyUpdateRequired(true);
         }
 
         /// <summary>
@@ -318,32 +331,33 @@ namespace OpenScadGraphEditor.Widgets
 
             // update the port type
             node.UpdatePortType(newConnectionType);
-            
+
             // then drop all connections from or to this reroute node
             GetAllConnections()
                 .Where(it => it.InvolvesNode(node))
                 .ForAll(DoDisconnect);
-            
-            
         }
 
         private void DoDisconnect(ScadConnection connection)
         {
-            DisconnectNode(_widgets[connection.From].Name, connection.FromPort, _widgets[connection.To].Name, connection.ToPort);
+            DisconnectNode(_widgets[connection.From].Name, connection.FromPort, _widgets[connection.To].Name,
+                connection.ToPort);
 
-            if (connection.From is RerouteNode fromReroute && !GetAllConnections().Any(it => it.InvolvesNode(connection.From)))
+            if (connection.From is RerouteNode fromReroute &&
+                !GetAllConnections().Any(it => it.InvolvesNode(connection.From)))
             {
                 // change back to Reroute
                 fromReroute.UpdatePortType(PortType.Reroute);
             }
 
-            if (connection.To is RerouteNode toReroute && !GetAllConnections().Any(it => it.InvolvesNode(connection.To)))
+            if (connection.To is RerouteNode toReroute &&
+                !GetAllConnections().Any(it => it.InvolvesNode(connection.To)))
             {
                 // change back to Reroute
                 toReroute.UpdatePortType(PortType.Reroute);
             }
-     
-            
+
+
             // notify nodes
             _widgets[connection.From].PortDisconnected(connection.FromPort, false);
             _widgets[connection.To].PortDisconnected(connection.ToPort, true);
@@ -355,30 +369,30 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        private void OnNodeAdded(ScadNode node)
+        private void OnNodeAdded(ScadNode node, NodeAddContext context)
         {
-            node.Offset = _lastReleasePosition + ScrollOffset;
+            node.Offset = context.LastReleasePosition + ScrollOffset;
             CreateWidgetFor(node);
 
-            if (_lastDestinationNode != null)
+            if (context.DestinationNode != null)
             {
-                var index = node.GetFirstOutputThatCanConnect(_lastDestinationNode.GetInputPortType(_lastPort));
+                var index = node.GetFirstOutputThatCanConnect(context.DestinationNode.GetInputPortType(context.LastPort));
                 if (index > -1)
                 {
-                    DoConnect(node, index, _lastDestinationNode, _lastPort);
+                    DoConnect(node, index, context.DestinationNode, context.LastPort);
                 }
             }
 
-            if (_lastSourceNode != null)
+            if (context.SourceNode != null)
             {
-                var index = node.GetFirstInputThatCanConnect(_lastSourceNode.GetOutputPortType(_lastPort));
+                var index = node.GetFirstInputThatCanConnect(context.SourceNode.GetOutputPortType(context.LastPort));
                 if (index > -1)
                 {
-                    DoConnect(_lastSourceNode, _lastPort, node, index);
+                    DoConnect(context.SourceNode, context.LastPort, node, index);
                 }
             }
 
-            NotifyUpdateRequired();
+            NotifyUpdateRequired(true);
         }
 
 
@@ -402,20 +416,53 @@ namespace OpenScadGraphEditor.Widgets
         private void Clear()
         {
             _entryPoint = null;
+            _selection.Clear();
             ClearConnections();
             _widgets.Values.ForAll(it => it.RemoveAndFree());
             _widgets.Clear();
         }
 
-        private void NotifyUpdateRequired()
+        private void NotifyUpdateRequired(bool codeChange)
         {
-            EmitSignal(nameof(NeedsUpdate));
+            EmitSignal(nameof(NeedsUpdate), codeChange);
         }
-        
+
 
         public string Render()
         {
             return _entryPoint.Render(this);
+        }
+
+        private class NodeAddContext
+        {
+
+            public static NodeAddContext AtPosition(Vector2 position)
+            {
+                return new NodeAddContext(position, null, null, 0);
+            }
+
+            public static NodeAddContext From(Vector2 position, ScadNode node, int port)
+            {
+                return new NodeAddContext(position, node, null, port);
+            }
+            public static NodeAddContext To(Vector2 position, ScadNode node, int port)
+            {
+                return new NodeAddContext(position, null, node, port);
+            }
+
+            private NodeAddContext(Vector2 lastReleasePosition, ScadNode sourceNode, ScadNode destinationNode,
+                int lastPort)
+            {
+                LastReleasePosition = lastReleasePosition;
+                SourceNode = sourceNode;
+                DestinationNode = destinationNode;
+                LastPort = lastPort;
+            }
+
+            public Vector2 LastReleasePosition { get; }
+            public ScadNode SourceNode { get; }
+            public ScadNode DestinationNode { get; }
+            public int LastPort { get; }
         }
     }
 }

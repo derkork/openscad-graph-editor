@@ -1,4 +1,6 @@
 using System;
+using System.Text;
+using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
@@ -11,43 +13,103 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "For Each";
         public override string NodeDescription => "Executes its children for each entry in the given array.";
 
+        public int NestLevel { get; private set; } = 1;
+
         public ForLoop()
         {
+            RebuildPorts();
+        }
+
+        private void RebuildPorts()
+        {
             InputPorts
-                .Flow()
-                .Array("Array");
+                .Clear();
+            InputPorts
+                .Flow();
 
             OutputPorts
-                .Flow("Children")
-                .Any("Array Element")
+                .Clear();
+            OutputPorts
+                .Flow("Children");
+
+            for (var i = 0; i < NestLevel; i++)
+            {
+                InputPorts.Array($"Array {i + 1}");
+                OutputPorts.Any($"Array Element {i + 1}");
+            }
+
+            OutputPorts
                 .Flow("After");
+        }
+
+        /// <summary>
+        /// Adds a nested for loop level. The caller is responsible for fixing up port connections.
+        /// </summary>
+        public void IncreaseNestLevel()
+        {
+            NestLevel += 1;
+            RebuildPorts();
+            // since we have no literals here, we can skip re-building port literals
+        }
+
+        /// <summary>
+        /// Removes a nested for loop level. The caller is responsible for fixing up port connections.
+        /// </summary>
+        public void DecreaseNestLevel()
+        {
+            GdAssert.That(NestLevel > 1, "Cannot decrease nest level any further.");
+            NestLevel -= 1;
+            RebuildPorts();
+            // since we have no literals here, we can skip re-building port literals
+        }
+
+
+        public override void SaveInto(SavedNode node)
+        {
+            node.SetData("nest_level", NestLevel);
+            base.SaveInto(node);
+        }
+
+        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        {
+            NestLevel = node.GetDataInt("nest_level", 1);
+            RebuildPorts();
+            base.LoadFrom(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)
         {
-            var loopVarName = Id.UniqueStableVariableName(0);
+            var builder = new StringBuilder("for(");
+            for (var i = 0; i < NestLevel; i++)
+            {
+                var loopVarName = Id.UniqueStableVariableName(i);
+                var array = RenderInput(context, 1 + i);
+                builder.Append(loopVarName)
+                    .Append(" = ")
+                    .Append(array);
+                if (i + 1 < NestLevel)
+                {
+                    builder.Append(", ");
+                }
+            }
 
-            var array = RenderInput(context, 1);
+            builder.Append(")");
+
             var children = RenderOutput(context, 0);
             var next = RenderOutput(context, 2);
 
-            return $"for({loopVarName} = {array}){children.AsBlock()}\n{next}";
+            return $"{builder}{children.AsBlock()}\n{next}";
         }
 
         public string RenderExpressionOutput(IScadGraph context, int port)
         {
-            switch (port)
-            {
-                case 1:
-                    return Id.UniqueStableVariableName(0);
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            GdAssert.That(port > 0 && port <= NestLevel, "port out of range");
+            return Id.UniqueStableVariableName(port - 1);
         }
 
         public bool IsExpressionPort(int port)
         {
-            return port == 1;
+            return port > 0 && port <= NestLevel;
         }
     }
 }

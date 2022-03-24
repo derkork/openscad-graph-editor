@@ -4,6 +4,7 @@ namespace OpenScadGraphEditor.Library
     {
         FunctionDescription ResolveFunctionReference(string id);
         ModuleDescription ResolveModuleReference(string id);
-        
+        VariableDescription ResolveVariableReference(string id);
+
     }
 }

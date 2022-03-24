@@ -10,8 +10,8 @@ namespace OpenScadGraphEditor.Widgets
     public class ScadNodeWidget : GraphNode
     {
         [Signal]
-        public delegate void Changed();
-
+        public delegate void Changed(bool codeChange);
+        
         private readonly Dictionary<int, IScadLiteralWidget> _inputLiteralWidgets =
             new Dictionary<int, IScadLiteralWidget>();
 
@@ -27,7 +27,7 @@ namespace OpenScadGraphEditor.Widgets
         private void OnOffsetChanged()
         {
             BoundNode.Offset = Offset;
-            NotifyChanged();
+            NotifyChanged(false);
         }
         
         public ScadNode BoundNode { get; protected set; }
@@ -141,7 +141,9 @@ namespace OpenScadGraphEditor.Widgets
                     _outputLiteralWidgets[idx] = literalWidget;
                 }
 
-                literalWidget.ConnectChanged().To(this, nameof(NotifyChanged));
+                literalWidget.ConnectChanged()
+                    .WithBinds(true)
+                    .To(this, nameof(NotifyChanged));
             }
 
             var portContainer = Prefabs.InstantiateFromScene<PortContainer.PortContainer>();
@@ -180,9 +182,9 @@ namespace OpenScadGraphEditor.Widgets
             return this.Connect(nameof(Changed));
         }
 
-        private void NotifyChanged()
+        private void NotifyChanged(bool codeChange)
         {
-            EmitSignal(nameof(Changed));
+            EmitSignal(nameof(Changed), codeChange);
         }
     }
 }

@@ -9,6 +9,11 @@ namespace OpenScadGraphEditor.Library
             return BuiltIns.Modules.First(it => it.Id == id);
         }
 
+        public VariableDescription ResolveVariableReference(string id)
+        {
+           return BuiltIns.Variables.First(it => it.Id == id);   
+        }
+
         public FunctionDescription ResolveFunctionReference(string id)
         {
             return BuiltIns.Functions.First(it => it.Id == id);

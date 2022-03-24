@@ -16,11 +16,15 @@ namespace OpenScadGraphEditor.Library
         private readonly Dictionary<string, ModuleDescription> _projectModuleDescriptions =
             new Dictionary<string, ModuleDescription>();
 
+        private readonly Dictionary<string, VariableDescription> _projectVariables =
+            new Dictionary<string, VariableDescription>(); 
+
         private readonly HashSet<IScadGraph> _modules = new HashSet<IScadGraph>();
         private readonly HashSet<IScadGraph> _functions = new HashSet<IScadGraph>();
 
         public IEnumerable<IScadGraph> Modules => _modules.OrderBy(x => x.Description.Name);
         public IEnumerable<IScadGraph> Functions => _functions.OrderBy(x => x.Description.Name);
+        public IEnumerable<VariableDescription> Variables => _projectVariables.Values.OrderBy(x => x.Name);
 
         public IScadGraph MainModule { get; private set; }
 
@@ -57,8 +61,6 @@ namespace OpenScadGraphEditor.Library
                 default:
                     throw new InvalidOperationException("unknown description type.");
             }            
-            
-            from.Discard();
         }
         
         public FunctionDescription ResolveFunctionReference(string id)
@@ -75,13 +77,23 @@ namespace OpenScadGraphEditor.Library
                 : _parentResolver.ResolveModuleReference(id);
         }
 
+        public VariableDescription ResolveVariableReference(string id)
+        {
+            return _projectVariables.TryGetValue(id, out var result)
+                ? result
+                : _parentResolver.ResolveVariableReference(id);
+        }
+
         private void Clear()
         {
             _projectFunctionDescriptions.Clear();
             _projectModuleDescriptions.Clear();
+            _projectVariables.Clear();
             _modules.ForAll(it => it.Discard());
             _functions.ForAll(it => it.Discard());
+            
             MainModule.Discard();
+            MainModule = null;
 
             _modules.Clear();
             _functions.Clear();
@@ -90,7 +102,7 @@ namespace OpenScadGraphEditor.Library
         public void Load(SavedProject project)
         {
             Clear();
-            // Step 1: load function descriptions so we can resolve them in step 2
+            // Step 1: load function descriptions so we can resolve them in step 3
             foreach (var function in project.Functions)
             {
                 _projectFunctionDescriptions[function.Description.Id] = (FunctionDescription) function.Description;
@@ -98,6 +110,12 @@ namespace OpenScadGraphEditor.Library
             foreach (var module in project.Modules)
             {
                 _projectModuleDescriptions[module.Description.Id] = (ModuleDescription) module.Description;
+            }
+            
+            // Step 2: load variable descriptions so we can resolve them in step 3
+            foreach (var variable in project.Variables)
+            {
+                _projectVariables.Add(variable.Id, variable);
             }
             
             // Step 2: load the actual graphs, which can now resolve references to other functions.
@@ -136,6 +154,11 @@ namespace OpenScadGraphEditor.Library
                 result.Modules.Add(savedGraph);
             }
 
+            foreach (var variable in _projectVariables.Values)
+            {
+                result.Variables.Add(variable);
+            }
+            
             {
                 var savedGraph = Prefabs.New<SavedGraph>();
                 MainModule.SaveInto(savedGraph);
@@ -181,6 +204,11 @@ namespace OpenScadGraphEditor.Library
             }
 
             return graph;
+        }
+
+        public void AddVariable(VariableDescription variableDescription)
+        {
+            _projectVariables[variableDescription.Id] = variableDescription;
         }
     }
 }

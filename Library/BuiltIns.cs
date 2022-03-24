@@ -13,7 +13,8 @@ namespace OpenScadGraphEditor.Library
     {
         public static IReadOnlyCollection<ModuleDescription> Modules { get; }
         public static IReadOnlyCollection<FunctionDescription> Functions { get; }
-        
+        public static IReadOnlyCollection<VariableDescription> Variables { get; }
+
         public static IReadOnlyCollection<Type> LanguageLevelNodes { get; }
 
         static BuiltIns()
@@ -57,6 +58,8 @@ namespace OpenScadGraphEditor.Library
                   .WithParameter("", PortType.Number)
                   .Build()
             };
+
+            Variables = new List<VariableDescription>();
         }
     }
 }
