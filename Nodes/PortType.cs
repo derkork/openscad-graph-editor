@@ -1,3 +1,5 @@
+using System;
+
 namespace OpenScadGraphEditor.Nodes
 {
     public enum PortType
@@ -15,12 +17,23 @@ namespace OpenScadGraphEditor.Nodes
 
     public static class PortTypeExt
     {
-        public static bool CanConnect(this PortType self, PortType other)
+        public static bool IsExpressionType(this PortType self)
         {
-            return self == other ||
-                   self == PortType.Reroute || other == PortType.Reroute ||
-                   self == PortType.Any && other != PortType.Flow ||
-                   self != PortType.Flow && other == PortType.Any;
+            switch (self)
+            {
+                case PortType.Boolean:
+                case PortType.Number:
+                case PortType.Vector3:
+                case PortType.Array:
+                case PortType.String:
+                case PortType.Any:
+                    return true;
+                case PortType.Flow:
+                case PortType.Reroute:
+                    return false;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(self), self, null);
+            } 
         }
     }
 }

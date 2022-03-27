@@ -55,6 +55,7 @@ namespace OpenScadGraphEditor.Library
             Functions = new List<FunctionDescription>()
             {
               FunctionBuilder.NewBuiltInFunction("abs", "Abs", PortType.Number)
+                  .WithDescription("Returns the absolute value of a number.")
                   .WithParameter("", PortType.Number)
                   .Build()
             };

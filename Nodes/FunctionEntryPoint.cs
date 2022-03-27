@@ -13,6 +13,15 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription => _description.Description;
 
 
+        static FunctionEntryPoint()
+        {
+            // a function entry point may not be disconnected from its return.
+            ConnectionRules.AddDisconnectRule(
+                it => it.From is FunctionEntryPoint && it.FromPort == 0,
+                ConnectionRules.OperationRuleDecision.Veto
+            );
+        }
+
         public override void SaveInto(SavedNode node)
         {
             node.SetData("function_description_id", _description.Id);
@@ -44,7 +53,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(IScadGraph context)
         {
             var arguments = _description.Parameters.Indices()
-                .Select(it => _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
+                .Select(it =>
+                    _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
 
             return $"function {_description.Name}({string.Join(", ", arguments)}) = {RenderOutput(context, 0)};";
         }

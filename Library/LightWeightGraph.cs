@@ -50,7 +50,7 @@ namespace OpenScadGraphEditor.Library
 
                     _nodes.Add(_entryPoint);
                     _nodes.Add(returnNode);
-                    _connections.Add(new ScadConnection(_entryPoint, 0, returnNode, 0));
+                    _connections.Add(new ScadConnection(this, _entryPoint, 0, returnNode, 0));
                     break;
                 case ModuleDescription moduleDescription:
                     _entryPoint = NodeFactory.Build<ModuleEntryPoint>(moduleDescription);
@@ -93,7 +93,7 @@ namespace OpenScadGraphEditor.Library
             foreach (var connection in graph.Connections)
             {
                 var target = Lookup(connection.ToId);
-                _connections.Add(new ScadConnection(Lookup(connection.FromId), connection.FromPort, target,
+                _connections.Add(new ScadConnection(this, Lookup(connection.FromId), connection.FromPort, target,
                     connection.ToPort));
             }
         }
@@ -129,17 +129,28 @@ namespace OpenScadGraphEditor.Library
         {
         }
 
-        public void Remove(ScadConnection connection)
+        public void RemoveConnection(ScadConnection connection)
         {
             var removed = _connections.Remove(connection);
             GdAssert.That(removed, "Tried to remove non-existing connection.");
         }
 
-        public void Add(ScadConnection connection)
+        public void AddConnection(string fromId, int fromPort, string toId, int toPort)
         {
-            GdAssert.That(_nodes.Contains(connection.From), "Tried to add connection from non-existing node.");
-            GdAssert.That(_nodes.Contains(connection.To), "Tried to add connection to non-existing node.");
-            _connections.Add(connection);
+            _connections.Add(new ScadConnection(this, ById(fromId), fromPort, ById(toId), toPort));
+        }
+
+        public void RemoveNode(ScadNode node)
+        {
+            GdAssert.That(_nodes.Contains(node), "Tried to remove non-existing node.");
+            GdAssert.That(!_connections.Any(it => it.InvolvesNode(node)), "Tried to remove node with connections.");
+            _nodes.Remove(node);
+        }
+
+        public void AddNode(ScadNode node)
+        {
+            GdAssert.That(_nodes.All(it => it.Id != node.Id), "Tried to add node which already exists.");
+            _nodes.Add(node);
         }
     }
 }

@@ -43,8 +43,8 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
 
             _supportedNodes = languageLevelNodes
-                .Union(libraryModules)
-                .Union(libraryFunctions)
+                .Concat(libraryModules)
+                .Concat(libraryFunctions)
                 .ToList();
         }
 
@@ -55,11 +55,13 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
 
             _itemList.Clear();
-            foreach (var entry in _supportedNodes.Where(it =>
-                         (it.ExampleNode.NodeTitle.ContainsIgnoreCase(searchTerm) ||
-                          it.ExampleNode.NodeDescription.ContainsIgnoreCase(searchTerm)) &&
-                         _contextFilter(it.ExampleNode)
-                     ))
+            var entries = _supportedNodes.Where(it =>
+                (it.ExampleNode.NodeTitle.ContainsIgnoreCase(searchTerm) ||
+                 it.ExampleNode.NodeDescription.ContainsIgnoreCase(searchTerm)) &&
+                _contextFilter(it.ExampleNode)
+            );
+            
+            foreach (var entry in entries)
             {
                 _itemList.AddItem(entry.ExampleNode.NodeTitle);
                 _itemList.SetItemMetadata(_itemList.GetItemCount() - 1, _supportedNodes.IndexOf(entry));

@@ -172,7 +172,7 @@ namespace OpenScadGraphEditor.Library
         {
             return string.Join("\n",
                 _modules.Select(it => it.Render())
-                    .Union(_functions.Select(it => it.Render()))
+                    .Concat(_functions.Select(it => it.Render()))
                     .Append(MainModule.Render())
                     .Where(it => it.Length > 0)
             );

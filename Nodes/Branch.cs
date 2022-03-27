@@ -20,7 +20,8 @@ namespace OpenScadGraphEditor.Nodes
 
             OutputPorts
                 .Flow("True")
-                .Flow("False");
+                .Flow("False")
+                .Flow("After");
         }
 
         public override string Render(IScadGraph context)
@@ -28,23 +29,24 @@ namespace OpenScadGraphEditor.Nodes
             var condition = RenderInput(context, 1);
             var ifBranch = RenderOutput(context, 0);
             var elseBranch = RenderOutput(context, 1);
+            var after = RenderOutput(context, 2);
 
             if (ifBranch.Length == 0)
             {
                 if (elseBranch.Length == 0)
                 {
-                    return "";
+                    return after;
                 }
 
-                return $@"if (!({condition}))" + elseBranch.AsBlock();
+                return $@"if (!({condition})){elseBranch.AsBlock()}{after}";
             }
 
             if (elseBranch.Length == 0)
             {
-                return $@"if ({condition})" + ifBranch.AsBlock();
+                return $@"if ({condition}){ifBranch.AsBlock()}{after}";
             }
             
-            return $@"if ({condition})" + ifBranch.AsBlock() + "else" + elseBranch.AsBlock();
+            return $@"if ({condition}){ifBranch.AsBlock()}else{elseBranch.AsBlock()}{after}";
         }
     }
 }

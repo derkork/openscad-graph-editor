@@ -6,7 +6,7 @@ using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Refactoring;
+using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
@@ -18,7 +18,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         public delegate void Cancelled();
 
         [Signal]
-        public delegate void RefactoringRequested(Refactoring.Refactoring refactoring);
+        public delegate void RefactoringRequested(Refactoring refactoring);
 
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;

@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.Reroute;
+using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
@@ -19,6 +22,9 @@ namespace OpenScadGraphEditor.Widgets
         private readonly HashSet<ScadNodeWidget> _selection = new HashSet<ScadNodeWidget>();
         private AddDialog.AddDialog _addDialog;
         private RefactoringPopup _refactoringPopup;
+        
+        [Signal]
+        public delegate void RequestRefactorings(Refactoring[] refactorings);
 
         [Signal]
         public delegate void NeedsUpdate(bool codeChange);
@@ -28,30 +34,22 @@ namespace OpenScadGraphEditor.Widgets
 
         private readonly Dictionary<ScadNode, ScadNodeWidget> _widgets = new Dictionary<ScadNode, ScadNodeWidget>();
 
+        private ScadConnection _pendingDisconnect = null;
+
         public override void _Ready()
         {
             RightDisconnects = true;
 
-            // allow to connect "Any" nodes to anything else, except "Flow" nodes.
-            Enum.GetValues(typeof(PortType))
-                .Cast<int>()
-                .Where(x => x != (int) PortType.Flow && x != (int) PortType.Any)
-                .ForAll(x =>
+            // we'll be handling all connection request ourselves, so we will per se allow
+            // everything to be connected to everything else.
+            var allPortTypes = Enum.GetValues(typeof(PortType)).Cast<PortType>().ToList();
+            foreach (var from in allPortTypes)
+            {
+                foreach (var to in allPortTypes)
                 {
-                    AddValidConnectionType((int) PortType.Any, x);
-                    AddValidConnectionType(x, (int) PortType.Any);
-                });
-
-            // allow to connect "Reroute" nodes to anything else
-            Enum.GetValues(typeof(PortType))
-                .Cast<int>()
-                .Where(x => x != (int) PortType.Reroute)
-                .ForAll(x =>
-                {
-                    AddValidConnectionType((int) PortType.Reroute, x);
-                    AddValidConnectionType(x, (int) PortType.Reroute);
-                });
-
+                   AddValidConnectionType((int) from, (int) to);
+                }
+            }
 
             this.Connect("connection_request")
                 .To(this, nameof(OnConnectionRequest));
@@ -192,13 +190,42 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
+        public override void _GuiInput(InputEvent evt)
         {
-            DoDisconnect(new ScadConnection(ScadNodeForWidgetName(fromWidgetName), fromSlot,
-                ScadNodeForWidgetName(toWidgetName), toSlot));
-            NotifyUpdateRequired(true);
+            if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
+            {
+                GD.Print("Resolving pending disconnect.");
+                if (DisconnectWithChecks(_pendingDisconnect, out var refactorings))
+                {
+                    PerformRefactorings(refactorings);
+                }
+                else
+                {
+                    // was vetoed, so restore the visible connection
+                    ConnectNode(_widgets[_pendingDisconnect.From].Name, _pendingDisconnect.FromPort, 
+                        _widgets[_pendingDisconnect.To].Name, _pendingDisconnect.ToPort);
+                }
+                _pendingDisconnect = null;
+            }
         }
 
+        private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
+        {
+            GD.Print("Disconnect request.");
+            var connection = new ScadConnection(this,ScadNodeForWidgetName(fromWidgetName), fromSlot,
+                ScadNodeForWidgetName(toWidgetName), toSlot);
+            
+            // the disconnect is not done until the user has released the mouse button, so in case this is called
+            // while the mouse is still down, just visually disconnect, but don't do a refactoring yet.
+            if (Input.IsMouseButtonPressed((int) ButtonList.Left))
+            {
+                DisconnectNode(fromWidgetName, fromSlot, toWidgetName, toSlot);
+                _pendingDisconnect = connection;
+            }
+        }
+
+        
+        
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
@@ -211,8 +238,7 @@ namespace OpenScadGraphEditor.Widgets
             else
             {
                 _addDialog.Open(it => OnNodeAdded(it, context),
-                    it => Description.CanUse(it) &&
-                          it.HasInputThatCanConnect(context.SourceNode.GetOutputPortType(fromPort)));
+                    it => Description.CanUse(it) && CanAcceptConnectionFrom(context.SourceNode, fromPort, it, out _));
             }
         }
 
@@ -227,8 +253,7 @@ namespace OpenScadGraphEditor.Widgets
             else
             {
                 _addDialog.Open(it => OnNodeAdded(it, context),
-                    it => Description.CanUse(it) &&
-                          it.HasOutputThatCanConnect(context.DestinationNode.GetInputPortType(toPort)));
+                    it => Description.CanUse(it) && CanAcceptConnectionTo(context.DestinationNode, toPort, it, out _));
             }
         }
 
@@ -244,6 +269,8 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnDeleteSelection()
         {
+            var refactorings = new List<Refactoring>();
+
             foreach (var widget in _selection)
             {
                 var scadNode = widget.BoundNode;
@@ -252,115 +279,89 @@ namespace OpenScadGraphEditor.Widgets
                     continue; // don't allow to delete certain nodes (e.g. the entry point and return nodes).
                 }
 
-                // disconnect all connections which involve the given node.
-                GetAllConnections()
-                    .Where(it => it.InvolvesNode(scadNode))
-                    .ForAll(DoDisconnect);
 
-                _widgets.Remove(scadNode);
-                widget.RemoveAndFree();
+                var refactoringsForNode = new List<Refactoring>();
+                var connectionsToDrop = GetAllConnections().Where(it => it.InvolvesNode(scadNode));
+                var nodeVetoed = false;
+                foreach (var connection in connectionsToDrop)
+                {
+                    if (DisconnectWithChecks(connection, out var dropConnectionRefactorings))
+                    {
+                        refactoringsForNode.AddRange(dropConnectionRefactorings);
+                    }
+                    else
+                    {
+                        // some disconnect was vetoed, so we can't delete this node.
+                        nodeVetoed = true;
+                        break;
+                    }
+                }
+                
+                // if node was vetoed, continue with the next node.
+                if (nodeVetoed)
+                {
+                    continue;
+                }
+                
+                refactoringsForNode.Add(new DeleteNodeRefactoring(this, scadNode));
+                refactorings.AddRange(refactoringsForNode);
             }
 
             _selection.Clear();
-            NotifyUpdateRequired(true);
+            PerformRefactorings(refactorings);
         }
 
 
-        private void OnConnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
+        private void OnConnectionRequest(string fromWidgetName, int fromPort, string toWidgetName, int toPort)
         {
-            DoConnect(ScadNodeForWidgetName(fromWidgetName), fromSlot, ScadNodeForWidgetName(toWidgetName), toSlot);
+            var connection = new ScadConnection(this, ScadNodeForWidgetName(fromWidgetName), fromPort,
+                ScadNodeForWidgetName(toWidgetName), toPort);
+            if (_pendingDisconnect != null)
+            {
+                if (_pendingDisconnect.RepresentsSameAs(connection))
+                {
+                    GD.Print("Re-connected pending node.");
+                    ConnectNode(fromWidgetName, fromPort, toWidgetName, toPort);
+                    _pendingDisconnect = null;
+                    return;
+                }
+            }
+            
+            
+            var refactorings = ConnectWithChecks(connection);
+            PerformRefactorings(refactorings);
         }
 
-        private void DoConnect(ScadNode fromNode, int fromPort, ScadNode toNode, int toPort)
+        [MustUseReturnValue]
+        private IEnumerable<Refactoring> ConnectWithChecks(ScadConnection connection)
         {
-            if (fromNode == toNode)
+            var result = ConnectionRules.CanConnect(connection);
+
+            if (result.Decision == ConnectionRules.OperationRuleDecision.Veto)
             {
-                return; // cannot connect a node to itself.
+                GD.Print("Connection vetoed.");
+                return Enumerable.Empty<Refactoring>();
             }
 
-            // if the source node is not an expression node then delete all connections
-            // from the source port
-            if (!(fromNode is ScadExpressionNode) && !(fromNode is IMultiExpressionOutputNode multiNode &&
-                                                       multiNode.IsExpressionPort(fromPort)))
-            {
-                GetAllConnections()
-                    .Where(it => it.IsFrom(fromNode, fromPort))
-                    .ForAll(DoDisconnect);
-            }
-
-            // also delete all connections to the target port
-            GetAllConnections()
-                .Where(it => it.IsTo(toNode, toPort))
-                .ForAll(DoDisconnect);
-
-            // Reroute nodes work like this:
-            // if a reroute node that is untyped is connected to a non-reroute node, the non-reroute node
-            // connection type wins. 
-            // if a reroute node is connected to another reroute node, the most specific
-            // connection wins (e.g. is less specific than anything else).
-
-            var fromType = fromNode.GetOutputPortType(fromPort);
-            var toType = toNode.GetInputPortType(toPort);
-
-            if (fromType == PortType.Reroute)
-            {
-                SwitchRerouteNodeType((RerouteNode) fromNode, toType);
-            }
-
-            if (toType == PortType.Reroute)
-            {
-                SwitchRerouteNodeType((RerouteNode) toNode, fromType);
-            }
-
-            ConnectNode(_widgets[fromNode].Name, fromPort, _widgets[toNode].Name, toPort);
-            _widgets[fromNode].PortConnected(fromPort, false);
-            _widgets[toNode].PortConnected(toPort, true);
-            NotifyUpdateRequired(true);
+            var createConnectionRefactoring = new CreateConnectionRefactoring(connection);
+            return result.Refactorings.Append(createConnectionRefactoring);
         }
 
-        /// <summary>
-        /// Switches the reroute node to a new connection type. Cleans up all non-matching connections.
-        /// </summary>
-        private void SwitchRerouteNodeType(RerouteNode node, PortType newConnectionType)
+
+        [MustUseReturnValue]
+        private bool DisconnectWithChecks(ScadConnection connection, out IEnumerable<Refactoring> refactorings)
         {
-            var currentConnectionType = node.GetInputPortType(0);
-            if (currentConnectionType == newConnectionType)
+            var result = ConnectionRules.CanDisconnect(connection);
+            
+            if (result.Decision == ConnectionRules.OperationRuleDecision.Veto)
             {
-                return; // nothing to do
+                GD.Print("Disconnection vetoed.");
+                refactorings = Enumerable.Empty<Refactoring>();
+                return false;
             }
 
-            // update the port type
-            node.UpdatePortType(newConnectionType);
-
-            // then drop all connections from or to this reroute node
-            GetAllConnections()
-                .Where(it => it.InvolvesNode(node))
-                .ForAll(DoDisconnect);
-        }
-
-        private void DoDisconnect(ScadConnection connection)
-        {
-            DisconnectNode(_widgets[connection.From].Name, connection.FromPort, _widgets[connection.To].Name,
-                connection.ToPort);
-
-            if (connection.From is RerouteNode fromReroute &&
-                !GetAllConnections().Any(it => it.InvolvesNode(connection.From)))
-            {
-                // change back to Reroute
-                fromReroute.UpdatePortType(PortType.Reroute);
-            }
-
-            if (connection.To is RerouteNode toReroute &&
-                !GetAllConnections().Any(it => it.InvolvesNode(connection.To)))
-            {
-                // change back to Reroute
-                toReroute.UpdatePortType(PortType.Reroute);
-            }
-
-
-            // notify nodes
-            _widgets[connection.From].PortDisconnected(connection.FromPort, false);
-            _widgets[connection.To].PortDisconnected(connection.ToPort, true);
+            refactorings = result.Refactorings.Append(new DropConnectionRefactoring(connection));
+            return true;
         }
 
         private ScadNode ScadNodeForWidgetName(string widgetName)
@@ -372,35 +373,69 @@ namespace OpenScadGraphEditor.Widgets
         private void OnNodeAdded(ScadNode node, NodeAddContext context)
         {
             node.Offset = context.LastReleasePosition + ScrollOffset;
-            CreateWidgetFor(node);
+
+            var refactorings = new List<Refactoring> {new AddNodeRefactoring(this, node)};
 
             if (context.DestinationNode != null)
             {
-                var index = node.GetFirstOutputThatCanConnect(context.DestinationNode.GetInputPortType(context.LastPort));
-                if (index > -1)
+                if (CanAcceptConnectionTo(context.DestinationNode, context.LastPort, node, out var fromPort))
                 {
-                    DoConnect(node, index, context.DestinationNode, context.LastPort);
+                    refactorings.AddRange(ConnectWithChecks(new ScadConnection(this, node, fromPort, context.DestinationNode, context.LastPort)));
                 }
             }
 
             if (context.SourceNode != null)
             {
-                var index = node.GetFirstInputThatCanConnect(context.SourceNode.GetOutputPortType(context.LastPort));
-                if (index > -1)
+                if (CanAcceptConnectionFrom(context.SourceNode, context.LastPort, node, out var toPort))
                 {
-                    DoConnect(context.SourceNode, context.LastPort, node, index);
+                    refactorings.AddRange(ConnectWithChecks(new ScadConnection(this, context.SourceNode, context.LastPort, node, toPort)));
                 }
             }
 
-            NotifyUpdateRequired(true);
+            PerformRefactorings(refactorings);
         }
 
 
+        private bool CanAcceptConnectionFrom(ScadNode from, int fromPort, ScadNode to, out int toPort)
+        {
+            for (var i = 0; i < to.InputPortCount; i++)
+            {
+                var connection = new ScadConnection(this, from, fromPort, to, i);
+                if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
+                {
+                    toPort = i;
+                    return true;
+                }
+            }
+
+            toPort = -1;
+            return false;
+        }
+
+        private bool CanAcceptConnectionTo(ScadNode to, int toPort, ScadNode from, out int fromPort)
+        {
+            for (var i = 0; i < from.OutputPortCount; i++)
+            {
+                var connection = new ScadConnection(this, from, i, to, toPort);
+                if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
+                {
+                    fromPort = i;
+                    return true;
+                }
+            }
+
+            fromPort = -1;
+            return false;
+        }
+        
+        
+        
         public IEnumerable<ScadConnection> GetAllConnections()
         {
             return GetConnectionList()
                 .Cast<Godot.Collections.Dictionary>()
                 .Select(item => new ScadConnection(
+                    this,
                     ScadNodeForWidgetName((string) item["from"]),
                     (int) item["from_port"],
                     ScadNodeForWidgetName((string) item["to"]),
@@ -420,6 +455,16 @@ namespace OpenScadGraphEditor.Widgets
             ClearConnections();
             _widgets.Values.ForAll(it => it.RemoveAndFree());
             _widgets.Clear();
+        }
+
+        private void PerformRefactorings(IEnumerable<Refactoring> refactorings)
+        {
+            var refactoringsAsArray = refactorings.ToArray();
+            if (refactoringsAsArray.Length == 0)
+            {
+                return;
+            }
+            EmitSignal(nameof(RequestRefactorings), new object[] { refactoringsAsArray });
         }
 
         private void NotifyUpdateRequired(bool codeChange)

@@ -1,17 +1,16 @@
-using System;
 using System.Text;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes
+namespace OpenScadGraphEditor.Nodes.ForLoop
 {
     [UsedImplicitly]
     public class ForLoop : ScadNode, IMultiExpressionOutputNode
     {
         public override string NodeTitle => "For Each";
-        public override string NodeDescription => "Executes its children for each entry in the given array.";
+        public override string NodeDescription => "Executes its children for each entry in the given vector.";
 
         public int NestLevel { get; private set; } = 1;
 
@@ -34,8 +33,8 @@ namespace OpenScadGraphEditor.Nodes
 
             for (var i = 0; i < NestLevel; i++)
             {
-                InputPorts.Array($"Array {i + 1}");
-                OutputPorts.Any($"Array Element {i + 1}");
+                InputPorts.Array($"Vector {i + 1}");
+                OutputPorts.Any($"Vector Element {i + 1}");
             }
 
             OutputPorts

@@ -3,7 +3,7 @@ using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Refactoring;
+using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 {
@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         public delegate void Cancelled();
 
         [Signal]
-        public delegate void RefactoringRequested(Refactoring.Refactoring refactoring);
+        public delegate void RefactoringRequested(Refactoring refactoring);
 
         private LineEdit _nameEdit;
         private VariableDescription _baseDescription;

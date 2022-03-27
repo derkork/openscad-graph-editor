@@ -102,26 +102,6 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
-        public bool HasInputThatCanConnect(PortType type)
-        {
-            return InputPorts.Any(it => it.PortType.CanConnect(type) || (type != PortType.Flow && it.AutoCoerce));
-        }
-
-        public bool HasOutputThatCanConnect(PortType type)
-        {
-            return OutputPorts.Any(it => it.PortType.CanConnect(type));
-        }
-
-        public int GetFirstInputThatCanConnect(PortType type)
-        {
-            return InputPorts.FindIndex(it => it.PortType.CanConnect(type) || (type != PortType.Flow && it.AutoCoerce));
-        }
-
-        public int GetFirstOutputThatCanConnect(PortType type)
-        {
-            return OutputPorts.FindIndex(it => it.PortType.CanConnect(type));
-        }
-
         public PortType GetInputPortType(int index)
         {
             return InputPorts[index].PortType;
@@ -178,8 +158,19 @@ namespace OpenScadGraphEditor.Nodes
             return "";
         }
 
+        protected void DropPortLiteral(int idx, bool isLeft)
+        {
+            if (isLeft)
+            {
+                _inputLiterals.Remove(idx);
+            }
+            else
+            {
+                _outputLiterals.Remove(idx);
+            }
+        }
 
-        private void BuildPortLiteral(int idx, PortDefinition portDefinition, bool isLeft)
+        protected void BuildPortLiteral(int idx, PortDefinition portDefinition, bool isLeft)
         {
             if (!portDefinition.AllowLiteral)
             {

@@ -19,7 +19,7 @@ namespace OpenScadGraphEditor.Library
 
         public override bool CanUse(ScadNode node)
         {
-            return true;
+            return !(node is Child || node is Children);
         }
     }
 }

@@ -4,6 +4,7 @@ using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
@@ -187,10 +188,24 @@ namespace OpenScadGraphEditor
             _invokableRefactorDialog.OpenForNewModule();
         }
 
-        private void OnRefactoringRequested(Refactoring.Refactoring refactoring)
+        private void OnRefactoringRequested(Refactoring refactoring)
         {
-            refactoring.PerformRefactoring(_currentProject);
-            refactoring.AfterRefactoring(this);
+            var context = new RefactoringContext(this, _currentProject);
+            context.AddRefactoring(refactoring);
+            context.PerformRefactorings();
+            RefreshLists();
+            MarkDirty(true);
+        }
+
+        private void OnRefactoringsRequested(Refactoring[] refactorings)
+        {
+            var context = new RefactoringContext(this, _currentProject);
+
+            foreach (var refactoring in refactorings)
+            {
+                context.AddRefactoring(refactoring);
+            }
+            context.PerformRefactorings();
             RefreshLists();
             MarkDirty(true);
         }
@@ -208,6 +223,8 @@ namespace OpenScadGraphEditor
             editor.Setup(_addDialog, _refactoringPopup);
             editor.Connect(nameof(ScadGraphEdit.NeedsUpdate))
                 .To(this, nameof(MarkDirty));
+            editor.Connect(nameof(ScadGraphEdit.RequestRefactorings))
+                .To(this, nameof(OnRefactoringsRequested));
         }
 
         private void OnOpenFilePressed()

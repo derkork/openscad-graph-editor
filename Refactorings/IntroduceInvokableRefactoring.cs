@@ -1,6 +1,6 @@
 using OpenScadGraphEditor.Library;
 
-namespace OpenScadGraphEditor.Refactoring
+namespace OpenScadGraphEditor.Refactorings
 {
     public class IntroduceInvokableRefactoring : Refactoring
     {
@@ -12,9 +12,9 @@ namespace OpenScadGraphEditor.Refactoring
             _description = description;
         }
 
-        public override void PerformRefactoring(ScadProject project)
+        public override void PerformRefactoring(RefactoringContext context)
         {
-            _graph = project.AddInvokable(_description);
+            _graph = context.Project.AddInvokable(_description);
         }
 
         public override void AfterRefactoring(GraphEditor graphEditor)

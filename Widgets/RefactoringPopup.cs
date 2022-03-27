@@ -1,8 +1,8 @@
 using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Refactoring;
 using GodotExt;
+using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Widgets
     {
 
         [Signal]
-        public delegate void RefactoringSelected(Refactoring.Refactoring refactoring);
+        public delegate void RefactoringSelected(Refactoring refactoring);
 
         public override void _Ready()
         {
@@ -20,7 +20,7 @@ namespace OpenScadGraphEditor.Widgets
 
         public void Open(Vector2 position, IScadGraph graph, ScadNode node)
         {
-            var applicableRefactorings = NodeRefactoring.GetApplicable(graph, node);
+            var applicableRefactorings = UserSelectableNodeRefactoring.GetApplicable(graph, node);
             if (applicableRefactorings.Count == 0)
             {
                 return; // nothing to show
@@ -40,7 +40,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnIndexPressed(int index)
         {
-            var refactoring = (Refactoring.Refactoring) GetItemMetadata(index);
+            var refactoring = (Refactoring) GetItemMetadata(index);
             EmitSignal(nameof(RefactoringSelected), refactoring);
         }
     }
