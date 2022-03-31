@@ -13,6 +13,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription => _description.Description;
 
 
+        public InvokableDescription InvokableDescription => _description;
+
         static FunctionEntryPoint()
         {
             // a function entry point may not be disconnected from its return.
@@ -22,22 +24,36 @@ namespace OpenScadGraphEditor.Nodes
             );
         }
 
+        public int GetParameterInputPort(int parameterIndex)
+        {
+            // entry point has no input ports that refer to parameters
+            return -1;
+        }
+
+        public int GetParameterOutputPort(int parameterIndex)
+        {
+            // the n-th parameter is the n+1-th output port
+            return parameterIndex + 1;
+        }
+
         public override void SaveInto(SavedNode node)
         {
             node.SetData("function_description_id", _description.Id);
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             var functionDescriptionId = node.GetData("function_description_id");
-            Setup(referenceResolver.ResolveFunctionReference(functionDescriptionId));
-            base.LoadFrom(node, referenceResolver);
+            SetupPorts(referenceResolver.ResolveFunctionReference(functionDescriptionId));
         }
 
-        public void Setup(InvokableDescription description)
+        public void SetupPorts(InvokableDescription description)
         {
             GdAssert.That(description is FunctionDescription, "needs a function description");
+
+            InputPorts.Clear();
+            OutputPorts.Clear();
 
             _description = (FunctionDescription) description;
             OutputPorts

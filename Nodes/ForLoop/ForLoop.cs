@@ -69,11 +69,10 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             NestLevel = node.GetDataInt("nest_level", 1);
             RebuildPorts();
-            base.LoadFrom(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)

@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => _description.NodeNameOrFallback;
         public override string NodeDescription => _description.Description;
 
+        public InvokableDescription InvokableDescription => _description;
 
         public override void SaveInto(SavedNode node)
         {
@@ -19,16 +20,29 @@ namespace OpenScadGraphEditor.Nodes
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public int GetParameterInputPort(int parameterIndex)
         {
-            var functionDescriptionId = node.GetData("module_description_id");
-            Setup(referenceResolver.ResolveModuleReference(functionDescriptionId));
-            base.LoadFrom(node, referenceResolver);
+            // module entry points have no input ports.
+            return -1;
         }
 
-        public void Setup(InvokableDescription description)
+        public int GetParameterOutputPort(int parameterIndex)
+        {
+            // the n-th parameter is at the n+1-th output port.
+            return parameterIndex + 1;
+        }
+
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
+        {
+            var functionDescriptionId = node.GetData("module_description_id");
+            SetupPorts(referenceResolver.ResolveModuleReference(functionDescriptionId));
+        }
+
+        public void SetupPorts(InvokableDescription description)
         {
             GdAssert.That(description is ModuleDescription, "needs a module description");
+            InputPorts.Clear();
+            OutputPorts.Clear();
 
             _description = (ModuleDescription) description;
             OutputPorts
@@ -44,7 +58,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(IScadGraph context)
         {
             var arguments = _description.Parameters.Indices()
-                .Select(it => _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
+                .Select(it =>
+                    _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
             var content = RenderOutput(context, 0);
 
             return $"module {_description.Name}({string.Join(", ", arguments)}){content.AsBlock()}";

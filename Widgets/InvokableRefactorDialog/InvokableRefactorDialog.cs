@@ -14,11 +14,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
     [UsedImplicitly]
     public class InvokableRefactorDialog : WindowDialog
     {
-        [Signal]
-        public delegate void Cancelled();
-
-        [Signal]
-        public delegate void RefactoringRequested(Refactoring refactoring);
+        public event Action<Refactoring[]> RefactoringsRequested;
 
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;
@@ -163,9 +159,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     throw new ArgumentOutOfRangeException();
             }
 
-            foreach (var parameter in description.Parameters)
+            for (var index = 0; index < description.Parameters.Count; index++)
             {
-                AddParameter(parameter.Name, parameter.TypeHint);
+                var parameter = description.Parameters[index];
+                AddParameter(parameter.Name, parameter.TypeHint, parameter.Name, (int) parameter.TypeHint, index);
             }
 
             ValidateAll();
@@ -177,13 +174,55 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _baseDescription = null;
             _parameterLines.ForAll(it => it.Discard());
             _parameterLines.Clear();
+            _okButton.Disabled = false;
         }
 
         private void OnOkPressed()
         {
+            _okButton.Disabled = true;
+
+            var refactorings = new List<Refactoring>();
+
             switch (_mode)
             {
                 case DialogMode.Edit:
+                    // check if the name has changed
+                    if (_baseDescription.Name != _nameEdit.Text)
+                    {
+                        refactorings.Add(new RenameInvokableRefactoring(_baseDescription, _nameEdit.Text));
+                    }
+
+                    // now analyze the parameters and see what has changed.
+                    // First create a refactoring to delete all parameters that were deleted.
+                    var indicesToDelete = _baseDescription.Parameters.Indices()
+                        // ReSharper disable once SimplifyLinqExpressionUseAll
+                        // all indices that are no longer referenced in the _parameterLines list
+                        .Where(it => !_parameterLines.Any(line => line.OriginalIndex == it))
+                        .ToArray();
+
+                    if (indicesToDelete.Length > 0)
+                    {
+                        refactorings.Add(new DropInvokableParametersRefactoring(_baseDescription, indicesToDelete));
+                    }
+
+
+                    // now check if any new parameters have been added
+                    var parametersToAdd = _parameterLines
+                        .Where(it => it.OriginalName == null)
+                        .Select(it =>
+                        {
+                            var parameterDescription = Prefabs.New<ParameterDescription>();
+                            parameterDescription.Name = it.Name;
+                            parameterDescription.TypeHint = it.TypeHint;
+                            return parameterDescription;
+                        })
+                        .ToArray();
+
+                    if (parametersToAdd.Length > 0)
+                    {
+                        refactorings.Add(new AddInvokableParametersRefactoring(_baseDescription, parametersToAdd));
+                    }
+
                     break;
                 case DialogMode.CreateFunction:
                     var functionDescription = FunctionBuilder
@@ -193,8 +232,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                         functionDescription.WithParameter(line.Name, line.TypeHint);
                     }
 
-                    EmitSignal(nameof(RefactoringRequested),
-                        new IntroduceInvokableRefactoring(functionDescription.Build()));
+                    refactorings.Add(new IntroduceInvokableRefactoring(functionDescription.Build()));
                     break;
 
                 case DialogMode.CreateModule:
@@ -207,19 +245,23 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                         moduleDescription.WithParameter(line.Name, line.TypeHint);
                     }
 
-                    EmitSignal(nameof(RefactoringRequested),
-                        new IntroduceInvokableRefactoring(moduleDescription.Build()));
+                    refactorings.Add(new IntroduceInvokableRefactoring(moduleDescription.Build()));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
+            if (refactorings.Count > 0)
+            {
+                RefactoringsRequested?.Invoke(refactorings.ToArray());
+            }
+
             Hide();
         }
 
+
         private void OnCancelPressed()
         {
-            EmitSignal(nameof(Cancelled));
             Hide();
         }
 
@@ -244,7 +286,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             AddParameter("parameter" + _parameterLines.Count, PortType.Any);
         }
 
-        private void AddParameter(string name, PortType typeHint)
+        private void AddParameter(string name, PortType typeHint, string originalName = null, int originalPortType = -1,
+            int originalIndex = -1)
         {
             var nameEdit = _templateParameterName.Clone();
             var optionButton = _templateParameterTypeHint.Clone();
@@ -266,7 +309,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 optionButton,
                 upButton,
                 downButton,
-                deleteButton
+                deleteButton,
+                originalName,
+                originalPortType,
+                originalIndex
             );
             _parameterLines.Add(line);
 
@@ -357,6 +403,21 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
         private class ParameterLine
         {
+            /// <summary>
+            /// The name this parameter had before the refactoring. If null, this parameter did not exist before.
+            /// </summary>
+            public string OriginalName { get; }
+
+            /// <summary>
+            /// The port type this parameter had before the refactoring. If -1, this parameter did not exist before.
+            /// </summary>
+            public int OriginalPortType { get; }
+
+            /// <summary>
+            /// The index this parameter had before the refactoring. If -1, this parameter did not exist before.
+            /// </summary>
+            public int OriginalIndex { get; }
+
             private readonly LineEdit _nameEdit;
             private readonly OptionButton _typeHint;
             private readonly Button _upButton;
@@ -364,8 +425,11 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             private readonly Button _deleteButton;
 
             public ParameterLine(LineEdit nameEdit, OptionButton typeHint, Button upButton, Button downButton,
-                Button deleteButton)
+                Button deleteButton, string originalName = null, int originalPortType = -1, int originalIndex = -1)
             {
+                OriginalName = originalName;
+                OriginalPortType = originalPortType;
+                OriginalIndex = originalIndex;
                 _nameEdit = nameEdit;
                 _typeHint = typeHint;
                 _upButton = upButton;

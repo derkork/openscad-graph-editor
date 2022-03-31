@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => _description.NodeNameOrFallback;
         public override string NodeDescription => _description.Description;
 
+        public InvokableDescription InvokableDescription => _description;
 
         public override void SaveInto(SavedNode node)
         {
@@ -18,17 +19,30 @@ namespace OpenScadGraphEditor.Nodes
             node.SetData("module_description_id", _description.Id);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public int GetParameterInputPort(int parameterIndex)
         {
-            var moduleDescriptionId = node.GetData("module_description_id");
-            Setup(referenceResolver.ResolveModuleReference(moduleDescriptionId));
-            base.LoadFrom(node, referenceResolver);
+            // the n-th parameter corresponds to the n+1-th input port
+            return parameterIndex + 1;
         }
 
-        public void Setup(InvokableDescription description)
+        public int GetParameterOutputPort(int parameterIndex)
+        {
+            // no output ports correspond to parameters
+            return -1;
+        }
+
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
+        {
+            var moduleDescriptionId = node.GetData("module_description_id");
+            SetupPorts(referenceResolver.ResolveModuleReference(moduleDescriptionId));
+        }
+
+        public void SetupPorts(InvokableDescription description)
         {
             GdAssert.That(description is ModuleDescription, "needs a module description");
             _description = (ModuleDescription) description;
+            InputPorts.Clear();
+            OutputPorts.Clear();
 
             InputPorts
                 .Flow();

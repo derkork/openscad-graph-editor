@@ -1,4 +1,5 @@
 using System.Linq;
+using Godot;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -21,26 +22,6 @@ namespace OpenScadGraphEditor.Library
             return false;
         }
 
-        public static bool IsOutputConnected(this IScadGraph self, ScadNode node, int port)
-        {
-            return self.GetAllConnections().Any(it => it.IsFrom(node, port));
-        }
-
-        public static bool TryGetIncomingPortDefinition(this IScadGraph self, ScadNode node, int port, out PortDefinition result)
-        {
-            var incomingConnection = self.GetAllConnections()
-                .FirstOrDefault(it => it.IsTo(node, port));
-
-            if (incomingConnection == null)
-            {
-                result = default;
-                return false;
-            }
-
-            result = incomingConnection.From.GetOutputPortDefinition(incomingConnection.FromPort);
-            return true;
-        }
-        
         public static bool TryGetOutgoingNode(this IScadGraph self, ScadNode node, int port, out ScadNode result,
             out int targetPort)
         {
@@ -55,6 +36,15 @@ namespace OpenScadGraphEditor.Library
             result = default;
             targetPort = default;
             return false;
+        }
+
+        /// <summary>
+        /// Returns true, if the graph contains references to the given invokable.
+        /// </summary>
+        public static bool ContainsReferencesTo(this IScadGraph self, InvokableDescription description)
+        {
+            return self.GetAllNodes().Any(it =>
+                it is IReferToAnInvokable referToAnInvokable && referToAnInvokable.InvokableDescription == description);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace OpenScadGraphEditor
     public class GraphEditor : Control
     {
         private AddDialog _addDialog;
-        private RefactoringPopup _refactoringPopup;
+        private QuickActionsPopup _quickActionsPopup;
         private Control _editingInterface;
         private TextEdit _textEdit;
         private FileDialog _fileDialog;
@@ -46,18 +46,15 @@ namespace OpenScadGraphEditor
             _tabContainer = this.WithName<TabContainer>("TabContainer");
 
             _addDialog = this.WithName<AddDialog>("AddDialog");
-            _refactoringPopup = this.WithName<RefactoringPopup>("RefactoringPopup");
-            _refactoringPopup.Connect(nameof(RefactoringPopup.RefactoringSelected))
-                .To(this, nameof(OnRefactoringRequested));
+            _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
 
             _invokableRefactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
-            _invokableRefactorDialog.Connect(nameof(InvokableRefactorDialog.RefactoringRequested))
-                .To(this, nameof(OnRefactoringRequested));
+            _invokableRefactorDialog.RefactoringsRequested += OnRefactoringsRequested;
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
-            _variableRefactorDialog.Connect(nameof(VariableRefactorDialog.RefactoringRequested))
-                .To(this, nameof(OnRefactoringRequested));
+            _variableRefactorDialog.RefactoringsRequested += OnRefactoringsRequested;
 
+            
             _editingInterface = this.WithName<Control>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");
             _fileDialog = this.WithName<FileDialog>("FileDialog");
@@ -220,11 +217,28 @@ namespace OpenScadGraphEditor
 
         private void AttachTo(ScadGraphEdit editor)
         {
-            editor.Setup(_addDialog, _refactoringPopup);
-            editor.Connect(nameof(ScadGraphEdit.NeedsUpdate))
-                .To(this, nameof(MarkDirty));
-            editor.Connect(nameof(ScadGraphEdit.RequestRefactorings))
-                .To(this, nameof(OnRefactoringsRequested));
+            editor.Setup(_addDialog);
+            editor.Changed += MarkDirty;
+            editor.RefactoringsRequested += OnRefactoringsRequested;
+            editor.NodePopupRequested += OnNodePopupRequested;
+        }
+        
+        private void OnNodePopupRequested(ScadGraphEdit editor,  ScadNode node, Vector2 position)
+        {
+            // build a list of quick actions that include all refactorings that would apply to the selected node
+            var actions = UserSelectableNodeRefactoring
+                .GetApplicable(editor, node)
+                .Select(it => new QuickAction(it.Title, () => OnRefactoringRequested(it)));
+            
+            
+            // if node is an entrypoint that can be refactored, add an action to open the refactor dialog
+            if (node is EntryPoint && node is IReferToAnInvokable iReferToAnInvokable)
+            {
+                actions = actions.Append(new QuickAction("Refactor", () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)));
+            }
+            
+            _quickActionsPopup.Open(position, actions);
+
         }
 
         private void OnOpenFilePressed()
@@ -244,7 +258,7 @@ namespace OpenScadGraphEditor
                 return;
             }
 
-            var savedProject = ResourceLoader.Load<SavedProject>(filename, noCache: true);
+            var savedProject = ResourceLoader.Load<SavedProject>(filename, "",  noCache: true);
             if (savedProject == null)
             {
                 GD.Print("Cannot load file!");
@@ -315,6 +329,10 @@ namespace OpenScadGraphEditor
                 if (ResourceSaver.Save(_currentFile, savedProject) != Error.Ok)
                 {
                     GD.Print("Cannot save project!");
+                }
+                else
+                {
+                    GD.Print("Saved project!");
                 }
             }
 

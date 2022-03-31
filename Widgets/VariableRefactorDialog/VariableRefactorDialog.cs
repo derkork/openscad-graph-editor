@@ -10,11 +10,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
     [UsedImplicitly]
     public class VariableRefactorDialog : WindowDialog
     {
-        [Signal]
-        public delegate void Cancelled();
-
-        [Signal]
-        public delegate void RefactoringRequested(Refactoring refactoring);
+        public event Action<Refactoring[]> RefactoringsRequested;
 
         private LineEdit _nameEdit;
         private VariableDescription _baseDescription;
@@ -74,8 +70,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 case DialogMode.Edit:
                     break;
                 case DialogMode.Create:
-                    EmitSignal(nameof(RefactoringRequested),
-                        new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text)));
+                    RefactoringsRequested?.Invoke(new Refactoring[]{new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text))});
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -85,7 +80,6 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private void OnCancelPressed()
         {
-            EmitSignal(nameof(Cancelled));
             Hide();
         }
 

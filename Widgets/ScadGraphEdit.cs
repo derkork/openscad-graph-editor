@@ -21,20 +21,33 @@ namespace OpenScadGraphEditor.Widgets
         private ScadNode _entryPoint;
         private readonly HashSet<ScadNodeWidget> _selection = new HashSet<ScadNodeWidget>();
         private AddDialog.AddDialog _addDialog;
-        private RefactoringPopup _refactoringPopup;
+
+
+        public event Action<Refactoring[]> RefactoringsRequested;
+
+        /// <summary>
+        /// Emitted when the user right-clicks on a node.
+        /// </summary>
+        public event Action<ScadGraphEdit, ScadNode, Vector2> NodePopupRequested;
+
+
+        /// <summary>
+        /// Sent when the graph is changed and needs to be re-rendered.
+        /// </summary>
+        public event Action<bool> Changed;
         
-        [Signal]
-        public delegate void RequestRefactorings(Refactoring[] refactorings);
-
-        [Signal]
-        public delegate void NeedsUpdate(bool codeChange);
-
         public InvokableDescription Description { get; private set; }
 
 
         private readonly Dictionary<ScadNode, ScadNodeWidget> _widgets = new Dictionary<ScadNode, ScadNodeWidget>();
 
-        private ScadConnection _pendingDisconnect = null;
+        private ScadConnection _pendingDisconnect;
+
+
+        public IEnumerable<ScadNode> GetAllNodes()
+        {
+            return _widgets.Keys.ToList();
+        }
 
         public override void _Ready()
         {
@@ -108,10 +121,9 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        public void Setup(AddDialog.AddDialog addDialog, RefactoringPopup refactoringPopup)
+        public void Setup(AddDialog.AddDialog addDialog)
         {
             _addDialog = addDialog;
-            _refactoringPopup = refactoringPopup;
         }
 
         public void FocusEntryPoint()
@@ -136,6 +148,8 @@ namespace OpenScadGraphEditor.Widgets
                     _entryPoint = node;
                 }
             }
+
+            Name = _entryPoint.NodeTitle;
 
             foreach (var connection in graph.Connections)
             {
@@ -179,14 +193,14 @@ namespace OpenScadGraphEditor.Widgets
             relativePosition *= Zoom;
 
             var matchingWidgets = _widgets.Values
-                .Where(it =>
-                    new Rect2((it.Offset - ScrollOffset) * Zoom, it.RectSize * Zoom).HasPoint(relativePosition));
+                .FirstOrDefault(it => new Rect2((it.Offset - ScrollOffset) * Zoom, it.RectSize * Zoom).HasPoint(relativePosition));
 
-            foreach (var widget in matchingWidgets)
+            if (matchingWidgets == null)
             {
-                _refactoringPopup.Open(position, this, widget.BoundNode);
-                break;
+                return;
             }
+
+            NodePopupRequested?.Invoke(this, matchingWidgets.BoundNode, position);
         }
 
 
@@ -464,12 +478,13 @@ namespace OpenScadGraphEditor.Widgets
             {
                 return;
             }
-            EmitSignal(nameof(RequestRefactorings), new object[] { refactoringsAsArray });
+            
+            RefactoringsRequested?.Invoke(refactoringsAsArray);
         }
 
         private void NotifyUpdateRequired(bool codeChange)
         {
-            EmitSignal(nameof(NeedsUpdate), codeChange);
+            Changed?.Invoke(codeChange);
         }
 
 

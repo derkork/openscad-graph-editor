@@ -24,6 +24,11 @@ namespace OpenScadGraphEditor.Library
             return _entryPoint.Render(this);
         }
 
+        public IEnumerable<ScadNode> GetAllNodes()
+        {
+            return _nodes.ToList();
+        }
+
         public void Main()
         {
             Clear();

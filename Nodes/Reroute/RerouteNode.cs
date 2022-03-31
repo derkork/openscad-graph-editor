@@ -61,11 +61,10 @@ namespace OpenScadGraphEditor.Nodes.Reroute
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             var type = (PortType) node.GetDataInt("reroute_type");
             UpdatePortType(type);
-            base.LoadFrom(node, referenceResolver);
         }
 
         public void UpdatePortType(PortType type)

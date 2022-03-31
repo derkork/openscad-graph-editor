@@ -2,7 +2,7 @@ using Godot;
 
 namespace OpenScadGraphEditor.Refactorings
 {
-    public abstract class Refactoring : Reference
+    public abstract class Refactoring
     {
         /// <summary>
         /// Performs the actual refactoring by modifying the the given project. All graphs in the project

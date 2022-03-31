@@ -32,11 +32,10 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             IndexPortCount = node.GetDataInt("ports", 1);
             RebuildPorts();
-            base.LoadFrom(node, referenceResolver);
         }
 
         public void IncreasePorts()
@@ -45,19 +44,18 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             RebuildPorts();
             
             // build an input port literal
-            BuildPortLiteral(IndexPortCount, InputPorts[IndexPortCount], true);
+            BuildInputPortLiteral(IndexPortCount);
             // build an output port literal
-            BuildPortLiteral(IndexPortCount, InputPorts[IndexPortCount-1], false);
+            BuildOutputPortLiteral(IndexPortCount-1);
         }
 
         public void DecreasePorts()
         {
             GdAssert.That(IndexPortCount > 1, "Cannot decrease ports below 1.");
-            // drop input port literal
-            DropPortLiteral(IndexPortCount, true);
-            // drop output port literal
-            DropPortLiteral(IndexPortCount - 1, false);
-                
+            DropInputLiteral(IndexPortCount);
+            var idx = IndexPortCount - 1;
+            DropOutputLiteral(idx);
+
             IndexPortCount--;
             RebuildPorts();
         }

@@ -25,10 +25,9 @@ namespace OpenScadGraphEditor.Nodes
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             _description = referenceResolver.ResolveVariableReference(node.GetData("variable_description_id")); 
-            base.LoadFrom(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)
@@ -38,7 +37,7 @@ namespace OpenScadGraphEditor.Nodes
             return $"{_description.Name} = {value};\n{next}";
         }
 
-        public void Setup(VariableDescription description)
+        public void SetupPorts(VariableDescription description)
         {
             _description = description;
         }

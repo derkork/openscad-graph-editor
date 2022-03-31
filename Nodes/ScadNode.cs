@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
@@ -49,6 +50,28 @@ namespace OpenScadGraphEditor.Nodes
         {
             return OutputPorts[index];
         }
+
+        public void DropInputLiteral(int index)
+        {
+            _inputLiterals.Remove(index);
+        }
+
+        public void DropOutputLiteral(int index)
+        {
+            _outputLiterals.Remove(index);
+        }
+
+        public void SwapInputLiterals(int index0, int index1)
+        {
+            GdAssert.That(_inputLiterals.ContainsKey(index0) && _inputLiterals.ContainsKey(index1), "Trying to swap non-existing literals");
+            (_inputLiterals[index0], _inputLiterals[index1]) = (_inputLiterals[index1], _inputLiterals[index0]);
+        }
+        
+        public void SwapOutputLiterals(int index0, int index1)
+        {
+            GdAssert.That(_outputLiterals.ContainsKey(index0) && _outputLiterals.ContainsKey(index1), "Trying to swap non-existing literals");
+            (_outputLiterals[index0], _outputLiterals[index1]) = (_outputLiterals[index1], _outputLiterals[index0]);
+        }
         
         public virtual void SaveInto(SavedNode node)
         {
@@ -66,7 +89,7 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
-        public void PreparePortLiterals()
+        public void PrepareLiteralsFromPortDefinitions()
         {
             var maxPorts = Mathf.Max(InputPorts.Count, OutputPorts.Count);
             var idx = 0;
@@ -74,21 +97,40 @@ namespace OpenScadGraphEditor.Nodes
             {
                 if (InputPorts.Count > idx)
                 {
-                    BuildPortLiteral(idx, InputPorts[idx], true);
+                    BuildInputPortLiteral(idx);
                 }
 
                 if (OutputPorts.Count > idx)
                 {
-                    BuildPortLiteral(idx, OutputPorts[idx], false);
+                    BuildOutputPortLiteral(idx);
                 }
 
                 idx++;
             }
         }
 
-        public virtual void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        /// <summary>
+        /// Loading Phase 1: Called to restore the port definitions from the saved node.
+        /// </summary>
+        public virtual void RestorePortDefinitions(SavedNode node, IReferenceResolver resolver)
         {
-            PreparePortLiterals();
+        }
+
+        /// <summary>
+        /// Loading Phase 2: Called to restore the literal structure from the saved node.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="resolver"></param>
+        public virtual void RestoreLiteralStructures(SavedNode node, IReferenceResolver resolver)
+        {
+            PrepareLiteralsFromPortDefinitions();
+        } 
+
+        /// <summary>
+        /// Loading Phase 3: Called to restore the literal values from the saved node. 
+        /// </summary>
+        public virtual void RestoreLiteralValues(SavedNode node, IReferenceResolver referenceResolver)
+        {
             Id = node.Id;
             Offset = node.Position;
             InputPorts
@@ -158,20 +200,20 @@ namespace OpenScadGraphEditor.Nodes
             return "";
         }
 
-        protected void DropPortLiteral(int idx, bool isLeft)
+        public void BuildInputPortLiteral(int idx)
         {
-            if (isLeft)
-            {
-                _inputLiterals.Remove(idx);
-            }
-            else
-            {
-                _outputLiterals.Remove(idx);
-            }
+            BuildPortLiteral(idx, true);   
         }
-
-        protected void BuildPortLiteral(int idx, PortDefinition portDefinition, bool isLeft)
+        
+        public void BuildOutputPortLiteral(int idx)
         {
+            BuildPortLiteral(idx, false);
+        }
+        
+        private void BuildPortLiteral(int idx, bool isLeft)
+        {
+            var portDefinition = isLeft ? InputPorts[idx] : OutputPorts[idx];
+            
             if (!portDefinition.AllowLiteral)
             {
                 return;

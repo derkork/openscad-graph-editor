@@ -26,24 +26,26 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
             base.SaveInto(node);
         }
 
-        public override void LoadFrom(SavedNode node, IReferenceResolver referenceResolver)
+        public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             VectorSize = node.GetDataInt("vector_size", 1);
             RebuildInputs();
-            base.LoadFrom(node, referenceResolver);
         }
 
         public void IncreaseVectorSize()
         {
             VectorSize++;
             RebuildInputs();
-            BuildPortLiteral(VectorSize-1, InputPorts[VectorSize-1], true);
+            BuildInputPortLiteral(VectorSize-1);
         }
 
         public void DecreaseVectorSize()
         {
             GdAssert.That(VectorSize > 1, "Cannot decrease vector size below 1.");
-            DropPortLiteral(VectorSize-1, true);
+            var idx = VectorSize-1;
+
+            DropInputLiteral(idx);
+
             VectorSize--;
             RebuildInputs();
         }
