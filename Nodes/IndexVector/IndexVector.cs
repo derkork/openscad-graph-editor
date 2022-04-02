@@ -52,9 +52,9 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
         public void DecreasePorts()
         {
             GdAssert.That(IndexPortCount > 1, "Cannot decrease ports below 1.");
-            DropInputLiteral(IndexPortCount);
+            DropInputPortLiteral(IndexPortCount);
             var idx = IndexPortCount - 1;
-            DropOutputLiteral(idx);
+            DropOutputPortLiteral(idx);
 
             IndexPortCount--;
             RebuildPorts();

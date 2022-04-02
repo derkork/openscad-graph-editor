@@ -222,6 +222,19 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     {
                         refactorings.Add(new AddInvokableParametersRefactoring(_baseDescription, parametersToAdd));
                     }
+                    
+                    // once these refactorings have been created, we can now check if any parameters have changed
+                    // their name
+                    _parameterLines
+                        .Where(it => it.OriginalName != null && it.OriginalName != it.Name)
+                        .Select(it => new RenameInvokableParameterRefactoring(_baseDescription, it.OriginalName, it.Name))
+                        .ForAll(it => refactorings.Add(it));
+                    
+                    // now check if any parameters have changed their type
+                    _parameterLines
+                        .Where(it => it.OriginalPortType != -1 && it.OriginalPortType != (int) it.TypeHint)
+                        .Select(it => new ChangeInvokableParameterTypeRefactoring(_baseDescription, it.OriginalName, it.TypeHint))
+                        .ForAll(it => refactorings.Add(it));
 
                     break;
                 case DialogMode.CreateFunction:

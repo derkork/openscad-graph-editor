@@ -307,7 +307,14 @@ namespace OpenScadGraphEditor
         {
             _dirty = true;
             _codeChanged = codeChange;
-            _forceSaveButton.Text = "[...]";
+            if (_codeChanged)
+            {
+                _forceSaveButton.Text = "[.!.]";
+            }
+            else
+            {
+                _forceSaveButton.Text = "[...]";
+            }
         }
 
         private void SaveChanges()

@@ -51,12 +51,12 @@ namespace OpenScadGraphEditor.Nodes
             return OutputPorts[index];
         }
 
-        public void DropInputLiteral(int index)
+        public void DropInputPortLiteral(int index)
         {
             _inputLiterals.Remove(index);
         }
 
-        public void DropOutputLiteral(int index)
+        public void DropOutputPortLiteral(int index)
         {
             _outputLiterals.Remove(index);
         }

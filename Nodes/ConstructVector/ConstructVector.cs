@@ -44,7 +44,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
             GdAssert.That(VectorSize > 1, "Cannot decrease vector size below 1.");
             var idx = VectorSize-1;
 
-            DropInputLiteral(idx);
+            DropInputPortLiteral(idx);
 
             VectorSize--;
             RebuildInputs();

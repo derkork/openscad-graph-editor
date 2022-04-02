@@ -113,7 +113,7 @@ namespace OpenScadGraphEditor.Refactorings
 
                     foreach (var literalIndex in inputLiteralsToDrop)
                     {
-                        ((ScadNode) node).DropInputLiteral(literalIndex);
+                        ((ScadNode) node).DropInputPortLiteral(literalIndex);
                     }
 
                     // continue with the output literals
@@ -124,7 +124,7 @@ namespace OpenScadGraphEditor.Refactorings
 
                     foreach (var literalIndex in outputLiteralsToDrop)
                     {
-                        ((ScadNode) node).DropOutputLiteral(literalIndex);
+                        ((ScadNode) node).DropOutputPortLiteral(literalIndex);
                     }
                 }
             }
