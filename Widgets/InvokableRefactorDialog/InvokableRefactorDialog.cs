@@ -236,6 +236,21 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                         .Select(it => new ChangeInvokableParameterTypeRefactoring(_baseDescription, it.OriginalName, it.TypeHint))
                         .ForAll(it => refactorings.Add(it));
 
+                    // finally check if any parameters have been reordered
+                    // if the number of parameters differs, just reorder all of them
+                    if (_parameterLines.Count != _baseDescription.Parameters.Count)
+                    {
+                        refactorings.Add(new ChangeParameterOrderRefactoring(_baseDescription, _parameterLines.Select(it => it.Name).ToArray()));
+                    }
+                    else
+                    {
+                        // we have the same amount of parameters so check if one of them has changed its order
+                        if (_baseDescription.Parameters.Where((t, i) => t.Name != _parameterLines[i].Name).Any())
+                        {
+                            refactorings.Add(new ChangeParameterOrderRefactoring(_baseDescription, _parameterLines.Select(it => it.Name).ToArray()));
+                        }
+                    }
+                    
                     break;
                 case DialogMode.CreateFunction:
                     var functionDescription = FunctionBuilder

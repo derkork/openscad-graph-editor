@@ -63,14 +63,50 @@ namespace OpenScadGraphEditor.Nodes
 
         public void SwapInputLiterals(int index0, int index1)
         {
-            GdAssert.That(_inputLiterals.ContainsKey(index0) && _inputLiterals.ContainsKey(index1), "Trying to swap non-existing literals");
-            (_inputLiterals[index0], _inputLiterals[index1]) = (_inputLiterals[index1], _inputLiterals[index0]);
+            var hasFirst = _inputLiterals.TryGetValue(index0, out var literal0);
+            var hasSecond = _inputLiterals.TryGetValue(index1, out var literal1);
+
+            if (hasFirst)
+            {
+                _inputLiterals[index1] = literal0;
+            }
+            else
+            {
+                _inputLiterals.Remove(index1);
+            }
+
+            if (hasSecond)
+            {
+                _inputLiterals[index0] = literal1;
+            }
+            else
+            {
+                _inputLiterals.Remove(index0);
+            }
         }
         
         public void SwapOutputLiterals(int index0, int index1)
         {
-            GdAssert.That(_outputLiterals.ContainsKey(index0) && _outputLiterals.ContainsKey(index1), "Trying to swap non-existing literals");
-            (_outputLiterals[index0], _outputLiterals[index1]) = (_outputLiterals[index1], _outputLiterals[index0]);
+            var hasFirst = _outputLiterals.TryGetValue(index0, out var literal0);
+            var hasSecond = _outputLiterals.TryGetValue(index1, out var literal1);
+
+            if (hasFirst)
+            {
+                _outputLiterals[index1] = literal0;
+            }
+            else
+            {
+                _outputLiterals.Remove(index1);
+            }
+
+            if (hasSecond)
+            {
+                _outputLiterals[index0] = literal1;
+            }
+            else
+            {
+                _outputLiterals.Remove(index0);
+            }
         }
         
         public virtual void SaveInto(SavedNode node)

@@ -231,10 +231,11 @@ namespace OpenScadGraphEditor
                 .Select(it => new QuickAction(it.Title, () => OnRefactoringRequested(it)));
             
             
-            // if node is an entrypoint that can be refactored, add an action to open the refactor dialog
-            if (node is EntryPoint && node is IReferToAnInvokable iReferToAnInvokable)
+            // if the node references some invokable, add an action to open the refactor dialog for this invokable.
+            if (node is IReferToAnInvokable iReferToAnInvokable)
             {
-                actions = actions.Append(new QuickAction("Refactor", () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)));
+                actions = actions.Append(new QuickAction($"Refactor {iReferToAnInvokable.InvokableDescription.Name}", 
+                    () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)));
             }
             
             _quickActionsPopup.Open(position, actions);

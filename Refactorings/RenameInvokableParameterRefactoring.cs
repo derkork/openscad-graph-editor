@@ -20,6 +20,11 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
+            if (_oldParameterName == _newParameterName)
+            {
+                return; // nothing to do
+            }
+            
             // first find all graphs that are affected by this and make them refactorable
             // this will force a re-draw of all graphs that may be currently open.
             context.Project.FindContainingReferencesTo(_description)
