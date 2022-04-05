@@ -37,6 +37,11 @@ namespace OpenScadGraphEditor.Utils
             
             return $"var{index}{Regex.Replace(Convert.ToBase64String(Guid.Parse(id).ToByteArray()), "[/+=]", "")}";
         }
+        
+        public static string OrUndef(this string input)
+        {
+            return input.Length == 0 ? "undef" : input;
+        }
 
     }
 }
