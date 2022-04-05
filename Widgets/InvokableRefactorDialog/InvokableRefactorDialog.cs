@@ -235,6 +235,16 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                         .Where(it => it.OriginalPortType != -1 && it.OriginalPortType != (int) it.TypeHint)
                         .Select(it => new ChangeInvokableParameterTypeRefactoring(_baseDescription, it.OriginalName, it.TypeHint))
                         .ForAll(it => refactorings.Add(it));
+                    
+                    // also check if the return type has changed in case we are editing a function
+                    if (_baseDescription is FunctionDescription aFunctionDescription)
+                    {
+                        var selectedReturnType = (PortType) _returnTypeOptionButton.GetSelectedId();
+                        if (aFunctionDescription.ReturnTypeHint != selectedReturnType)
+                        {
+                            refactorings.Add(new ChangeFunctionReturnTypeRefactoring(aFunctionDescription, selectedReturnType));
+                        }
+                    }
 
                     // finally check if any parameters have been reordered
                     // if the number of parameters differs, just reorder all of them
@@ -362,6 +372,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             line.InsertInto(_parameterGrid);
 
             Repaint();
+            ValidateAll();
         }
 
         private void Repaint()
