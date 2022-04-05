@@ -3,7 +3,7 @@ using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class FunctionReturn : ScadNode, ICannotBeDeleted, IReferToAnInvokable
+    public class FunctionReturn : ScadNode, ICannotBeDeleted, IReferToAFunction
     {
         private FunctionDescription _description;
 
@@ -27,6 +27,16 @@ namespace OpenScadGraphEditor.Nodes
         public int GetParameterOutputPort(int parameterIndex)
         {
             // no ports refer to parameters.
+            return -1;
+        }
+
+        public int GetReturnValueInputPort()
+        {
+            return 1;
+        }
+
+        public int GetReturnValueOutputPort()
+        {
             return -1;
         }
 

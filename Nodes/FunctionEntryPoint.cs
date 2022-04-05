@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class FunctionEntryPoint : EntryPoint, IMultiExpressionOutputNode, IReferToAnInvokable
+    public class FunctionEntryPoint : EntryPoint, IMultiExpressionOutputNode, IReferToAFunction
     {
         private FunctionDescription _description;
 
@@ -35,6 +35,17 @@ namespace OpenScadGraphEditor.Nodes
             // the n-th parameter is the n+1-th output port
             return parameterIndex + 1;
         }
+
+        public int GetReturnValueInputPort()
+        {
+            return -1;
+        }
+
+        public int GetReturnValueOutputPort()
+        {
+            return -1;
+        }
+
 
         public override void SaveInto(SavedNode node)
         {

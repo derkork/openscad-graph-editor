@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes

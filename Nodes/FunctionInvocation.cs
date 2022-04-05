@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     /// <summary>
     /// A function invocation.
     /// </summary>
-    public class FunctionInvocation : ScadExpressionNode, IReferToAnInvokable
+    public class FunctionInvocation : ScadExpressionNode, IReferToAFunction
     {
         private FunctionDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -33,6 +33,16 @@ namespace OpenScadGraphEditor.Nodes
         {
             // function invocations have no output ports corresponding to the parameters.
             return -1;
+        }
+
+        public int GetReturnValueInputPort()
+        {
+            return -1;
+        }
+
+        public int GetReturnValueOutputPort()
+        {
+            return 0;
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
