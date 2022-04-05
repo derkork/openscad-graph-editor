@@ -54,7 +54,7 @@ namespace OpenScadGraphEditor
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested += OnRefactoringsRequested;
 
-            
+
             _editingInterface = this.WithName<Control>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");
             _fileDialog = this.WithName<FileDialog>("FileDialog");
@@ -202,6 +202,7 @@ namespace OpenScadGraphEditor
             {
                 context.AddRefactoring(refactoring);
             }
+
             context.PerformRefactorings();
             RefreshLists();
             MarkDirty(true);
@@ -222,24 +223,32 @@ namespace OpenScadGraphEditor
             editor.RefactoringsRequested += OnRefactoringsRequested;
             editor.NodePopupRequested += OnNodePopupRequested;
         }
-        
-        private void OnNodePopupRequested(ScadGraphEdit editor,  ScadNode node, Vector2 position)
+
+        private void OnNodePopupRequested(ScadGraphEdit editor, ScadNode node, Vector2 position)
         {
             // build a list of quick actions that include all refactorings that would apply to the selected node
             var actions = UserSelectableNodeRefactoring
                 .GetApplicable(editor, node)
                 .Select(it => new QuickAction(it.Title, () => OnRefactoringRequested(it)));
-            
-            
+
+
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.
             if (node is IReferToAnInvokable iReferToAnInvokable)
             {
-                actions = actions.Append(new QuickAction($"Refactor {iReferToAnInvokable.InvokableDescription.Name}", 
-                    () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)));
+                var name = iReferToAnInvokable.InvokableDescription.Name;
+                actions = actions.Append(
+                    new QuickAction($"Go to definition of {name}",
+                        () => Open(_currentProject.FindDefiningGraph(iReferToAnInvokable.InvokableDescription))
+                    )
+                );
+                actions = actions.Append(
+                    new QuickAction($"Refactor {name}",
+                        () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)
+                    )
+                );
             }
-            
-            _quickActionsPopup.Open(position, actions);
 
+            _quickActionsPopup.Open(position, actions);
         }
 
         private void OnOpenFilePressed()
@@ -259,7 +268,7 @@ namespace OpenScadGraphEditor
                 return;
             }
 
-            var savedProject = ResourceLoader.Load<SavedProject>(filename, "",  noCache: true);
+            var savedProject = ResourceLoader.Load<SavedProject>(filename, "", noCache: true);
             if (savedProject == null)
             {
                 GD.Print("Cannot load file!");

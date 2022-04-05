@@ -11,5 +11,11 @@ namespace OpenScadGraphEditor.Library
             var graphs = project.Functions.Concat(project.Modules).Append(project.MainModule);
             return graphs.Where(it => it.ContainsReferencesTo(invokableDescription));
         }
+
+        public static IScadGraph FindDefiningGraph(this ScadProject project, InvokableDescription invokableDescription)
+        {
+            var graphs = project.Functions.Concat(project.Modules).Append(project.MainModule);
+            return graphs.First(it => it.Description == invokableDescription);
+        }
     }
 }
