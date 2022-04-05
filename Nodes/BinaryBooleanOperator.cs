@@ -2,10 +2,10 @@ namespace OpenScadGraphEditor.Nodes
 {
     public abstract class BinaryBooleanOperator : BinaryOperator
     {
-        protected BinaryBooleanOperator() : base()
+        protected BinaryBooleanOperator()
         {
             OutputPorts
-                .Boolean();
+                .Boolean(allowLiteral: false);
         }
     }
 }

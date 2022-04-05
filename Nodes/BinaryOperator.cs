@@ -1,4 +1,5 @@
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -7,12 +8,19 @@ namespace OpenScadGraphEditor.Nodes
         
         protected abstract string OperatorSign { get; }
 
+        protected BinaryOperator()
+        {
+            InputPorts
+                .Any()
+                .Any();
+        }
+
         public override string Render(IScadGraph context)
         {
             var left = RenderInput(context, 0);
             var right = RenderInput(context, 1);
 
-            return $"({left} {OperatorSign} {right})";
+            return $"(({left.OrUndef()}) {OperatorSign} ({right.OrUndef()}))";
         }
     }
 }
