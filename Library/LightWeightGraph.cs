@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
@@ -52,6 +53,8 @@ namespace OpenScadGraphEditor.Library
                 case FunctionDescription functionDescription:
                     _entryPoint = NodeFactory.Build<FunctionEntryPoint>(functionDescription);
                     var returnNode = NodeFactory.Build<FunctionReturn>(functionDescription);
+                    // don't let the nodes overlap
+                    returnNode.Offset = _entryPoint.Offset + new Vector2(800, 0);
 
                     _nodes.Add(_entryPoint);
                     _nodes.Add(returnNode);
