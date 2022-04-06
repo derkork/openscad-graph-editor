@@ -5,8 +5,7 @@ namespace OpenScadGraphEditor.Refactorings
     public abstract class Refactoring
     {
         /// <summary>
-        /// Performs the actual refactoring by modifying the the given project. All graphs in the project
-        /// are guaranteed to be LightWeightGraphs when this is invoked.
+        /// Performs the actual refactoring by modifying the the given project.
         /// </summary>
         public abstract void PerformRefactoring(RefactoringContext context);
 
