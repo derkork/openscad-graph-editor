@@ -1,5 +1,4 @@
 using System.Linq;
-using Godot;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -45,6 +44,15 @@ namespace OpenScadGraphEditor.Library
         {
             return self.GetAllNodes().Any(it =>
                 it is IReferToAnInvokable referToAnInvokable && referToAnInvokable.InvokableDescription == description);
+        }
+        
+        /// <summary>
+        /// Returns true, if the graph contains references to the given variable.
+        /// </summary>
+        public static bool ContainsReferencesTo(this IScadGraph self, VariableDescription description)
+        {
+            return self.GetAllNodes().Any(it =>
+                it is IReferToAVariable referToAVariable && referToAVariable.VariableDescription == description);
         }
     }
 }

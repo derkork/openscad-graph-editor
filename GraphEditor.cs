@@ -38,6 +38,7 @@ namespace OpenScadGraphEditor
         private GlobalLibrary _rootResolver;
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
+        private ScadConfirmationDialog _confirmationDialog;
         private bool _codeChanged;
 
         public override void _Ready()
@@ -55,6 +56,8 @@ namespace OpenScadGraphEditor
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested += OnRefactoringsRequested;
+            
+            _confirmationDialog = this.WithName<ScadConfirmationDialog>("ConfirmationDialog");
 
 
             _editingInterface = this.WithName<Control>("EditingInterface");
@@ -72,6 +75,11 @@ namespace OpenScadGraphEditor
 
             _modulesList.ItemActivated += Open;
             _functionsList.ItemActivated += Open;
+            
+            _modulesList.ItemContextMenuRequested += OnItemContextMenuRequested;
+            _functionsList.ItemContextMenuRequested += OnItemContextMenuRequested;
+            _variablesList.ItemContextMenuRequested += OnItemContextMenuRequested;
+            
 
 
             this.WithName<Button>("NewButton")
@@ -111,6 +119,34 @@ namespace OpenScadGraphEditor
                 .To(this, nameof(SaveChanges));
 
             OnNewButtonPressed();
+        }
+
+        private void OnItemContextMenuRequested(ScadItemListEntry entry, Vector2 mousePosition)
+        {
+            var actions = new List<QuickAction>();
+            if (entry is ScadInvokableListEntry invokableListEntry && !(invokableListEntry.Description is MainModuleDescription))
+            {
+                actions.Add(new QuickAction($"Delete {invokableListEntry.Description.Name}", () => ShowConfirmDeleteDialog(invokableListEntry.Description)));
+            }
+
+            if (entry is ScadVariableListEntry scadVariableListEntry)
+            {
+                actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}", () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));;
+            }
+            
+            _quickActionsPopup.Open(mousePosition, actions);
+        }
+
+        private void ShowConfirmDeleteDialog(InvokableDescription description)
+        {
+            _confirmationDialog.Open($"Do you really want to delete {description.Name}?",
+                () => OnRefactoringRequested(new DeleteInvokableRefactoring(description)));
+        }
+        
+        private void ShowConfirmDeleteDialog(VariableDescription description)
+        {
+            _confirmationDialog.Open($"Do you really want to delete variable {description.Name}?",
+                () => OnRefactoringRequested(new DeleteVariableRefactoring(description)));
         }
 
         private void Open(ScadItemListEntry entry)

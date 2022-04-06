@@ -4,8 +4,8 @@ namespace OpenScadGraphEditor.Nodes
 {
     public class GetVariable : ScadExpressionNode, IReferToAVariable
     {
-        private VariableDescription _description;
-        public override string NodeTitle => $"Get {_description?.Name ?? "Variable"}";
+        public VariableDescription VariableDescription { get; private set; }
+        public override string NodeTitle => $"Get {VariableDescription?.Name ?? "Variable"}";
         public override string NodeDescription => "Gets a variable's value.";
 
         
@@ -17,27 +17,28 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts
                 .Any();
         }
-        
+
+
         public void SetupPorts(VariableDescription description)
         {
-            _description = description;
+            VariableDescription = description;
         }
 
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("variable_description_id", _description.Id);
+            node.SetData("variable_description_id", VariableDescription.Id);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            _description = referenceResolver.ResolveVariableReference(node.GetData("variable_description_id")); 
+            VariableDescription = referenceResolver.ResolveVariableReference(node.GetData("variable_description_id")); 
         }
 
         public override string Render(IScadGraph context)
         {
-            return $"{_description.Name}";
+            return $"{VariableDescription.Name}";
         }
     }
 }

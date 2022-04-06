@@ -12,10 +12,13 @@ namespace OpenScadGraphEditor.Library
             return graphs.Where(it => it.ContainsReferencesTo(invokableDescription));
         }
 
-        public static IScadGraph FindDefiningGraph(this ScadProject project, InvokableDescription invokableDescription)
+        // same for variable descriptions
+        public static IEnumerable<IScadGraph> FindContainingReferencesTo(this ScadProject project,
+            VariableDescription variableDescription)
         {
             var graphs = project.Functions.Concat(project.Modules).Append(project.MainModule);
-            return graphs.First(it => it.Description == invokableDescription);
+            return graphs.Where(it => it.ContainsReferencesTo(variableDescription));
         }
+
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
@@ -79,6 +80,19 @@ namespace OpenScadGraphEditor.Refactorings
             return result;
         }
 
+
+        public void MarkDeleted(IScadGraph graph)
+        {
+            GdAssert.That(graph is LightWeightGraph, "Only LightWeightGraphs can be marked as deleted.");
+            // if the graph is currently visible, discard the visible graph as well
+            if (_modifiedVisibleGraphs.TryGetValue(graph, out var visibleGraph))
+            {
+                visibleGraph.Discard();
+            }
+
+            _modifiedVisibleGraphs.Remove(graph);
+        }
+        
         /// <summary>
         /// Transforms all lightweight graphs which represent graphs that are currently open for editing back into
         /// heavyweight graphs.

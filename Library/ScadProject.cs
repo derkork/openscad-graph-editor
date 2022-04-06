@@ -206,9 +206,42 @@ namespace OpenScadGraphEditor.Library
             return graph;
         }
 
+        public void RemoveInvokable(InvokableDescription description)
+        {
+            var graph = FindDefiningGraph(description);
+            switch (description)
+            {
+                case FunctionDescription _:
+                    _functions.Remove(graph);
+                    _projectFunctionDescriptions.Remove(description.Id);
+                    graph.Discard();
+                    break;
+                case ModuleDescription _:
+                    _modules.Remove(graph);
+                    _projectModuleDescriptions.Remove(description.Id);
+                    graph.Discard();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+        }
+
         public void AddVariable(VariableDescription variableDescription)
         {
             _projectVariables[variableDescription.Id] = variableDescription;
         }
+
+        public void RemoveVariable(VariableDescription variableDescription)
+        {
+            _projectVariables.Remove(variableDescription.Id);
+        }
+        
+        public IScadGraph FindDefiningGraph( InvokableDescription invokableDescription)
+        {
+            var graphs = Functions.Concat(Modules).Append(MainModule);
+            return graphs.First(it => it.Description == invokableDescription);
+        }
+
     }
 }
