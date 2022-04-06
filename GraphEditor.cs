@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
@@ -9,7 +11,7 @@ using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
-using OpenScadGraphEditor.Widgets.ScadNodeList;
+using OpenScadGraphEditor.Widgets.ScadItemList;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 
 namespace OpenScadGraphEditor
@@ -22,9 +24,9 @@ namespace OpenScadGraphEditor
         private Control _editingInterface;
         private TextEdit _textEdit;
         private FileDialog _fileDialog;
-        private ScadNodeList _modulesList;
-        private ScadNodeList _functionsList;
-        private ScadNodeList _variablesList;
+        private ScadItemList _modulesList;
+        private ScadItemList _functionsList;
+        private ScadItemList _variablesList;
 
         private string _currentFile;
 
@@ -64,9 +66,12 @@ namespace OpenScadGraphEditor
                 .To(this, nameof(SaveChanges));
 
 
-            _modulesList = this.WithName<ScadNodeList>("ModulesList");
-            _functionsList = this.WithName<ScadNodeList>("FunctionsList");
-            _variablesList = this.WithName<ScadNodeList>("VariablesList");
+            _modulesList = this.WithName<ScadItemList>("ModulesList");
+            _functionsList = this.WithName<ScadItemList>("FunctionsList");
+            _variablesList = this.WithName<ScadItemList>("VariablesList");
+
+            _modulesList.ItemActivated += Open;
+            _functionsList.ItemActivated += Open;
 
 
             this.WithName<Button>("NewButton")
@@ -108,6 +113,14 @@ namespace OpenScadGraphEditor
             OnNewButtonPressed();
         }
 
+        private void Open(ScadItemListEntry entry)
+        {
+            if (entry is ScadInvokableListEntry invokableListEntry)
+            {
+                Open(_currentProject.FindDefiningGraph(invokableListEntry.Description));
+            }
+        }
+
         private void Clear()
         {
             _currentProject?.Discard();
@@ -120,30 +133,17 @@ namespace OpenScadGraphEditor
         {
             _functionsList.Setup(
                 _currentProject.Functions
-                    .Select(it => new ScadNodeListEntry(it.Description.Name,
-                        () => Open(it),
-                        new DragData($"Call function {it.Description.Name}",
-                            () => NodeFactory.Build<FunctionInvocation>(it.Description))))
+                    .Select(it => new ScadInvokableListEntry(it.Description, true))
             );
 
             _modulesList.Setup(
                 _currentProject.Modules
-                    .Select(it => new ScadNodeListEntry(it.Description.Name,
-                        () => Open(it),
-                        new DragData($"Call module {it.Description.Name}",
-                            () => NodeFactory.Build<ModuleInvocation>(it.Description))))
-                    .Append(new ScadNodeListEntry(_currentProject.MainModule.Description.Name,
-                        () => Open(_currentProject.MainModule)))
+                    .Select(it => new ScadInvokableListEntry(it.Description, !(it.Description is MainModuleDescription)))
             );
 
             _variablesList.Setup(
                 _currentProject.Variables
-                    .Select(
-                        it => new ScadNodeListEntry(it.Name,
-                            () => { },
-                            new DragData($"Set {it.Name}", () => NodeFactory.Build<SetVariable>(it))
-                        )
-                    )
+                    .Select( it => new ScadVariableListEntry(it))
             );
         }
 
@@ -222,6 +222,54 @@ namespace OpenScadGraphEditor
             editor.Changed += MarkDirty;
             editor.RefactoringsRequested += OnRefactoringsRequested;
             editor.NodePopupRequested += OnNodePopupRequested;
+            editor.ItemDataDropped += OnItemDataDropped;
+        }
+
+        private void OnItemDataDropped(ScadGraphEdit graph, ScadItemListEntry entry, Vector2 mousePosition, Vector2 virtualPosition)
+        {
+            // did we drag an invokable from the list to the graph?
+            if (entry is ScadInvokableListEntry invokableListEntry)
+            {
+                // then add a new node calling the invokable.
+                var description = invokableListEntry.Description;
+                ScadNode node;
+                if (description is FunctionDescription functionDescription)
+                {
+                    node = NodeFactory.Build<FunctionInvocation>(functionDescription);
+                }
+                else if (description is ModuleDescription moduleDescription)
+                {
+                    node = NodeFactory.Build<ModuleInvocation>(moduleDescription);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown invokable type.");
+                }
+
+                node.Offset = virtualPosition;
+                OnRefactoringRequested(new AddNodeRefactoring(graph, node));
+            }
+            
+            // did we drag a variable from the list to the graph?
+            if (entry is ScadVariableListEntry variableListEntry)
+            {
+                // in case of a variable we can either _get_ or _set_ the variable
+                // so we will need to open a popup menu to let the user choose.
+                var getNode = NodeFactory.Build<GetVariable>(variableListEntry.Description);
+                getNode.Offset = virtualPosition;
+                var setNode = NodeFactory.Build<SetVariable>(variableListEntry.Description);
+                setNode.Offset = virtualPosition;
+
+                var actions = new List<QuickAction>
+                {
+                    new QuickAction($"Get {variableListEntry.Description.Name}",
+                        () => OnRefactoringRequested(new AddNodeRefactoring(graph, getNode))),
+                    new QuickAction($"Set {variableListEntry.Description.Name}",
+                        () => OnRefactoringRequested(new AddNodeRefactoring(graph, setNode)))
+                };
+                
+                _quickActionsPopup.Open(mousePosition, actions);
+            }
         }
 
         private void OnNodePopupRequested(ScadGraphEdit editor, ScadNode node, Vector2 position)

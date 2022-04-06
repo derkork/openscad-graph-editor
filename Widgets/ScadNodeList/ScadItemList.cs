@@ -6,7 +6,7 @@ using GodotExt;
 
 namespace OpenScadGraphEditor.Widgets.ScadNodeList
 {
-    public class ScadNodeList : ItemList
+    public class ScadItemList : ItemList
     {
         private List<ScadNodeListEntry> _entries;
 

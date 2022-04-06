@@ -9,6 +9,7 @@ using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets.ScadItemList;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -23,6 +24,9 @@ namespace OpenScadGraphEditor.Widgets
         private AddDialog.AddDialog _addDialog;
 
 
+        /// <summary>
+        /// Emitted when refactorings are requested (e.g. basically any edit except changes in literals).
+        /// </summary>
         public event Action<Refactoring[]> RefactoringsRequested;
 
         /// <summary>
@@ -35,6 +39,11 @@ namespace OpenScadGraphEditor.Widgets
         /// Sent when the graph is changed and needs to be re-rendered.
         /// </summary>
         public event Action<bool> Changed;
+
+        /// <summary>
+        /// Called when data from any list entry is dropped.
+        /// </summary>
+        public event Action<ScadGraphEdit,ScadItemListEntry, Vector2, Vector2> ItemDataDropped;
         
         public InvokableDescription Description { get; private set; }
 
@@ -84,25 +93,14 @@ namespace OpenScadGraphEditor.Widgets
 
         public override bool CanDropData(Vector2 position, object data)
         {
-            if (!(data is Reference reference))
-            {
-                return false;
-            }
-
-            return reference.TryGetBeer(out DragData[] _);
+            return data is ScadItemListDragData;
         }
 
         public override void DropData(Vector2 position, object data)
         {
-
-            if (!(data is Reference reference) || !reference.TryGetBeer(out DragData[] dragData))
+            if (data is ScadItemListDragData itemListDragData)
             {
-                return;
-            }
-
-            if (dragData.Length == 1)
-            {
-                OnNodeAdded(dragData[0].Data(), NodeAddContext.AtPosition(position));
+                ItemDataDropped?.Invoke(this, itemListDragData.Entry, GetGlobalMousePosition(), position + ScrollOffset);
             }
         }
 
@@ -382,6 +380,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             return this.AtPath<ScadNodeWidget>(widgetName).BoundNode;
         }
+
 
 
         private void OnNodeAdded(ScadNode node, NodeAddContext context)
