@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.History;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -35,6 +36,7 @@ namespace OpenScadGraphEditor
         private Label _fileNameLabel;
         private TabContainer _tabContainer;
         private ScadProject _currentProject;
+        private HistoryStack _currentHistoryStack;
         private GlobalLibrary _rootResolver;
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
@@ -160,6 +162,7 @@ namespace OpenScadGraphEditor
         private void Clear()
         {
             _currentProject?.Discard();
+            _currentHistoryStack = null;
             _currentFile = null;
             _fileNameLabel.Text = "<not yet saved to a file>";
         }
@@ -248,10 +251,20 @@ namespace OpenScadGraphEditor
         {
             Clear();
             _currentProject = new ScadProject(_rootResolver);
+            _currentHistoryStack = new HistoryStack(_currentProject, GetEditorState());
             Open(_currentProject.MainModule);
             RefreshLists();
         }
 
+        private EditorState GetEditorState()
+        {
+            // create a list of currently open tabs
+            var tabs = 
+                _tabContainer.GetChildNodes<ScadGraphEdit>()
+                    .Select((it, idx) => new EditorOpenTab(it.Description.Id, _tabContainer.CurrentTab == idx, it.ScrollOffset));
+            return new EditorState(tabs);
+        }
+        
         private void AttachTo(ScadGraphEdit editor)
         {
             editor.Setup(_addDialog);

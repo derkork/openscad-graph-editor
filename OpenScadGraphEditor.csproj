@@ -17,13 +17,10 @@
     <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Antlr4 Update="OpenSCAD.g4">
+    <Antlr4 Update="OpenScadParser.g4">
       <Listener>false</Listener>
       <CustomToolNamespace>OpenScadGraphEditor.Library.External</CustomToolNamespace>
     </Antlr4>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Library\External" />
   </ItemGroup>
 
   <PropertyGroup>

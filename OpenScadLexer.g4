@@ -1,7 +1,8 @@
-lexer grammar OpenSCADLexer;
+lexer grammar OpenScadLexer;
 
-INCLUDE: 'include' [\t ]* '<' -> pushMode(FILE_IMPORT);
-USE: 'use' [\t ]* '<' -> pushMode(FILE_IMPORT);
+
+INCLUDE: 'include' [\t ]* '<' -> pushMode(FILE_IMPORT_MODE);
+USE: 'use' [\t ]* '<' -> pushMode(FILE_IMPORT_MODE);
 
 // operators
 ADD : '+';
@@ -21,7 +22,7 @@ AND : '&&';
 OR : '||';
 TERNARY: '?';
 COLON: ':';
-
+DOT: '.';
 
 STATEMENT_TERMINATOR: ';'; 
 ASSIGNMENT_OPERATOR: '=';
@@ -43,6 +44,8 @@ ELSE: 'else';
 FUNCTION: 'function';
 MODULE: 'module';
 FOR: 'for';
+LET: 'let';
+EACH: 'each';
 INTERSECTION_FOR: 'intersection_for';
 
 
@@ -56,7 +59,16 @@ STRING : '"' .*? '"';
 NUMBER  
     : ( [0-9]* '.' )? [0-9]+;
     
+   
+BLOCK_COMMENT
+    :   '/*' .*? '*/' -> skip
+    ;
+
+LINE_COMMENT
+    :   '//' ~[\r\n]* -> skip
+    ;
     
-mode FILE_IMPORT;
+mode FILE_IMPORT_MODE;
     END_IMPORT: '>' -> popMode, skip;
     PATH_STRING: ~[>]+;
+
