@@ -1,8 +1,10 @@
 /.idea/
 /.mono/
 /.import/
+/gen/
 
 mono_crash*
 *graph.tres*
 
 *.DotSettings.user
+/*.tokens

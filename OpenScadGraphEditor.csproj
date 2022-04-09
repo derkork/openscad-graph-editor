@@ -19,8 +19,11 @@
   <ItemGroup>
     <Antlr4 Update="OpenSCAD.g4">
       <Listener>false</Listener>
-      <CustomToolNamespace>Example.Generated</CustomToolNamespace>
+      <CustomToolNamespace>OpenScadGraphEditor.Library.External</CustomToolNamespace>
     </Antlr4>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Library\External" />
   </ItemGroup>
 
   <PropertyGroup>
