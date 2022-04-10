@@ -6,14 +6,14 @@ namespace OpenScadGraphEditor.Library.External
 {
     public class OpenScadVisitor : OpenScadParserBaseVisitor<object>
     {
-        private readonly ExternalDeclarations _externalDeclarations;
+        private readonly ExternalReference _externalReference;
         private readonly string _sourceFileHash;
 
 
-        public OpenScadVisitor(ExternalDeclarations externalDeclarations)
+        public OpenScadVisitor(ExternalReference externalReference)
         {
-            _externalDeclarations = externalDeclarations;
-            _sourceFileHash = _externalDeclarations.SourceFile.SHA256Text();
+            _externalReference = externalReference;
+            _sourceFileHash = _externalReference.SourceFile.SHA256Text();
         }
 
 
@@ -32,10 +32,10 @@ namespace OpenScadGraphEditor.Library.External
             // check if we already know this variable
             
             // ReSharper disable once SimplifyLinqExpressionUseAll
-            if (!_externalDeclarations.Variables.Any(it => it.Name == variableName))
+            if (!_externalReference.Variables.Any(it => it.Name == variableName))
             {
                 var variable = VariableBuilder.NewVariable(variableName, MakeId("variable", variableName));
-                _externalDeclarations.Variables.Add(variable);
+                _externalReference.Variables.Add(variable);
             }
 
             // and walk the rest of the tree
@@ -62,7 +62,7 @@ namespace OpenScadGraphEditor.Library.External
                     builder.WithParameter(name);
                 }
                 
-                _externalDeclarations.Functions.Add(builder.Build());
+                _externalReference.Functions.Add(builder.Build());
             }
             
             // and walk the rest of the tree
@@ -86,7 +86,7 @@ namespace OpenScadGraphEditor.Library.External
                     builder.WithParameter(name);
                 }
                 
-                _externalDeclarations.Modules.Add(builder.Build());
+                _externalReference.Modules.Add(builder.Build());
             }
             
             // and walk the rest of the tree

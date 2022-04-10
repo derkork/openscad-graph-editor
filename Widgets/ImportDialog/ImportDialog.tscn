@@ -1,0 +1,145 @@
+[gd_scene format=2]
+
+[node name="ImportDialog" type="WindowDialog"]
+visible = true
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -435.0
+margin_top = -337.0
+margin_right = 553.0
+margin_bottom = -39.0
+window_title = "Include / Use"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 978.0
+margin_bottom = 288.0
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+margin_right = 968.0
+margin_bottom = 210.0
+custom_constants/vseparation = 10
+custom_constants/hseparation = 15
+columns = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_right = 120.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 0, 45 )
+text = "Mode"
+valign = 1
+
+[node name="ImportModeOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 135.0
+margin_right = 968.0
+margin_bottom = 45.0
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 55.0
+margin_right = 120.0
+margin_bottom = 100.0
+rect_min_size = Vector2( 0, 45 )
+text = "Reference"
+valign = 1
+
+[node name="PathModeOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 135.0
+margin_top = 55.0
+margin_right = 968.0
+margin_bottom = 100.0
+
+[node name="FileLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 110.0
+margin_right = 120.0
+margin_bottom = 155.0
+rect_min_size = Vector2( 0, 45 )
+text = "File"
+valign = 1
+
+[node name="FileSelectBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 135.0
+margin_top = 110.0
+margin_right = 968.0
+margin_bottom = 155.0
+size_flags_horizontal = 3
+
+[node name="PathLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer/FileSelectBox"]
+margin_right = 715.0
+margin_bottom = 45.0
+size_flags_horizontal = 3
+editable = false
+
+[node name="SelectButton" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/FileSelectBox"]
+margin_left = 723.0
+margin_right = 833.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 0 )
+text = "Select"
+
+[node name="LibraryFileLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 165.0
+margin_right = 120.0
+margin_bottom = 210.0
+rect_min_size = Vector2( 0, 45 )
+text = "Library File"
+valign = 1
+
+[node name="LibraryFileBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 135.0
+margin_top = 165.0
+margin_right = 968.0
+margin_bottom = 210.0
+
+[node name="LibraryFileOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer/LibraryFileBox"]
+margin_right = 715.0
+margin_bottom = 45.0
+size_flags_horizontal = 3
+
+[node name="LibraryFileRefreshButton" type="Button" parent="MarginContainer/VBoxContainer/GridContainer/LibraryFileBox"]
+margin_left = 723.0
+margin_right = 833.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 0 )
+text = "Refresh"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
+margin_top = 218.0
+margin_right = 968.0
+margin_bottom = 225.0
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+margin_top = 233.0
+margin_right = 968.0
+margin_bottom = 278.0
+rect_min_size = Vector2( 0, 45 )
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_right = 732.0
+margin_bottom = 45.0
+size_flags_horizontal = 3
+
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 740.0
+margin_right = 850.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 0 )
+text = "Cancel"
+
+[node name="OkButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 858.0
+margin_right = 968.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 0 )
+text = "OK"

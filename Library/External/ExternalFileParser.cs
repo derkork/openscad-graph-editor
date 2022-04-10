@@ -7,7 +7,7 @@ namespace OpenScadGraphEditor.Library.External
     /// </summary>
     public static class ExternalFileParser
     {
-        public static void Parse(string text, ExternalDeclarations externalDeclarations)
+        public static void Parse(string text, ExternalReference externalReference)
         {
             var inputStream = new AntlrInputStream(text);
             var lexer = new OpenScadLexer(inputStream);
@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Library.External
             var parser = new OpenScadParser(tokenStream);
 
             var root = parser.scadFile();
-            var visitor = new OpenScadVisitor(externalDeclarations);
+            var visitor = new OpenScadVisitor(externalReference);
             visitor.Visit(root);
         }
     }

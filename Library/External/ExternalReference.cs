@@ -3,7 +3,10 @@ using Godot;
 
 namespace OpenScadGraphEditor.Library.External
 {
-    public class ExternalDeclarations : Resource
+    /// <summary>
+    /// A reference to an external OpenSCAD file.
+    /// </summary>
+    public class ExternalReference : Resource
     {
         /// <summary>
         /// The source file from which the declarations were loaded.
