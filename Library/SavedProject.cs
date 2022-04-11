@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using OpenScadGraphEditor.Library.External;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -27,6 +28,13 @@ namespace OpenScadGraphEditor.Library
         /// All defined variables.
         /// </summary>
         [Export] public Array<VariableDescription> Variables = new Array<VariableDescription>();
+        
+                
+        /// <summary>
+        /// All references to external files.
+        /// </summary>
+        [Export]
+        public Array<ExternalReference> ExternalReferences = new Array<ExternalReference>();
 
     }
 }

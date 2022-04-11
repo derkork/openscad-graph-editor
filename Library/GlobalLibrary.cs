@@ -1,4 +1,5 @@
 using System.Linq;
+using OpenScadGraphEditor.Library.External;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -17,6 +18,11 @@ namespace OpenScadGraphEditor.Library
         public FunctionDescription ResolveFunctionReference(string id)
         {
             return BuiltIns.Functions.First(it => it.Id == id);
+        }
+
+        public ExternalReference ResolveExternalReference(string id)
+        {
+            return null;
         }
     }
 }

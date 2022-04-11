@@ -51,47 +51,81 @@ namespace OpenScadGraphEditor.Library.External
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
+    
+        /// <summary>
+        /// Decodes a path encoded by <see cref="Encode"/>.
+        /// </summary>
+        public static string Decode(string input, out ExternalFilePathMode mode)
+        {
+            if (input.StartsWith("library://"))
+            {
+                mode = ExternalFilePathMode.Library;
+                return input.Substring("library://".Length);
+            }
+            if (input.StartsWith("relative://"))
+            {
+                mode = ExternalFilePathMode.Relative;
+                return input.Substring("relative://".Length);
+            }
+            if (input.StartsWith("absolute://"))
+            {
+                mode = ExternalFilePathMode.Absolute;
+                return input.Substring("absolute://".Length);
+            }
+            throw new ArgumentException($"Invalid path prefix in {input}", nameof(input));
+        }
+
+
+        /// <summary>
+        /// Checks whether two paths refer to the same file. The paths must not contain any unresolved
+        /// prefixes.
+        /// </summary>
+        public static bool IsSamePath(string path1, string path2)
+        {
+            // Uri does path canonicalization. So we can use that to check if the paths are the same.
+            // https://stackoverflow.com/questions/1266674/how-can-one-get-an-absolute-or-normalized-file-path-in-net
+            return new Uri(path1).LocalPath == new Uri(path2).LocalPath;
+        }
+
 
         /// <summary>
         /// Tries to resolve a path that was encoded with <see cref="Encode"/>.
         /// </summary>
         public static bool TryResolve(string projectPath, string path, out string resolvedPath)
         {
-            if (path.StartsWith("library://"))
+            var decodedPath = Decode(path, out var mode);
+
+            switch (mode)
             {
-                var file = path.Substring("library://".Length);
-                var libraryPaths = GetLibraryPaths();
-                var realPath = libraryPaths
-                    .Select(it => Path.Combine(it, file))
-                    .Where(File.Exists)
-                    .FirstOrDefault();
+                case ExternalFilePathMode.Library:
+                    var libraryPaths = GetLibraryPaths();
+                    var realPath = libraryPaths
+                        .Select(it => Path.Combine(it, decodedPath))
+                        .Where(File.Exists)
+                        .FirstOrDefault();
 
-                if (realPath != null)
-                {
-                    resolvedPath = realPath;
-                    return true;
-                }
-            }
-
-            if (path.StartsWith("relative://"))
-            {
-                var file = path.Substring("relative://".Length);
-                if (File.Exists(Path.Combine(projectPath, file)))
-                {
-                    resolvedPath = Path.Combine(projectPath, file);
-                    return true;
-                }
-            }
-
-
-            if (path.StartsWith("absolute://"))
-            {
-                var file = path.Substring("absolute://".Length);
-                if (File.Exists(file))
-                {
-                    resolvedPath = file;
-                    return true;
-                }
+                    if (realPath != null)
+                    {
+                        resolvedPath = realPath;
+                        return true;
+                    }
+                    break;
+                case ExternalFilePathMode.Relative:
+                    if (File.Exists(Path.Combine(projectPath, decodedPath)))
+                    {
+                        resolvedPath = Path.Combine(projectPath, decodedPath);
+                        return true;
+                    }
+                    break;
+                case ExternalFilePathMode.Absolute:
+                    if (File.Exists(decodedPath))
+                    {
+                        resolvedPath = decodedPath;
+                        return true;
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             resolvedPath = default;

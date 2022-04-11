@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library.External;
 
 namespace OpenScadGraphEditor.Library
 {

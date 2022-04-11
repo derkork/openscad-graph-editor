@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GodotExt;
+using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
@@ -18,6 +19,8 @@ namespace OpenScadGraphEditor.Library
 
         private readonly Dictionary<string, VariableDescription> _projectVariables =
             new Dictionary<string, VariableDescription>(); 
+        
+        private readonly List<ExternalReference> _externalReferences = new List<ExternalReference>();
 
         private readonly HashSet<IScadGraph> _modules = new HashSet<IScadGraph>();
         private readonly HashSet<IScadGraph> _functions = new HashSet<IScadGraph>();
@@ -65,23 +68,59 @@ namespace OpenScadGraphEditor.Library
         
         public FunctionDescription ResolveFunctionReference(string id)
         {
-            return _projectFunctionDescriptions.TryGetValue(id, out var result)
-                ? result
-                : _parentResolver.ResolveFunctionReference(id);
+            if (_projectFunctionDescriptions.TryGetValue(id, out var functionDescription))
+            {
+                return functionDescription;
+            }
+
+            foreach (var resolveFunctionReference in _externalReferences
+                         .Select(externalReference => externalReference.ResolveFunctionReference(id))
+                         .Where(resolveFunctionReference => resolveFunctionReference != null))
+            {
+                return resolveFunctionReference;
+            }
+            
+            return _parentResolver.ResolveFunctionReference(id);
         }
 
         public ModuleDescription ResolveModuleReference(string id)
         {
-            return _projectModuleDescriptions.TryGetValue(id, out var result)
-                ? result
-                : _parentResolver.ResolveModuleReference(id);
+            if (_projectModuleDescriptions.TryGetValue(id, out var moduleDescription))
+            {
+                return moduleDescription;
+            }
+            
+            foreach (var resolveModuleReference in _externalReferences
+                         .Select(externalReference => externalReference.ResolveModuleReference(id))
+                         .Where(resolveModuleReference => resolveModuleReference != null))
+            {
+                return resolveModuleReference;
+            }
+            
+            return _parentResolver.ResolveModuleReference(id);
         }
 
         public VariableDescription ResolveVariableReference(string id)
         {
-            return _projectVariables.TryGetValue(id, out var result)
-                ? result
-                : _parentResolver.ResolveVariableReference(id);
+            if (_projectVariables.TryGetValue(id, out var variableDescription))
+            {
+                return variableDescription;
+            }
+            
+            foreach (var resolveVariableReference in _externalReferences
+                         .Select(externalReference => externalReference.ResolveVariableReference(id))
+                         .Where(resolveVariableReference => resolveVariableReference != null))
+            {
+                return resolveVariableReference;
+            }
+            
+            return _parentResolver.ResolveVariableReference(id);
+        }
+
+        public ExternalReference ResolveExternalReference(string id)
+        {
+            var result = _externalReferences.FirstOrDefault(it => it.Id == id);
+            return result ?? _parentResolver.ResolveExternalReference(id);
         }
 
         private void Clear()
@@ -102,7 +141,7 @@ namespace OpenScadGraphEditor.Library
         public void Load(SavedProject project)
         {
             Clear();
-            // Step 1: load function descriptions so we can resolve them in step 3
+            // Step 1: load function descriptions so we can resolve them in step 4
             foreach (var function in project.Functions)
             {
                 _projectFunctionDescriptions[function.Description.Id] = (FunctionDescription) function.Description;
@@ -112,13 +151,16 @@ namespace OpenScadGraphEditor.Library
                 _projectModuleDescriptions[module.Description.Id] = (ModuleDescription) module.Description;
             }
             
-            // Step 2: load variable descriptions so we can resolve them in step 3
+            // Step 2: load variable descriptions so we can resolve them in step 4
             foreach (var variable in project.Variables)
             {
                 _projectVariables.Add(variable.Id, variable);
             }
             
-            // Step 2: load the actual graphs, which can now resolve references to other functions.
+            // Step 3: load external references so we can resolve them in step 4
+            _externalReferences.AddRange(project.ExternalReferences);
+            
+            // Step 4: load the actual graphs, which can now resolve references to other functions.
             foreach (var function in project.Functions)
             {
                 var functionContext = new LightWeightGraph();
@@ -140,6 +182,9 @@ namespace OpenScadGraphEditor.Library
         public SavedProject Save()
         {
             var result = Prefabs.New<SavedProject>();
+            
+            _externalReferences.ForAll(it => result.ExternalReferences.Add(it));
+            
             foreach (var function in _functions)
             {
                 var savedGraph = Prefabs.New<SavedGraph>();

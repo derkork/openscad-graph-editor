@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -36,6 +37,17 @@ namespace OpenScadGraphEditor.Library
             node.PrepareLiteralsFromPortDefinitions();
             return node;
         }
+        
+        public static ScadNode Build<[MeansImplicitUse] T>(ExternalReference externalReference)
+            where T : ScadNode, IReferToAnExternalReference
+        {
+            var node = (T) Activator.CreateInstance(typeof(T));
+            node.SetupPorts(externalReference);
+            node.PrepareLiteralsFromPortDefinitions();
+            return node;
+        }
+        
+        
 
         /// <summary>
         /// Builds a node of the given type.
