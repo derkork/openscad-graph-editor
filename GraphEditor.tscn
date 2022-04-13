@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/ScadItemList/ScadItemList.cs" type="Script" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://Widgets/QuickActionsPopup.cs" type="Script" id=5]
 [ext_resource path="res://Widgets/VariableRefactorDialog/VariableRefactorDialog.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Widgets/ScadConfirmationDialog.cs" type="Script" id=7]
+[ext_resource path="res://Widgets/ImportDialog/ImportDialog.tscn" type="PackedScene" id=8]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -20,6 +21,9 @@ margin_right = 400.0
 margin_bottom = 140.0
 rect_min_size = Vector2( 400, 140 )
 script = ExtResource( 7 )
+
+[node name="ImportDialog" parent="." instance=ExtResource( 8 )]
+visible = false
 
 [node name="QuickActionsPopup" type="PopupMenu" parent="."]
 margin_right = 144.0

@@ -12,6 +12,7 @@ using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 using OpenScadGraphEditor.Widgets.ScadItemList;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
@@ -21,6 +22,8 @@ namespace OpenScadGraphEditor
     [UsedImplicitly]
     public class GraphEditor : Control
     {
+        // TODO: this class gets _really_ big.
+        
         private AddDialog _addDialog;
         private QuickActionsPopup _quickActionsPopup;
         private Control _editingInterface;
@@ -29,6 +32,7 @@ namespace OpenScadGraphEditor
         private ScadItemList _modulesList;
         private ScadItemList _functionsList;
         private ScadItemList _variablesList;
+        private ImportDialog _importDialog;
 
         private string _currentFile;
 
@@ -54,6 +58,7 @@ namespace OpenScadGraphEditor
 
             _addDialog = this.WithName<AddDialog>("AddDialog");
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
+            _importDialog = this.WithName<ImportDialog>("ImportDialog");
 
             _invokableRefactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
             _invokableRefactorDialog.InvokableModificationRequested += (description, refactorings) => PerformRefactorings(refactorings);
@@ -260,6 +265,20 @@ namespace OpenScadGraphEditor
             );
 
             
+            // add special node for using a scad file
+            _addDialogEntries.Add(
+                new NodeBasedEntry(
+                    GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                    NodeFactory.Build<UseScadFile>,
+                    OnImportScadFile
+                )
+            );
+            
+        }
+
+        private void OnImportScadFile(RequestContext context, NodeBasedEntry entry)
+        {
+            _importDialog.OpenForNewImport(_currentFile);
         }
 
 
@@ -636,6 +655,9 @@ namespace OpenScadGraphEditor
             Icon = icon;
         }
         
+        // TODO: we need a distinction here whether the node simply doesn't fit context
+        // or if it is actually not allowed to be used here. E.g. right now we can use
+        // module calls in functions which we should not be able to do.
         public bool Matches(RequestContext context)
         {
             // if this came from a node left of us, check if we have a matching input port
