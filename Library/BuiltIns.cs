@@ -23,12 +23,14 @@ namespace OpenScadGraphEditor.Library
                     .GetTypes()
                     .Where(t => typeof(ScadNode).IsAssignableFrom(t) && !t.IsAbstract)
                     // only nodes which can be directly created
+                    // TODO: make a proper marker interface for language level nodes. 
                     .Where(it => !typeof(ICannotBeCreated).IsAssignableFrom(it))
                     .ToList();
 
             
             Modules = new List<ModuleDescription>()
             {
+                // TODO: add remaining built-in modules
                 ModuleBuilder.NewBuiltInModule("cube", "Cube")
                     .WithDescription("Creates a cube in the first octant.\nWhen center is true, the cube is\ncentered on the origin.")
                     .WithParameter("size", PortType.Vector3, label: "Size")
@@ -54,6 +56,7 @@ namespace OpenScadGraphEditor.Library
             
             Functions = new List<FunctionDescription>()
             {
+                // TODO: add remaining built-in functions
               FunctionBuilder.NewBuiltInFunction("abs", "Abs", PortType.Number)
                   .WithDescription("Returns the absolute value of a number.")
                   .WithParameter("", PortType.Number)

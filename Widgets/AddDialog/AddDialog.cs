@@ -13,11 +13,12 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     [UsedImplicitly]
     public class AddDialog : WindowDialog
     {
+        
         private LineEdit _lineEdit;
         private ItemList _itemList;
-        private List<AddDialogEntry> _supportedNodes;
-        private Predicate<ScadNode> _contextFilter = node => true;
-        private Action<ScadNode> _callback;
+        private List<IAddDialogEntry> _entries = new List<IAddDialogEntry>();
+        private RequestContext _context;
+        private Button _filterByContextCheckbox;
 
         public override void _Ready()
         {
@@ -32,39 +33,30 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             _itemList.Connect("item_activated")
                 .To(this, nameof(OnItemActivated));
 
-            // todo: the list of available stuff is dynamic and we need a function to refresh it.
-
-            var languageLevelNodes = 
-                BuiltIns.LanguageLevelNodes.Select(it => new AddDialogEntry(() => NodeFactory.Build(it)));
-            var libraryModules =
-                BuiltIns.Modules.Select(it => new AddDialogEntry(() => NodeFactory.Build<ModuleInvocation>(it)));
-            var libraryFunctions =
-                BuiltIns.Functions.Select(it => new AddDialogEntry(() => NodeFactory.Build<FunctionInvocation>(it)));
-
-
-            _supportedNodes = languageLevelNodes
-                .Concat(libraryModules)
-                .Concat(libraryFunctions)
-                .ToList();
+            _filterByContextCheckbox = this.WithName<Button>("FilterByContextCheckbox");
+            _filterByContextCheckbox
+                .Connect("toggled")
+                .To(this, nameof(OnFilterByContextCheckboxToggled));
         }
-
-
+        
         private void Refresh()
         {
             var searchTerm = _lineEdit.Text;
 
-
+            var filterByContext = _filterByContextCheckbox.Pressed;
+            
             _itemList.Clear();
-            var entries = _supportedNodes.Where(it =>
-                (it.ExampleNode.NodeTitle.ContainsIgnoreCase(searchTerm) ||
-                 it.ExampleNode.NodeDescription.ContainsIgnoreCase(searchTerm)) &&
-                _contextFilter(it.ExampleNode)
+            var entries = _entries.Where(it =>
+                (it.Title.ContainsIgnoreCase(searchTerm) ||
+                 it.Keywords.ContainsIgnoreCase(searchTerm)) &&
+                (!filterByContext || it.Matches(_context))
             );
             
             foreach (var entry in entries)
             {
-                _itemList.AddItem(entry.ExampleNode.NodeTitle);
-                _itemList.SetItemMetadata(_itemList.GetItemCount() - 1, _supportedNodes.IndexOf(entry));
+                _itemList.AddItem(entry.Title);
+                _itemList.SetItemIcon(_itemList.GetItemCount() - 1, entry.Icon);
+                _itemList.SetItemMetadata(_itemList.GetItemCount() - 1, _entries.IndexOf(entry));
             }
 
             if (_itemList.GetItemCount() > 0)
@@ -74,14 +66,14 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         }
 
 
-        public void Open(Action<ScadNode> callback, Predicate<ScadNode> contextFilter = null)
+        public void Open(List<IAddDialogEntry> entries, RequestContext context)
         {
-            _callback = callback;
-            _contextFilter = contextFilter ?? (node => true);
+            _entries = entries;
+            _context = context;
+            _filterByContextCheckbox.Pressed = true;
             _lineEdit.Text = "";
             Refresh();
-            ShowModal();
-
+            PopupCentered();
             _lineEdit.GrabFocus();
         }
 
@@ -98,16 +90,22 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
                 return;
             }
 
-            var entry = _supportedNodes[(int) _itemList.GetItemMetadata(selectedItems[0])];
-            _callback(entry.CreateCopy());
+            var entry = _entries[(int) _itemList.GetItemMetadata(selectedItems[0])];
+            entry.Action(_context);
             Visible = false;
         }
 
         private void OnItemActivated(int index)
         {
-            var entry = _supportedNodes[(int) _itemList.GetItemMetadata(index)];
-            _callback(entry.CreateCopy());
+            var entry = _entries[(int) _itemList.GetItemMetadata(index)];
+            entry.Action(_context);
             Visible = false;
+        }
+        
+        private void OnFilterByContextCheckboxToggled([UsedImplicitly] bool _)
+        {
+            _lineEdit.GrabFocus();
+            Refresh();
         }
     }
 }

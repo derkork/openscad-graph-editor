@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using OpenScadGraphEditor.History;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
@@ -41,6 +42,7 @@ namespace OpenScadGraphEditor
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
         private ScadConfirmationDialog _confirmationDialog;
+        private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private bool _codeChanged;
 
         public override void _Ready()
@@ -187,6 +189,104 @@ namespace OpenScadGraphEditor
                 _currentProject.Variables
                     .Select( it => new ScadVariableListEntry(it))
             );
+            
+            // Fill the Add Dialog Entries.
+
+            _addDialogEntries.Clear();
+            
+            _addDialogEntries.AddRange(
+                BuiltIns.LanguageLevelNodes
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                        () => NodeFactory.Build(it),
+                        AddNode
+                    ))
+                );
+
+            _addDialogEntries.AddRange(
+                BuiltIns.Functions
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/function.png"),
+                        () => NodeFactory.Build<FunctionInvocation>(it),
+                        AddNode
+                    ))
+                );
+
+            _addDialogEntries.AddRange(
+                BuiltIns.Modules
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/module.png"),
+                        () => NodeFactory.Build<ModuleInvocation>(it),
+                        AddNode
+                    )));
+            
+            
+            // also add entries for functions and modules defined in the project
+            _addDialogEntries.AddRange(
+                _currentProject.Functions
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/function.png"),
+                        () => NodeFactory.Build<FunctionInvocation>(it.Description),
+                        AddNode
+                    ))
+            );
+            
+            _addDialogEntries.AddRange(
+                _currentProject.Modules
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/module.png"),
+                        () => NodeFactory.Build<ModuleInvocation>(it.Description),
+                        AddNode
+                    ))
+            );
+
+        }
+
+
+        private void AddNode(RequestContext context, NodeBasedEntry entry)
+        {
+            AddNode(context, entry.CreateNode());
+        }
+
+        private void AddNode(RequestContext context, ScadNode node)
+        {
+            
+            node.Offset = context.LastReleasePosition;
+
+            var refactorings = new List<Refactoring> {new AddNodeRefactoring(context.Source, node)};
+
+            // if we find a matching input port for the source port, connect it.
+            if (context.SourceNode != null)
+            {
+                for (var i = 0; i < node.InputPortCount; i++)
+                {
+                    var connection = new ScadConnection(context.Source, context.SourceNode, context.LastPort, node, i);
+                    var operationResult = ConnectionRules.CanConnect(connection);
+                    if (operationResult.Decision == ConnectionRules.OperationRuleDecision.Allow)
+                    {
+                        refactorings.AddRange(operationResult.Refactorings);
+                        refactorings.Add(new CreateConnectionRefactoring(connection));
+                        break;
+                    }
+                }
+            }
+
+            // if we find a matching output port for the target port, connect it.
+            if (context.DestinationNode != null)
+            {
+                for (var i = 0; i < node.OutputPortCount; i++)
+                {
+                    var connection = new ScadConnection(context.Source,  node, i, context.DestinationNode, context.LastPort);
+                    var operationResult = ConnectionRules.CanConnect(connection);
+                    if (operationResult.Decision == ConnectionRules.OperationRuleDecision.Allow)
+                    {
+                        refactorings.AddRange(operationResult.Refactorings);
+                        refactorings.Add(new CreateConnectionRefactoring(connection));
+                        break;
+                    }
+                }
+            }
+            PerformRefactorings(refactorings);
         }
 
         public void Open(IScadGraph toOpen)
@@ -260,11 +360,24 @@ namespace OpenScadGraphEditor
         
         private void AttachTo(ScadGraphEdit editor)
         {
-            editor.Setup(_addDialog);
             editor.Changed += MarkDirty;
             editor.RefactoringsRequested += (refactorings) => PerformRefactorings(refactorings);
             editor.NodePopupRequested += OnNodePopupRequested;
             editor.ItemDataDropped += OnItemDataDropped;
+            editor.AddDialogRequested += OnAddDialogRequested;
+        }
+
+        private void OnAddDialogRequested(RequestContext context)
+        {
+            // when shift is pressed this means we want to have a reroute node.
+            if (Input.IsKeyPressed((int) KeyList.Shift))
+            {
+                AddNode(context,  NodeFactory.Build<RerouteNode>());
+                return;
+            }
+
+            // otherwise let the user choose a node.
+            _addDialog.Open(_addDialogEntries, context);
         }
 
         private void OnItemDataDropped(ScadGraphEdit graph, ScadItemListEntry entry, Vector2 mousePosition, Vector2 virtualPosition)
@@ -472,5 +585,68 @@ namespace OpenScadGraphEditor
                 }
             }
         }
+    }
+    
+    
+    class NodeBasedEntry : IAddDialogEntry
+    {
+        private readonly ScadNode _template;
+        private readonly Func<ScadNode> _factory;
+        private readonly Action<RequestContext,NodeBasedEntry> _action
+            ;
+
+        public string Title => _template.NodeTitle;
+        public string Keywords => _template.NodeDescription;
+        public Action<RequestContext> Action => Select;
+
+        private void Select(RequestContext obj)
+        {
+            _action(obj, this);
+        }
+
+        public Texture Icon { get; }
+
+        public ScadNode CreateNode() => _factory();
+        
+        public NodeBasedEntry(Texture icon, Func<ScadNode> factory, Action<RequestContext, NodeBasedEntry> action)
+        {
+            _factory = factory;
+            _template = _factory();
+            _action = action;
+            Icon = icon;
+        }
+        
+        public bool Matches(RequestContext context)
+        {
+            // if this came from a node left of us, check if we have a matching input port
+            if (context.SourceNode != null)
+            {
+                for (var i = 0; i < _template.InputPortCount; i++)
+                {
+                    var connection = new ScadConnection(context.Source, context.SourceNode, context.LastPort, _template, i);
+                    if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            // if this came from a node right of us, check if we have a matching output port
+            if (context.DestinationNode != null)
+            {
+                for (var i = 0; i < _template.OutputPortCount; i++)
+                {
+                    var connection = new ScadConnection(context.Source, _template, i, context.DestinationNode, context.LastPort);
+                    if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            // otherwise it doesn't match
+            return false;
+        }
+
     }
 }

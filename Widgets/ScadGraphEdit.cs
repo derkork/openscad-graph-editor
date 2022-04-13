@@ -22,8 +22,6 @@ namespace OpenScadGraphEditor.Widgets
     {
         private ScadNode _entryPoint;
         private readonly HashSet<ScadNodeWidget> _selection = new HashSet<ScadNodeWidget>();
-        private AddDialog.AddDialog _addDialog;
-
 
         /// <summary>
         /// Emitted when refactorings are requested (e.g. basically any edit except changes in literals).
@@ -123,12 +121,6 @@ namespace OpenScadGraphEditor.Widgets
             _widgets[node] = widget;
             widget.MoveToNewParent(this);
             widget.BindTo(node);
-        }
-
-
-        public void Setup(AddDialog.AddDialog addDialog)
-        {
-            _addDialog = addDialog;
         }
 
         public void FocusEntryPoint()
@@ -239,32 +231,15 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            var context = RequestContext.From(this, releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
-
-            if (Input.IsKeyPressed((int) KeyList.Shift))
-            {
-                OnNodeAdded(NodeFactory.Build<RerouteNode>(), context);
-            }
-            else
-            {
-                _addDialog.Open(it => OnNodeAdded(it, context),
-                    it => Description.CanUse(it) && CanAcceptConnectionFrom(context.SourceNode, fromPort, it, out _));
-            }
+            var context = RequestContext.From(this, ScrollOffset+releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
+            AddDialogRequested?.Invoke(context);
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
             
             var context = RequestContext.To(this, releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
-            if (Input.IsKeyPressed((int) KeyList.Shift))
-            {
-                OnNodeAdded(NodeFactory.Build<RerouteNode>(), context);
-            }
-            else
-            {
-                _addDialog.Open(it => OnNodeAdded(it, context),
-                    it => Description.CanUse(it) && CanAcceptConnectionTo(context.DestinationNode, toPort, it, out _));
-            }
+            AddDialogRequested?.Invoke(context);
         }
 
         private void OnNodeSelected(ScadNodeWidget node)
@@ -329,66 +304,6 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        private void OnNodeAdded(ScadNode node, RequestContext context)
-        {
-            node.Offset = context.LastReleasePosition + ScrollOffset;
-
-            var refactorings = new List<Refactoring> {new AddNodeRefactoring(this, node)};
-
-            if (context.DestinationNode != null)
-            {
-                if (CanAcceptConnectionTo(context.DestinationNode, context.LastPort, node, out var fromPort))
-                {
-                    refactorings.AddRange(ConnectWithChecks(new ScadConnection(this, node, fromPort, context.DestinationNode, context.LastPort)));
-                }
-            }
-
-            if (context.SourceNode != null)
-            {
-                if (CanAcceptConnectionFrom(context.SourceNode, context.LastPort, node, out var toPort))
-                {
-                    refactorings.AddRange(ConnectWithChecks(new ScadConnection(this, context.SourceNode, context.LastPort, node, toPort)));
-                }
-            }
-
-            PerformRefactorings(refactorings);
-        }
-
-
-        private bool CanAcceptConnectionFrom(ScadNode from, int fromPort, ScadNode to, out int toPort)
-        {
-            for (var i = 0; i < to.InputPortCount; i++)
-            {
-                var connection = new ScadConnection(this, from, fromPort, to, i);
-                if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
-                {
-                    toPort = i;
-                    return true;
-                }
-            }
-
-            toPort = -1;
-            return false;
-        }
-
-        private bool CanAcceptConnectionTo(ScadNode to, int toPort, ScadNode from, out int fromPort)
-        {
-            for (var i = 0; i < from.OutputPortCount; i++)
-            {
-                var connection = new ScadConnection(this, from, i, to, toPort);
-                if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
-                {
-                    fromPort = i;
-                    return true;
-                }
-            }
-
-            fromPort = -1;
-            return false;
-        }
-        
-        
-        
         public IEnumerable<ScadConnection> GetAllConnections()
         {
             return GetConnectionList()
@@ -438,4 +353,5 @@ namespace OpenScadGraphEditor.Widgets
             return _entryPoint.Render(this);
         }
     }
+
 }
