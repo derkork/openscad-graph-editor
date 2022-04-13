@@ -239,7 +239,27 @@ namespace OpenScadGraphEditor
                         AddNode
                     ))
             );
+            
+            // add getter and setters for all variables
+            _addDialogEntries.AddRange(
+                _currentProject.Variables
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                        () => NodeFactory.Build<SetVariable>(it),
+                        AddNode
+                    ))
+            );
+            
+            _addDialogEntries.AddRange(
+                _currentProject.Variables
+                    .Select(it => new NodeBasedEntry(
+                        GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                        () => NodeFactory.Build<GetVariable>(it),
+                        AddNode
+                    ))
+            );
 
+            
         }
 
 
