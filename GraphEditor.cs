@@ -54,10 +54,13 @@ namespace OpenScadGraphEditor
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
 
             _invokableRefactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
-            _invokableRefactorDialog.RefactoringsRequested += OnRefactoringsRequested;
+            _invokableRefactorDialog.InvokableModificationRequested += (description, refactorings) => PerformRefactorings(refactorings);
+            _invokableRefactorDialog.InvokableCreationRequested +=
+                // create the invokable, then open it's graph in a new tab.
+                (description, refactorings) => PerformRefactorings(refactorings, () => Open(_currentProject.FindDefiningGraph(description)));
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
-            _variableRefactorDialog.RefactoringsRequested += OnRefactoringsRequested;
+            _variableRefactorDialog.RefactoringsRequested += (refactorings) => PerformRefactorings(refactorings);
             
             _confirmationDialog = this.WithName<ScadConfirmationDialog>("ConfirmationDialog");
 
@@ -133,7 +136,7 @@ namespace OpenScadGraphEditor
 
             if (entry is ScadVariableListEntry scadVariableListEntry)
             {
-                actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}", () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));;
+                actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}", () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));
             }
             
             _quickActionsPopup.Open(mousePosition, actions);
@@ -226,23 +229,13 @@ namespace OpenScadGraphEditor
 
         private void OnRefactoringRequested(Refactoring refactoring)
         {
-            var context = new RefactoringContext(this, _currentProject);
-            context.AddRefactoring(refactoring);
-            context.PerformRefactorings();
-            RefreshLists();
-            MarkDirty(true);
+            PerformRefactorings(new [] {refactoring});
         }
 
-        private void OnRefactoringsRequested(Refactoring[] refactorings)
+        private void PerformRefactorings(IEnumerable<Refactoring> refactorings, params Action[] after)
         {
-            var context = new RefactoringContext(this, _currentProject);
-
-            foreach (var refactoring in refactorings)
-            {
-                context.AddRefactoring(refactoring);
-            }
-
-            context.PerformRefactorings();
+            var context = new RefactoringContext( _currentProject);
+            context.PerformRefactorings(refactorings, after);
             RefreshLists();
             MarkDirty(true);
         }
@@ -269,7 +262,7 @@ namespace OpenScadGraphEditor
         {
             editor.Setup(_addDialog);
             editor.Changed += MarkDirty;
-            editor.RefactoringsRequested += OnRefactoringsRequested;
+            editor.RefactoringsRequested += (refactorings) => PerformRefactorings(refactorings);
             editor.NodePopupRequested += OnNodePopupRequested;
             editor.ItemDataDropped += OnItemDataDropped;
         }
@@ -333,11 +326,16 @@ namespace OpenScadGraphEditor
             if (node is IReferToAnInvokable iReferToAnInvokable)
             {
                 var name = iReferToAnInvokable.InvokableDescription.Name;
-                actions = actions.Append(
-                    new QuickAction($"Go to definition of {name}",
-                        () => Open(_currentProject.FindDefiningGraph(iReferToAnInvokable.InvokableDescription))
-                    )
-                );
+                // if the node isn't actually the entry point, add an action to go to the entrypoint
+                if (!(node is EntryPoint))
+                {
+                    actions = actions.Append(
+                        new QuickAction($"Go to definition of {name}",
+                            () => Open(_currentProject.FindDefiningGraph(iReferToAnInvokable.InvokableDescription))
+                        )
+                    );
+                }
+
                 actions = actions.Append(
                     new QuickAction($"Refactor {name}",
                         () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)

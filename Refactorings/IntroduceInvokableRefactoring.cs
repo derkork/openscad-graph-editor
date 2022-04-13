@@ -5,7 +5,6 @@ namespace OpenScadGraphEditor.Refactorings
     public class IntroduceInvokableRefactoring : Refactoring
     {
         private readonly InvokableDescription _description;
-        private IScadGraph _graph;
 
         public IntroduceInvokableRefactoring(InvokableDescription description)
         {
@@ -14,12 +13,7 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            _graph = context.Project.AddInvokable(_description);
-        }
-
-        public override void AfterRefactoring(GraphEditor graphEditor)
-        {
-            graphEditor.Open(_graph);
+            context.Project.AddInvokable(_description);
         }
     }
 }

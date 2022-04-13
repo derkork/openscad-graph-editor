@@ -9,6 +9,7 @@ using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.ScadItemList;
 
 namespace OpenScadGraphEditor.Widgets
@@ -26,6 +27,7 @@ namespace OpenScadGraphEditor.Widgets
 
         /// <summary>
         /// Emitted when refactorings are requested (e.g. basically any edit except changes in literals).
+        /// TODO: probably we also want refactorings for literals as they should participate in the undo/redo stack.
         /// </summary>
         public event Action<Refactoring[]> RefactoringsRequested;
 
@@ -33,6 +35,11 @@ namespace OpenScadGraphEditor.Widgets
         /// Emitted when the user right-clicks on a node.
         /// </summary>
         public event Action<ScadGraphEdit, ScadNode, Vector2> NodePopupRequested;
+
+        /// <summary>
+        /// Emitted when the user requires the dialog to add a node.
+        /// </summary>
+        public event Action<RequestContext> AddDialogRequested;
 
 
         /// <summary>
@@ -207,16 +214,7 @@ namespace OpenScadGraphEditor.Widgets
             if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
             {
                 GD.Print("Resolving pending disconnect.");
-                if (DisconnectWithChecks(_pendingDisconnect, out var refactorings))
-                {
-                    PerformRefactorings(refactorings);
-                }
-                else
-                {
-                    // was vetoed, so restore the visible connection
-                    ConnectNode(_widgets[_pendingDisconnect.From].Name, _pendingDisconnect.FromPort, 
-                        _widgets[_pendingDisconnect.To].Name, _pendingDisconnect.ToPort);
-                }
+                PerformRefactorings(new[] {new DropConnectionRefactoring(_pendingDisconnect)});
                 _pendingDisconnect = null;
             }
         }
@@ -241,7 +239,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            var context = NodeAddContext.From(releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
+            var context = RequestContext.From(this, releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
 
             if (Input.IsKeyPressed((int) KeyList.Shift))
             {
@@ -257,7 +255,7 @@ namespace OpenScadGraphEditor.Widgets
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
             
-            var context = NodeAddContext.To(releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
+            var context = RequestContext.To(this, releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
             if (Input.IsKeyPressed((int) KeyList.Shift))
             {
                 OnNodeAdded(NodeFactory.Build<RerouteNode>(), context);
@@ -281,44 +279,9 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnDeleteSelection()
         {
-            var refactorings = new List<Refactoring>();
-
-            foreach (var widget in _selection)
-            {
-                var scadNode = widget.BoundNode;
-                if (scadNode is ICannotBeDeleted)
-                {
-                    continue; // don't allow to delete certain nodes (e.g. the entry point and return nodes).
-                }
-
-
-                var refactoringsForNode = new List<Refactoring>();
-                var connectionsToDrop = GetAllConnections().Where(it => it.InvolvesNode(scadNode));
-                var nodeVetoed = false;
-                foreach (var connection in connectionsToDrop)
-                {
-                    if (DisconnectWithChecks(connection, out var dropConnectionRefactorings))
-                    {
-                        refactoringsForNode.AddRange(dropConnectionRefactorings);
-                    }
-                    else
-                    {
-                        // some disconnect was vetoed, so we can't delete this node.
-                        nodeVetoed = true;
-                        break;
-                    }
-                }
-                
-                // if node was vetoed, continue with the next node.
-                if (nodeVetoed)
-                {
-                    continue;
-                }
-                
-                refactoringsForNode.Add(new DeleteNodeRefactoring(this, scadNode));
-                refactorings.AddRange(refactoringsForNode);
-            }
-
+            var refactorings = 
+                _selection.Select(it => new DeleteNodeRefactoring(this, it.BoundNode))
+                    .ToList();
             _selection.Clear();
             PerformRefactorings(refactorings);
         }
@@ -360,30 +323,13 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        [MustUseReturnValue]
-        private bool DisconnectWithChecks(ScadConnection connection, out IEnumerable<Refactoring> refactorings)
-        {
-            var result = ConnectionRules.CanDisconnect(connection);
-            
-            if (result.Decision == ConnectionRules.OperationRuleDecision.Veto)
-            {
-                GD.Print("Disconnection vetoed.");
-                refactorings = Enumerable.Empty<Refactoring>();
-                return false;
-            }
-
-            refactorings = result.Refactorings.Append(new DropConnectionRefactoring(connection));
-            return true;
-        }
-
         private ScadNode ScadNodeForWidgetName(string widgetName)
         {
             return this.AtPath<ScadNodeWidget>(widgetName).BoundNode;
         }
 
 
-
-        private void OnNodeAdded(ScadNode node, NodeAddContext context)
+        private void OnNodeAdded(ScadNode node, RequestContext context)
         {
             node.Offset = context.LastReleasePosition + ScrollOffset;
 
@@ -490,38 +436,6 @@ namespace OpenScadGraphEditor.Widgets
         public string Render()
         {
             return _entryPoint.Render(this);
-        }
-
-        private class NodeAddContext
-        {
-
-            public static NodeAddContext AtPosition(Vector2 position)
-            {
-                return new NodeAddContext(position, null, null, 0);
-            }
-
-            public static NodeAddContext From(Vector2 position, ScadNode node, int port)
-            {
-                return new NodeAddContext(position, node, null, port);
-            }
-            public static NodeAddContext To(Vector2 position, ScadNode node, int port)
-            {
-                return new NodeAddContext(position, null, node, port);
-            }
-
-            private NodeAddContext(Vector2 lastReleasePosition, ScadNode sourceNode, ScadNode destinationNode,
-                int lastPort)
-            {
-                LastReleasePosition = lastReleasePosition;
-                SourceNode = sourceNode;
-                DestinationNode = destinationNode;
-                LastPort = lastPort;
-            }
-
-            public Vector2 LastReleasePosition { get; }
-            public ScadNode SourceNode { get; }
-            public ScadNode DestinationNode { get; }
-            public int LastPort { get; }
         }
     }
 }

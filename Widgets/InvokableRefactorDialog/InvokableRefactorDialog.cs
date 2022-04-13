@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -14,7 +15,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
     [UsedImplicitly]
     public class InvokableRefactorDialog : WindowDialog
     {
-        public event Action<Refactoring[]> RefactoringsRequested;
+        public event Action<InvokableDescription, IEnumerable<Refactoring>> InvokableCreationRequested;
+        public event Action<InvokableDescription, IEnumerable<Refactoring>> InvokableModificationRequested;
 
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;
@@ -172,9 +174,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void Clear()
         {
             _baseDescription = null;
+            _nameEdit.Text = "";
             _parameterLines.ForAll(it => it.Discard());
             _parameterLines.Clear();
-            _okButton.Disabled = false;
+            _okButton.Disabled = true;
         }
 
         private void OnOkPressed()
@@ -222,27 +225,30 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     {
                         refactorings.Add(new AddInvokableParametersRefactoring(_baseDescription, parametersToAdd));
                     }
-                    
+
                     // once these refactorings have been created, we can now check if any parameters have changed
                     // their name
                     _parameterLines
                         .Where(it => it.OriginalName != null && it.OriginalName != it.Name)
-                        .Select(it => new RenameInvokableParameterRefactoring(_baseDescription, it.OriginalName, it.Name))
+                        .Select(it =>
+                            new RenameInvokableParameterRefactoring(_baseDescription, it.OriginalName, it.Name))
                         .ForAll(it => refactorings.Add(it));
-                    
+
                     // now check if any parameters have changed their type
                     _parameterLines
                         .Where(it => it.OriginalPortType != -1 && it.OriginalPortType != (int) it.TypeHint)
-                        .Select(it => new ChangeInvokableParameterTypeRefactoring(_baseDescription, it.OriginalName, it.TypeHint))
+                        .Select(it =>
+                            new ChangeInvokableParameterTypeRefactoring(_baseDescription, it.OriginalName, it.TypeHint))
                         .ForAll(it => refactorings.Add(it));
-                    
+
                     // also check if the return type has changed in case we are editing a function
                     if (_baseDescription is FunctionDescription aFunctionDescription)
                     {
                         var selectedReturnType = (PortType) _returnTypeOptionButton.GetSelectedId();
                         if (aFunctionDescription.ReturnTypeHint != selectedReturnType)
                         {
-                            refactorings.Add(new ChangeFunctionReturnTypeRefactoring(aFunctionDescription, selectedReturnType));
+                            refactorings.Add(
+                                new ChangeFunctionReturnTypeRefactoring(aFunctionDescription, selectedReturnType));
                         }
                     }
 
@@ -250,17 +256,19 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     // if the number of parameters differs, just reorder all of them
                     if (_parameterLines.Count != _baseDescription.Parameters.Count)
                     {
-                        refactorings.Add(new ChangeParameterOrderRefactoring(_baseDescription, _parameterLines.Select(it => it.Name).ToArray()));
+                        refactorings.Add(new ChangeParameterOrderRefactoring(_baseDescription,
+                            _parameterLines.Select(it => it.Name).ToArray()));
                     }
                     else
                     {
                         // we have the same amount of parameters so check if one of them has changed its order
                         if (_baseDescription.Parameters.Where((t, i) => t.Name != _parameterLines[i].Name).Any())
                         {
-                            refactorings.Add(new ChangeParameterOrderRefactoring(_baseDescription, _parameterLines.Select(it => it.Name).ToArray()));
+                            refactorings.Add(new ChangeParameterOrderRefactoring(_baseDescription,
+                                _parameterLines.Select(it => it.Name).ToArray()));
                         }
                     }
-                    
+
                     break;
                 case DialogMode.CreateFunction:
                     var functionDescription = FunctionBuilder
@@ -270,7 +278,9 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                         functionDescription.WithParameter(line.Name, line.TypeHint);
                     }
 
-                    refactorings.Add(new IntroduceInvokableRefactoring(functionDescription.Build()));
+                    // we need this down there when calling our listeners
+                    _baseDescription = functionDescription.Build();
+                    refactorings.Add(new IntroduceInvokableRefactoring(_baseDescription));
                     break;
 
                 case DialogMode.CreateModule:
@@ -282,8 +292,9 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     {
                         moduleDescription.WithParameter(line.Name, line.TypeHint);
                     }
-
-                    refactorings.Add(new IntroduceInvokableRefactoring(moduleDescription.Build()));
+                    // we need this down there when calling our listeners
+                    _baseDescription = moduleDescription.Build();
+                    refactorings.Add(new IntroduceInvokableRefactoring(_baseDescription));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -291,7 +302,18 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
             if (refactorings.Count > 0)
             {
-                RefactoringsRequested?.Invoke(refactorings.ToArray());
+                switch (_mode)
+                {
+                    case DialogMode.Edit:
+                        InvokableModificationRequested?.Invoke(_baseDescription, refactorings);
+                        break;
+                    case DialogMode.CreateFunction:
+                    case DialogMode.CreateModule:
+                        InvokableCreationRequested?.Invoke(_baseDescription, refactorings);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
 
             Hide();

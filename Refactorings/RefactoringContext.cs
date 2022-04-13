@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -14,54 +14,95 @@ namespace OpenScadGraphEditor.Refactorings
     /// </summary>
     public class RefactoringContext
     {
-        private readonly GraphEditor _editor;
         public ScadProject Project { get; }
         private readonly List<Refactoring> _refactorings = new List<Refactoring>();
 
         private readonly Dictionary<IScadGraph, IScadGraph> _modifiedVisibleGraphs =
             new Dictionary<IScadGraph, IScadGraph>();
 
+        private RefactoringPhase _phase;
 
-        public RefactoringContext(GraphEditor editor, ScadProject project)
+        /// <summary>
+        /// An enum representing the current refactoring phase.
+        /// </summary>
+        private enum RefactoringPhase
         {
-            _editor = editor;
+            /// <summary>
+            /// The default phase. Most refactorings run in this phase.
+            /// </summary>
+            Default,
+            
+            /// <summary>
+            /// The late phase. Refactorings in this phase are applied after all other refactorings have been.
+            /// </summary>
+            Late
+        }
+
+
+        public RefactoringContext(ScadProject project)
+        {
             Project = project;
+            _phase = RefactoringPhase.Default;
         }
 
-        public void AddRefactoring(Refactoring refactoring)
+        public void PerformRefactorings(IEnumerable<Refactoring> refactorings, params Action[] after )
         {
-            _refactorings.Add(refactoring);
-        }
+            _refactorings.AddRange(refactorings);
+            
+            // start with the default phase.
+            var defaultPhaseRefactorings = _refactorings.Where(it => !it.IsLate)
+                .ToList();
 
-        public void PerformRefactorings()
-        {
-            _refactorings.Where(it => !it.IsLate).ForAll(it =>
+            foreach (var refactoring in defaultPhaseRefactorings)
             {
-                GD.Print("Performing refactoring: " + it.GetType().Name);
-                it.PerformRefactoring(this);
-            });
+                GD.Print("Performing refactoring: " + refactoring.GetType().Name);
+                refactoring.PerformRefactoring(this);
+            }
 
-            // perform late-stage refactorings
-            _refactorings.Where(it => it.IsLate).ForAll(it =>
+            // now the late phase
+            _phase = RefactoringPhase.Late;
+
+            var latePhaseRefactorings = _refactorings.Where(it => it.IsLate)
+                .ToList();
+            foreach (var refactoring in latePhaseRefactorings)
             {
-                GD.Print("Performing late-stage refactoring: " + it.GetType().Name);
-                it.PerformRefactoring(this);
-            });
+                GD.Print("Performing late-stage refactoring: " + refactoring.GetType().Name);
+                refactoring.PerformRefactoring(this);
+            }
+         
 
             TransferModifiedDataBackToVisibleGraphs();
-            _refactorings.ForAll(it => it.AfterRefactoring(_editor));
+            foreach (var afterAction in after)
+            {
+                afterAction();
+            }
+            _refactorings.Clear();
         }
 
+        /// <summary>
+        /// Can be called by refactorings, to run another refactoring. If the refactoring's phase matches
+        /// the current phase it will be performed immediately, otherwise it will be performed later
+        /// when the phase of th refactoring comes. 
+        /// </summary>
+        /// <param name="refactoring"></param>
+        internal void PerformRefactoring(Refactoring refactoring)
+        {
+            if (_phase == RefactoringPhase.Default && refactoring.IsLate)
+            {
+                _refactorings.Add(refactoring);
+                return;
+            } 
+            
+            refactoring.PerformRefactoring(this);
+        }
+        
         /// <summary>
         /// Makes a graph refactorable (e.g. transforms it into a LightWeightGraph). We don't perform refactorings
         /// on heavyweight UI graphs because that would introduce all kinds of rendering headache. Instead we
         /// perform refactorings on LightWeightGraphs and then transform the refactored graph back into a visual
         /// representation.
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="project"></param>
-        /// <returns></returns>
-        public LightWeightGraph MakeRefactorable(IScadGraph graph)
+        internal LightWeightGraph MakeRefactorable(IScadGraph graph)
         {
             if (graph is LightWeightGraph lightWeightGraph)
             {
@@ -81,7 +122,7 @@ namespace OpenScadGraphEditor.Refactorings
         }
 
 
-        public void MarkDeleted(IScadGraph graph)
+        internal void MarkDeleted(IScadGraph graph)
         {
             GdAssert.That(graph is LightWeightGraph, "Only LightWeightGraphs can be marked as deleted.");
             // if the graph is currently visible, discard the visible graph as well
@@ -97,7 +138,7 @@ namespace OpenScadGraphEditor.Refactorings
         /// Transforms all lightweight graphs which represent graphs that are currently open for editing back into
         /// heavyweight graphs.
         /// </summary>
-        public void TransferModifiedDataBackToVisibleGraphs()
+        private void TransferModifiedDataBackToVisibleGraphs()
         {
             foreach (var lightWeightGraph in _modifiedVisibleGraphs.Keys)
             {
