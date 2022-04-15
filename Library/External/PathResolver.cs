@@ -111,6 +111,11 @@ namespace OpenScadGraphEditor.Library.External
                     }
                     break;
                 case ExternalFilePathMode.Relative:
+                    if (projectPath == null)
+                    {
+                        break;
+                    }
+                    
                     if (File.Exists(Path.Combine(projectPath, decodedPath)))
                     {
                         resolvedPath = Path.Combine(projectPath, decodedPath);
@@ -132,14 +137,14 @@ namespace OpenScadGraphEditor.Library.External
             return false;
         }
 
-        /// <summary>
-        /// Return s
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
         public static string DirectoryFromFile(string filePath)
         {
             return Path.GetDirectoryName(filePath);
+        }
+
+        public static string FileName(string filePath)
+        {
+            return Path.GetFileName(filePath);
         }
 
 

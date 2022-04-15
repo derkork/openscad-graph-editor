@@ -17,6 +17,8 @@ namespace OpenScadGraphEditor.Library.External
             var root = parser.scadFile();
             var visitor = new OpenScadVisitor(externalReference);
             visitor.Visit(root);
+
+            externalReference.IsLoaded = true;
         }
     }
 }

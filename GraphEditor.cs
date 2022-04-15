@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.History;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
@@ -23,7 +25,7 @@ namespace OpenScadGraphEditor
     public class GraphEditor : Control
     {
         // TODO: this class gets _really_ big.
-        
+
         private AddDialog _addDialog;
         private QuickActionsPopup _quickActionsPopup;
         private Control _editingInterface;
@@ -59,16 +61,19 @@ namespace OpenScadGraphEditor
             _addDialog = this.WithName<AddDialog>("AddDialog");
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
             _importDialog = this.WithName<ImportDialog>("ImportDialog");
+            _importDialog.OnNewImportRequested += OnNewImportRequested;
 
             _invokableRefactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
-            _invokableRefactorDialog.InvokableModificationRequested += (description, refactorings) => PerformRefactorings(refactorings);
+            _invokableRefactorDialog.InvokableModificationRequested +=
+                (description, refactorings) => PerformRefactorings(refactorings);
             _invokableRefactorDialog.InvokableCreationRequested +=
                 // create the invokable, then open it's graph in a new tab.
-                (description, refactorings) => PerformRefactorings(refactorings, () => Open(_currentProject.FindDefiningGraph(description)));
+                (description, refactorings) => PerformRefactorings(refactorings,
+                    () => Open(_currentProject.FindDefiningGraph(description)));
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested += (refactorings) => PerformRefactorings(refactorings);
-            
+
             _confirmationDialog = this.WithName<ScadConfirmationDialog>("ConfirmationDialog");
 
 
@@ -87,11 +92,10 @@ namespace OpenScadGraphEditor
 
             _modulesList.ItemActivated += Open;
             _functionsList.ItemActivated += Open;
-            
+
             _modulesList.ItemContextMenuRequested += OnItemContextMenuRequested;
             _functionsList.ItemContextMenuRequested += OnItemContextMenuRequested;
             _variablesList.ItemContextMenuRequested += OnItemContextMenuRequested;
-            
 
 
             this.WithName<Button>("NewButton")
@@ -133,19 +137,72 @@ namespace OpenScadGraphEditor
             OnNewButtonPressed();
         }
 
+        private void OnNewImportRequested(ExternalReference reference, RequestContext requestContext)
+        {
+            var currentPath = _currentFile != null ? PathResolver.DirectoryFromFile(_currentFile) : null;
+
+            // first, check if the reference is already in the project.
+            var resolved = PathResolver.TryResolve(currentPath, reference.SourceFile, out var fullPath);
+            GdAssert.That(resolved, $"Could not resolve reference '{reference.SourceFile}'");
+
+            var exists = _currentProject.ExternalReferences.FirstOrDefault(it =>
+            {
+                var innerResolved = PathResolver.TryResolve(currentPath, it.SourceFile, out var innerFullPath);
+                GdAssert.That(innerResolved, $"Could not resolve reference '{it.SourceFile}'");
+
+                return PathResolver.IsSamePath(fullPath, innerFullPath);
+            });
+
+            if (exists == null)
+            {
+                // if it doesn't exist, load the file and add it to the project.
+                try
+                {
+                    // read text from file
+                    var text = System.IO.File.ReadAllText(fullPath, Encoding.UTF8);
+                    // parse contents and fill the reference with data
+                    ExternalFileParser.Parse(text, reference);
+
+                    // and add it to the project
+                    _currentProject.AddExternalReference(reference);
+                }
+                catch (Exception e)
+                {
+                    GD.PrintErr("Cannot read file. " + e.Message);
+                    // TODO: better error handling
+                    return;
+                }
+
+                // finally add an import node to the graph
+                AddNode(requestContext, NodeFactory.Build<ImportScadFile>(reference));
+                return;
+            }
+
+            // TODO: the import from the dialog may have used a different path mode, so it's not exactly the same
+            // but i think we should stick to _ONE_ and only one import mode for each file. Maybe the dialog should
+            // give the user some hint that the file is already included? Then again there are possible reasons why
+            // one would want to include stuff twice.
+
+            // otherwise just add an import node to the existing reference to the graph
+            AddNode(requestContext, NodeFactory.Build<ImportScadFile>(reference));
+        }
+
         private void OnItemContextMenuRequested(ScadItemListEntry entry, Vector2 mousePosition)
         {
             var actions = new List<QuickAction>();
-            if (entry is ScadInvokableListEntry invokableListEntry && !(invokableListEntry.Description is MainModuleDescription))
+            if (entry is ScadInvokableListEntry invokableListEntry &&
+                !(invokableListEntry.Description is MainModuleDescription))
             {
-                actions.Add(new QuickAction($"Delete {invokableListEntry.Description.Name}", () => ShowConfirmDeleteDialog(invokableListEntry.Description)));
+                actions.Add(new QuickAction($"Delete {invokableListEntry.Description.Name}",
+                    () => ShowConfirmDeleteDialog(invokableListEntry.Description)));
             }
 
             if (entry is ScadVariableListEntry scadVariableListEntry)
             {
-                actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}", () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));
+                actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}",
+                    () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));
             }
-            
+
             _quickActionsPopup.Open(mousePosition, actions);
         }
 
@@ -154,7 +211,7 @@ namespace OpenScadGraphEditor
             _confirmationDialog.Open($"Do you really want to delete {description.Name}?",
                 () => OnRefactoringRequested(new DeleteInvokableRefactoring(description)));
         }
-        
+
         private void ShowConfirmDeleteDialog(VariableDescription description)
         {
             _confirmationDialog.Open($"Do you really want to delete variable {description.Name}?",
@@ -187,18 +244,19 @@ namespace OpenScadGraphEditor
 
             _modulesList.Setup(
                 _currentProject.Modules
-                    .Select(it => new ScadInvokableListEntry(it.Description, !(it.Description is MainModuleDescription)))
+                    .Select(it =>
+                        new ScadInvokableListEntry(it.Description, !(it.Description is MainModuleDescription)))
             );
 
             _variablesList.Setup(
                 _currentProject.Variables
-                    .Select( it => new ScadVariableListEntry(it))
+                    .Select(it => new ScadVariableListEntry(it))
             );
-            
+
             // Fill the Add Dialog Entries.
 
             _addDialogEntries.Clear();
-            
+
             _addDialogEntries.AddRange(
                 BuiltIns.LanguageLevelNodes
                     .Select(it => new NodeBasedEntry(
@@ -206,7 +264,7 @@ namespace OpenScadGraphEditor
                         () => NodeFactory.Build(it),
                         AddNode
                     ))
-                );
+            );
 
             _addDialogEntries.AddRange(
                 BuiltIns.Functions
@@ -215,7 +273,7 @@ namespace OpenScadGraphEditor
                         () => NodeFactory.Build<FunctionInvocation>(it),
                         AddNode
                     ))
-                );
+            );
 
             _addDialogEntries.AddRange(
                 BuiltIns.Modules
@@ -224,8 +282,8 @@ namespace OpenScadGraphEditor
                         () => NodeFactory.Build<ModuleInvocation>(it),
                         AddNode
                     )));
-            
-            
+
+
             // also add entries for functions and modules defined in the project
             _addDialogEntries.AddRange(
                 _currentProject.Functions
@@ -235,7 +293,7 @@ namespace OpenScadGraphEditor
                         AddNode
                     ))
             );
-            
+
             _addDialogEntries.AddRange(
                 _currentProject.Modules
                     .Select(it => new NodeBasedEntry(
@@ -244,7 +302,7 @@ namespace OpenScadGraphEditor
                         AddNode
                     ))
             );
-            
+
             // add getter and setters for all variables
             _addDialogEntries.AddRange(
                 _currentProject.Variables
@@ -254,7 +312,7 @@ namespace OpenScadGraphEditor
                         AddNode
                     ))
             );
-            
+
             _addDialogEntries.AddRange(
                 _currentProject.Variables
                     .Select(it => new NodeBasedEntry(
@@ -264,21 +322,45 @@ namespace OpenScadGraphEditor
                     ))
             );
 
-            
+
             // add special node for using a scad file
             _addDialogEntries.Add(
                 new NodeBasedEntry(
                     GD.Load<Texture>("res://Icons/scad_builtin.png"),
-                    NodeFactory.Build<UseScadFile>,
+                    NodeFactory.Build<ImportScadFile>,
                     OnImportScadFile
                 )
             );
-            
+
+
+            // add call entries for all externally referenced functions and modules
+            foreach (var reference in _currentProject.ExternalReferences)
+            {
+                _addDialogEntries.AddRange(
+                    reference.Functions
+                        .Select(it => new NodeBasedEntry(
+                                GD.Load<Texture>("res://Icons/function.png"),
+                                () => NodeFactory.Build<FunctionInvocation>(it),
+                                AddNode
+                            )
+                        )
+                );
+
+                _addDialogEntries.AddRange(
+                    reference.Modules
+                        .Select(it => new NodeBasedEntry(
+                                GD.Load<Texture>("res://Icons/module.png"),
+                                () => NodeFactory.Build<ModuleInvocation>(it),
+                                AddNode
+                            )
+                        )
+                );
+            }
         }
 
         private void OnImportScadFile(RequestContext context, NodeBasedEntry entry)
         {
-            _importDialog.OpenForNewImport(_currentFile);
+            _importDialog.OpenForNewImport(_currentFile, context);
         }
 
 
@@ -289,7 +371,6 @@ namespace OpenScadGraphEditor
 
         private void AddNode(RequestContext context, ScadNode node)
         {
-            
             node.Offset = context.LastReleasePosition;
 
             var refactorings = new List<Refactoring> {new AddNodeRefactoring(context.Source, node)};
@@ -315,7 +396,8 @@ namespace OpenScadGraphEditor
             {
                 for (var i = 0; i < node.OutputPortCount; i++)
                 {
-                    var connection = new ScadConnection(context.Source,  node, i, context.DestinationNode, context.LastPort);
+                    var connection = new ScadConnection(context.Source, node, i, context.DestinationNode,
+                        context.LastPort);
                     var operationResult = ConnectionRules.CanConnect(connection);
                     if (operationResult.Decision == ConnectionRules.OperationRuleDecision.Allow)
                     {
@@ -325,6 +407,7 @@ namespace OpenScadGraphEditor
                     }
                 }
             }
+
             PerformRefactorings(refactorings);
         }
 
@@ -368,12 +451,12 @@ namespace OpenScadGraphEditor
 
         private void OnRefactoringRequested(Refactoring refactoring)
         {
-            PerformRefactorings(new [] {refactoring});
+            PerformRefactorings(new[] {refactoring});
         }
 
         private void PerformRefactorings(IEnumerable<Refactoring> refactorings, params Action[] after)
         {
-            var context = new RefactoringContext( _currentProject);
+            var context = new RefactoringContext(_currentProject);
             context.PerformRefactorings(refactorings, after);
             RefreshLists();
             MarkDirty(true);
@@ -391,12 +474,13 @@ namespace OpenScadGraphEditor
         private EditorState GetEditorState()
         {
             // create a list of currently open tabs
-            var tabs = 
+            var tabs =
                 _tabContainer.GetChildNodes<ScadGraphEdit>()
-                    .Select((it, idx) => new EditorOpenTab(it.Description.Id, _tabContainer.CurrentTab == idx, it.ScrollOffset));
+                    .Select((it, idx) =>
+                        new EditorOpenTab(it.Description.Id, _tabContainer.CurrentTab == idx, it.ScrollOffset));
             return new EditorState(tabs);
         }
-        
+
         private void AttachTo(ScadGraphEdit editor)
         {
             editor.Changed += MarkDirty;
@@ -411,7 +495,7 @@ namespace OpenScadGraphEditor
             // when shift is pressed this means we want to have a reroute node.
             if (Input.IsKeyPressed((int) KeyList.Shift))
             {
-                AddNode(context,  NodeFactory.Build<RerouteNode>());
+                AddNode(context, NodeFactory.Build<RerouteNode>());
                 return;
             }
 
@@ -419,7 +503,8 @@ namespace OpenScadGraphEditor
             _addDialog.Open(_addDialogEntries, context);
         }
 
-        private void OnItemDataDropped(ScadGraphEdit graph, ScadItemListEntry entry, Vector2 mousePosition, Vector2 virtualPosition)
+        private void OnItemDataDropped(ScadGraphEdit graph, ScadItemListEntry entry, Vector2 mousePosition,
+            Vector2 virtualPosition)
         {
             // did we drag an invokable from the list to the graph?
             if (entry is ScadInvokableListEntry invokableListEntry)
@@ -443,7 +528,7 @@ namespace OpenScadGraphEditor
                 node.Offset = virtualPosition;
                 OnRefactoringRequested(new AddNodeRefactoring(graph, node));
             }
-            
+
             // did we drag a variable from the list to the graph?
             if (entry is ScadVariableListEntry variableListEntry)
             {
@@ -461,7 +546,7 @@ namespace OpenScadGraphEditor
                     new QuickAction($"Set {variableListEntry.Description.Name}",
                         () => OnRefactoringRequested(new AddNodeRefactoring(graph, setNode)))
                 };
-                
+
                 _quickActionsPopup.Open(mousePosition, actions);
             }
         }
@@ -625,14 +710,13 @@ namespace OpenScadGraphEditor
             }
         }
     }
-    
-    
+
+
     class NodeBasedEntry : IAddDialogEntry
     {
         private readonly ScadNode _template;
         private readonly Func<ScadNode> _factory;
-        private readonly Action<RequestContext,NodeBasedEntry> _action
-            ;
+        private readonly Action<RequestContext, NodeBasedEntry> _action;
 
         public string Title => _template.NodeTitle;
         public string Keywords => _template.NodeDescription;
@@ -646,7 +730,7 @@ namespace OpenScadGraphEditor
         public Texture Icon { get; }
 
         public ScadNode CreateNode() => _factory();
-        
+
         public NodeBasedEntry(Texture icon, Func<ScadNode> factory, Action<RequestContext, NodeBasedEntry> action)
         {
             _factory = factory;
@@ -654,7 +738,7 @@ namespace OpenScadGraphEditor
             _action = action;
             Icon = icon;
         }
-        
+
         // TODO: we need a distinction here whether the node simply doesn't fit context
         // or if it is actually not allowed to be used here. E.g. right now we can use
         // module calls in functions which we should not be able to do.
@@ -665,30 +749,31 @@ namespace OpenScadGraphEditor
             {
                 for (var i = 0; i < _template.InputPortCount; i++)
                 {
-                    var connection = new ScadConnection(context.Source, context.SourceNode, context.LastPort, _template, i);
+                    var connection = new ScadConnection(context.Source, context.SourceNode, context.LastPort, _template,
+                        i);
                     if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                     {
                         return true;
                     }
                 }
             }
-            
+
             // if this came from a node right of us, check if we have a matching output port
             if (context.DestinationNode != null)
             {
                 for (var i = 0; i < _template.OutputPortCount; i++)
                 {
-                    var connection = new ScadConnection(context.Source, _template, i, context.DestinationNode, context.LastPort);
+                    var connection = new ScadConnection(context.Source, _template, i, context.DestinationNode,
+                        context.LastPort);
                     if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                     {
                         return true;
                     }
                 }
             }
-            
+
             // otherwise it doesn't match
             return false;
         }
-
     }
 }

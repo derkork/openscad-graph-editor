@@ -10,16 +10,30 @@ namespace OpenScadGraphEditor.Library.External
     public class ExternalReference : Resource, IReferenceResolver
     {
         /// <summary>
+        /// Flag indicating whether the file has actually been loaded and the functions and modules and variables
+        /// are up to date.
+        /// </summary>
+        [Export]
+        public bool IsLoaded { get; set; }
+
+        /// <summary>
         /// Id of this external reference.
         /// </summary>
         [Export]
         public string Id { get; set; }
         
         /// <summary>
-        /// The source file from which the declarations were loaded.
+        /// The source file from which the declarations were loaded. This needs to be decoded with
+        /// <see cref="PathResolver.Decode"/>. Use <see cref="IncludePath"/> accessor instead of this.
         /// </summary>
         [Export]
         public string SourceFile { get; set; }
+        
+        /// <summary>
+        /// The include mode used to get this reference. (see https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Include_Statement).
+        /// </summary>
+        [Export]
+        public IncludeMode Mode { get; set; }
         
         /// <summary>
         /// All functions defined in the source file.
@@ -58,5 +72,10 @@ namespace OpenScadGraphEditor.Library.External
         {
             return id == Id ? this : null;
         }
+
+        /// <summary>
+        /// Returns the include path as it will be printed into the scad file.
+        /// </summary>
+        public string IncludePath => PathResolver.Decode(SourceFile, out _);
     }
 }
