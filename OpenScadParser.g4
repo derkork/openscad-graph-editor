@@ -30,7 +30,7 @@ functionDeclaration
     : FUNCTION identifier parameterList ASSIGNMENT_OPERATOR expression STATEMENT_TERMINATOR;
 
 moduleDeclaration
-    : MODULE identifier parameterList BLOCK_START moduleContent BLOCK_END;
+    : MODULE identifier parameterList block;
 
 invocationParameterList
     : OPEN_PAREN (invocationParameter (COMMA invocationParameter)*)? CLOSE_PAREN 
