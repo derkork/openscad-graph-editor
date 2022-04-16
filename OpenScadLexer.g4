@@ -4,6 +4,9 @@ lexer grammar OpenScadLexer;
 INCLUDE: 'include' [\t ]* '<' -> pushMode(FILE_IMPORT_MODE);
 USE: 'use' [\t ]* '<' -> pushMode(FILE_IMPORT_MODE);
 
+ASSERT: 'assert';
+ECHO: 'echo';
+
 // operators
 ADD : '+';
 SUBTRACT : '-';

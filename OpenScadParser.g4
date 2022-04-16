@@ -56,6 +56,12 @@ forLoop
 
 intersectionForLoop
     : INTERSECTION_FOR invocationParameterList block;
+
+assertionBlock
+    : ASSERT invocationParameterList block;
+    
+echoInvocation
+    : ECHO invocationParameterList STATEMENT_TERMINATOR;    
     
 block
     : BLOCK_START moduleContent BLOCK_END
@@ -64,6 +70,8 @@ block
     | forLoop
     | letBlock
     | intersectionForLoop
+    | assertionBlock
+    | echoInvocation
     | STATEMENT_TERMINATOR
     ;
     
@@ -86,7 +94,16 @@ expression
     | vectorIndexExpression
     | expression binaryOperator expression
     | lambdaExpression
+    | assertionExpression
+    | echoExpression
     ;
+
+assertionExpression
+    : ASSERT invocationParameterList expression?;
+    
+
+echoExpression
+    : ECHO invocationParameterList expression?;
 
 lambdaExpression
     : FUNCTION parameterList expression;
