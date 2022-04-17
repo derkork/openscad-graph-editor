@@ -14,15 +14,17 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private LineEdit _nameEdit;
         private VariableDescription _baseDescription;
-        
+
         private DialogMode _mode = DialogMode.Edit;
         private Button _okButton;
+        private Label _errorLabel;
 
         public override void _Ready()
         {
             GetCloseButton().Visible = false;
 
             _nameEdit = this.WithName<LineEdit>("NameEdit");
+            _errorLabel = this.WithName<Label>("ErrorLabel");
             _nameEdit
                 .Connect("text_changed")
                 .To(this, nameof(OnIdentifierChanged));
@@ -44,6 +46,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _mode = DialogMode.Create;
             ValidateAll();
             PopupCentered();
+            SetAsMinsize();
         }
 
         public void Open(VariableDescription description)
@@ -55,6 +58,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _nameEdit.Text = description.Name;
             ValidateAll();
             PopupCentered();
+            SetAsMinsize();
         }
 
         private void Clear()
@@ -70,11 +74,13 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 case DialogMode.Edit:
                     break;
                 case DialogMode.Create:
-                    RefactoringsRequested?.Invoke(new Refactoring[]{new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text))});
+                    RefactoringsRequested?.Invoke(new Refactoring[]
+                        {new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text))});
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
             Hide();
         }
 
@@ -86,13 +92,16 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private void OnIdentifierChanged(string _)
         {
             ValidateAll();
+            SetAsMinsize();
         }
 
         private void ValidateAll()
         {
-            // name must be valid
-            var isValid = _nameEdit.Text.IsValidIdentifier();
-            _okButton.Disabled = !isValid;
+            ValidityChecker.For(_errorLabel, _okButton)
+                .Check(_nameEdit.Text.IsValidIdentifier(),
+                    "Name must not be blank and must be only letters, numbers, and underscores and must not start with a letter."
+                )
+                .UpdateUserInterface();
         }
     }
 }

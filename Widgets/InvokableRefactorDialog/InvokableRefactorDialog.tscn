@@ -14,6 +14,7 @@ margin_right = 300.0
 margin_bottom = 150.0
 rect_min_size = Vector2( 800, 400 )
 window_title = "Setup"
+resizable = true
 script = ExtResource( 1 )
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
@@ -107,12 +108,13 @@ text = "+"
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 margin_top = 223.0
 margin_right = 780.0
-margin_bottom = 333.0
+margin_bottom = 290.0
 size_flags_vertical = 3
+scroll_horizontal_enabled = false
 
 [node name="ParameterGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
 margin_right = 780.0
-margin_bottom = 110.0
+margin_bottom = 67.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 5
@@ -148,20 +150,31 @@ margin_right = 780.0
 margin_bottom = 45.0
 text = "x"
 
+[node name="ErrorLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+margin_top = 300.0
+margin_right = 780.0
+margin_bottom = 325.0
+custom_colors/font_color = Color( 1, 1, 0, 1 )
+text = "Error Message!"
+align = 2
+autowrap = true
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 343.0
+margin_top = 335.0
 margin_right = 780.0
 margin_bottom = 380.0
 alignment = 2
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 623.0
-margin_right = 718.0
-margin_bottom = 37.0
+margin_left = 552.0
+margin_right = 662.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 45 )
 text = "Cancel"
 
 [node name="OkButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 726.0
+margin_left = 670.0
 margin_right = 780.0
-margin_bottom = 37.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 45 )
 text = "Ok"

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -29,6 +28,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private Button _templateParameterUpButton;
         private Button _templateParameterDownButton;
         private Button _templateParameterDeleteButton;
+        private Label _errorLabel;
         private GridContainer _parameterGrid;
         private readonly List<ParameterLine> _parameterLines = new List<ParameterLine>();
         private readonly Dictionary<PortType, int> _indexByPortTypes = new Dictionary<PortType, int>();
@@ -50,6 +50,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _allowChildrenLabel = this.WithName<Label>("AllowChildrenLabel");
             _allowChildrenCheckbox = this.WithName<CheckBox>("AllowChildrenCheckbox");
 
+            _errorLabel = this.WithName<Label>("ErrorLabel");
 
             _templateParameterName = this.WithName<LineEdit>("TemplateParameterName");
             _templateParameterName.Visible = false;
@@ -118,6 +119,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _allowChildrenLabel.Visible = false;
             _allowChildrenCheckbox.Visible = false;
             ValidateAll();
+            SetAsMinsize();
             PopupCentered();
         }
 
@@ -131,6 +133,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _allowChildrenCheckbox.Visible = true;
             _allowChildrenCheckbox.Pressed = true;
             ValidateAll();
+            SetAsMinsize();
             PopupCentered();
         }
 
@@ -292,6 +295,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     {
                         moduleDescription.WithParameter(line.Name, line.TypeHint);
                     }
+
                     // we need this down there when calling our listeners
                     _baseDescription = moduleDescription.Build();
                     refactorings.Add(new IntroduceInvokableRefactoring(_baseDescription));
@@ -328,17 +332,27 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void OnIdentifierChanged(string _)
         {
             ValidateAll();
+            SetAsMinsize();
         }
 
         private void ValidateAll()
         {
-            // name must be valid
-            var isValid = _nameEdit.Text.IsValidIdentifier();
-            // all parameter names must be valid
-            isValid &= _parameterLines.All(it => it.Name.IsValidIdentifier());
-            // parameter names must be unique
-            isValid &= _parameterLines.Select(it => it.Name).Distinct().Count() == _parameterLines.Count;
-            _okButton.Disabled = !isValid;
+            ValidityChecker.For(_errorLabel, _okButton)
+                .Check(
+                    _nameEdit.Text.IsValidIdentifier(),
+                    $"Name must not be blank and must be only letters, numbers, and underscores and must not start with a letter."
+                )
+                .CheckAll(
+                    _parameterLines,
+                    it => it.Name.IsValidIdentifier(),
+                    it =>
+                        $"Parameter name '{it.Name}' must be only letters, numbers, and underscores and must not start with a letter."
+                )
+                .Check(
+                    _parameterLines.Select(it => it.Name).Distinct().Count() == _parameterLines.Count,
+                    "Parameter names must be unique."
+                )
+                .UpdateUserInterface();
         }
 
         private void OnAddParameterPressed()
@@ -395,6 +409,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
             Repaint();
             ValidateAll();
+            SetAsMinsize();
         }
 
         private void Repaint()
