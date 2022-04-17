@@ -57,7 +57,17 @@ IDENTIFIER: '$'?[a-zA-Z_][a-zA-Z0-9_]*;
 
 WS  : (' '|'\t'|'\r'|'\n')+ -> skip;
  
-STRING : '"' .*? '"';
+STRING :  '"' (~["\\] | EscapeSequence)* '"';
+
+fragment EscapeSequence
+    : '\\' [btnfr"'\\]
+    | '\\' ([0-3]? [0-7])? [0-7]
+    | '\\' 'u'+ HexDigit HexDigit HexDigit HexDigit
+    ;
+    
+fragment HexDigit
+    : [0-9a-fA-F]
+    ;
 
 NUMBER  
     : ( [0-9]* '.' )? [0-9]+ (( 'e' | 'E' ) ( '+' | '-' )? [0-9]+)?;
