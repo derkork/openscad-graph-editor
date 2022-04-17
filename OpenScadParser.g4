@@ -84,7 +84,6 @@ expression
     : simpleExpression
     | LET invocationParameterList expression
     | vectorExpression
-    | vectorComprehension
     | functionInvocation
     | unaryOperator expression
     | parenthesizedExpression
@@ -112,23 +111,21 @@ parenthesizedExpression
     : OPEN_PAREN expression CLOSE_PAREN;
 
 vectorIndexExpression
-    : ( identifier | parenthesizedExpression | vectorExpression | vectorComprehension | functionInvocation ) (DOT identifier | VECTOR_START expression VECTOR_END)+;
+    : ( identifier | parenthesizedExpression | vectorExpression | functionInvocation ) (DOT identifier | VECTOR_START expression VECTOR_END)+;
 
 vectorExpression
-    : (VECTOR_START expression (COMMA expression)* COMMA* VECTOR_END) // funny enough the parser allows for trailing commas 
+    : (VECTOR_START vectorInner (COMMA vectorInner)* COMMA* VECTOR_END) // funny enough the parser allows for trailing commas 
     | (VECTOR_START VECTOR_END);
     
-vectorComprehension
-    : VECTOR_START comprehensionForLoop comprehensionExpression VECTOR_END;
     
 comprehensionForLoop
     : FOR OPEN_PAREN invocationParameter (COMMA invocationParameter)* ( STATEMENT_TERMINATOR  expression STATEMENT_TERMINATOR invocationParameter (COMMA invocationParameter)* )? CLOSE_PAREN;
 
-comprehensionExpression
-    : IF OPEN_PAREN expression CLOSE_PAREN comprehensionExpression (ELSE comprehensionExpression)?
-    | LET invocationParameterList comprehensionExpression
-    | EACH comprehensionExpression
-    | comprehensionForLoop comprehensionExpression 
+vectorInner
+    : IF OPEN_PAREN expression CLOSE_PAREN vectorInner (ELSE vectorInner)?
+    | LET invocationParameterList vectorInner
+    | EACH vectorInner
+    | comprehensionForLoop vectorInner 
     | expression;  
 
 rangeExpression
