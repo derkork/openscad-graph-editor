@@ -73,9 +73,9 @@ namespace OpenScadGraphEditor.Widgets.ScadItemList
             ItemActivated?.Invoke(_entries[index]);
         }
 
-        private void OnItemRmbSelected(int index, Vector2 position)
+        private void OnItemRmbSelected(int index, [UsedImplicitly] Vector2 _)
         {
-            ItemContextMenuRequested?.Invoke(_entries[index], position);
+            ItemContextMenuRequested?.Invoke(_entries[index], GetGlobalMousePosition());
         }
     }
 }
