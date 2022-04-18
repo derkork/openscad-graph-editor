@@ -73,7 +73,7 @@ namespace OpenScadGraphEditor.Nodes
                 InputPorts
                     .Indices()
                     .Skip(1)
-                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(context, it)}")
+                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(context, it).OrUndef()}")
             );
             var result = $"{_description.Name}({parameters})";
             var childNodes = _description.SupportsChildren ? RenderOutput(context, 0) : "";

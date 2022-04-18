@@ -79,7 +79,7 @@ namespace OpenScadGraphEditor.Nodes
                     .Select(it =>
                     {
                         var parameterName = _description.Parameters[it].Name;
-                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(context, it)}" : RenderInput(context, it);
+                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(context, it).OrUndef()}" : RenderInput(context, it).OrUndef();
                     })
             );
             return $"{_description.Name}({parameters})";
