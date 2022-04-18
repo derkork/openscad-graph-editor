@@ -91,10 +91,5 @@ namespace OpenScadGraphEditor.Nodes
             // return simply the parameter name.
             return _description.Parameters[port - 1].Name;
         }
-
-        public bool IsExpressionPort(int port)
-        {
-            return port > 0 && port <= _description.Parameters.Count;
-        }
     }
 }

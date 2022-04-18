@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using GodotExt;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -17,8 +16,19 @@ namespace OpenScadGraphEditor.Refactorings
         public ScadProject Project { get; }
         private readonly List<Refactoring> _refactorings = new List<Refactoring>();
 
-        private readonly Dictionary<IScadGraph, IScadGraph> _modifiedVisibleGraphs =
-            new Dictionary<IScadGraph, IScadGraph>();
+        /// <summary>
+        /// A dictionary of visible graphs. The key is the <see cref="LightWeightGraph"/> and the
+        /// value is the heavy weight graph that is currently open.
+        /// </summary>
+        private readonly Dictionary<LightWeightGraph, IScadGraph> _modifiedVisibleGraphs =
+            new Dictionary<LightWeightGraph, IScadGraph>();
+
+        /// <summary>
+        /// A reverse version of <see cref="_modifiedVisibleGraphs"/>, used to quickly reverse look up if
+        /// a graph already has been made refactorable.
+        /// </summary>
+        private readonly Dictionary<IScadGraph, LightWeightGraph> _modifiedVisibleGraphsReverse =
+            new Dictionary<IScadGraph, LightWeightGraph>();
 
         private RefactoringPhase _phase;
 
@@ -93,6 +103,7 @@ namespace OpenScadGraphEditor.Refactorings
                 return;
             } 
             
+            GD.Print("Performing refactoring: " + refactoring.GetType().Name);
             refactoring.PerformRefactoring(this);
         }
         
@@ -109,25 +120,25 @@ namespace OpenScadGraphEditor.Refactorings
                 return lightWeightGraph;
             }
 
-            // when multiple refactorings are done on the same source graph, don't swap out the graph again.
-            foreach (var entry in _modifiedVisibleGraphs.Where(entry => entry.Value == graph))
+            if (_modifiedVisibleGraphsReverse.TryGetValue(graph, out var lightWeightGraphReverse))
             {
-                return entry.Key as LightWeightGraph;
+                return lightWeightGraphReverse;
             }
 
             var result = new LightWeightGraph();
             Project.TransferData(graph, result);
             _modifiedVisibleGraphs[result] = graph;
+            _modifiedVisibleGraphsReverse[graph] = result;
             return result;
         }
 
 
-        internal void MarkDeleted(IScadGraph graph)
+        internal void MarkDeleted(LightWeightGraph graph)
         {
-            GdAssert.That(graph is LightWeightGraph, "Only LightWeightGraphs can be marked as deleted.");
             // if the graph is currently visible, discard the visible graph as well
             if (_modifiedVisibleGraphs.TryGetValue(graph, out var visibleGraph))
             {
+                _modifiedVisibleGraphsReverse.Remove(visibleGraph);
                 visibleGraph.Discard();
             }
 
@@ -148,6 +159,7 @@ namespace OpenScadGraphEditor.Refactorings
             }
 
             _modifiedVisibleGraphs.Clear();
+            _modifiedVisibleGraphsReverse.Clear();
         }
     }
 }

@@ -98,16 +98,5 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
             return RenderInput(context, 0);
         }
-
-        public bool IsExpressionPort(int port)
-        {
-            if (port != 0)
-            {
-                return false;
-            }
-
-            var outputPortType = GetOutputPortType(0);
-            return outputPortType != PortType.Flow && outputPortType != PortType.Reroute;
-        }
     }
 }

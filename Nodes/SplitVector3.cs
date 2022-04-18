@@ -45,10 +45,5 @@ namespace OpenScadGraphEditor.Nodes
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        public bool IsExpressionPort(int port)
-        {
-            return port >= 0 && port < 3;
-        }
     }
 }

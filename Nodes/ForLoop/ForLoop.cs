@@ -104,10 +104,5 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             GdAssert.That(port > 0 && port <= NestLevel, "port out of range");
             return Id.UniqueStableVariableName(port - 1);
         }
-
-        public bool IsExpressionPort(int port)
-        {
-            return port > 0 && port <= NestLevel;
-        }
     }
 }

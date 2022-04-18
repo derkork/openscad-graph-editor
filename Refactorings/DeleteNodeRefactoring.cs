@@ -1,15 +1,12 @@
-using System.Linq;
-using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
 {
     /// <summary>
     /// Deletes a node. Will delete all connections from or to that node as well. Nodes that are marked as
-    /// <see cref="ICannotBeDeleted"/> will not be deleted. If any connection to the node vetoes its disconnection
-    /// the node will not be deleted and no connection will be deleted either.
+    /// <see cref="ICannotBeDeleted"/> will not be deleted. Nodes marked with <see cref="IHaveSpecialDestruction"/>
+    /// will be deleted using their destruction refactoring.
     /// </summary>
     public class DeleteNodeRefactoring : NodeRefactoring
     {
@@ -19,28 +16,20 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            if (Node is ICannotBeDeleted)
+            switch (Node)
             {
-                return;
-            }
-            
-            var graph = context.MakeRefactorable(Holder);
-            var toDelete = graph.ById(Node.Id);
-
-            var connections = graph.GetAllConnections()
-                .Where(it => it.InvolvesNode(toDelete))
-                .ToList();
-            
-            if (connections.Select(ConnectionRules.CanDisconnect).Any(result => result.Decision == ConnectionRules.OperationRuleDecision.Veto))
-            {
-                GD.Print("Disconnection vetoed.");
-                return;
+                case ICannotBeDeleted _:
+                    return;
+                case IHaveSpecialDestruction haveSpecialDestruction:
+                    var refactoring = haveSpecialDestruction.GetDestructionRefactoring(Holder);
+                    context.PerformRefactoring(refactoring);
+                    return;
             }
 
-            // drop all connections. Run a proper refactoring for this, so all the side effects are executed as well
-            connections.Select(it => new DropConnectionRefactoring(it)).ForAll(context.PerformRefactoring);
-            // and finally the node
-            graph.RemoveNode(toDelete);
+
+            // otherwise just call the simple destruction refactoring
+            var simpleDeletion = new DeleteNodeRefactoringSimple(Holder, Node);
+            context.PerformRefactoring(simpleDeletion);
         }
     }
 }

@@ -36,23 +36,5 @@ namespace OpenScadGraphEditor.Library
             targetPort = default;
             return false;
         }
-
-        /// <summary>
-        /// Returns true, if the graph contains references to the given invokable.
-        /// </summary>
-        public static bool ContainsReferencesTo(this IScadGraph self, InvokableDescription description)
-        {
-            return self.GetAllNodes().Any(it =>
-                it is IReferToAnInvokable referToAnInvokable && referToAnInvokable.InvokableDescription == description);
-        }
-        
-        /// <summary>
-        /// Returns true, if the graph contains references to the given variable.
-        /// </summary>
-        public static bool ContainsReferencesTo(this IScadGraph self, VariableDescription description)
-        {
-            return self.GetAllNodes().Any(it =>
-                it is IReferToAVariable referToAVariable && referToAVariable.VariableDescription == description);
-        }
     }
 }

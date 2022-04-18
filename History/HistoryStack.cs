@@ -55,7 +55,7 @@ namespace OpenScadGraphEditor.History
             
             var item = _history[_currentIndex - 1];
             // restore the project
-            project.Load(item.ProjectState);
+            project.Load(item.ProjectState, project.ProjectPath);
             _currentIndex--;
             return item.EditorState;
         }
@@ -73,7 +73,7 @@ namespace OpenScadGraphEditor.History
             
             var item = _history[_currentIndex + 1];
             // restore the project
-            project.Load(item.ProjectState);
+            project.Load(item.ProjectState, project.ProjectPath);
             _currentIndex++;
             return item.EditorState;
         }

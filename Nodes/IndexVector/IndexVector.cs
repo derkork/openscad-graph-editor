@@ -84,10 +84,5 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             var index = RenderInput(context, port+1);
             return $"({vector})[{index}]";
         }
-
-        public bool IsExpressionPort(int port)
-        {
-            return port >= 0 && port < IndexPortCount;
-        }
     }
 }

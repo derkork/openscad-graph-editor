@@ -9,6 +9,7 @@ using OpenScadGraphEditor.History;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.ImportScadFile;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -613,7 +614,7 @@ namespace OpenScadGraphEditor
             _fileNameLabel.Text = filename;
 
             _currentProject = new ScadProject(_rootResolver);
-            _currentProject.Load(savedProject);
+            _currentProject.Load(savedProject, _currentFile);
 
             Open(_currentProject.MainModule);
             RefreshLists();

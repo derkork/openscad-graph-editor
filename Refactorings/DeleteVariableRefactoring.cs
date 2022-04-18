@@ -16,28 +16,13 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            // find all graphs that refer to this variable and make them refactorable
-            var graphs = context.Project.FindContainingReferencesTo(_description)
-                .Select(context.MakeRefactorable)
-                .ToList();
-            
-            // now walk all graphs and remove all nodes that refer to this variable
-            foreach (var graph in graphs)
-            {
-                var nodesToKill = graph.GetAllNodes()
-                    .Where(it =>
-                        it is IReferToAVariable iReferToAVariable &&
-                        iReferToAVariable.VariableDescription == _description)
-                    .ToList();
-
-                // first kill all connections involving any of these nodes from the graph
-                graph.GetAllConnections().Where(it => nodesToKill.Any(it.InvolvesNode))
-                    .ToList()
-                    .ForAll(it => graph.RemoveConnection(it));
-                
-                // then kill the nodes themselves
-                nodesToKill.ForAll(it => graph.RemoveNode(it));
-            }
+            // find all nodes that somehow refer to this variable
+            context.Project.FindAllReferencingNodes(_description)
+                // create a deletion refactoring for them
+                .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node) )
+                .ToList() // avoid modifying the project while still reading it
+                // and perform the deletion refactorings
+                .ForAll(context.PerformRefactoring);
             
             // finally delete the variable entry from the project
             context.Project.RemoveVariable(_description);
