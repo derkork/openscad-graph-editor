@@ -31,6 +31,8 @@ namespace OpenScadGraphEditor.Library
         public IEnumerable<ExternalReference> ExternalReferences => _externalReferences;
 
         public IScadGraph MainModule { get; private set; }
+        
+        public string ProjectPath { get; set; }
 
         public ScadProject(IReferenceResolver parentResolver)
         {
@@ -139,9 +141,10 @@ namespace OpenScadGraphEditor.Library
             _functions.Clear();
         }
 
-        public void Load(SavedProject project)
+        public void Load(SavedProject project, string projectPath)
         {
             Clear();
+            ProjectPath = projectPath;
             // Step 1: load function descriptions so we can resolve them in step 4
             foreach (var function in project.Functions)
             {
@@ -294,5 +297,10 @@ namespace OpenScadGraphEditor.Library
             _externalReferences.Add(reference);
         }
 
+        public void RemoveExternalReference(ExternalReference externalReference)
+        {
+            var removed = _externalReferences.Remove(externalReference);
+            GdAssert.That(removed, "Tried to remove an external reference that was not present.");
+        }
     }
 }

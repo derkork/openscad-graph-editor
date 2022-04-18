@@ -2,13 +2,14 @@ using System;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
+using OpenScadGraphEditor.Refactorings;
 
-namespace OpenScadGraphEditor.Nodes
+namespace OpenScadGraphEditor.Nodes.ImportScadFile
 {
     /// <summary>
     /// Class for nodes importing data from *.scad files.
     /// </summary>
-    public sealed class ImportScadFile : ScadNode, IReferToAnExternalReference
+    public sealed class ImportScadFile : ScadNode, IReferToAnExternalReference, IHaveSpecialDestruction
     {
 
         public override string NodeTitle
@@ -78,6 +79,11 @@ namespace OpenScadGraphEditor.Nodes
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public Refactoring GetDestructionRefactoring(IScadGraph nodeHolder)
+        {
+            return new DeleteImportScadFileRefactoring(nodeHolder, this);
         }
     }
 }
