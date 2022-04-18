@@ -1,5 +1,6 @@
 using System.Linq;
 using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
 using Godot;
 
 namespace OpenScadGraphEditor.Library.External
@@ -85,14 +86,45 @@ namespace OpenScadGraphEditor.Library.External
                     var name = parameter.identifier().IDENTIFIER().GetText();
                     builder.WithParameter(name);
                 }
-                
+                // finally check if this module supports children
+                if (SupportsChildren(context))
+                {
+                    builder.WithChildren();
+                }
                 _externalReference.Modules.Add(builder.Build());
+                
             }
             
             // and walk the rest of the tree
             return base.VisitModuleDeclaration(context);
         }
         
+        /// <summary>
+        /// Checks if the given module declaration supports children. It supports children if it has any
+        /// module invocation in it that calls to the `children` module.
+        /// </summary>
+        private static bool SupportsChildren(IParseTree context)
+        {
+            var contextChildCount = context.ChildCount;
+            for (var i = 0; i < contextChildCount; i++)
+            {
+                var child = context.GetChild(i);
+                if (child is OpenScadParser.ModuleInvocationContext invocation)
+                {
+                    if (invocation.identifier().IDENTIFIER().GetText() == "children")
+                    {
+                        return true;
+                    }
+                }
+                // recursively call this method on the child
+                if (SupportsChildren(child))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Checks whether no parent context of the given context is a ModuleDeclarationContext.
         /// </summary>
