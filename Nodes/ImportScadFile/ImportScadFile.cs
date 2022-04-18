@@ -73,9 +73,9 @@ namespace OpenScadGraphEditor.Nodes.ImportScadFile
             switch (ExternalReference.Mode)
             {
                 case IncludeMode.Use:
-                    return "use <" + ExternalReference.IncludePath + ">; " + next;
+                    return "use <" + ExternalReference.IncludePath + ">;\n" + next;
                 case IncludeMode.Include:
-                    return "include <" + ExternalReference.IncludePath + ">; " + next;
+                    return "include <" + ExternalReference.IncludePath + ">;\n" + next;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
