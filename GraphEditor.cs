@@ -17,7 +17,7 @@ using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
-using OpenScadGraphEditor.Widgets.ScadItemList;
+using OpenScadGraphEditor.Widgets.ProjectTree;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 
 namespace OpenScadGraphEditor
@@ -32,9 +32,7 @@ namespace OpenScadGraphEditor
         private Control _editingInterface;
         private TextEdit _textEdit;
         private FileDialog _fileDialog;
-        private ScadItemList _modulesList;
-        private ScadItemList _functionsList;
-        private ScadItemList _variablesList;
+        private ProjectTree _projectTree;
         private ImportDialog _importDialog;
 
         private string _currentFile;
@@ -87,17 +85,10 @@ namespace OpenScadGraphEditor
                 .To(this, nameof(SaveChanges));
 
 
-            _modulesList = this.WithName<ScadItemList>("ModulesList");
-            _functionsList = this.WithName<ScadItemList>("FunctionsList");
-            _variablesList = this.WithName<ScadItemList>("VariablesList");
+            _projectTree = this.WithName<ProjectTree>("ProjectTree");
 
-            _modulesList.ItemActivated += Open;
-            _functionsList.ItemActivated += Open;
-
-            _modulesList.ItemContextMenuRequested += OnItemContextMenuRequested;
-            _functionsList.ItemContextMenuRequested += OnItemContextMenuRequested;
-            _variablesList.ItemContextMenuRequested += OnItemContextMenuRequested;
-
+            _projectTree.ItemActivated += Open;
+            _projectTree.ItemContextMenuRequested += OnItemContextMenuRequested;
 
             this.WithName<Button>("NewButton")
                 .Connect("pressed")
@@ -188,17 +179,17 @@ namespace OpenScadGraphEditor
             AddNode(requestContext, NodeFactory.Build<ImportScadFile>(reference));
         }
 
-        private void OnItemContextMenuRequested(ScadItemListEntry entry, Vector2 mousePosition)
+        private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
         {
             var actions = new List<QuickAction>();
-            if (entry is ScadInvokableListEntry invokableListEntry &&
+            if (entry is ScadInvokableTreeEntry invokableListEntry &&
                 !(invokableListEntry.Description is MainModuleDescription))
             {
                 actions.Add(new QuickAction($"Delete {invokableListEntry.Description.Name}",
                     () => ShowConfirmDeleteDialog(invokableListEntry.Description)));
             }
 
-            if (entry is ScadVariableListEntry scadVariableListEntry)
+            if (entry is ScadVariableTreeEntry scadVariableListEntry)
             {
                 actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}",
                     () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));
@@ -219,9 +210,9 @@ namespace OpenScadGraphEditor
                 () => OnRefactoringRequested(new DeleteVariableRefactoring(description)));
         }
 
-        private void Open(ScadItemListEntry entry)
+        private void Open(ProjectTreeEntry entry)
         {
-            if (entry is ScadInvokableListEntry invokableListEntry)
+            if (entry is ScadInvokableTreeEntry invokableListEntry)
             {
                 Open(_currentProject.FindDefiningGraph(invokableListEntry.Description));
             }
@@ -238,21 +229,8 @@ namespace OpenScadGraphEditor
 
         private void RefreshLists()
         {
-            _functionsList.Setup(
-                _currentProject.Functions
-                    .Select(it => new ScadInvokableListEntry(it.Description, true))
-            );
-
-            _modulesList.Setup(
-                _currentProject.Modules
-                    .Select(it =>
-                        new ScadInvokableListEntry(it.Description, !(it.Description is MainModuleDescription)))
-            );
-
-            _variablesList.Setup(
-                _currentProject.Variables
-                    .Select(it => new ScadVariableListEntry(it))
-            );
+            _projectTree.Setup(new List<ProjectTreeEntry>() {new RootProjectTreeEntry(_currentProject)});
+            
 
             // Fill the Add Dialog Entries.
 
@@ -261,7 +239,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 BuiltIns.LanguageLevelNodes
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                        Resources.ScadBuiltinIcon,
                         () => NodeFactory.Build(it),
                         AddNode
                     ))
@@ -270,7 +248,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 BuiltIns.Functions
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/function.png"),
+                        Resources.FunctionIcon,
                         () => NodeFactory.Build<FunctionInvocation>(it),
                         AddNode
                     ))
@@ -279,7 +257,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 BuiltIns.Modules
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/module.png"),
+                        Resources.ModuleIcon,
                         () => NodeFactory.Build<ModuleInvocation>(it),
                         AddNode
                     )));
@@ -289,7 +267,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 _currentProject.Functions
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/function.png"),
+                        Resources.FunctionIcon,
                         () => NodeFactory.Build<FunctionInvocation>(it.Description),
                         AddNode
                     ))
@@ -298,7 +276,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 _currentProject.Modules
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/module.png"),
+                        Resources.ModuleIcon,
                         () => NodeFactory.Build<ModuleInvocation>(it.Description),
                         AddNode
                     ))
@@ -308,7 +286,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 _currentProject.Variables
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                        Resources.VariableIcon,
                         () => NodeFactory.Build<SetVariable>(it),
                         AddNode
                     ))
@@ -317,7 +295,7 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 _currentProject.Variables
                     .Select(it => new NodeBasedEntry(
-                        GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                        Resources.VariableIcon,
                         () => NodeFactory.Build<GetVariable>(it),
                         AddNode
                     ))
@@ -327,7 +305,7 @@ namespace OpenScadGraphEditor
             // add special node for using a scad file
             _addDialogEntries.Add(
                 new NodeBasedEntry(
-                    GD.Load<Texture>("res://Icons/scad_builtin.png"),
+                    Resources.ScadBuiltinIcon,
                     NodeFactory.Build<ImportScadFile>,
                     OnImportScadFile
                 )
@@ -340,7 +318,7 @@ namespace OpenScadGraphEditor
                 _addDialogEntries.AddRange(
                     reference.Functions
                         .Select(it => new NodeBasedEntry(
-                                GD.Load<Texture>("res://Icons/function.png"),
+                                Resources.FunctionIcon,
                                 () => NodeFactory.Build<FunctionInvocation>(it),
                                 AddNode
                             )
@@ -350,7 +328,7 @@ namespace OpenScadGraphEditor
                 _addDialogEntries.AddRange(
                     reference.Modules
                         .Select(it => new NodeBasedEntry(
-                                GD.Load<Texture>("res://Icons/module.png"),
+                                Resources.ModuleIcon,
                                 () => NodeFactory.Build<ModuleInvocation>(it),
                                 AddNode
                             )
@@ -504,11 +482,11 @@ namespace OpenScadGraphEditor
             _addDialog.Open(_addDialogEntries, context);
         }
 
-        private void OnItemDataDropped(ScadGraphEdit graph, ScadItemListEntry entry, Vector2 mousePosition,
+        private void OnItemDataDropped(ScadGraphEdit graph, ProjectTreeEntry entry, Vector2 mousePosition,
             Vector2 virtualPosition)
         {
             // did we drag an invokable from the list to the graph?
-            if (entry is ScadInvokableListEntry invokableListEntry)
+            if (entry is ScadInvokableTreeEntry invokableListEntry)
             {
                 // then add a new node calling the invokable.
                 var description = invokableListEntry.Description;
@@ -531,7 +509,7 @@ namespace OpenScadGraphEditor
             }
 
             // did we drag a variable from the list to the graph?
-            if (entry is ScadVariableListEntry variableListEntry)
+            if (entry is ScadVariableTreeEntry variableListEntry)
             {
                 // in case of a variable we can either _get_ or _set_ the variable
                 // so we will need to open a popup menu to let the user choose.

@@ -1,11 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
-using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.AddDialog

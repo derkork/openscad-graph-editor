@@ -10,7 +10,7 @@ using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets.AddDialog;
-using OpenScadGraphEditor.Widgets.ScadItemList;
+using OpenScadGraphEditor.Widgets.ProjectTree;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -48,7 +48,7 @@ namespace OpenScadGraphEditor.Widgets
         /// <summary>
         /// Called when data from any list entry is dropped.
         /// </summary>
-        public event Action<ScadGraphEdit,ScadItemListEntry, Vector2, Vector2> ItemDataDropped;
+        public event Action<ScadGraphEdit,ProjectTreeEntry, Vector2, Vector2> ItemDataDropped;
         
         public InvokableDescription Description { get; private set; }
 
@@ -98,12 +98,12 @@ namespace OpenScadGraphEditor.Widgets
 
         public override bool CanDropData(Vector2 position, object data)
         {
-            return data is ScadItemListDragData;
+            return data is ProjectTreeDragData;
         }
 
         public override void DropData(Vector2 position, object data)
         {
-            if (data is ScadItemListDragData itemListDragData)
+            if (data is ProjectTreeDragData itemListDragData)
             {
                 ItemDataDropped?.Invoke(this, itemListDragData.Entry, GetGlobalMousePosition(), position + ScrollOffset);
             }
