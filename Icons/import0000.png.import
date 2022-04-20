@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/scad_builtin.png-13d258af7ede30a54d49285c129e31f7.stex"
+path="res://.import/import0000.png-84b145b6514b2860d4447cd9b9171515.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Icons/scad_builtin.png"
-dest_files=[ "res://.import/scad_builtin.png-13d258af7ede30a54d49285c129e31f7.stex" ]
+source_file="res://Icons/import0000.png"
+dest_files=[ "res://.import/import0000.png-84b145b6514b2860d4447cd9b9171515.stex" ]
 
 [params]
 

@@ -1,16 +1,17 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
-[ext_resource path="res://Icons/module.png" type="Texture" id=2]
+[ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
 [ext_resource path="res://Widgets/AddDialog/AddDialog.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Widgets/InvokableRefactorDialog/InvokableRefactorDialog.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Widgets/QuickActionsPopup.cs" type="Script" id=5]
 [ext_resource path="res://Widgets/VariableRefactorDialog/VariableRefactorDialog.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Widgets/ScadConfirmationDialog.cs" type="Script" id=7]
 [ext_resource path="res://Widgets/ImportDialog/ImportDialog.tscn" type="PackedScene" id=8]
-[ext_resource path="res://Icons/variable.png" type="Texture" id=9]
-[ext_resource path="res://Icons/function.png" type="Texture" id=10]
+[ext_resource path="res://Icons/variable0000.png" type="Texture" id=9]
+[ext_resource path="res://Icons/function0000.png" type="Texture" id=10]
 [ext_resource path="res://Widgets/ProjectTree/ProjectTree.cs" type="Script" id=11]
+[ext_resource path="res://Icons/import0000.png" type="Texture" id=12]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -160,22 +161,21 @@ __meta__ = {
 margin_right = 1920.0
 margin_bottom = 1015.0
 custom_constants/autohide = 0
-custom_constants/separation = 0
 split_offset = 100
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
-margin_right = 350.0
+margin_right = 372.0
 margin_bottom = 1015.0
 rect_min_size = Vector2( 250, 0 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer"]
 margin_left = 14.0
 margin_top = 14.0
-margin_right = 336.0
+margin_right = 358.0
 margin_bottom = 1001.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_right = 322.0
+margin_right = 344.0
 margin_bottom = 45.0
 
 [node name="AddModuleButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer"]
@@ -201,9 +201,17 @@ rect_min_size = Vector2( 55, 45 )
 icon = ExtResource( 9 )
 expand_icon = true
 
+[node name="AddExternalReferenceButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer"]
+margin_left = 189.0
+margin_right = 244.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+icon = ExtResource( 12 )
+expand_icon = true
+
 [node name="ProjectTree" type="Tree" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 53.0
-margin_right = 322.0
+margin_right = 344.0
 margin_bottom = 987.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -211,7 +219,7 @@ allow_rmb_select = true
 script = ExtResource( 11 )
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
-margin_left = 366.0
+margin_left = 396.0
 margin_right = 1920.0
 margin_bottom = 1015.0
 tab_align = 0
