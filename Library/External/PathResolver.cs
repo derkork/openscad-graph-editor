@@ -157,12 +157,12 @@ namespace OpenScadGraphEditor.Library.External
         }
         
         /// <summary>
-        /// Calculates the given <see cref="absolutePath"/> relative to the given <see cref="relativeTo"/> path.
+        /// Calculates the given <see cref="absolutePath"/> relative to the given <see cref="relativeToDirectory"/> path.
         /// </summary>
-        public static bool TryAbsoluteToRelative(string absolutePath, string relativeTo, out string result)
+        public static bool TryAbsoluteToRelative(string absolutePath, string relativeToDirectory, out string result)
         {
             var absoluteDirectoryParts = NormalizePath(absolutePath).Split('/');
-            var relativeToDirectoryParts = NormalizePath(relativeTo).Split('/');
+            var relativeToDirectoryParts = NormalizePath(relativeToDirectory).Split('/');
 
             // Get the shortest of the two paths
             var len = absoluteDirectoryParts.Length < relativeToDirectoryParts.Length ? absoluteDirectoryParts.Length : relativeToDirectoryParts.Length;
@@ -191,7 +191,8 @@ namespace OpenScadGraphEditor.Library.External
             var relativePath = new StringBuilder();
 
             // Add on the ..
-            for (var index = lastCommonRoot + 1; index < absoluteDirectoryParts.Length; index++)
+            // exclude the last element as this is a file name.
+            for (var index = lastCommonRoot + 1; index < absoluteDirectoryParts.Length - 1; index++)
             {
                 if (absoluteDirectoryParts[index].Length > 0)
                 {
@@ -200,12 +201,12 @@ namespace OpenScadGraphEditor.Library.External
             }
 
             // Add on the folders
-            for (var index = lastCommonRoot + 1; index < relativeToDirectoryParts.Length - 1; index++)
+            for (var index = lastCommonRoot + 1; index < absoluteDirectoryParts.Length - 1; index++)
             {
-                relativePath.Append(relativeToDirectoryParts[index] + "/");
+                relativePath.Append(absoluteDirectoryParts[index] + "/");
             }
 
-            relativePath.Append(relativeToDirectoryParts[relativeToDirectoryParts.Length - 1]);
+            relativePath.Append(absoluteDirectoryParts[absoluteDirectoryParts.Length - 1]);
 
             result = relativePath.ToString();
             return true;

@@ -27,12 +27,12 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         private ExternalReference _baseReference;
 
 
-        public event Action<ExternalReference, RequestContext> OnNewImportRequested;
+        public event Action<ExternalReference> OnNewImportRequested;
 
 
         public override void _Ready()
         {
-            _fileDialog = this.WithName<FileDialog>("FileDialog");
+            _fileDialog = this.WithName<FileDialog>("ImportFileDialog");
 
             _fileDialog
                 .Connect("file_selected")
@@ -83,9 +83,8 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         }
 
 
-        public void OpenForNewImport([CanBeNull] string currentProjectPath, RequestContext context)
+        public void OpenForNewImport([CanBeNull] string currentProjectPath)
         {
-            _context = context;
             _currentProjectPath = currentProjectPath;
             _importModeOptionButton.Selected = 0;
             _pathModeOptionButton.Selected = 0;
@@ -147,7 +146,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                     if (pathMode == ExternalFilePathMode.Relative)
                     {
                         var canResolve =
-                            PathResolver.TryAbsoluteToRelative(_pathLineEdit.Text, _currentProjectPath, out _);
+                            PathResolver.TryAbsoluteToRelative(_pathLineEdit.Text, PathResolver.DirectoryFromFile(_currentProjectPath), out _);
                         _okButton.Disabled = !canResolve;
                     }
                     else
@@ -175,6 +174,11 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                             _allLibraryFiles[_libraryFileOptionButton.GetSelectedId()]);
                         break;
                     case ExternalFilePathMode.Relative:
+                        var canResolve =
+                            PathResolver.TryAbsoluteToRelative(_pathLineEdit.Text, PathResolver.DirectoryFromFile(_currentProjectPath), out var path);
+                        GdAssert.That(canResolve, "Could not resolve path");
+                        externalReference = ExternalReferenceBuilder.Build(pathMode, includeMode, path);
+                        break;
                     case ExternalFilePathMode.Absolute:
                         externalReference = ExternalReferenceBuilder.Build(pathMode, includeMode,
                             _pathLineEdit.Text);
@@ -184,7 +188,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                 }
                 
                 // and notify the interested parties
-                OnNewImportRequested?.Invoke(externalReference, _context);
+                OnNewImportRequested?.Invoke(externalReference);
                 Hide();
             }
         }

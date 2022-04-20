@@ -220,7 +220,8 @@ namespace OpenScadGraphEditor.Library
         public string Render()
         {
             return string.Join("\n",
-                _modules.Select(it => it.Render())
+                _externalReferences.Select(it => it.Render())
+                    .Concat(_modules.Select(it => it.Render()))
                     .Concat(_functions.Select(it => it.Render()))
                     .Append(MainModule.Render())
                     .Where(it => it.Length > 0)
@@ -302,5 +303,21 @@ namespace OpenScadGraphEditor.Library
             var removed = _externalReferences.Remove(externalReference);
             GdAssert.That(removed, "Tried to remove an external reference that was not present.");
         }
+
+        public bool IsDefinedInThisProject(FunctionDescription description)
+        {
+            return _projectFunctionDescriptions.ContainsKey(description.Id);
+        }
+        
+        public bool IsDefinedInThisProject(ModuleDescription description)
+        {
+            return _projectModuleDescriptions.ContainsKey(description.Id);
+        }
+
+        public bool IsDefinedInThisProject(VariableDescription description)
+        {
+            return _projectVariables.ContainsKey(description.Id);
+        }
+            
     }
 }

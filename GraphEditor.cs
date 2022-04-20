@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
@@ -9,7 +8,6 @@ using OpenScadGraphEditor.History;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Nodes.ImportScadFile;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -46,7 +44,6 @@ namespace OpenScadGraphEditor
         private GlobalLibrary _rootResolver;
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
-        private ScadConfirmationDialog _confirmationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private bool _codeChanged;
 
@@ -73,9 +70,6 @@ namespace OpenScadGraphEditor
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested += (refactorings) => PerformRefactorings(refactorings);
 
-            _confirmationDialog = this.WithName<ScadConfirmationDialog>("ConfirmationDialog");
-
-
             _editingInterface = this.WithName<Control>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");
             _fileDialog = this.WithName<FileDialog>("FileDialog");
@@ -89,6 +83,10 @@ namespace OpenScadGraphEditor
 
             _projectTree.ItemActivated += Open;
             _projectTree.ItemContextMenuRequested += OnItemContextMenuRequested;
+            
+            this.WithName<Button>("AddExternalReferenceButton")
+                .Connect("pressed")
+                .To(this, nameof(OnImportScadFile));
 
             this.WithName<Button>("NewButton")
                 .Connect("pressed")
@@ -129,85 +127,49 @@ namespace OpenScadGraphEditor
             OnNewButtonPressed();
         }
 
-        private void OnNewImportRequested(ExternalReference reference, RequestContext requestContext)
+        private void OnNewImportRequested(ExternalReference reference)
         {
-            var currentPath = _currentFile != null ? PathResolver.DirectoryFromFile(_currentFile) : null;
-
-            // first, check if the reference is already in the project.
-            var resolved = PathResolver.TryResolve(currentPath, reference.SourceFile, out var fullPath);
-            GdAssert.That(resolved, $"Could not resolve reference '{reference.SourceFile}'");
-
-            var exists = _currentProject.ExternalReferences.FirstOrDefault(it =>
-            {
-                var innerResolved = PathResolver.TryResolve(currentPath, it.SourceFile, out var innerFullPath);
-                GdAssert.That(innerResolved, $"Could not resolve reference '{it.SourceFile}'");
-
-                return PathResolver.IsSamePath(fullPath, innerFullPath);
-            });
-
-            if (exists == null)
-            {
-                // if it doesn't exist, load the file and add it to the project.
-                try
-                {
-                    // read text from file
-                    var text = System.IO.File.ReadAllText(fullPath, Encoding.UTF8);
-                    // parse contents and fill the reference with data
-                    ExternalFileParser.Parse(text, reference);
-
-                    // and add it to the project
-                    _currentProject.AddExternalReference(reference);
-                }
-                catch (Exception e)
-                {
-                    GD.PrintErr("Cannot read file. " + e.Message);
-                    // TODO: better error handling
-                    return;
-                }
-
-                // finally add an import node to the graph
-                AddNode(requestContext, NodeFactory.Build<ImportScadFile>(reference));
-                return;
-            }
-
-            // TODO: the import from the dialog may have used a different path mode, so it's not exactly the same
-            // but i think we should stick to _ONE_ and only one import mode for each file. Maybe the dialog should
-            // give the user some hint that the file is already included? Then again there are possible reasons why
-            // one would want to include stuff twice.
-
-            // otherwise just add an import node to the existing reference to the graph
-            AddNode(requestContext, NodeFactory.Build<ImportScadFile>(reference));
+           OnRefactoringRequested(new AddExternalReferenceRefactoring(reference));
         }
 
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
         {
             var actions = new List<QuickAction>();
-            if (entry is ScadInvokableTreeEntry invokableListEntry &&
-                !(invokableListEntry.Description is MainModuleDescription))
-            {
-                actions.Add(new QuickAction($"Delete {invokableListEntry.Description.Name}",
-                    () => ShowConfirmDeleteDialog(invokableListEntry.Description)));
-            }
 
+            
+            if (entry is ScadInvokableTreeEntry invokableTreeEntry)
+            {
+                switch (invokableTreeEntry.Description)
+                {
+                    case FunctionDescription functionDescription:
+                        if (_currentProject.IsDefinedInThisProject(functionDescription))
+                        {
+                            actions.Add(new QuickAction("Delete ${entry.Title}", () => OnRefactoringRequested(new DeleteInvokableRefactoring(functionDescription))));
+                        }
+                        break;
+                    case ModuleDescription moduleDescription:
+                        if (_currentProject.IsDefinedInThisProject(moduleDescription))
+                        {
+                            actions.Add(new QuickAction("Delete ${entry.Title}", () => OnRefactoringRequested(new DeleteInvokableRefactoring(moduleDescription))));
+                        }
+                        break;
+                }
+            }
+            
             if (entry is ScadVariableTreeEntry scadVariableListEntry)
             {
-                actions.Add(new QuickAction($"Delete {scadVariableListEntry.Description.Name}",
-                    () => ShowConfirmDeleteDialog(scadVariableListEntry.Description)));
+                if (_currentProject.IsDefinedInThisProject(scadVariableListEntry.Description))
+                {
+                    actions.Add(new QuickAction("Delete ${entry.Title}", () => OnRefactoringRequested(new DeleteVariableRefactoring(scadVariableListEntry.Description))));
+                }
+            }
+
+            if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry)
+            {
+                actions.Add(new QuickAction($"Remove reference to {entry.Title}", () => OnRefactoringRequested(new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
             }
 
             _quickActionsPopup.Open(mousePosition, actions);
-        }
-
-        private void ShowConfirmDeleteDialog(InvokableDescription description)
-        {
-            _confirmationDialog.Open($"Do you really want to delete {description.Name}?",
-                () => OnRefactoringRequested(new DeleteInvokableRefactoring(description)));
-        }
-
-        private void ShowConfirmDeleteDialog(VariableDescription description)
-        {
-            _confirmationDialog.Open($"Do you really want to delete variable {description.Name}?",
-                () => OnRefactoringRequested(new DeleteVariableRefactoring(description)));
         }
 
         private void Open(ProjectTreeEntry entry)
@@ -302,16 +264,6 @@ namespace OpenScadGraphEditor
             );
 
 
-            // add special node for using a scad file
-            _addDialogEntries.Add(
-                new NodeBasedEntry(
-                    Resources.ScadBuiltinIcon,
-                    NodeFactory.Build<ImportScadFile>,
-                    OnImportScadFile
-                )
-            );
-
-
             // add call entries for all externally referenced functions and modules
             foreach (var reference in _currentProject.ExternalReferences)
             {
@@ -337,9 +289,9 @@ namespace OpenScadGraphEditor
             }
         }
 
-        private void OnImportScadFile(RequestContext context, NodeBasedEntry entry)
+        private void OnImportScadFile()
         {
-            _importDialog.OpenForNewImport(_currentFile, context);
+            _importDialog.OpenForNewImport(_currentFile);
         }
 
 

@@ -1,4 +1,5 @@
 using System.Linq;
+using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
@@ -79,8 +80,15 @@ namespace OpenScadGraphEditor.Nodes
                     .Select(it =>
                     {
                         var parameterName = _description.Parameters[it].Name;
-                        return parameterName.Length > 0 ? $"{parameterName} = {RenderInput(context, it).OrUndef()}" : RenderInput(context, it).OrUndef();
+
+                        var value = RenderInput(context, it);
+                        if (value.Empty())
+                        {
+                            return "";
+                        }
+                        return $"{parameterName} = {value}";
                     })
+                    .Where(it => !it.Empty())
             );
             return $"{_description.Name}({parameters})";
         }

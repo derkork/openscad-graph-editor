@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using OpenScadGraphEditor.Library.External;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.ProjectTree
 {
@@ -11,7 +12,7 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
         public override ExternalReference Description { get; }
         public override bool CanBeDragged => false;
         public override bool CanBeActivated => true;
-        public override Texture Icon => null;
+        public override Texture Icon => Resources.ImportIcon;
         public override string Id => Description.Id;
 
         public override List<ProjectTreeEntry> Children { get; }

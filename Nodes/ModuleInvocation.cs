@@ -1,4 +1,5 @@
 using System.Linq;
+using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
@@ -73,7 +74,16 @@ namespace OpenScadGraphEditor.Nodes
                 InputPorts
                     .Indices()
                     .Skip(1)
-                    .Select(it => $"{_description.Parameters[it - 1].Name} = {RenderInput(context, it).OrUndef()}")
+                    .Select(it =>
+                    {
+                        var value = RenderInput(context, it);
+                        if (value.Empty())
+                        {
+                            return "";
+                        }
+                        return $"{_description.Parameters[it - 1].Name} = {value}";
+                    })
+                    .Where(it => !it.Empty())
             );
             var result = $"{_description.Name}({parameters})";
             var childNodes = _description.SupportsChildren ? RenderOutput(context, 0) : "";

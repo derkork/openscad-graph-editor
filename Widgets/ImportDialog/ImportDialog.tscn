@@ -14,7 +14,7 @@ margin_bottom = -39.0
 window_title = "Include / Use"
 script = ExtResource( 1 )
 
-[node name="FileDialog" type="FileDialog" parent="."]
+[node name="ImportFileDialog" type="FileDialog" parent="."]
 margin_right = 1117.0
 margin_bottom = 620.0
 rect_min_size = Vector2( 400, 140 )

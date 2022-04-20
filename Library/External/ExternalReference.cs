@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -77,5 +78,18 @@ namespace OpenScadGraphEditor.Library.External
         /// Returns the include path as it will be printed into the scad file.
         /// </summary>
         public string IncludePath => PathResolver.Decode(SourceFile, out _);
+
+        public string Render()
+        {
+            switch (Mode)
+            {
+                case IncludeMode.Include:
+                    return $"include <{IncludePath}>;\n";
+                case IncludeMode.Use:
+                    return $"use <{IncludePath}>;\n";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 }
