@@ -2,13 +2,15 @@ using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public sealed class StringConstant : ScadExpressionNode
+    /// <summary>
+    /// A node representing a literal string.
+    /// </summary>
+    public class LiteralString  :ScadExpressionNode
     {
-        public override string NodeTitle => "String constant";
-        public override string NodeDescription => "A string constant";
+        public override string NodeTitle => "String";
+        public override string NodeDescription => "A string.";
 
-
-        public StringConstant()
+        public LiteralString()
         {
             OutputPorts
                 .String();

@@ -8,13 +8,6 @@ namespace OpenScadGraphEditor.Nodes
         
         protected abstract string OperatorSign { get; }
 
-        protected BinaryOperator()
-        {
-            InputPorts
-                .Any()
-                .Any();
-        }
-
         public override string Render(IScadGraph context)
         {
             var left = RenderInput(context, 0);

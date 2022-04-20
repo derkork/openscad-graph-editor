@@ -52,6 +52,22 @@ namespace OpenScadGraphEditor.Library
                     .WithParameter("a", PortType.Vector3, label: "Euler Angles")
                     .WithChildren()
                     .Build(),
+                ModuleBuilder.NewBuiltInModule("linear_extrude", "Linear Extrude")
+                    .WithDescription("Linear Extrusion is an operation that takes a 2D object as input and generates a 3D object as a result.")
+                    .WithParameter("height", PortType.Number, label: "Height")
+                    .WithParameter("center", PortType.Boolean, label: "Center")
+                    .WithParameter("convexity", PortType.Number, label: "Convexity")
+                    .WithParameter("twist", PortType.Number, label: "Twist")
+                    .WithParameter("slices", PortType.Number, label: "Slices")
+                    .WithParameter("scale", PortType.Vector3, label: "Scale")
+                    .WithParameter("$fn", PortType.Number, label: "$fn")
+                    .WithChildren()
+                    .Build(),
+                ModuleBuilder.NewBuiltInModule("color", "Color")
+                    .WithDescription("Sets the color of the next elements.")
+                    .WithParameter("c", PortType.Any, label: "Color")
+                    .WithChildren()
+                    .Build(),
             };
             
             Functions = new List<FunctionDescription>()
