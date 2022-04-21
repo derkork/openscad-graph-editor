@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Text;
 using Godot;
 using GodotExt;
@@ -25,32 +24,58 @@ namespace OpenScadGraphEditor.Refactorings
             var resolved = PathResolver.TryResolve(projectDirectory, _externalReference.SourceFile, out var fullPath);
             GdAssert.That(resolved, $"Could not resolve reference '{_externalReference.SourceFile}'");
 
-            var exists = context.Project.ExternalReferences.FirstOrDefault(it =>
+            if (context.Project.ContainsReferenceTo(fullPath))
             {
-                var innerResolved = PathResolver.TryResolve(projectDirectory, it.SourceFile, out var innerFullPath);
-                GdAssert.That(innerResolved, $"Could not resolve reference '{it.SourceFile}'");
+                // nothing to do, we already got this.
+            }
 
-                return PathResolver.IsSamePath(fullPath, innerFullPath);
-            });
+            // if it doesn't exist, load the file and add it to the project.
+            ParseAndAdd(context, _externalReference, fullPath);
+        }
 
-            if (exists == null)
+        private void ParseAndAdd(RefactoringContext context, ExternalReference reference, string fullPath)
+        {
+            try
             {
-                // if it doesn't exist, load the file and add it to the project.
-                try
-                {
-                    // read text from file
-                    var text = System.IO.File.ReadAllText(fullPath, Encoding.UTF8);
-                    // parse contents and fill the reference with data
-                    ExternalFileParser.Parse(text, _externalReference);
+                // read text from file
+                var text = System.IO.File.ReadAllText(fullPath, Encoding.UTF8);
+                GD.Print("Parsing SCAD file: " + fullPath);
+                // parse contents and fill the reference with data
+                ExternalFileParser.Parse(text, reference);
 
-                    // and add it to the project
-                    context.Project.AddExternalReference(_externalReference);
-                }
-                catch (Exception e)
+                // and add it to the project
+                context.Project.AddExternalReference(reference);
+                
+                
+                // check if the reference again contains includes
+                var directory = PathResolver.DirectoryFromFile(fullPath);
+
+                foreach (var includedReference in reference.References)
                 {
-                    GD.PrintErr("Cannot read file. " + e.Message);
-                    // TODO: better error handling
+                    var resolved = PathResolver.TryResolve(directory, includedReference, out var includedFullPath);
+                    if (!resolved)
+                    {
+                        // TODO: better error handling
+                        GD.PrintErr("Cannot resolve transitive reference to '{0}'", includedReference);
+                        continue;
+                    }
+                    
+                    // check if we already have this reference
+                    if (context.Project.ContainsReferenceTo(includedFullPath))
+                    {
+                        // we got this
+                        continue;
+                    }
+                    
+                    // if not, add another one
+                    var transitiveReference = ExternalReferenceBuilder.Build(IncludeMode.Include, includedReference, reference );
+                    ParseAndAdd(context, transitiveReference, includedFullPath);
                 }
+            }
+            catch (Exception e)
+            {
+                GD.PrintErr("Cannot read file. " + e.Message);
+                // TODO: better error handling
             }
         }
     }

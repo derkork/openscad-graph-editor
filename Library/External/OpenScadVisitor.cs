@@ -22,7 +22,14 @@ namespace OpenScadGraphEditor.Library.External
         {
             return $"{_sourceFileHash}_{type}_{name}";
         }
-        
+
+
+        public override object VisitIncludeDeclaration(OpenScadParser.IncludeDeclarationContext context)
+        {
+            var includePath = context.PATH_STRING().GetText();
+            _externalReference.References.Add(includePath);
+            return base.VisitIncludeDeclaration(context);
+        }
 
         public override object VisitVariableDeclaration(OpenScadParser.VariableDeclarationContext context)
         {

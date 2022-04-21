@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Godot;
+using GodotExt;
 using Directory = System.IO.Directory;
 using Environment = System.Environment;
 using File = System.IO.File;
@@ -16,7 +17,7 @@ namespace OpenScadGraphEditor.Library.External
     /// </summary>
     public static class PathResolver
     {
-        public static IEnumerable<string> GetLibraryPaths()
+        private static IEnumerable<string> GetLibraryPaths()
         {
             switch (Environment.OSVersion.Platform)
             {
@@ -32,56 +33,17 @@ namespace OpenScadGraphEditor.Library.External
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        /// <summary>
-        /// Encodes the given path to a representation that allows resolving it.
-        /// </summary>
-        public static string Encode(string path, ExternalFilePathMode mode)
-        {
-            var normalizedPath = NormalizePath(path);
-            switch (mode)
-            {
-                case ExternalFilePathMode.Library:
-                    return $"library://{normalizedPath}";
-                case ExternalFilePathMode.Relative:
-                    return $"relative://{normalizedPath}";
-                case ExternalFilePathMode.Absolute:
-                    return $"absolute://{normalizedPath}";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
-            }
-        }
-    
-        /// <summary>
-        /// Decodes a path encoded by <see cref="Encode"/>.
-        /// </summary>
-        public static string Decode(string input, out ExternalFilePathMode mode)
-        {
-            if (input.StartsWith("library://"))
-            {
-                mode = ExternalFilePathMode.Library;
-                return input.Substring("library://".Length);
-            }
-            if (input.StartsWith("relative://"))
-            {
-                mode = ExternalFilePathMode.Relative;
-                return input.Substring("relative://".Length);
-            }
-            if (input.StartsWith("absolute://"))
-            {
-                mode = ExternalFilePathMode.Absolute;
-                return input.Substring("absolute://".Length);
-            }
-            throw new ArgumentException($"Invalid path prefix in {input}", nameof(input));
-        }
+        
 
 
         /// <summary>
-        /// Checks whether two paths refer to the same file. The paths must not contain any unresolved
-        /// prefixes.
+        /// Checks whether two paths refer to the same file. Both paths must be absolute.
         /// </summary>
         public static bool IsSamePath(string path1, string path2)
         {
+            GdAssert.That(Path.IsPathRooted(path1), "Path1 is not absolute");
+            GdAssert.That(Path.IsPathRooted(path2), "Path2 is not absolute");
+
             // Uri does path canonicalization. So we can use that to check if the paths are the same.
             // https://stackoverflow.com/questions/1266674/how-can-one-get-an-absolute-or-normalized-file-path-in-net
             return new Uri(path1).LocalPath == new Uri(path2).LocalPath;
@@ -89,62 +51,56 @@ namespace OpenScadGraphEditor.Library.External
 
 
         /// <summary>
-        /// Tries to resolve a path that was encoded with <see cref="Encode"/>.
+        /// Tries to resolve a path from an include statement. Returns a canonical path.
         /// </summary>
-        public static bool TryResolve(string projectPath, string path, out string resolvedPath)
+        public static bool TryResolve(string sourceDirectory, string includePath, out string resolvedFullPath)
         {
-            var decodedPath = Decode(path, out var mode);
-
-            switch (mode)
+            if (!sourceDirectory.Empty())
             {
-                case ExternalFilePathMode.Library:
-                    var libraryPaths = GetLibraryPaths();
-                    var realPath = libraryPaths
-                        .Select(it => Path.Combine(it, decodedPath))
-                        .Where(File.Exists)
-                        .FirstOrDefault();
+                GdAssert.That(Path.IsPathRooted(sourceDirectory), "Source path is not absolute.");
+            }
+            
+            var isAbsolute = Path.IsPathRooted(includePath);
 
-                    if (realPath != null)
-                    {
-                        resolvedPath = realPath;
-                        return true;
-                    }
-                    break;
-                case ExternalFilePathMode.Relative:
-                    if (projectPath == null)
-                    {
-                        break;
-                    }
-                    
-                    if (File.Exists(Path.Combine(projectPath, decodedPath)))
-                    {
-                        resolvedPath = Path.Combine(projectPath, decodedPath);
-                        return true;
-                    }
-                    break;
-                case ExternalFilePathMode.Absolute:
-                    if (File.Exists(decodedPath))
-                    {
-                        resolvedPath = decodedPath;
-                        return true;
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+            
+            if (isAbsolute)
+            {
+                resolvedFullPath = new Uri(includePath).LocalPath;
+                return File.Exists(resolvedFullPath);
             }
 
-            resolvedPath = default;
+            // first try to find the file relative to the include location
+            if (!sourceDirectory.Empty())
+            {
+                var tryResolve = Path.Combine(sourceDirectory, includePath);
+                if (File.Exists(tryResolve))
+                {
+                    resolvedFullPath = new Uri(tryResolve).LocalPath;
+                    return true;
+                }
+            }
+
+            // no joy, then try to find it in the library paths
+            foreach (var libraryPath in GetLibraryPaths())
+            {
+                var tryResolve = Path.Combine(libraryPath, includePath);
+                if (!File.Exists(tryResolve))
+                {
+                    continue;
+                }
+                resolvedFullPath = new Uri(tryResolve).LocalPath;
+                return true;
+            }
+            
+            // still no joy, give up.
+
+            resolvedFullPath = default;
             return false;
         }
 
         public static string DirectoryFromFile(string filePath)
         {
             return Path.GetDirectoryName(filePath);
-        }
-
-        public static string FileName(string filePath)
-        {
-            return Path.GetFileName(filePath);
         }
 
 

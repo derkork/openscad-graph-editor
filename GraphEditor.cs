@@ -83,7 +83,7 @@ namespace OpenScadGraphEditor
 
             _projectTree.ItemActivated += Open;
             _projectTree.ItemContextMenuRequested += OnItemContextMenuRequested;
-            
+
             this.WithName<Button>("AddExternalReferenceButton")
                 .Connect("pressed")
                 .To(this, nameof(OnImportScadFile));
@@ -129,14 +129,14 @@ namespace OpenScadGraphEditor
 
         private void OnNewImportRequested(ExternalReference reference)
         {
-           OnRefactoringRequested(new AddExternalReferenceRefactoring(reference));
+            OnRefactoringRequested(new AddExternalReferenceRefactoring(reference));
         }
 
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
         {
             var actions = new List<QuickAction>();
 
-            
+
             if (entry is ScadInvokableTreeEntry invokableTreeEntry)
             {
                 switch (invokableTreeEntry.Description)
@@ -144,29 +144,38 @@ namespace OpenScadGraphEditor
                     case FunctionDescription functionDescription:
                         if (_currentProject.IsDefinedInThisProject(functionDescription))
                         {
-                            actions.Add(new QuickAction("Delete ${entry.Title}", () => OnRefactoringRequested(new DeleteInvokableRefactoring(functionDescription))));
+                            actions.Add(new QuickAction("Delete ${entry.Title}",
+                                () => OnRefactoringRequested(new DeleteInvokableRefactoring(functionDescription))));
                         }
+
                         break;
                     case ModuleDescription moduleDescription:
                         if (_currentProject.IsDefinedInThisProject(moduleDescription))
                         {
-                            actions.Add(new QuickAction("Delete ${entry.Title}", () => OnRefactoringRequested(new DeleteInvokableRefactoring(moduleDescription))));
+                            actions.Add(new QuickAction("Delete ${entry.Title}",
+                                () => OnRefactoringRequested(new DeleteInvokableRefactoring(moduleDescription))));
                         }
+
                         break;
                 }
             }
-            
+
             if (entry is ScadVariableTreeEntry scadVariableListEntry)
             {
                 if (_currentProject.IsDefinedInThisProject(scadVariableListEntry.Description))
                 {
-                    actions.Add(new QuickAction("Delete ${entry.Title}", () => OnRefactoringRequested(new DeleteVariableRefactoring(scadVariableListEntry.Description))));
+                    actions.Add(new QuickAction("Delete ${entry.Title}",
+                        () => OnRefactoringRequested(
+                            new DeleteVariableRefactoring(scadVariableListEntry.Description))));
                 }
             }
 
-            if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry)
+            if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry &&
+                !externalReferenceTreeEntry.Description.IsTransitive)
             {
-                actions.Add(new QuickAction($"Remove reference to {entry.Title}", () => OnRefactoringRequested(new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
+                actions.Add(new QuickAction($"Remove reference to {entry.Title}",
+                    () => OnRefactoringRequested(
+                        new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
             }
 
             _quickActionsPopup.Open(mousePosition, actions);
@@ -174,9 +183,10 @@ namespace OpenScadGraphEditor
 
         private void Open(ProjectTreeEntry entry)
         {
-            if (entry is ScadInvokableTreeEntry invokableListEntry)
+            if (entry is ScadInvokableTreeEntry invokableTreeEntry
+                && _currentProject.IsDefinedInThisProject(invokableTreeEntry.Description))
             {
-                Open(_currentProject.FindDefiningGraph(invokableListEntry.Description));
+                Open(_currentProject.FindDefiningGraph(invokableTreeEntry.Description));
             }
         }
 
@@ -192,7 +202,7 @@ namespace OpenScadGraphEditor
         private void RefreshLists()
         {
             _projectTree.Setup(new List<ProjectTreeEntry>() {new RootProjectTreeEntry(_currentProject)});
-            
+
 
             // Fill the Add Dialog Entries.
 

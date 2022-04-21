@@ -170,17 +170,17 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                 switch (pathMode)
                 {
                     case ExternalFilePathMode.Library:
-                        externalReference = ExternalReferenceBuilder.Build(pathMode, includeMode,
+                        externalReference = ExternalReferenceBuilder.Build(includeMode,
                             _allLibraryFiles[_libraryFileOptionButton.GetSelectedId()]);
                         break;
                     case ExternalFilePathMode.Relative:
                         var canResolve =
                             PathResolver.TryAbsoluteToRelative(_pathLineEdit.Text, PathResolver.DirectoryFromFile(_currentProjectPath), out var path);
                         GdAssert.That(canResolve, "Could not resolve path");
-                        externalReference = ExternalReferenceBuilder.Build(pathMode, includeMode, path);
+                        externalReference = ExternalReferenceBuilder.Build(includeMode, path);
                         break;
                     case ExternalFilePathMode.Absolute:
-                        externalReference = ExternalReferenceBuilder.Build(pathMode, includeMode,
+                        externalReference = ExternalReferenceBuilder.Build(includeMode,
                             _pathLineEdit.Text);
                         break;
                     default:

@@ -18,9 +18,14 @@ namespace OpenScadGraphEditor.Library
             new Dictionary<string, ModuleDescription>();
 
         private readonly Dictionary<string, VariableDescription> _projectVariables =
-            new Dictionary<string, VariableDescription>(); 
-        
-        private readonly List<ExternalReference> _externalReferences = new List<ExternalReference>();
+            new Dictionary<string, VariableDescription>();
+
+        private readonly Dictionary<string, ExternalReference> _externalReferences = new Dictionary<string, ExternalReference>();
+
+        /// <summary>
+        /// cache for storing the full paths to external references.
+        /// </summary>
+        private Dictionary<string, string> _resolvedExternalReferencePaths = new Dictionary<string, string>();
 
         private readonly HashSet<IScadGraph> _modules = new HashSet<IScadGraph>();
         private readonly HashSet<IScadGraph> _functions = new HashSet<IScadGraph>();
@@ -28,10 +33,10 @@ namespace OpenScadGraphEditor.Library
         public IEnumerable<IScadGraph> Modules => _modules.OrderBy(x => x.Description.Name);
         public IEnumerable<IScadGraph> Functions => _functions.OrderBy(x => x.Description.Name);
         public IEnumerable<VariableDescription> Variables => _projectVariables.Values.OrderBy(x => x.Name);
-        public IEnumerable<ExternalReference> ExternalReferences => _externalReferences;
+        public IEnumerable<ExternalReference> ExternalReferences => _externalReferences.Values.OrderBy(x => x.SourceFile);
 
         public IScadGraph MainModule { get; private set; }
-        
+
         public string ProjectPath { get; set; }
 
         public ScadProject(IReferenceResolver parentResolver)
@@ -45,12 +50,13 @@ namespace OpenScadGraphEditor.Library
 
         public void TransferData(IScadGraph from, IScadGraph to)
         {
-            GdAssert.That(from == MainModule || _functions.Contains(from) || _modules.Contains(from), "'from' graph is not part of this project.");
-            
+            GdAssert.That(from == MainModule || _functions.Contains(from) || _modules.Contains(from),
+                "'from' graph is not part of this project.");
+
             var savedGraph = Prefabs.New<SavedGraph>();
             from.SaveInto(savedGraph);
             to.LoadFrom(savedGraph, this);
-            
+
             switch (to.Description)
             {
                 case MainModuleDescription _:
@@ -66,9 +72,9 @@ namespace OpenScadGraphEditor.Library
                     break;
                 default:
                     throw new InvalidOperationException("unknown description type.");
-            }            
+            }
         }
-        
+
         public FunctionDescription ResolveFunctionReference(string id)
         {
             if (_projectFunctionDescriptions.TryGetValue(id, out var functionDescription))
@@ -76,14 +82,12 @@ namespace OpenScadGraphEditor.Library
                 return functionDescription;
             }
 
-            foreach (var resolveFunctionReference in _externalReferences
-                         .Select(externalReference => externalReference.ResolveFunctionReference(id))
-                         .Where(resolveFunctionReference => resolveFunctionReference != null))
-            {
-                return resolveFunctionReference;
-            }
+            var fromExternal = _externalReferences
+                .Values
+                .SelectMany(it => it.Functions)
+                .FirstOrDefault(it => it.Id == id);
             
-            return _parentResolver.ResolveFunctionReference(id);
+            return fromExternal ?? _parentResolver.ResolveFunctionReference(id);
         }
 
         public ModuleDescription ResolveModuleReference(string id)
@@ -93,14 +97,12 @@ namespace OpenScadGraphEditor.Library
                 return moduleDescription;
             }
             
-            foreach (var resolveModuleReference in _externalReferences
-                         .Select(externalReference => externalReference.ResolveModuleReference(id))
-                         .Where(resolveModuleReference => resolveModuleReference != null))
-            {
-                return resolveModuleReference;
-            }
-            
-            return _parentResolver.ResolveModuleReference(id);
+            var fromExternal = _externalReferences
+                .Values
+                .SelectMany(it => it.Modules)
+                .FirstOrDefault(it => it.Id == id);
+
+            return fromExternal ?? _parentResolver.ResolveModuleReference(id);
         }
 
         public VariableDescription ResolveVariableReference(string id)
@@ -110,20 +112,23 @@ namespace OpenScadGraphEditor.Library
                 return variableDescription;
             }
             
-            foreach (var resolveVariableReference in _externalReferences
-                         .Select(externalReference => externalReference.ResolveVariableReference(id))
-                         .Where(resolveVariableReference => resolveVariableReference != null))
-            {
-                return resolveVariableReference;
-            }
+            var fromExternal = _externalReferences
+                .Values
+                .SelectMany(it => it.Variables)
+                .FirstOrDefault(it => it.Id == id);
             
-            return _parentResolver.ResolveVariableReference(id);
+
+            return fromExternal ?? _parentResolver.ResolveVariableReference(id);
         }
 
         public ExternalReference ResolveExternalReference(string id)
         {
-            var result = _externalReferences.FirstOrDefault(it => it.Id == id);
-            return result ?? _parentResolver.ResolveExternalReference(id);
+            if (_externalReferences.TryGetValue(id, out var result))
+            {
+                return result;
+            }
+            
+            return _parentResolver.ResolveExternalReference(id);
         }
 
         private void Clear()
@@ -133,12 +138,14 @@ namespace OpenScadGraphEditor.Library
             _projectVariables.Clear();
             _modules.ForAll(it => it.Discard());
             _functions.ForAll(it => it.Discard());
-            
+
             MainModule.Discard();
             MainModule = null;
 
             _modules.Clear();
             _functions.Clear();
+            _externalReferences.Clear();
+            _resolvedExternalReferencePaths.Clear();
         }
 
         public void Load(SavedProject project, string projectPath)
@@ -150,20 +157,24 @@ namespace OpenScadGraphEditor.Library
             {
                 _projectFunctionDescriptions[function.Description.Id] = (FunctionDescription) function.Description;
             }
+
             foreach (var module in project.Modules)
             {
                 _projectModuleDescriptions[module.Description.Id] = (ModuleDescription) module.Description;
             }
-            
+
             // Step 2: load variable descriptions so we can resolve them in step 4
             foreach (var variable in project.Variables)
             {
                 _projectVariables.Add(variable.Id, variable);
             }
-            
+
             // Step 3: load external references so we can resolve them in step 4
-            _externalReferences.AddRange(project.ExternalReferences);
-            
+            foreach (var external in project.ExternalReferences)
+            {
+                _externalReferences.Add(external.Id, external);
+            }
+
             // Step 4: load the actual graphs, which can now resolve references to other functions.
             foreach (var function in project.Functions)
             {
@@ -186,16 +197,16 @@ namespace OpenScadGraphEditor.Library
         public SavedProject Save()
         {
             var result = Prefabs.New<SavedProject>();
-            
-            _externalReferences.ForAll(it => result.ExternalReferences.Add(it));
-            
+
+            _externalReferences.ForAll(it => result.ExternalReferences.Add(it.Value));
+
             foreach (var function in _functions)
             {
                 var savedGraph = Prefabs.New<SavedGraph>();
                 function.SaveInto(savedGraph);
                 result.Functions.Add(savedGraph);
             }
-            
+
             foreach (var module in _modules)
             {
                 var savedGraph = Prefabs.New<SavedGraph>();
@@ -207,20 +218,20 @@ namespace OpenScadGraphEditor.Library
             {
                 result.Variables.Add(variable);
             }
-            
+
             {
                 var savedGraph = Prefabs.New<SavedGraph>();
                 MainModule.SaveInto(savedGraph);
                 result.MainModule = savedGraph;
             }
-            
+
             return result;
         }
 
         public string Render()
         {
             return string.Join("\n",
-                _externalReferences.Select(it => it.Render())
+                _externalReferences.Select(it => it.Value.Render())
                     .Concat(_modules.Select(it => it.Render()))
                     .Concat(_functions.Select(it => it.Render()))
                     .Append(MainModule.Render())
@@ -274,7 +285,6 @@ namespace OpenScadGraphEditor.Library
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
         }
 
         public void AddVariable(VariableDescription variableDescription)
@@ -286,8 +296,8 @@ namespace OpenScadGraphEditor.Library
         {
             _projectVariables.Remove(variableDescription.Id);
         }
-        
-        public IScadGraph FindDefiningGraph( InvokableDescription invokableDescription)
+
+        public IScadGraph FindDefiningGraph(InvokableDescription invokableDescription)
         {
             var graphs = Functions.Concat(Modules).Append(MainModule);
             return graphs.First(it => it.Description == invokableDescription);
@@ -295,20 +305,39 @@ namespace OpenScadGraphEditor.Library
 
         public void AddExternalReference(ExternalReference reference)
         {
-            _externalReferences.Add(reference);
+            _externalReferences[reference.Id] = reference;
+        }
+
+        public bool ContainsReferenceTo(string path)
+        {
+            return _externalReferences.Values.Any(it => TryGetFullPathTo(it, out var fullPath) && PathResolver.IsSamePath(fullPath,path));
         }
 
         public void RemoveExternalReference(ExternalReference externalReference)
         {
-            var removed = _externalReferences.Remove(externalReference);
+            var removed = _externalReferences.Remove(externalReference.Id);
             GdAssert.That(removed, "Tried to remove an external reference that was not present.");
         }
 
+
+        public bool IsDefinedInThisProject(InvokableDescription invokableDescription)
+        {
+            switch (invokableDescription)
+            {
+                case FunctionDescription functionDescription:
+                    return IsDefinedInThisProject(functionDescription);
+                case ModuleDescription moduleDescription:
+                    return IsDefinedInThisProject(moduleDescription);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        
         public bool IsDefinedInThisProject(FunctionDescription description)
         {
             return _projectFunctionDescriptions.ContainsKey(description.Id);
         }
-        
+
         public bool IsDefinedInThisProject(ModuleDescription description)
         {
             return _projectModuleDescriptions.ContainsKey(description.Id);
@@ -318,6 +347,42 @@ namespace OpenScadGraphEditor.Library
         {
             return _projectVariables.ContainsKey(description.Id);
         }
+
+        private bool TryGetFullPathTo(ExternalReference reference, out string result)
+        {
+            GdAssert.That(_externalReferences.ContainsKey(reference.Id), "Tried to get the full path to an external reference that was not present in the project.");
             
+            // if we have this cached, use this.
+            if (_resolvedExternalReferencePaths.TryGetValue(reference.Id, out  result))
+            {
+                return true;
+            }
+            
+            // otherwise check who included it.
+            if (reference.IsTransitive)
+            {
+                var includedId = reference.IncludedBy;
+                var includedBy = _externalReferences[includedId];
+                // get its full path, then resolve 
+                if (TryGetFullPathTo(includedBy, out var includedByPath))
+                {
+                    if (PathResolver.TryResolve(includedByPath, reference.SourceFile, out result))
+                    {
+                        _resolvedExternalReferencePaths[reference.Id] = result;
+                        return true;
+                    }
+                }
+            }
+            
+            // if it is not transitive, try to resolve it relative to this project
+            if (PathResolver.TryResolve(ProjectPath, reference.SourceFile, out result))
+            {
+                _resolvedExternalReferencePaths[reference.Id] = result;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
     }
 }

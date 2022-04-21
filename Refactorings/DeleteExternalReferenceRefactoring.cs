@@ -17,6 +17,12 @@ namespace OpenScadGraphEditor.Refactorings
         public override void PerformRefactoring(RefactoringContext context)
         {
             // we have to clean up all references to anything that was pulled in from this external reference.
+            // this is somewhat tricky as we do not include files that are already in the project. So when we 
+            // remove a transitive reference, it may happen that the same file was referred from another file
+            // that we do not want to remove, so in this case we need to move these references over.
+            
+            // TODO: implement this
+            
 
             // get all nodes  that refer to functions or modules in this external reference
             foreach (var invokableDescription in _toDelete.Functions.Concat<InvokableDescription>(
