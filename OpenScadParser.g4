@@ -77,8 +77,8 @@ block
     
     
     
-includeDeclaration: INCLUDE PATH_STRING STATEMENT_TERMINATOR;
-useDeclaration: USE PATH_STRING STATEMENT_TERMINATOR;
+includeDeclaration: INCLUDE PATH_STRING;
+useDeclaration: USE PATH_STRING;
  
 expression
     : simpleExpression
@@ -141,6 +141,7 @@ variableReference
 
 unaryOperator
     : SUBTRACT
+    | ADD
     | NOT
     ;
      
