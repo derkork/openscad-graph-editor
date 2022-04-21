@@ -16,9 +16,20 @@ moduleContent
     : (variableDeclaration | functionDeclaration | moduleDeclaration | includeDeclaration | useDeclaration | block)*;
 
 
+// the scad parser seems to be lenient about commas, so where ever a comma can be there can also be
+// multiple of them and they will just be treated as a single comma. Also trailing commas seem to be no
+// problem either.
+comma
+    : COMMA+
+    ;
+    
+commaMaybe
+    : COMMA*
+    ;    
+
 parameterList
-    : OPEN_PAREN parameterDeclaration (COMMA parameterDeclaration)* CLOSE_PAREN 
-    | OPEN_PAREN CLOSE_PAREN ;
+    : OPEN_PAREN parameterDeclaration (comma parameterDeclaration)* commaMaybe CLOSE_PAREN  
+    | OPEN_PAREN commaMaybe CLOSE_PAREN ;
 
 parameterDeclaration
     : identifier (ASSIGNMENT_OPERATOR expression)?;
@@ -33,8 +44,8 @@ moduleDeclaration
     : MODULE identifier parameterList block;
 
 invocationParameterList
-    : OPEN_PAREN (invocationParameter (COMMA invocationParameter)*)? CLOSE_PAREN 
-    | OPEN_PAREN CLOSE_PAREN;
+    : OPEN_PAREN (invocationParameter (comma invocationParameter)*)? commaMaybe CLOSE_PAREN 
+    | OPEN_PAREN commaMaybe CLOSE_PAREN;
 
 invocationParameter
     : (identifier ASSIGNMENT_OPERATOR expression | expression);
@@ -114,19 +125,23 @@ vectorIndexExpression
     : ( identifier | parenthesizedExpression | vectorExpression | functionInvocation ) (DOT identifier | VECTOR_START expression VECTOR_END)+;
 
 vectorExpression
-    : (VECTOR_START vectorInner (COMMA vectorInner)* COMMA* VECTOR_END) // funny enough the parser allows for trailing commas 
-    | (VECTOR_START VECTOR_END);
+    : (VECTOR_START vectorInner (comma vectorInner)* commaMaybe VECTOR_END) 
+    | (VECTOR_START commaMaybe VECTOR_END);
     
     
 comprehensionForLoop
-    : FOR OPEN_PAREN invocationParameter (COMMA invocationParameter)* ( STATEMENT_TERMINATOR  expression STATEMENT_TERMINATOR invocationParameter (COMMA invocationParameter)* )? CLOSE_PAREN;
+    : FOR OPEN_PAREN invocationParameter (comma invocationParameter)* ( STATEMENT_TERMINATOR  expression STATEMENT_TERMINATOR invocationParameter (comma invocationParameter)* commaMaybe)? CLOSE_PAREN;
 
 vectorInner
     : IF OPEN_PAREN expression CLOSE_PAREN vectorInner (ELSE vectorInner)?
     | LET invocationParameterList vectorInner
     | EACH vectorInner
     | comprehensionForLoop vectorInner 
+    | parenthesizedVectorInner
     | expression;  
+    
+parenthesizedVectorInner
+    : OPEN_PAREN vectorInner CLOSE_PAREN;    
 
 rangeExpression
     : VECTOR_START expression COLON expression (COLON expression)? VECTOR_END;
