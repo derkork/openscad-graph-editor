@@ -1,5 +1,4 @@
 using System.Globalization;
-using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;

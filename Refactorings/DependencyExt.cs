@@ -8,7 +8,6 @@ using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Utils;
-using Path = System.IO.Path;
 
 namespace OpenScadGraphEditor.Refactorings
 {

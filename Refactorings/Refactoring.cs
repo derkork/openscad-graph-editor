@@ -1,5 +1,3 @@
-using Godot;
-
 namespace OpenScadGraphEditor.Refactorings
 {
     public abstract class Refactoring

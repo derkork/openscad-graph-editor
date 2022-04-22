@@ -1,5 +1,3 @@
-using OpenScadGraphEditor.Library;
-
 namespace OpenScadGraphEditor.Nodes
 {
     /// <summary>

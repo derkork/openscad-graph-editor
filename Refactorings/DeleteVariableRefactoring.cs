@@ -1,6 +1,5 @@
 using System.Linq;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;

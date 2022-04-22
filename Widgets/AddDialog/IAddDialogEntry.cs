@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets.AddDialog
 {

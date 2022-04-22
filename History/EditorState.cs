@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.History
 {
