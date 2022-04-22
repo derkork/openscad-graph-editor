@@ -20,8 +20,7 @@ namespace OpenScadGraphEditor.Library.External
         /// <summary>
         /// Flag marking whether this reference was made from the main project or from another library.
         /// </summary>
-        [Export]
-        public bool IsTransitive { get; set; } = false;
+        public bool IsTransitive => !IncludedBy.Empty();
 
         /// <summary>
         /// ID of the external reference which has included this. Only defined if this is a transitive reference.
@@ -42,10 +41,10 @@ namespace OpenScadGraphEditor.Library.External
         public string Id { get; set; }
         
         /// <summary>
-        /// The source file from which the declarations were loaded. 
+        /// The include path that was used to get this reference.
         /// </summary>
         [Export]
-        public string SourceFile { get; set; }
+        public string IncludePath { get; set; }
         
         /// <summary>
         /// The include mode used to get this reference. (see https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Include_Statement).
@@ -82,9 +81,9 @@ namespace OpenScadGraphEditor.Library.External
             switch (Mode)
             {
                 case IncludeMode.Include:
-                    return $"include <{SourceFile}>;\n";
+                    return $"include <{IncludePath}>;\n";
                 case IncludeMode.Use:
-                    return $"use <{SourceFile}>;\n";
+                    return $"use <{IncludePath}>;\n";
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -16,37 +16,37 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            // we have to clean up all references to anything that was pulled in from this external reference.
-            // this is somewhat tricky as we do not include files that are already in the project. So when we 
-            // remove a transitive reference, it may happen that the same file was referred from another file
-            // that we do not want to remove, so in this case we need to move these references over.
-            
-            // TODO: implement this
-            
+            // Prepare the reference for removal. This function will return all
+            // the removed reference and all transitive references that were removed as well
+            var allRemovedReferences = context.Project.PrepareForRemoval(_toDelete).ToList();
 
-            // get all nodes  that refer to functions or modules in this external reference
-            foreach (var invokableDescription in _toDelete.Functions.Concat<InvokableDescription>(
-                         _toDelete.Modules))
+            // now we need to delete everything that refers to something inside those deleted references
+            foreach (var reference in allRemovedReferences)
             {
-                context.Project
-                    .FindAllReferencingNodes(invokableDescription)
-                    .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
-                    .ToList() // avoid still reading from the project while running the refactorings
-                    .ForAll(context.PerformRefactoring);
+                // get all nodes  that refer to functions or modules in this external reference
+                foreach (var invokableDescription in reference.Functions.Concat<InvokableDescription>(
+                             reference.Modules))
+                {
+                    context.Project
+                        .FindAllReferencingNodes(invokableDescription)
+                        .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
+                        .ToList() // avoid still reading from the project while running the refactorings
+                        .ForAll(context.PerformRefactoring);
+                }
+
+                // same for all variables
+                foreach (var variable in reference.Variables)
+                {
+                    context.Project
+                        .FindAllReferencingNodes(variable)
+                        .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
+                        .ToList() // avoid still reading from the project while running the refactorings
+                        .ForAll(context.PerformRefactoring);
+                }
             }
             
-            // same for all variables
-            foreach (var variable in _toDelete.Variables)
-            {
-                context.Project
-                    .FindAllReferencingNodes(variable)
-                    .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
-                    .ToList() // avoid still reading from the project while running the refactorings
-                    .ForAll(context.PerformRefactoring);
-            }
-            
-            // and tell the project to forget about the external reference
-            context.Project.RemoveExternalReference(_toDelete);
+            // finally remove the references from the project
+            allRemovedReferences.ForAll(it => context.Project.RemoveExternalReference(it));
         }
     }
 }

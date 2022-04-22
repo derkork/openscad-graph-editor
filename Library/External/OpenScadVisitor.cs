@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Library.External
         public OpenScadVisitor(ExternalReference externalReference)
         {
             _externalReference = externalReference;
-            _sourceFileHash = _externalReference.SourceFile.SHA256Text();
+            _sourceFileHash = _externalReference.IncludePath.SHA256Text();
         }
 
 

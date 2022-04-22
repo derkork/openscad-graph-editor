@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
 {
     public class ExternalReferenceTreeEntry : ProjectTreeEntry<ExternalReference>
     {
-        public override string Title => Description.SourceFile;
+        public override string Title => Description.IncludePath;
         public override ExternalReference Description { get; }
         public override bool CanBeDragged => false;
         public override bool CanBeActivated => true;

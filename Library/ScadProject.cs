@@ -22,22 +22,17 @@ namespace OpenScadGraphEditor.Library
 
         private readonly Dictionary<string, ExternalReference> _externalReferences = new Dictionary<string, ExternalReference>();
 
-        /// <summary>
-        /// cache for storing the full paths to external references.
-        /// </summary>
-        private Dictionary<string, string> _resolvedExternalReferencePaths = new Dictionary<string, string>();
-
         private readonly HashSet<IScadGraph> _modules = new HashSet<IScadGraph>();
         private readonly HashSet<IScadGraph> _functions = new HashSet<IScadGraph>();
 
         public IEnumerable<IScadGraph> Modules => _modules.OrderBy(x => x.Description.Name);
         public IEnumerable<IScadGraph> Functions => _functions.OrderBy(x => x.Description.Name);
         public IEnumerable<VariableDescription> Variables => _projectVariables.Values.OrderBy(x => x.Name);
-        public IEnumerable<ExternalReference> ExternalReferences => _externalReferences.Values.OrderBy(x => x.SourceFile);
+        public IEnumerable<ExternalReference> ExternalReferences => _externalReferences.Values.OrderBy(x => x.IncludePath);
 
         public IScadGraph MainModule { get; private set; }
 
-        public string ProjectPath { get; set; }
+        public string ProjectPath { get; private set; }
 
         public ScadProject(IReferenceResolver parentResolver)
         {
@@ -145,7 +140,6 @@ namespace OpenScadGraphEditor.Library
             _modules.Clear();
             _functions.Clear();
             _externalReferences.Clear();
-            _resolvedExternalReferencePaths.Clear();
         }
 
         public void Load(SavedProject project, string projectPath)
@@ -305,13 +299,10 @@ namespace OpenScadGraphEditor.Library
 
         public void AddExternalReference(ExternalReference reference)
         {
+            GdAssert.That(!_externalReferences.ContainsKey(reference.Id), "Tried to add an external reference twice.");
             _externalReferences[reference.Id] = reference;
         }
 
-        public bool ContainsReferenceTo(string path)
-        {
-            return _externalReferences.Values.Any(it => TryGetFullPathTo(it, out var fullPath) && PathResolver.IsSamePath(fullPath,path));
-        }
 
         public void RemoveExternalReference(ExternalReference externalReference)
         {
@@ -348,41 +339,5 @@ namespace OpenScadGraphEditor.Library
             return _projectVariables.ContainsKey(description.Id);
         }
 
-        private bool TryGetFullPathTo(ExternalReference reference, out string result)
-        {
-            GdAssert.That(_externalReferences.ContainsKey(reference.Id), "Tried to get the full path to an external reference that was not present in the project.");
-            
-            // if we have this cached, use this.
-            if (_resolvedExternalReferencePaths.TryGetValue(reference.Id, out  result))
-            {
-                return true;
-            }
-            
-            // otherwise check who included it.
-            if (reference.IsTransitive)
-            {
-                var includedId = reference.IncludedBy;
-                var includedBy = _externalReferences[includedId];
-                // get its full path, then resolve 
-                if (TryGetFullPathTo(includedBy, out var includedByPath))
-                {
-                    if (PathResolver.TryResolve(includedByPath, reference.SourceFile, out result))
-                    {
-                        _resolvedExternalReferencePaths[reference.Id] = result;
-                        return true;
-                    }
-                }
-            }
-            
-            // if it is not transitive, try to resolve it relative to this project
-            if (PathResolver.TryResolve(ProjectPath, reference.SourceFile, out result))
-            {
-                _resolvedExternalReferencePaths[reference.Id] = result;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
     }
 }

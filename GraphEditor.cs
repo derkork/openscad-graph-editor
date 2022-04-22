@@ -127,9 +127,9 @@ namespace OpenScadGraphEditor
             OnNewButtonPressed();
         }
 
-        private void OnNewImportRequested(ExternalReference reference)
+        private void OnNewImportRequested(string path, IncludeMode includeMode)
         {
-            OnRefactoringRequested(new AddExternalReferenceRefactoring(reference));
+            OnRefactoringRequested(new AddExternalReferenceRefactoring(path, includeMode));
         }
 
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)

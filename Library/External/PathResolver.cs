@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
 using Directory = System.IO.Directory;
 using Environment = System.Environment;
 using File = System.IO.File;
@@ -51,10 +53,12 @@ namespace OpenScadGraphEditor.Library.External
 
 
         /// <summary>
-        /// Tries to resolve a path from an include statement. Returns a canonical path.
+        /// Tries to resolve a path from an include statement. Returns a canonical, normalized path.
         /// </summary>
-        public static bool TryResolve(string sourceDirectory, string includePath, out string resolvedFullPath)
+        public static bool TryResolve([CanBeNull] string pathToSourceFile, string includePath, out string resolvedFullPath)
         {
+            var sourceDirectory =  pathToSourceFile.Empty() ? "" : Path.GetDirectoryName(pathToSourceFile);
+            
             if (!sourceDirectory.Empty())
             {
                 GdAssert.That(Path.IsPathRooted(sourceDirectory), "Source path is not absolute.");
@@ -72,6 +76,7 @@ namespace OpenScadGraphEditor.Library.External
             // first try to find the file relative to the include location
             if (!sourceDirectory.Empty())
             {
+                // ReSharper disable once AssignNullToNotNullAttribute
                 var tryResolve = Path.Combine(sourceDirectory, includePath);
                 if (File.Exists(tryResolve))
                 {
@@ -96,11 +101,6 @@ namespace OpenScadGraphEditor.Library.External
 
             resolvedFullPath = default;
             return false;
-        }
-
-        public static string DirectoryFromFile(string filePath)
-        {
-            return Path.GetDirectoryName(filePath);
         }
 
 
