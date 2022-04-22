@@ -48,7 +48,7 @@ namespace OpenScadGraphEditor.History
         public EditorState Undo(ScadProject project)
         {
             // we need at least 2 items in the history stack
-            if (_currentIndex <= 1)
+            if (_currentIndex < 1)
             {
                 throw new InvalidOperationException("Cannot undo. History stack is empty.");
             }
@@ -84,9 +84,9 @@ namespace OpenScadGraphEditor.History
         public bool CanUndo(out string operationName)
         {
             // and undo step is available if we have at least two items in the history stack
-            if (_currentIndex <= 1)
+            if (_currentIndex < 1)
             {
-                operationName = null;
+                operationName = "<no more undo steps>";
                 return false;
             }
             operationName = _history[_currentIndex].OperationName;
@@ -101,7 +101,7 @@ namespace OpenScadGraphEditor.History
             // and redo step is available if we have at least one item past the current index in the history stack
             if (_currentIndex >= _history.Count - 1)
             {
-                operationName = null;
+                operationName = "<no more redo steps>";
                 return false;
             }
             operationName = _history[_currentIndex + 1].OperationName;

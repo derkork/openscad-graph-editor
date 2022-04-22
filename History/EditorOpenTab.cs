@@ -13,20 +13,14 @@ namespace OpenScadGraphEditor.History
         public string InvokableId { get; }
 
         /// <summary>
-        /// Whether the tab was currently the active tab.
-        /// </summary>
-        public bool WasActive { get; }
-
-        /// <summary>
         /// The scroll offset of the editor in the tab.
         /// </summary>
         public Vector2 ScrollOffset { get; }
 
         
-        public EditorOpenTab(string invokableId, bool wasActive, Vector2 scrollOffset)
+        public EditorOpenTab(string invokableId, Vector2 scrollOffset)
         {
             InvokableId = invokableId;
-            WasActive = wasActive;
             ScrollOffset = scrollOffset;
         }
     }

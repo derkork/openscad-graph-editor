@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GodotExt;
 
 namespace OpenScadGraphEditor.History
 {
@@ -9,10 +10,14 @@ namespace OpenScadGraphEditor.History
     public class EditorState
     {
        public List<EditorOpenTab> OpenTabs { get; }
+       
+       public int CurrentTabIndex { get; }
 
-       public EditorState(IEnumerable<EditorOpenTab> openTabs)
+       public EditorState(IEnumerable<EditorOpenTab> openTabs, int currentTabIndex)
        {
            OpenTabs = openTabs.ToList();
+           GdAssert.That(currentTabIndex >= 0 && currentTabIndex < OpenTabs.Count(), "currentTabIndex is out of range");
+           CurrentTabIndex = currentTabIndex;
        }
     }
 }

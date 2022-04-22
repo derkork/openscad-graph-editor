@@ -27,7 +27,7 @@ namespace OpenScadGraphEditor.Widgets
         /// Emitted when refactorings are requested (e.g. basically any edit except changes in literals).
         /// TODO: probably we also want refactorings for literals as they should participate in the undo/redo stack.
         /// </summary>
-        public event Action<Refactoring[]> RefactoringsRequested;
+        public event Action<string, Refactoring[]> RefactoringsRequested;
 
         /// <summary>
         /// Emitted when the user right-clicks on a node.
@@ -206,7 +206,7 @@ namespace OpenScadGraphEditor.Widgets
             if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
             {
                 GD.Print("Resolving pending disconnect.");
-                PerformRefactorings(new[] {new DropConnectionRefactoring(_pendingDisconnect)});
+                PerformRefactorings("Remove connection", new[] {new DropConnectionRefactoring(_pendingDisconnect)});
                 _pendingDisconnect = null;
             }
         }
@@ -258,7 +258,7 @@ namespace OpenScadGraphEditor.Widgets
                 _selection.Select(it => new DeleteNodeRefactoring(this, it.BoundNode))
                     .ToList();
             _selection.Clear();
-            PerformRefactorings(refactorings);
+            PerformRefactorings("Delete selection",  refactorings);
         }
 
 
@@ -279,7 +279,7 @@ namespace OpenScadGraphEditor.Widgets
             
             
             var refactorings = ConnectWithChecks(connection);
-            PerformRefactorings(refactorings);
+            PerformRefactorings("Create connection", refactorings);
         }
 
         [MustUseReturnValue]
@@ -331,7 +331,7 @@ namespace OpenScadGraphEditor.Widgets
             _widgets.Clear();
         }
 
-        private void PerformRefactorings(IEnumerable<Refactoring> refactorings)
+        private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings)
         {
             var refactoringsAsArray = refactorings.ToArray();
             if (refactoringsAsArray.Length == 0)
@@ -339,7 +339,7 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
             
-            RefactoringsRequested?.Invoke(refactoringsAsArray);
+            RefactoringsRequested?.Invoke(description, refactoringsAsArray);
         }
 
         private void NotifyUpdateRequired(bool codeChange)

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -14,7 +13,7 @@ namespace OpenScadGraphEditor.Refactorings
         public static IEnumerable<ReferencingNode<IReferToAnInvokable, IScadGraph>> FindAllReferencingNodes(
             this ScadProject project, InvokableDescription description)
         {
-            var graphs = project.Functions.Concat(project.Modules).Append(project.MainModule);
+            var graphs = project.AllDeclaredInvokables;
             foreach (var graph in graphs)
             {
                 foreach (var node in graph.GetAllNodes().OfType<IReferToAnInvokable>()
@@ -32,7 +31,7 @@ namespace OpenScadGraphEditor.Refactorings
             this ScadProject project,
             VariableDescription description)
         {
-            var graphs = project.Functions.Concat(project.Modules).Append(project.MainModule);
+            var graphs = project.AllDeclaredInvokables;
             foreach (var graph in graphs)
             {
                 foreach (var node in graph.GetAllNodes().OfType<IReferToAVariable>()
@@ -43,50 +42,12 @@ namespace OpenScadGraphEditor.Refactorings
             }
         }
 
-        /// <summary>
-        /// Finds all nodes in the project that refer to the given <see cref="ExternalReference"/>
-        /// </summary>
-        public static IEnumerable<ReferencingNode<IReferToAnExternalReference, IScadGraph>> FindAllReferencingNodes(
-            this ScadProject project,
-            ExternalReference externalReference)
-        {
-            var graphs = project.Functions.Concat(project.Modules).Append(project.MainModule);
-            foreach (var graph in graphs)
-            {
-                foreach (var node in graph.GetAllNodes().OfType<IReferToAnExternalReference>()
-                             .Where(it => it.ExternalReference == externalReference))
-                {
-                    yield return new ReferencingNode<IReferToAnExternalReference, IScadGraph>(graph, (ScadNode) node,
-                        node);
-                }
-            }
-        }
-
-        /**
-         * Makes the graph of the given referencing node refactorable and returns an updated referencing node.
-         */
-        public static ReferencingNode<IReferToAnExternalReference, LightWeightGraph> MakeRefactorable<TGraphType>(
-            this RefactoringContext context, ReferencingNode<IReferToAnExternalReference, TGraphType> input) where TGraphType : IScadGraph
-        {
-            var refactorableGraph = context.MakeRefactorable(input.Graph);
-            var scadNode = refactorableGraph.ById(input.Node.Id);
-            return new ReferencingNode<IReferToAnExternalReference, LightWeightGraph>(refactorableGraph, scadNode, (IReferToAnExternalReference) scadNode);
-        }
-
         public static ReferencingNode<IReferToAnInvokable, LightWeightGraph> MakeRefactorable<TGraphType>(
             this RefactoringContext context, ReferencingNode<IReferToAnInvokable, TGraphType> input) where TGraphType : IScadGraph
         {
             var refactorableGraph = context.MakeRefactorable(input.Graph);
             var scadNode = refactorableGraph.ById(input.Node.Id);
             return new ReferencingNode<IReferToAnInvokable, LightWeightGraph>(refactorableGraph, scadNode, (IReferToAnInvokable) scadNode);
-        }
-
-        public static ReferencingNode<IReferToAVariable, LightWeightGraph> MakeRefactorable<TGraphType>(
-            this RefactoringContext context, ReferencingNode<IReferToAVariable, TGraphType> input) where TGraphType : IScadGraph
-        {
-            var refactorableGraph = context.MakeRefactorable(input.Graph);
-            var scadNode = refactorableGraph.ById(input.Node.Id);
-            return new ReferencingNode<IReferToAVariable, LightWeightGraph>(refactorableGraph, scadNode, (IReferToAVariable) scadNode);
         }
 
 

@@ -27,6 +27,9 @@ namespace OpenScadGraphEditor.Library
 
         public IEnumerable<IScadGraph> Modules => _modules.OrderBy(x => x.Description.Name);
         public IEnumerable<IScadGraph> Functions => _functions.OrderBy(x => x.Description.Name);
+
+        public IEnumerable<IScadGraph> AllDeclaredInvokables => Functions.Concat(Modules).Append(MainModule);
+
         public IEnumerable<VariableDescription> Variables => _projectVariables.Values.OrderBy(x => x.Name);
         public IEnumerable<ExternalReference> ExternalReferences => _externalReferences.Values.OrderBy(x => x.IncludePath);
 
@@ -293,8 +296,7 @@ namespace OpenScadGraphEditor.Library
 
         public IScadGraph FindDefiningGraph(InvokableDescription invokableDescription)
         {
-            var graphs = Functions.Concat(Modules).Append(MainModule);
-            return graphs.First(it => it.Description == invokableDescription);
+            return AllDeclaredInvokables.First(it => it.Description == invokableDescription);
         }
 
         public void AddExternalReference(ExternalReference reference)
