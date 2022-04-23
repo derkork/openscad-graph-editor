@@ -13,6 +13,7 @@ using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
@@ -32,8 +33,8 @@ namespace OpenScadGraphEditor
         private FileDialog _fileDialog;
         private ProjectTree _projectTree;
         private ImportDialog _importDialog;
-        private Button _undoButton;
-        private Button _redoButton;
+        private IconButton _undoButton;
+        private IconButton _redoButton;
 
         private string _currentFile;
 
@@ -86,17 +87,14 @@ namespace OpenScadGraphEditor
             _projectTree.ItemActivated += Open;
             _projectTree.ItemContextMenuRequested += OnItemContextMenuRequested;
 
-            _undoButton = this.WithName<Button>("UndoButton");
-            _undoButton.Connect("pressed")
-                .To(this, nameof(Undo));
+            _undoButton = this.WithName<IconButton>("UndoButton");
+            _undoButton.ButtonPressed += Undo;
 
-            _redoButton = this.WithName<Button>("RedoButton");
-            _redoButton.Connect("pressed")
-                .To(this, nameof(Redo));
+            _redoButton = this.WithName<IconButton>("RedoButton");
+            _redoButton.ButtonPressed += Redo;
 
-            this.WithName<Button>("AddExternalReferenceButton")
-                .Connect("pressed")
-                .To(this, nameof(OnImportScadFile));
+            this.WithName<IconButton>("AddExternalReferenceButton")
+                .ButtonPressed += OnImportScadFile;
 
             this.WithName<Button>("NewButton")
                 .Connect("pressed")
@@ -114,19 +112,14 @@ namespace OpenScadGraphEditor
                 .Connect("pressed")
                 .To(this, nameof(OnSaveAsPressed));
 
-            this.WithName<Button>("AddModuleButton")
-                .Connect("pressed")
-                .To(this, nameof(OnAddModulePressed));
+            this.WithName<IconButton>("AddModuleButton")
+                .ButtonPressed += OnAddModulePressed;
 
+            this.WithName<IconButton>("AddFunctionButton")
+                .ButtonPressed += OnAddFunctionPressed;
 
-            this.WithName<Button>("AddFunctionButton")
-                .Connect("pressed")
-                .To(this, nameof(OnAddFunctionPressed));
-
-            this.WithName<Button>("AddVariableButton")
-                .Connect("pressed")
-                .To(this, nameof(OnAddVariablePressed));
-
+            this.WithName<IconButton>("AddVariableButton")
+                .ButtonPressed += OnAddVariablePressed;
 
             MarkDirty(true);
 
@@ -393,7 +386,7 @@ namespace OpenScadGraphEditor
 
         private void OnRefactoringRequested(string humanReadableDescription, Refactoring refactoring)
         {
-            PerformRefactorings(humanReadableDescription, new[] {refactoring});
+            PerformRefactorings(humanReadableDescription, refactoring);
         }
 
         private void PerformRefactorings(string description, params Refactoring[] refactorings)
@@ -406,8 +399,18 @@ namespace OpenScadGraphEditor
         {
             var context = new RefactoringContext(_currentProject);
             context.PerformRefactorings(refactorings, after);
+
+            // in case a module or function was deleted the current tab may be off
+            var currentTabId = _tabContainer.CurrentTab;
+            var childCount = _tabContainer.GetChildCount<ScadGraphEdit>();
+            if (currentTabId >= childCount)
+            {
+                _tabContainer.CurrentTab = childCount - 1;
+            }
+            
             // important, the snapshot must be made _after_ the changes.
             _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
+
             RefreshControls();
             MarkDirty(true);
         }

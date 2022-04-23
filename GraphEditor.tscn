@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -14,6 +14,7 @@
 [ext_resource path="res://Icons/import0000.png" type="Texture" id=12]
 [ext_resource path="res://Icons/redo0000.png" type="Texture" id=13]
 [ext_resource path="res://Icons/undo0000.png" type="Texture" id=14]
+[ext_resource path="res://Widgets/IconButton/IconButton.tscn" type="PackedScene" id=15]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -111,32 +112,35 @@ margin_bottom = 45.0
 hint_tooltip = "Save the current project to a file."
 text = "Save as..."
 
-[node name="UndoButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+[node name="UndoButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_left = 303.0
-margin_right = 358.0
+margin_right = 348.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 55, 45 )
-hint_tooltip = "Undo"
-icon = ExtResource( 14 )
-expand_icon = true
+rect_min_size = Vector2( 45, 45 )
+Icon = ExtResource( 14 )
+Padding = Vector2( 8, 8 )
 
-[node name="RedoButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 366.0
-margin_right = 421.0
+[node name="RedoButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 356.0
+margin_right = 401.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 55, 45 )
-hint_tooltip = "Redo"
-icon = ExtResource( 13 )
-expand_icon = true
+rect_min_size = Vector2( 45, 45 )
+Icon = ExtResource( 13 )
+HintTooltip = null
+Padding = Vector2( 8, 8 )
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 429.0
-margin_right = 1059.0
+margin_left = 409.0
+margin_right = 1049.0
 margin_bottom = 45.0
 size_flags_horizontal = 3
 
 [node name="FileNameLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1067.0
+margin_left = 1057.0
 margin_top = 10.0
 margin_right = 1698.0
 margin_bottom = 35.0
@@ -188,54 +192,66 @@ custom_constants/autohide = 0
 split_offset = 100
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
-margin_right = 372.0
+margin_right = 350.0
 margin_bottom = 1007.0
 rect_min_size = Vector2( 250, 0 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer"]
 margin_left = 14.0
 margin_top = 14.0
-margin_right = 358.0
+margin_right = 336.0
 margin_bottom = 993.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_right = 344.0
+margin_right = 322.0
 margin_bottom = 45.0
 
-[node name="AddModuleButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer"]
-margin_right = 55.0
+[node name="AddModuleButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 45.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 55, 45 )
-icon = ExtResource( 2 )
-expand_icon = true
+rect_min_size = Vector2( 45, 45 )
+Icon = ExtResource( 2 )
+HintTooltip = "Add module"
+Padding = Vector2( 8, 8 )
 
-[node name="AddFunctionButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer"]
-margin_left = 63.0
-margin_right = 118.0
+[node name="AddFunctionButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 53.0
+margin_right = 98.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 55, 45 )
-icon = ExtResource( 10 )
-expand_icon = true
+rect_min_size = Vector2( 45, 45 )
+Icon = ExtResource( 10 )
+HintTooltip = "Add function"
+Padding = Vector2( 8, 8 )
 
-[node name="AddVariableButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer"]
-margin_left = 126.0
-margin_right = 181.0
+[node name="AddVariableButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 106.0
+margin_right = 151.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 55, 45 )
-icon = ExtResource( 9 )
-expand_icon = true
+rect_min_size = Vector2( 45, 45 )
+Icon = ExtResource( 9 )
+HintTooltip = "Add variable"
+Padding = Vector2( 8, 8 )
 
-[node name="AddExternalReferenceButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer"]
-margin_left = 189.0
-margin_right = 244.0
+[node name="AddExternalReferenceButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 159.0
+margin_right = 204.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 55, 45 )
-icon = ExtResource( 12 )
-expand_icon = true
+rect_min_size = Vector2( 45, 45 )
+Icon = ExtResource( 12 )
+HintTooltip = "Include/use .scad file"
+Padding = Vector2( 8, 8 )
 
 [node name="ProjectTree" type="Tree" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 53.0
-margin_right = 344.0
+margin_right = 322.0
 margin_bottom = 979.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -243,7 +259,7 @@ allow_rmb_select = true
 script = ExtResource( 11 )
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
-margin_left = 396.0
+margin_left = 374.0
 margin_right = 1920.0
 margin_bottom = 1007.0
 tab_align = 0

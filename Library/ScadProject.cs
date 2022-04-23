@@ -321,6 +321,8 @@ namespace OpenScadGraphEditor.Library
                     return IsDefinedInThisProject(functionDescription);
                 case ModuleDescription moduleDescription:
                     return IsDefinedInThisProject(moduleDescription);
+                case MainModuleDescription mainModuleDescription:
+                    return MainModule.Description.Id == mainModuleDescription.Id;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

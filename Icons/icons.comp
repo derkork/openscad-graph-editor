@@ -2,7 +2,7 @@ Composition {
 	CurrentTime = 0,
 	RenderRange = { 0, 0 },
 	GlobalRange = { 0, 1 },
-	CurrentID = 98,
+	CurrentID = 152,
 	HiQ = true,
 	PlaybackUpdateMode = 0,
 	Version = "Fusion Studio 17.4.6 build 4",
@@ -13,16 +13,247 @@ Composition {
 	AudioOffset = 0,
 	Resumable = true,
 	OutputClips = {
-		"comp:/import.png",
-		"comp:/transitive_import.png",
+		"comp:/eraser.png",
+		"comp:/function.png",
+		"comp:/module.png",
 		"comp:/variable.png",
 		"comp:/scad_builtin.png",
-		"comp:/module.png",
-		"comp:/function.png",
+		"comp:/import.png",
+		"comp:/transitive_import.png",
+		"comp:/undo.png",
 		"comp:/redo.png",
-		"comp:/undo.png"
+		"comp:/pencil.png"
 	},
 	Tools = {
+		EraserBodyInner = RectangleMask {
+			NameSet = true,
+			SourceOp = "EraserBody",
+			Inputs = {
+				SettingsNest = Input { },
+				PaintMode = Input { Value = FuID { "Subtract" }, },
+				Invert = Input { },
+				Width = Input {
+					Value = 0.312,
+					Expression = "EraserBody.Width -0.05"
+				},
+				Height = Input {
+					Value = 0.659,
+					Expression = "EraserBody.Height -0.05"
+				},
+				["ShapeRasterizer.Nest"] = Input { },
+				CommentsNest = Input { },
+				FrameRenderScriptNest = Input { },
+				StartRenderScripts = Input { },
+				EndRenderScripts = Input { },
+				EffectMask = Input { }
+			},
+			ViewInfo = OperatorInfo { Pos = { 165, 808.5 } },
+		},
+		CutoverRectangle = RectangleMask {
+			NameSet = true,
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				PaintMode = Input { Value = FuID { "Subtract" }, },
+				MaskWidth = Input { Value = 64, },
+				MaskHeight = Input { Value = 64, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Center = Input { Value = { 0.62109375, 0.7109375 }, },
+				Width = Input { Value = 1, },
+				Angle = Input {
+					Value = -44.4,
+					Expression = "EraserBody.Angle",
+				},
+				EffectMask = Input {
+					SourceOp = "EraserBodyInner",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 165, 775.5 } },
+		},
+		EraserBody = RectangleMask {
+			NameSet = true,
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				PaintMode = Input { Value = FuID { "Add" }, },
+				Invert = Input { Value = 1, },
+				MaskWidth = Input { Value = 64, },
+				MaskHeight = Input { Value = 64, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Center = Input { Value = { 0.50390625, 0.5 }, },
+				Width = Input { Value = 0.362, },
+				Height = Input { Value = 0.709, },
+				CornerRadius = Input { Value = 0.283, },
+				Angle = Input { Value = -44.4, },
+				EffectMask = Input {
+					SourceOp = "CutoverRectangle",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 275, 775.5 } },
+		},
+		Rectangle2 = RectangleMask {
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				PaintMode = Input { Value = FuID { "Subtract" }, },
+				MaskWidth = Input { Value = 64, },
+				MaskHeight = Input { Value = 64, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Center = Input { Value = { 0.62707182320442, 0.146408839779006 }, },
+				Height = Input { Value = 0.031, },
+				EffectMask = Input {
+					SourceOp = "EraserBody",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 385, 775.5 } },
+		},
+		Instance_Instance_WhiteBg = Background {
+			NameSet = true,
+			SourceOp = "Instance_WhiteBg",
+			Inputs = {
+				EffectMask = Input {
+					SourceOp = "Rectangle2",
+					Source = "Mask",
+				},
+				SettingsNest = Input { },
+				ApplyMaskInverted = Input { Value = 1, },
+				ImageNest = Input { },
+				["Gamut.ColorSpaceNest"] = Input { },
+				["Gamut.GammaSpaceNest"] = Input { },
+				BackgroundNest = Input { },
+				CommentsNest = Input { },
+				FrameRenderScriptNest = Input { },
+				StartRenderScripts = Input { },
+				EndRenderScripts = Input { },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 775.5 } },
+		},
+		Saver1_2_1_1_1_1_1_1 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/eraser.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "Instance_Instance_WhiteBg",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 605, 775.5 } },
+		},
+		RedBG = Background {
+			NameSet = true,
+			Inputs = {
+				EffectMask = Input {
+					SourceOp = "Ellipse1",
+					Source = "Mask",
+				},
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				TopLeftRed = Input { Value = 0.882, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 385, 82.5 } },
+		},
+		TextF = TextPlus {
+			NameSet = true,
+			Inputs = {
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Center = Input { Value = { 0.488950276243094, 0.488950276243094 }, },
+				StyledText = Input { Value = "f", },
+				Font = Input { Value = "Open Sans", },
+				Style = Input { Value = "Extrabold", },
+				Size = Input { Value = 1.3, },
+				VerticalJustificationNew = Input { Value = 3, },
+				HorizontalJustificationNew = Input { Value = 3, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 49.5 } },
+		},
+		FunctionIcon = Merge {
+			NameSet = true,
+			Inputs = {
+				Background = Input {
+					SourceOp = "RedBG",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "TextF",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 82.5 } },
+		},
+		Saver1 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/function.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						TimeCode = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "FunctionIcon",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 605, 82.5 } },
+		},
+		TealBG = Background {
+			NameSet = true,
+			Inputs = {
+				EffectMask = Input {
+					SourceOp = "Ellipse1",
+					Source = "Mask",
+				},
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				TopLeftRed = Input { Value = 0.27843137254902, },
+				TopLeftGreen = Input { Value = 0.466666666666667, },
+				TopLeftBlue = Input { Value = 0.549019607843137, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 385, 148.5 } },
+		},
 		TextM = TextPlus {
 			NameSet = true,
 			Inputs = {
@@ -40,20 +271,50 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 495, 115.5 } },
 		},
-		DarkBlueBg = Background {
+		ModuleIcon = Merge {
 			NameSet = true,
 			Inputs = {
-				EffectMask = Input {
-					SourceOp = "Ellipse1",
-					Source = "Mask",
+				Background = Input {
+					SourceOp = "TealBG",
+					Source = "Output",
 				},
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				TopLeftBlue = Input { Value = 0.498039215686275, },
+				Foreground = Input {
+					SourceOp = "TextM",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
 			},
-			ViewInfo = OperatorInfo { Pos = { 385, 280.5 } },
+			ViewInfo = OperatorInfo { Pos = { 495, 148.5 } },
+		},
+		Saver1_1 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/module.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						TimeCode = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "ModuleIcon",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 605, 148.5 } },
 		},
 		GreyBg = Background {
 			NameSet = true,
@@ -72,7 +333,70 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 385, 511.5 } },
 		},
-		TealBG = Background {
+		TextV = TextPlus {
+			NameSet = true,
+			Inputs = {
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Center = Input { Value = { 0.516574585635359, 0.566298342541436 }, },
+				StyledText = Input { Value = "v", },
+				Font = Input { Value = "Open Sans", },
+				Style = Input { Value = "Extrabold", },
+				Size = Input { Value = 1.3, },
+				VerticalJustificationNew = Input { Value = 3, },
+				HorizontalJustificationNew = Input { Value = 3, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 478.5 } },
+		},
+		VariableIcon = Merge {
+			NameSet = true,
+			Inputs = {
+				Background = Input {
+					SourceOp = "GreyBg",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "TextV",
+					Source = "Output",
+				},
+				Center = Input { Value = { 0.488950276243094, 0.450276243093923 }, },
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 511.5 } },
+		},
+		Saver1_2_1_1 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/variable.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						TimeCode = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "VariableIcon",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 605, 511.5 } },
+		},
+		LightGreenBg = Background {
 			NameSet = true,
 			Inputs = {
 				EffectMask = Input {
@@ -83,11 +407,73 @@ Composition {
 				Width = Input { Value = 64, },
 				Height = Input { Value = 64, },
 				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				TopLeftRed = Input { Value = 0.27843137254902, },
-				TopLeftGreen = Input { Value = 0.466666666666667, },
-				TopLeftBlue = Input { Value = 0.549019607843137, },
+				TopLeftRed = Input { Value = 0.349019607843137, },
+				TopLeftGreen = Input { Value = 0.666666666666667, },
+				TopLeftBlue = Input { Value = 0.298039215686275, },
 			},
-			ViewInfo = OperatorInfo { Pos = { 385, 148.5 } },
+			ViewInfo = OperatorInfo { Pos = { 385, 214.5 } },
+		},
+		TextS = TextPlus {
+			NameSet = true,
+			Inputs = {
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Center = Input { Value = { 0.511049723756906, 0.549723756906077 }, },
+				StyledText = Input { Value = "s", },
+				Font = Input { Value = "Open Sans", },
+				Style = Input { Value = "Extrabold", },
+				Size = Input { Value = 1.3, },
+				VerticalJustificationNew = Input { Value = 3, },
+				HorizontalJustificationNew = Input { Value = 3, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 181.5 } },
+		},
+		BuiltInIcon = Merge {
+			NameSet = true,
+			Inputs = {
+				Background = Input {
+					SourceOp = "LightGreenBg",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "TextS",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 214.5 } },
+		},
+		Saver1_2 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/scad_builtin.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						TimeCode = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "BuiltInIcon",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 605, 214.5 } },
 		},
 		ImportIcon = Merge {
 			NameSet = true,
@@ -135,6 +521,33 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 605, 280.5 } },
 		},
+		Ellipse1 = EllipseMask {
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				MaskWidth = Input { Value = 64, },
+				MaskHeight = Input { Value = 64, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Width = Input { Value = 1, },
+				Height = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 220, 148.5 } },
+		},
+		DarkBlueBg = Background {
+			NameSet = true,
+			Inputs = {
+				EffectMask = Input {
+					SourceOp = "Ellipse1",
+					Source = "Mask",
+				},
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				TopLeftBlue = Input { Value = 0.498039215686275, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 385, 280.5 } },
+		},
 		PipeRouter1 = PipeRouter {
 			Inputs = {
 				Input = Input {
@@ -143,6 +556,23 @@ Composition {
 				},
 			},
 			ViewInfo = PipeRouterInfo { Pos = { 454.666, 445.545 } },
+		},
+		TextImport = TextPlus {
+			NameSet = true,
+			Inputs = {
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Center = Input { Value = { 0.516574585635359, 0.538674033149171 }, },
+				StyledText = Input { Value = "<>", },
+				Font = Input { Value = "Open Sans", },
+				Style = Input { Value = "Extrabold", },
+				Size = Input { Value = 1.3, },
+				VerticalJustificationNew = Input { Value = 3, },
+				HorizontalJustificationNew = Input { Value = 3, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 346.5 } },
 		},
 		Transform1 = Transform {
 			Inputs = {
@@ -155,21 +585,38 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 495, 379.5 } },
 		},
-		VariableIcon = Merge {
+		Duplicate1 = Fuse.Duplicate {
+			Inputs = {
+				Copies = Input { Value = 2.99, },
+				Center = Input { Value = { 0.6015625, 0.4609375 }, },
+				XSize = Input { Value = 0.77, },
+				ApplyMode = Input { Value = FuID { "Screen" }, },
+				SubtractiveAdditive = Input { Value = 0, },
+				GainNest = Input { Value = 1, },
+				AlphaGain = Input { Value = 0.622, },
+				RandomSeed = Input { Value = 26024, },
+				Background = Input {
+					SourceOp = "Transform1",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 605, 379.5 } },
+		},
+		TransitiveImportIcon = Merge {
 			NameSet = true,
 			Inputs = {
 				Background = Input {
-					SourceOp = "GreyBg",
+					SourceOp = "PipeRouter1",
 					Source = "Output",
 				},
 				Foreground = Input {
-					SourceOp = "TextV",
+					SourceOp = "Duplicate1",
 					Source = "Output",
 				},
-				Center = Input { Value = { 0.488950276243094, 0.450276243093923 }, },
+				Center = Input { Value = { 0.504575276243094, 0.419026243093923 }, },
 				PerformDepthMerge = Input { Value = 0, },
 			},
-			ViewInfo = OperatorInfo { Pos = { 495, 511.5 } },
+			ViewInfo = OperatorInfo { Pos = { 605, 445.5 } },
 		},
 		Saver1_2_1_2 = Saver {
 			CtrlWZoom = false,
@@ -202,46 +649,12 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 715, 445.5 } },
 		},
-		LightGreenBg = Background {
-			NameSet = true,
-			Inputs = {
-				EffectMask = Input {
-					SourceOp = "Ellipse1",
-					Source = "Mask",
-				},
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				TopLeftRed = Input { Value = 0.349019607843137, },
-				TopLeftGreen = Input { Value = 0.666666666666667, },
-				TopLeftBlue = Input { Value = 0.298039215686275, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 385, 214.5 } },
-		},
-		TextS = TextPlus {
-			NameSet = true,
-			Inputs = {
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Center = Input { Value = { 0.511049723756906, 0.549723756906077 }, },
-				StyledText = Input { Value = "s", },
-				Font = Input { Value = "Open Sans", },
-				Style = Input { Value = "Extrabold", },
-				Size = Input { Value = 1.3, },
-				VerticalJustificationNew = Input { Value = 3, },
-				HorizontalJustificationNew = Input { Value = 3, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 181.5 } },
-		},
-		Saver1_2_1_1 = Saver {
+		Saver1_2_1_1_1 = Saver {
 			Inputs = {
 				ProcessWhenBlendIs00 = Input { Value = 0, },
 				Clip = Input {
 					Value = Clip {
-						Filename = "comp:/variable.png",
+						Filename = "comp:/undo.png",
 						FormatID = "PNGFormat",
 						Length = 0,
 						Saving = true,
@@ -259,263 +672,16 @@ Composition {
 				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
 				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
 				Input = Input {
-					SourceOp = "VariableIcon",
+					SourceOp = "WhiteBg",
 					Source = "Output",
 				},
 				["PNGFormat.PreDivide"] = Input { Value = 1, },
 			},
-			ViewInfo = OperatorInfo { Pos = { 605, 511.5 } },
-		},
-		Saver1_2 = Saver {
-			Inputs = {
-				ProcessWhenBlendIs00 = Input { Value = 0, },
-				Clip = Input {
-					Value = Clip {
-						Filename = "comp:/scad_builtin.png",
-						FormatID = "PNGFormat",
-						Length = 0,
-						Saving = true,
-						TrimIn = 0,
-						ExtendFirst = 0,
-						ExtendLast = 0,
-						Loop = 1,
-						AspectMode = 0,
-						Depth = 0,
-						TimeCode = 0,
-						GlobalStart = -2000000000,
-						GlobalEnd = 0
-					},
-				},
-				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Input = Input {
-					SourceOp = "BuiltInIcon",
-					Source = "Output",
-				},
-				["PNGFormat.PreDivide"] = Input { Value = 1, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 605, 214.5 } },
-		},
-		Saver1_1 = Saver {
-			Inputs = {
-				ProcessWhenBlendIs00 = Input { Value = 0, },
-				Clip = Input {
-					Value = Clip {
-						Filename = "comp:/module.png",
-						FormatID = "PNGFormat",
-						Length = 0,
-						Saving = true,
-						TrimIn = 0,
-						ExtendFirst = 0,
-						ExtendLast = 0,
-						Loop = 1,
-						AspectMode = 0,
-						Depth = 0,
-						TimeCode = 0,
-						GlobalStart = -2000000000,
-						GlobalEnd = 0
-					},
-				},
-				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Input = Input {
-					SourceOp = "ModuleIcon",
-					Source = "Output",
-				},
-				["PNGFormat.PreDivide"] = Input { Value = 1, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 605, 148.5 } },
-		},
-		FunctionIcon = Merge {
-			NameSet = true,
-			Inputs = {
-				Background = Input {
-					SourceOp = "RedBG",
-					Source = "Output",
-				},
-				Foreground = Input {
-					SourceOp = "TextF",
-					Source = "Output",
-				},
-				PerformDepthMerge = Input { Value = 0, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 82.5 } },
-		},
-		RedBG = Background {
-			NameSet = true,
-			Inputs = {
-				EffectMask = Input {
-					SourceOp = "Ellipse1",
-					Source = "Mask",
-				},
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				TopLeftRed = Input { Value = 0.882, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 385, 82.5 } },
-		},
-		BuiltInIcon = Merge {
-			NameSet = true,
-			Inputs = {
-				Background = Input {
-					SourceOp = "LightGreenBg",
-					Source = "Output",
-				},
-				Foreground = Input {
-					SourceOp = "TextS",
-					Source = "Output",
-				},
-				PerformDepthMerge = Input { Value = 0, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 214.5 } },
-		},
-		ModuleIcon = Merge {
-			NameSet = true,
-			Inputs = {
-				Background = Input {
-					SourceOp = "TealBG",
-					Source = "Output",
-				},
-				Foreground = Input {
-					SourceOp = "TextM",
-					Source = "Output",
-				},
-				PerformDepthMerge = Input { Value = 0, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 148.5 } },
-		},
-		TransitiveImportIcon = Merge {
-			NameSet = true,
-			Inputs = {
-				Background = Input {
-					SourceOp = "PipeRouter1",
-					Source = "Output",
-				},
-				Foreground = Input {
-					SourceOp = "Duplicate1",
-					Source = "Output",
-				},
-				Center = Input { Value = { 0.504575276243094, 0.419026243093923 }, },
-				PerformDepthMerge = Input { Value = 0, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 605, 445.5 } },
-		},
-		TextImport = TextPlus {
-			NameSet = true,
-			Inputs = {
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Center = Input { Value = { 0.516574585635359, 0.538674033149171 }, },
-				StyledText = Input { Value = "<>", },
-				Font = Input { Value = "Open Sans", },
-				Style = Input { Value = "Extrabold", },
-				Size = Input { Value = 1.3, },
-				VerticalJustificationNew = Input { Value = 3, },
-				HorizontalJustificationNew = Input { Value = 3, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 346.5 } },
-		},
-		TextF = TextPlus {
-			NameSet = true,
-			Inputs = {
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Center = Input { Value = { 0.488950276243094, 0.488950276243094 }, },
-				StyledText = Input { Value = "f", },
-				Font = Input { Value = "Open Sans", },
-				Style = Input { Value = "Extrabold", },
-				Size = Input { Value = 1.3, },
-				VerticalJustificationNew = Input { Value = 3, },
-				HorizontalJustificationNew = Input { Value = 3, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 49.5 } },
-		},
-		Ellipse1 = EllipseMask {
-			Inputs = {
-				Filter = Input { Value = FuID { "Fast Gaussian" }, },
-				MaskWidth = Input { Value = 64, },
-				MaskHeight = Input { Value = 64, },
-				PixelAspect = Input { Value = { 1, 1 }, },
-				ClippingMode = Input { Value = FuID { "None" }, },
-				Width = Input { Value = 1, },
-				Height = Input { Value = 1, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 220, 148.5 } },
-		},
-		Saver1 = Saver {
-			Inputs = {
-				ProcessWhenBlendIs00 = Input { Value = 0, },
-				Clip = Input {
-					Value = Clip {
-						Filename = "comp:/function.png",
-						FormatID = "PNGFormat",
-						Length = 0,
-						Saving = true,
-						TrimIn = 0,
-						ExtendFirst = 0,
-						ExtendLast = 0,
-						Loop = 1,
-						AspectMode = 0,
-						Depth = 0,
-						TimeCode = 0,
-						GlobalStart = -2000000000,
-						GlobalEnd = 0
-					},
-				},
-				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Input = Input {
-					SourceOp = "FunctionIcon",
-					Source = "Output",
-				},
-				["PNGFormat.PreDivide"] = Input { Value = 1, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 605, 82.5 } },
-		},
-		Duplicate1 = Fuse.Duplicate {
-			Inputs = {
-				Copies = Input { Value = 2.99, },
-				Center = Input { Value = { 0.6015625, 0.4609375 }, },
-				XSize = Input { Value = 0.77, },
-				ApplyMode = Input { Value = FuID { "Screen" }, },
-				SubtractiveAdditive = Input { Value = 0, },
-				GainNest = Input { Value = 1, },
-				AlphaGain = Input { Value = 0.622, },
-				RandomSeed = Input { Value = 26024, },
-				Background = Input {
-					SourceOp = "Transform1",
-					Source = "Output",
-				},
-			},
-			ViewInfo = OperatorInfo { Pos = { 605, 379.5 } },
-		},
-		TextV = TextPlus {
-			NameSet = true,
-			Inputs = {
-				GlobalOut = Input { Value = 1, },
-				Width = Input { Value = 64, },
-				Height = Input { Value = 64, },
-				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
-				Center = Input { Value = { 0.516574585635359, 0.566298342541436 }, },
-				StyledText = Input { Value = "v", },
-				Font = Input { Value = "Open Sans", },
-				Style = Input { Value = "Extrabold", },
-				Size = Input { Value = 1.3, },
-				VerticalJustificationNew = Input { Value = 3, },
-				HorizontalJustificationNew = Input { Value = 3, },
-			},
-			ViewInfo = OperatorInfo { Pos = { 495, 478.5 } },
+			ViewInfo = OperatorInfo { Pos = { 605, 577.5 } },
 		},
 		ArrowLeft = PolylineMask {
 			DrawMode = "InsertAndModify",
 			DrawMode2 = "InsertAndModify",
-			CtrlWZoom = false,
 			NameSet = true,
 			Inputs = {
 				Filter = Input { Value = FuID { "Fast Gaussian" }, },
@@ -524,7 +690,7 @@ Composition {
 				PixelAspect = Input { Value = { 1, 1 }, },
 				ClippingMode = Input { Value = FuID { "None" }, },
 				Polyline = Input {
-					SourceOp = "Polygon1Polyline",
+					SourceOp = "ArrowLeftPolyline",
 					Source = "Value",
 				},
 				Polyline2 = Input {
@@ -535,7 +701,7 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 275, 577.5 } },
 		},
-		Polygon1Polyline = BezierSpline {
+		ArrowLeftPolyline = BezierSpline {
 			SplineColor = { Red = 173, Green = 255, Blue = 47 },
 			CtrlWZoom = false,
 			NameSet = true,
@@ -558,6 +724,10 @@ Composition {
 		WhiteBg = Background {
 			NameSet = true,
 			Inputs = {
+				EffectMask = Input {
+					SourceOp = "ArrowLeft",
+					Source = "Mask",
+				},
 				GlobalOut = Input { Value = 1, },
 				Width = Input { Value = 64, },
 				Height = Input { Value = 64, },
@@ -565,10 +735,6 @@ Composition {
 				TopLeftRed = Input { Value = 1, },
 				TopLeftGreen = Input { Value = 1, },
 				TopLeftBlue = Input { Value = 1, },
-				EffectMask = Input {
-					SourceOp = "ArrowLeft",
-					Source = "Mask",
-				}
 			},
 			ViewInfo = OperatorInfo { Pos = { 495, 577.5 } },
 		},
@@ -598,6 +764,7 @@ Composition {
 						Loop = 1,
 						AspectMode = 0,
 						Depth = 0,
+						TimeCode = 0,
 						GlobalStart = -2000000000,
 						GlobalEnd = 0
 					},
@@ -612,12 +779,117 @@ Composition {
 			},
 			ViewInfo = OperatorInfo { Pos = { 715, 643.5 } },
 		},
-		Saver1_2_1_1_1 = Saver {
+		Tip = PolylineMask {
+			DrawMode = "InsertAndModify",
+			DrawMode2 = "InsertAndModify",
+			NameSet = true,
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				MaskWidth = Input { Value = 64, },
+				MaskHeight = Input { Value = 64, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Center = Input { Value = { 0.5, 0.4921875 }, },
+				Polyline = Input {
+					SourceOp = "Polygon2Polyline",
+					Source = "Value",
+				},
+				Polyline2 = Input {
+					Value = Polyline {
+					},
+					Disabled = true,
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 385, 676.5 } },
+		},
+		Polygon2Polyline = BezierSpline {
+			SplineColor = { Red = 96, Green = 255, Blue = 47 },
+			CtrlWZoom = false,
+			NameSet = true,
+			KeyFrames = {
+				[0] = { 0, Flags = { Linear = true, LockedY = true }, Value = Polyline {
+						Closed = true,
+						Points = {
+							{ Linear = true, X = -0.3349609375, Y = -0.1650390625, LX = -0.0123697916666667, LY = -0.0227864583333333, RX = 0.0149739583333333, RY = -0.0162760416666667 },
+							{ Linear = true, X = -0.2900390625, Y = -0.2138671875, LX = -0.0149739583333333, LY = 0.0162760416666667, RX = -0.02734375, RY = -0.00651041666666667 },
+							{ Linear = true, X = -0.3720703125, Y = -0.2333984375, LX = 0.02734375, LY = 0.00651041666666667, RX = 0.0123697916666667, RY = 0.0227864583333333 }
+						}
+					} }
+			}
+		},
+		Handle = PolylineMask {
+			DrawMode = "InsertAndModify",
+			DrawMode2 = "InsertAndModify",
+			NameSet = true,
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				MaskWidth = Input { Value = 64, },
+				MaskHeight = Input { Value = 64, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Center = Input { Value = { 0.5, 0.48828125 }, },
+				Polyline = Input {
+					SourceOp = "Polygon1Polyline1",
+					Source = "Value",
+				},
+				Polyline2 = Input {
+					Value = Polyline {
+					},
+					Disabled = true,
+				},
+				EffectMask = Input {
+					SourceOp = "Tip",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 385, 709.5 } },
+		},
+		Polygon1Polyline1 = BezierSpline {
+			SplineColor = { Red = 96, Green = 255, Blue = 47 },
+			CtrlWZoom = false,
+			NameSet = true,
+			KeyFrames = {
+				[0] = { 0, Flags = { Linear = true, LockedY = true }, Value = Polyline {
+						Closed = true,
+						Points = {
+							{ Linear = true, X = -0.249018042127072, Y = -0.210074240331492, LX = 0.0249949643186004, LY = 0.0041868093922652, RX = -0.0226554757203045, RY = 0.0282561970128522 },
+							{ Linear = true, X = -0.316984469287985, Y = -0.125305649292935, LX = 0.0226554757203045, LY = -0.0282561970128522, RX = 0.0126596481420356, RY = 0.0293376105377923 },
+							{ Linear = true, X = -0.279005524861879, Y = -0.0372928176795581, LX = -0.0126596481420356, LY = -0.0293376105377923, RX = 0.18232044198895, RY = 0.139963167587477 },
+							{ Linear = true, X = 0.267955801104973, Y = 0.382596685082873, LX = -0.18232044198895, LY = -0.139963167587477, RX = 0.0377532228360959, RY = -0.0469613259668507 },
+							{ X = 0.38121546961326, Y = 0.24171270718232, LX = -0.0377532228360958, LY = 0.0469613259668509, RX = -0.185082872928177, RY = -0.146408839779006 },
+							{ Linear = true, X = -0.174033149171271, Y = -0.197513812154696, LX = 0.185082872928177, LY = 0.146408839779006, RX = -0.0249949643186004, RY = -0.0041868093922652 }
+						}
+					} }
+			}
+		},
+		Instance_WhiteBg = Background {
+			CtrlWZoom = false,
+			NameSet = true,
+			SourceOp = "WhiteBg",
+			Inputs = {
+				SettingsNest = Input { },
+				ApplyMaskInverted = Input { },
+				ImageNest = Input { },
+				["Gamut.ColorSpaceNest"] = Input { },
+				["Gamut.GammaSpaceNest"] = Input { },
+				BackgroundNest = Input { },
+				CommentsNest = Input { },
+				FrameRenderScriptNest = Input { },
+				StartRenderScripts = Input { },
+				EndRenderScripts = Input { },
+				EffectMask = Input {
+					SourceOp = "Handle",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 495, 709.5 } },
+		},
+		Saver1_2_1_1_1_1_1 = Saver {
 			Inputs = {
 				ProcessWhenBlendIs00 = Input { Value = 0, },
 				Clip = Input {
 					Value = Clip {
-						Filename = "comp:/undo.png",
+						Filename = "comp:/pencil.png",
 						FormatID = "PNGFormat",
 						Length = 0,
 						Saving = true,
@@ -634,12 +906,12 @@ Composition {
 				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
 				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
 				Input = Input {
-					SourceOp = "WhiteBg",
+					SourceOp = "Instance_WhiteBg",
 					Source = "Output",
 				},
 				["PNGFormat.PreDivide"] = Input { Value = 1, },
 			},
-			ViewInfo = OperatorInfo { Pos = { 605, 577.5 } },
+			ViewInfo = OperatorInfo { Pos = { 605, 709.5 } },
 		}
 	},
 	Frames = {
@@ -653,14 +925,14 @@ Composition {
 			Width = 1920,
 			Height = 938,
 			ZoneInfo = {
-				AuxRight = { Expanded = true },
+				["!Right"] = {
+				},
 				["!Left"] = {
 				},
 				AuxLeft = { Expanded = true },
 				Right = { Expanded = true, },
 				Left = { Expanded = false, },
-				["!Right"] = {
-				}
+				AuxRight = { Expanded = true }
 			},
 			ViewInfo = {
 				Viewer1 = { Show = true, RatioY = 0.01, RatioX = 1, },
@@ -668,7 +940,7 @@ Composition {
 				},
 				MainSplit = {
 					RatioX = 100,
-					RatioY = 1.17945690672963,
+					RatioY = 1.29634002361275,
 				},
 				CenterSplit = {
 					RatioX = 1,
@@ -679,14 +951,14 @@ Composition {
 				Time = { Show = true, RatioX = 100, },
 				InnerColumns = {
 					RatioX = 100,
-					RatioY = 1.82054309327037,
+					RatioY = 1.70365997638725,
 				},
 				Keyframes = { Show = false, },
 				LayoutStrip = { Show = true, RatioX = 100, },
 				Inspector = { Show = true, RatioY = 1, RatioX = 100, },
 				InnerRight = {
 				},
-				MediaPool = { Show = false, },
+				Clips = { Show = false, },
 				OuterColumns = {
 					RatioX = 100,
 					RatioY = 1,
@@ -702,10 +974,10 @@ Composition {
 				},
 				Nodes = { Show = true, RatioY = 100, RatioX = 1, },
 				OuterRight = {
-					PixelX = 420,
 					RatioY = 100,
+					PixelX = 420,
 				},
-				Clips = { Show = false, },
+				MediaPool = { Show = false, },
 				Spline = { Show = false, }
 			},
 			Views = ordered() {
@@ -732,7 +1004,7 @@ Composition {
 						Direction = "Horizontal",
 						PipeStyle = "Direct",
 						RootScale = 1,
-						RootOffset = { -104, -524.939 }
+						RootOffset = { -123.333, -533.424 }
 					}
 				},
 				Keyframes = MultiView {
@@ -909,11 +1181,11 @@ Composition {
 						Viewer = {
 							EnableLUTs = false,
 							LUTPlugin = "FusionViewLUT",
-							NearZ = 0,
+							FitMarginY = 0,
 							FitMarginX = 0,
 							FitMarginType = 0,
 							FarZ = -1000,
-							FitMarginY = 0
+							NearZ = 0
 						}
 					},
 				},
@@ -928,11 +1200,11 @@ Composition {
 						Viewer = {
 							EnableLUTs = false,
 							LUTPlugin = "FusionViewLUT",
-							NearZ = 0,
+							FitMarginY = 0,
 							FitMarginX = 0,
 							FitMarginType = 0,
 							FarZ = -1000,
-							FitMarginY = 0
+							NearZ = 0
 						}
 					},
 				},
@@ -954,30 +1226,30 @@ Composition {
 				GlobalEnd = 1,
 				RenderSettings = {
 					Configs = {
-						Final = {
-							StepRender = false,
-							PriorityClasses = "all",
-							ShowRenderNodes = false,
-							CustomAspect = true,
-							SizeType = 1,
-							CustomHeight = 160,
-							MotionBlur = true,
-							CustomWidth = 200,
-							StepSize = 5,
-							UpdateMode = "Some",
-							UseNetwork = false,
-							Quality = true
-						},
 						Preview = {
 							StepRender = false,
 							PriorityClasses = "all",
 							ShowRenderNodes = false,
-							CustomAspect = true,
 							SizeType = 1,
+							CustomAspect = true,
 							CustomHeight = 160,
-							MotionBlur = true,
-							CustomWidth = 200,
 							StepSize = 5,
+							CustomWidth = 200,
+							MotionBlur = true,
+							UpdateMode = "Some",
+							UseNetwork = false,
+							Quality = true
+						},
+						Final = {
+							StepRender = false,
+							PriorityClasses = "all",
+							ShowRenderNodes = false,
+							SizeType = 1,
+							CustomAspect = true,
+							CustomHeight = 160,
+							StepSize = 5,
+							CustomWidth = 200,
+							MotionBlur = true,
 							UpdateMode = "Some",
 							UseNetwork = false,
 							Quality = true

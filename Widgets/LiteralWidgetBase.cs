@@ -2,13 +2,13 @@ using System;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
 {
     public abstract class LiteralWidgetBase<TControl,TLiteral> : HBoxContainer, IScadLiteralWidget where TControl:Control where TLiteral:IScadLiteral
     {
-        private Button _disableButton;
-        private Button _enableButton;
+        private IconButton.IconButton _toggleButton;
         public event Action<object> LiteralValueChanged;
         public event Action<bool> LiteralToggled;
         
@@ -17,62 +17,60 @@ namespace OpenScadGraphEditor.Widgets
 
         protected abstract TControl CreateControl();
 
-        public void BindTo(TLiteral literal)
+        public void BindTo(TLiteral literal, bool isOutput)
         {
-            if (Control == null)
+            void MakeControl()
             {
-                Control = CreateControl();
-                Control.MoveToNewParent(this);
+                if (Control == null)
+                {
+                    Control = CreateControl();
+                    Control.MoveToNewParent(this);
+                }
             }
 
-            if (_disableButton == null)
+            void MakeButton()
             {
-                _disableButton = new Button();
-                _disableButton.Text = "X";
-                _disableButton.Connect("pressed")
-                    .To(this, nameof(OnDisableButtonPressed));
-                _disableButton.MoveToNewParent(this);
-            }
-            
-            if (_enableButton == null)
-            {
-                _enableButton = new Button();
-                _enableButton.Text = "Set";
-                _enableButton.Connect("pressed")
-                    .To(this, nameof(OnEnableButtonPressed));
-                _enableButton.MoveToNewParent(this);
+                if (_toggleButton == null)
+                {
+                    var centerContainer = new CenterContainer();
+
+                    _toggleButton = Prefabs.InstantiateFromScene<IconButton.IconButton>();
+                    _toggleButton.MoveToNewParent(centerContainer);
+                    centerContainer.MoveToNewParent(this);
+
+                    _toggleButton.ToggleMode = true;
+                    _toggleButton.Icon = Resources.EditIcon;
+                    _toggleButton.RectMinSize = new Vector2(20, 20);
+                    _toggleButton.ButtonToggled += (value) => LiteralToggled?.Invoke(value);
+                }
             }
 
-
-            Literal = literal;
-            if (literal.IsSet)
+            if (isOutput)
             {
-                ApplyControlValue();
-                Control.Visible = true;
-                _disableButton.Visible = true;
-                _enableButton.Visible = false;
+                Alignment = AlignMode.End;
+                MakeControl();
+                MakeButton(); // button goes to the right
             }
             else
             {
-                Control.Visible = false;
-                _disableButton.Visible = false;
-                _enableButton.Visible = true;
+                Alignment = AlignMode.Begin;
+                MakeButton(); // button goes to the left
+                MakeControl();
+            }
+
+            Literal = literal;
+            _toggleButton.Pressed = literal.IsSet;
+            Control.Visible = literal.IsSet;
+            
+            if (literal.IsSet)
+            {
+                ApplyControlValue();
             }
         }
 
 
         protected abstract void ApplyControlValue();
         
-        private void OnDisableButtonPressed()
-        {
-            LiteralToggled?.Invoke( false);
-        }
-        
-        private void OnEnableButtonPressed()
-        {
-            LiteralToggled?.Invoke( true);
-        }
-
 
         protected void EmitValueChange(object value)
         {

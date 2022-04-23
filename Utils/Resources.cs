@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Utils
         public static Texture ScadBuiltinIcon => GD.Load<Texture>("res://Icons/scad_builtin0000.png");
         public static Texture ImportIcon => GD.Load<Texture>("res://Icons/import0000.png");
         public static Texture TransitiveImportIcon => GD.Load<Texture>("res://Icons/transitive_import0000.png");
+        public static Texture EditIcon => GD.Load<Texture>("res://Icons/pencil0000.png");
         
     }
 }

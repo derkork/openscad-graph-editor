@@ -117,9 +117,9 @@ namespace OpenScadGraphEditor.Widgets
             }
             
             // remove any remaining containers
-            while (existingContainers.Count > idx)
+            for(var i = idx; i < existingContainers.Count; i++)
             {
-                existingContainers[idx].RemoveAndFree();
+                existingContainers[i].RemoveAndFree();
             }
             
             // set to minimum size. Needs to be called
@@ -175,7 +175,7 @@ namespace OpenScadGraphEditor.Widgets
                             booleanEdit = Prefabs.New<BooleanEdit>();
                         }
 
-                        booleanEdit.BindTo(booleanLiteral);
+                        booleanEdit.BindTo(booleanLiteral, port.IsOutput);
                         literalWidget = booleanEdit;
                         break;
 
@@ -184,7 +184,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             numberEdit = Prefabs.New<NumberEdit>();
                         }
-                        numberEdit.BindTo(numberLiteral);
+                        numberEdit.BindTo(numberLiteral, port.IsOutput);
                         literalWidget = numberEdit;
                         break;
 
@@ -193,7 +193,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             stringEdit = Prefabs.New<StringEdit>();
                         }
-                        stringEdit.BindTo(stringLiteral);
+                        stringEdit.BindTo(stringLiteral, port.IsOutput);
                         literalWidget = stringEdit;
                         break;
 
@@ -202,7 +202,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             vector3Edit = Prefabs.New<Vector3Edit>();
                         }
-                        vector3Edit.BindTo(vector3Literal);
+                        vector3Edit.BindTo(vector3Literal, port.IsOutput);
                         literalWidget = vector3Edit;
                         break;
                 }
@@ -218,7 +218,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (literalWidget != null)
             {
-                literalWidget.SetEnabled(!isConnected);
+                literalWidget.SetEnabled(port.IsOutput || !isConnected);
                 // only wire the events if we have an new widget.
                 if (existingWidget != literalWidget)
                 {
