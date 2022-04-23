@@ -5,6 +5,17 @@ namespace OpenScadGraphEditor.Library
 {
     public static class ScadGraphExt
     {
+
+        public static bool IsInputConnected(this IScadGraph self, ScadNode node, int port)
+        {
+            return self.GetAllConnections().Any(it => it.IsTo(node, port));
+        }
+        
+        public static bool IsOutputConnected(this IScadGraph self, ScadNode node, int port)
+        {
+            return self.GetAllConnections().Any(it => it.IsFrom(node, port));
+        }
+        
         public static bool TryGetIncomingNode(this IScadGraph self, ScadNode node, int port, out ScadNode result,
             out int originatingPort)
         {

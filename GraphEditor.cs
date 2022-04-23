@@ -343,45 +343,12 @@ namespace OpenScadGraphEditor
 
         private void AddNode(RequestContext context, ScadNode node)
         {
-            // TODO: this could be moved into a refactoring itself.
             node.Offset = context.LastReleasePosition;
-
-            var refactorings = new List<Refactoring> {new AddNodeRefactoring(context.Source, node)};
-
-            // if we find a matching input port for the source port, connect it.
-            if (context.SourceNode != null)
-            {
-                for (var i = 0; i < node.InputPortCount; i++)
-                {
-                    var connection = new ScadConnection(context.Source, context.SourceNode, context.LastPort, node, i);
-                    var operationResult = ConnectionRules.CanConnect(connection);
-                    if (operationResult.Decision == ConnectionRules.OperationRuleDecision.Allow)
-                    {
-                        refactorings.AddRange(operationResult.Refactorings);
-                        refactorings.Add(new CreateConnectionRefactoring(connection));
-                        break;
-                    }
-                }
-            }
-
-            // if we find a matching output port for the target port, connect it.
-            if (context.DestinationNode != null)
-            {
-                for (var i = 0; i < node.OutputPortCount; i++)
-                {
-                    var connection = new ScadConnection(context.Source, node, i, context.DestinationNode,
-                        context.LastPort);
-                    var operationResult = ConnectionRules.CanConnect(connection);
-                    if (operationResult.Decision == ConnectionRules.OperationRuleDecision.Allow)
-                    {
-                        refactorings.AddRange(operationResult.Refactorings);
-                        refactorings.Add(new CreateConnectionRefactoring(connection));
-                        break;
-                    }
-                }
-            }
-
-            PerformRefactorings("Add node", refactorings);
+            var otherNode = context.SourceNode ?? context.DestinationNode;
+            var isIncoming = context.SourceNode != null;
+            var otherPort = context.LastPort;
+            
+            PerformRefactorings("Add node", new AddNodeRefactoring(context.Source, node, otherNode, otherPort, isIncoming));
         }
 
         private ScadGraphEdit Open(IScadGraph toOpen)
@@ -429,6 +396,11 @@ namespace OpenScadGraphEditor
             PerformRefactorings(humanReadableDescription, new[] {refactoring});
         }
 
+        private void PerformRefactorings(string description, params Refactoring[] refactorings)
+        {
+            PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
+        }
+        
         private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
             params Action[] after)
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using GodotExt;
+using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
@@ -14,12 +15,6 @@ namespace OpenScadGraphEditor.Widgets
 
         public event Action<ScadNode, Vector2> PositionChanged;
         
-        
-        private readonly Dictionary<int, IScadLiteralWidget> _inputLiteralWidgets =
-            new Dictionary<int, IScadLiteralWidget>();
-
-        private readonly Dictionary<int, IScadLiteralWidget> _outputLiteralWidgets =
-            new Dictionary<int, IScadLiteralWidget>();
 
         private bool _offsetChangePending;
         private bool _initializing;
@@ -57,7 +52,7 @@ namespace OpenScadGraphEditor.Widgets
 
         public ScadNode BoundNode { get; protected set; }
 
-        public virtual void BindTo(ScadNode node)
+        public virtual void BindTo(IScadGraph graph, ScadNode node)
         {
             // setting node values may trigger change events which we don't want to
             // therefore we set _initializing to true to prevent these events from
@@ -80,12 +75,12 @@ namespace OpenScadGraphEditor.Widgets
 
                 if (node.InputPortCount > idx)
                 {
-                    BuildPort(container, idx, node.GetInputPortDefinition(idx), true, node);
+                    BuildPort(container, idx, node.GetInputPortDefinition(idx), true, graph, node);
                 }
 
                 if (node.OutputPortCount > idx)
                 {
-                    BuildPort(container, idx, node.GetOutputPortDefinition(idx), false, node);
+                    BuildPort(container, idx, node.GetOutputPortDefinition(idx), false, graph, node);
                 }
 
                 idx++;
@@ -96,29 +91,7 @@ namespace OpenScadGraphEditor.Widgets
             _initializing = false;
         }
 
-        public virtual void PortConnected(int port, bool isLeft)
-        {
-            if (isLeft)
-            {
-                if (_inputLiteralWidgets.TryGetValue(port, out var widget))
-                {
-                    widget.SetEnabled(false);
-                }
-            }
-        }
-
-        public virtual void PortDisconnected(int port, bool isLeft)
-        {
-            if (isLeft)
-            {
-                if (_inputLiteralWidgets.TryGetValue(port, out var widget))
-                {
-                    widget.SetEnabled(true);
-                }
-            }
-        }
-
-        private void BuildPort(Container container, int idx, PortDefinition portDefinition, bool isLeft, ScadNode node)
+        private void BuildPort(Container container, int idx, PortDefinition portDefinition, bool isLeft, IScadGraph graph, ScadNode node)
         {
             var connectorPortType = portDefinition.AutoCoerce ? PortType.Any : portDefinition.PortType;
             if (isLeft)
@@ -134,6 +107,10 @@ namespace OpenScadGraphEditor.Widgets
                 SetSlotTypeRight(idx, (int) connectorPortType);
             }
 
+            
+            var isConnected = isLeft ? graph.IsInputConnected(node, idx) : graph.IsOutputConnected(node, idx);
+
+            
             IScadLiteralWidget literalWidget = null;
 
             var literal = isLeft ? node.GetInputLiteral(idx) : node.GetOutputLiteral(idx);
@@ -166,15 +143,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (literalWidget != null)
             {
-                if (isLeft)
-                {
-                    _inputLiteralWidgets[idx] = literalWidget;
-                }
-                else
-                {
-                    _outputLiteralWidgets[idx] = literalWidget;
-                }
-
+                literalWidget.SetEnabled(!isConnected);
                 literalWidget.ConnectChanged()
                     .WithBinds(true)
                     .To(this, nameof(NotifyChanged));

@@ -122,7 +122,7 @@ namespace OpenScadGraphEditor.Widgets
 
             _widgets[node] = widget;
             widget.MoveToNewParent(this);
-            widget.BindTo(node);
+            widget.BindTo(this, node);
         }
 
         public void FocusEntryPoint()
@@ -158,9 +158,6 @@ namespace OpenScadGraphEditor.Widgets
                 var toNode = _widgets.Keys.First(it => it.Id == connection.ToId);
 
                 ConnectNode(_widgets[fromNode].Name, connection.FromPort, _widgets[toNode].Name, connection.ToPort);
-                // restore literal visibility
-                _widgets[fromNode].PortConnected(connection.FromPort, false);
-                _widgets[toNode].PortConnected(connection.ToPort, true);
             }
         }
 
@@ -208,7 +205,7 @@ namespace OpenScadGraphEditor.Widgets
             if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
             {
                 GD.Print("Resolving pending disconnect.");
-                PerformRefactorings("Remove connection", new[] {new DropConnectionRefactoring(_pendingDisconnect)});
+                PerformRefactorings("Remove connection", new DropConnectionRefactoring(_pendingDisconnect));
                 _pendingDisconnect = null;
             }
         }
@@ -280,23 +277,8 @@ namespace OpenScadGraphEditor.Widgets
             }
             
             
-            var refactorings = ConnectWithChecks(connection);
+            var refactorings = new AddConnectionRefactoring(connection);
             PerformRefactorings("Create connection", refactorings);
-        }
-
-        [MustUseReturnValue]
-        private IEnumerable<Refactoring> ConnectWithChecks(ScadConnection connection)
-        {
-            var result = ConnectionRules.CanConnect(connection);
-
-            if (result.Decision == ConnectionRules.OperationRuleDecision.Veto)
-            {
-                GD.Print("Connection vetoed.");
-                return Enumerable.Empty<Refactoring>();
-            }
-
-            var createConnectionRefactoring = new CreateConnectionRefactoring(connection);
-            return result.Refactorings.Append(createConnectionRefactoring);
         }
 
 
