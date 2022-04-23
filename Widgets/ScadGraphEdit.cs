@@ -114,6 +114,10 @@ namespace OpenScadGraphEditor.Widgets
             var widget = node is RerouteNode
                 ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>()
                 : Prefabs.New<ScadNodeWidget>();
+            
+            // this is technically not needed but it would seem that the graph edit gets confused if you don't set
+            // the name of the widget to something unique.
+            widget.Name = node.Id;
 
             widget.PositionChanged += (changedNode, position) =>
                 PerformRefactorings("Move node", new ChangeNodePositionRefactoring(this, node, position));
