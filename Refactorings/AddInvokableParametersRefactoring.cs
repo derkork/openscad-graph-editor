@@ -1,5 +1,6 @@
 using System.Linq;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -44,13 +45,13 @@ namespace OpenScadGraphEditor.Refactorings
                     var inputPortIndex = nodeAsReference.GetParameterInputPort(parameterIndex + i);
                     if (inputPortIndex != -1)
                     {
-                        node.BuildInputPortLiteral(inputPortIndex);
+                        node.BuildPortLiteral(PortId.Input(inputPortIndex));
                     }
 
                     var outputPortIndex = nodeAsReference.GetParameterOutputPort(parameterIndex + i);
                     if (outputPortIndex != -1)
                     {
-                        node.BuildOutputPortLiteral(outputPortIndex);
+                        node.BuildPortLiteral(PortId.Output(outputPortIndex));
                     }
                 }
             }

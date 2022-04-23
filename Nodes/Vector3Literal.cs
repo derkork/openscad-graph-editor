@@ -1,14 +1,14 @@
 namespace OpenScadGraphEditor.Nodes
 {
-    public class Vector3Literal : IScadLiteral
+    public class Vector3Literal : LiteralBase
     {
         public double X { get;  set; }
         public double Y { get; set; }
         public double Z { get; set; }
 
-        public string LiteralValue => $"[{X}, {Y}, {Z}]";
+        public override string RenderedValue => $"[{X}, {Y}, {Z}]";
 
-        public string SerializedValue
+        public override string SerializedValue
         {
             get => $"{X}|{Y}|{Z}";
             set

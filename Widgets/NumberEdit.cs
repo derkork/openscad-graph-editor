@@ -1,45 +1,18 @@
 using System.Globalization;
-using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {
     [UsedImplicitly]
-    public class NumberEdit : LineEditBase
+    public class NumberEdit : LineEditBase<NumberLiteral>
     {
-        private NumberLiteral _numberLiteral;
+        protected override string LiteralValue => Literal.Value.ToString(CultureInfo.InvariantCulture);
 
-        public override void _Ready()
-        {
-            base._Ready();
-            
-            this.Connect("focus_exited")
-                .To(this, nameof(OnFocusExited));
-            
-            Text = _numberLiteral.Value.ToString(CultureInfo.InvariantCulture);
-        }
 
-        public void BindTo(NumberLiteral numberLiteral)
+        protected override void OnFocusExited()
         {
-            _numberLiteral = numberLiteral;
-        }
-        
-        private void OnFocusExited()
-        {
-            if (!double.TryParse(Text, out var result))
-            {
-                Text = "0";
-                _numberLiteral.Value = 0;
-            }
-            else
-            {
-                Text = result.ToString(CultureInfo.InvariantCulture);
-                _numberLiteral.Value = result;
-            }
-
-            EmitSignal(nameof(Changed));
-            DeselectAll();
+            EmitValueChange(!double.TryParse(Control.Text, out var result) ? 0d : result);
         }
     }
 }

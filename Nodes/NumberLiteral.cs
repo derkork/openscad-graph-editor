@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class NumberLiteral : IScadLiteral
+    public class NumberLiteral : LiteralBase
     {
         public NumberLiteral(double value)
         {
@@ -11,9 +11,9 @@ namespace OpenScadGraphEditor.Nodes
 
         public double Value { get; set; }
 
-        public string LiteralValue => Value.ToString(CultureInfo.InvariantCulture);
+        public override string RenderedValue => Value.ToString(CultureInfo.InvariantCulture);
 
-        public string SerializedValue
+        public override string SerializedValue
         {
             get => Value.ToString(CultureInfo.InvariantCulture);
             set => Value = double.Parse(value);

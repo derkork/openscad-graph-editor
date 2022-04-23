@@ -74,14 +74,14 @@ namespace OpenScadGraphEditor.Refactorings
                 // and rebuild the literal for the affected ports
                 if (inputPort != -1)
                 {
-                    scadNode.DropInputPortLiteral(inputPort);
-                    scadNode.BuildInputPortLiteral(inputPort);
+                    scadNode.DropPortLiteral(PortId.Input(inputPort));
+                    scadNode.BuildPortLiteral(PortId.Input(inputPort));
                 }
 
                 if (outputPort != -1)
                 {
-                    scadNode.DropOutputPortLiteral(outputPort);
-                    scadNode.BuildOutputPortLiteral(outputPort);
+                    scadNode.DropPortLiteral(PortId.Output(outputPort));
+                    scadNode.BuildPortLiteral(PortId.Output(outputPort));
                 }
 
 

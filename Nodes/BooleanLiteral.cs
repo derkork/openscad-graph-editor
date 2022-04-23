@@ -1,6 +1,6 @@
 namespace OpenScadGraphEditor.Nodes
 {
-    public class BooleanLiteral : IScadLiteral
+    public class BooleanLiteral : LiteralBase
     {
         public bool Value { get; set; }
 
@@ -9,9 +9,9 @@ namespace OpenScadGraphEditor.Nodes
             Value = value;
         }
 
-        public string LiteralValue => Value ? "true" : "false";
+        public override string RenderedValue => Value ? "true" : "false";
 
-        public string SerializedValue
+        public override string SerializedValue
         {
             get => Value ? "true" : "false";
             set => Value = value == "true";

@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Widgets.PortContainer
     {
         private Container _innerContainer;
         private Label _label;
+        private Control _widget;
 
         public override void _Ready()
         {
@@ -17,9 +18,20 @@ namespace OpenScadGraphEditor.Widgets.PortContainer
 
         public void Setup(bool left, string text, [CanBeNull] Control widget = null)
         {
+            if (_widget != null && _widget != widget)
+            {
+                _innerContainer.RemoveChild(_widget);
+            }
+            
+            _widget = widget;
             _label.Align = left ? Label.AlignEnum.Left : Label.AlignEnum.Right;
             _label.Text = text;
             widget?.MoveToNewParent(_innerContainer);
+        }
+
+        public void Clear()
+        {
+            Visible = false;
         }
 
     }

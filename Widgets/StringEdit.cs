@@ -5,27 +5,14 @@ using OpenScadGraphEditor.Nodes;
 namespace OpenScadGraphEditor.Widgets
 {
     [UsedImplicitly]
-    public class StringEdit : LineEditBase
+    public class StringEdit : LineEditBase<StringLiteral>
     {
-        private StringLiteral _stringLiteral;
+        protected override string LiteralValue => Literal.Value;
 
-        public override void _Ready()
+
+        protected override void OnFocusExited()
         {
-            this.Connect("focus_exited")
-                .To(this, nameof(OnFocusExited));
-
-            Text = _stringLiteral.Value;
-        }
-
-        public void BindTo(StringLiteral stringLiteral)
-        {
-            _stringLiteral = stringLiteral;
-        }
-
-        private void OnFocusExited()
-        {
-            _stringLiteral.Value = Text;
-            EmitSignal(nameof(Changed));
+            EmitValueChange(Control.Text);
         }
     }
 }

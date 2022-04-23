@@ -7,6 +7,16 @@ namespace OpenScadGraphEditor.Nodes
             return connection.From == node || connection.To == node;
         }
 
+        public static bool InvolvesPort(this ScadConnection connection, ScadNode node, PortId port)
+        {
+            if (port.IsInput)
+            {
+                return connection.To == node && connection.ToPort == port.Port;
+            }
+
+            return connection.From == node && connection.FromPort == port.Port;
+        }
+
         public static bool IsFrom(this ScadConnection connection, ScadNode node, int port)
         {
             return connection.From == node && connection.FromPort == port;
@@ -19,19 +29,19 @@ namespace OpenScadGraphEditor.Nodes
 
         public static bool IsFromPortType(this ScadConnection connection, PortType type)
         {
-            return connection.From.OutputPortCount > connection.FromPort &&  connection.From.GetOutputPortType(connection.FromPort) == type;
+            return connection.From.OutputPortCount > connection.FromPort &&  connection.From.GetPortType(PortId.Output(connection.FromPort)) == type;
         }
 
         public static bool IsToPortType(this ScadConnection connection, PortType type)
         {
-            return connection.To.InputPortCount > connection.ToPort && connection.To.GetInputPortType(connection.ToPort) == type;
+            return connection.To.InputPortCount > connection.ToPort && connection.To.GetPortType(PortId.Input(connection.ToPort)) == type;
         }
 
         public static bool TryGetFromPortType(this ScadConnection connection, out PortType result)
         {
             if (connection.From.OutputPortCount > connection.FromPort)
             {
-                result = connection.From.GetOutputPortType(connection.FromPort);
+                result = connection.From.GetPortType(PortId.Output(connection.FromPort));
                 return true;
             }
 
@@ -43,7 +53,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             if (connection.To.InputPortCount > connection.ToPort)
             {
-                result = connection.To.GetInputPortType(connection.ToPort);
+                result = connection.To.GetPortType(PortId.Input(connection.ToPort));
                 return true;
             }
 

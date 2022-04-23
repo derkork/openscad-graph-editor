@@ -5,38 +5,31 @@ using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {
-    public class BooleanEdit : CheckBox, IScadLiteralWidget
+    public class BooleanEdit : LiteralWidgetBase<CheckBox, BooleanLiteral>
     {
-        private BooleanLiteral _booleanLiteral;
-
-        [Signal]
-        public delegate void Changed();
-
-        public void SetEnabled(bool enabled)
+        protected override void DoSetEnabled(bool enabled)
         {
-            Disabled = !enabled;
+            Control.Disabled = !enabled;
         }
 
-        public ConnectExt.ConnectBinding ConnectChanged()
+        protected override CheckBox CreateControl()
         {
-            return this.Connect(nameof(Changed));
-        }
-
-        public override void _Ready()
-        {
-            this.Connect("toggled")
+            var checkBox = new CheckBox();
+            checkBox.Connect("toggled")
                 .To(this, nameof(NotifyChanged));
+            
+            return checkBox;
+        }
+
+        protected override void ApplyControlValue()
+        {
+            Control.Pressed = Literal.Value;
         }
 
         private void NotifyChanged([UsedImplicitly] bool value)
         {
-            _booleanLiteral.Value = value;
-            EmitSignal(nameof(Changed));   
-        }
-
-        public void BindTo(BooleanLiteral booleanLiteral)
-        {
-            _booleanLiteral = booleanLiteral;
+            GD.Print(value);
+            EmitValueChange(value);
         }
     }
 }

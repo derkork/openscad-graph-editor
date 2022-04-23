@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
@@ -10,12 +11,13 @@ namespace OpenScadGraphEditor.Widgets
 {
     public class ScadNodeWidget : GraphNode
     {
-        [Signal]
-        public delegate void Changed(bool codeChange);
-
-        public event Action<ScadNode, Vector2> PositionChanged;
+        public event Action<Vector2> PositionChanged;
+        public event Action<PortId, object> LiteralValueChanged;
+        public event Action<PortId, bool> LiteralToggled;
         
 
+        private readonly Dictionary<PortId, IScadLiteralWidget> _literalWidgets = new Dictionary<PortId, IScadLiteralWidget>();
+        
         private bool _offsetChangePending;
         private bool _initializing;
         
@@ -36,6 +38,7 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void _Input(InputEvent inputEvent)
         {
+            // if we have an offset change pending and the mouse was released
             if (!_offsetChangePending || !(inputEvent is InputEventMouseButton mouseButtonEvent))
             {
                 return;
@@ -46,11 +49,13 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
             
-            PositionChanged?.Invoke(BoundNode, Offset);   
+            // notify about a position change.
+            PositionChanged?.Invoke(Offset);   
             _offsetChangePending = false;
         }
 
         public ScadNode BoundNode { get; protected set; }
+
 
         public virtual void BindTo(IScadGraph graph, ScadNode node)
         {
@@ -62,39 +67,83 @@ namespace OpenScadGraphEditor.Widgets
             BoundNode = node;
             Title = node.NodeTitle;
             HintTooltip = node.NodeDescription;
-            RectMinSize = new Vector2(200, 120);
             Offset = node.Offset;
 
             var maxPorts = Mathf.Max(node.InputPortCount, node.OutputPortCount);
-
+            
+            var existingContainers = this.GetChildNodes<HBoxContainer>().ToList();
+            
             var idx = 0;
             while (idx < maxPorts)
             {
-                var container = new HBoxContainer();
-                AddChild(container);
+                PortContainer.PortContainer left;
+                PortContainer.PortContainer right;
+                
+                if (existingContainers.Count <= idx)
+                {
+                    // make a new container
+                    var parent = new HBoxContainer();
+                    parent.MoveToNewParent(this);
+                    left  = Prefabs.InstantiateFromScene<PortContainer.PortContainer>();
+                    left.MoveToNewParent(parent);
+                    right = Prefabs.InstantiateFromScene<PortContainer.PortContainer>();
+                    right.MoveToNewParent(parent);
+                }
+                else
+                {
+                    left = existingContainers[idx].GetChild<PortContainer.PortContainer>(0);
+                    right = existingContainers[idx].GetChild<PortContainer.PortContainer>(1);
+                }
 
                 if (node.InputPortCount > idx)
                 {
-                    BuildPort(container, idx, node.GetInputPortDefinition(idx), true, graph, node);
+                    BuildPort(left,  graph, node, PortId.Input(idx));
+                }
+                else
+                {
+                    left.Clear();
                 }
 
                 if (node.OutputPortCount > idx)
                 {
-                    BuildPort(container, idx, node.GetOutputPortDefinition(idx), false, graph, node);
+                    BuildPort(right, graph, node, PortId.Output(idx));
+                }
+                else
+                {
+                    right.Clear();
                 }
 
                 idx++;
             }
-            QueueSort();
+            
+            // remove any remaining containers
+            while (existingContainers.Count > idx)
+            {
+                existingContainers[idx].RemoveAndFree();
+            }
+            
+            // set to minimum size. Needs to be called
+            // deferred as it doesn't seem to have any effect when being called in the same
+            // frame as when the widget is created.
+            CallDeferred(nameof(Minimize));
             
             // re-enable event observing
             _initializing = false;
         }
 
-        private void BuildPort(Container container, int idx, PortDefinition portDefinition, bool isLeft, IScadGraph graph, ScadNode node)
+        private void Minimize()
         {
+            SetSize(new Vector2(1,1));
+            QueueSort();
+        }
+
+        private void BuildPort(PortContainer.PortContainer container, IScadGraph graph, ScadNode node, PortId port)
+        {
+            var portDefinition = node.GetPortDefinition(port);
+            var idx = port.Port;
+            
             var connectorPortType = portDefinition.AutoCoerce ? PortType.Any : portDefinition.PortType;
-            if (isLeft)
+            if (port.IsInput)
             {
                 SetSlotEnabledLeft(idx, true);
                 SetSlotColorLeft(idx, ColorFor(connectorPortType));
@@ -107,55 +156,83 @@ namespace OpenScadGraphEditor.Widgets
                 SetSlotTypeRight(idx, (int) connectorPortType);
             }
 
-            
-            var isConnected = isLeft ? graph.IsInputConnected(node, idx) : graph.IsOutputConnected(node, idx);
+
+            var isConnected = graph.IsPortConnected(node, port);
 
             
             IScadLiteralWidget literalWidget = null;
 
-            var literal = isLeft ? node.GetInputLiteral(idx) : node.GetOutputLiteral(idx);
-            switch (literal)
+            _literalWidgets.TryGetValue(port, out var existingWidget);
+            
+            if (node.TryGetLiteral(port, out var literal))
             {
-                case BooleanLiteral booleanLiteral:
-                    var booleanEdit = Prefabs.New<BooleanEdit>();
-                    booleanEdit.BindTo(booleanLiteral);
-                    literalWidget = booleanEdit;
-                    break;
+                
+                switch (literal)
+                {
+                    case BooleanLiteral booleanLiteral:
+                        if (!(existingWidget is BooleanEdit booleanEdit))
+                        {
+                            booleanEdit = Prefabs.New<BooleanEdit>();
+                        }
 
-                case NumberLiteral numberLiteral:
-                    var numberEdit = Prefabs.New<NumberEdit>();
-                    numberEdit.BindTo(numberLiteral);
-                    literalWidget = numberEdit;
-                    break;
+                        booleanEdit.BindTo(booleanLiteral);
+                        literalWidget = booleanEdit;
+                        break;
 
-                case StringLiteral stringLiteral:
-                    var stringEdit = Prefabs.New<StringEdit>();
-                    stringEdit.BindTo(stringLiteral);
-                    literalWidget = stringEdit;
-                    break;
+                    case NumberLiteral numberLiteral:
+                        if (!(existingWidget is NumberEdit numberEdit))
+                        {
+                            numberEdit = Prefabs.New<NumberEdit>();
+                        }
+                        numberEdit.BindTo(numberLiteral);
+                        literalWidget = numberEdit;
+                        break;
 
-                case Vector3Literal vector3Literal:
-                    var vector3Edit = Prefabs.New<Vector3Edit>();
-                    vector3Edit.BindTo(vector3Literal);
-                    literalWidget = vector3Edit;
-                    break;
+                    case StringLiteral stringLiteral:
+                        if (!(existingWidget is StringEdit stringEdit))
+                        {
+                            stringEdit = Prefabs.New<StringEdit>();
+                        }
+                        stringEdit.BindTo(stringLiteral);
+                        literalWidget = stringEdit;
+                        break;
+
+                    case Vector3Literal vector3Literal:
+                        if (!(existingWidget is Vector3Edit vector3Edit))
+                        {
+                            vector3Edit = Prefabs.New<Vector3Edit>();
+                        }
+                        vector3Edit.BindTo(vector3Literal);
+                        literalWidget = vector3Edit;
+                        break;
+                }
+            }
+
+            if (existingWidget != null && existingWidget != literalWidget)
+            {
+                GD.Print("Widget mismatch");
+                // we replaced the widget with something else, so delete the existing widget
+                ((Node)existingWidget).RemoveAndFree();
+                _literalWidgets.Remove(port);
             }
 
             if (literalWidget != null)
             {
                 literalWidget.SetEnabled(!isConnected);
-                literalWidget.ConnectChanged()
-                    .WithBinds(true)
-                    .To(this, nameof(NotifyChanged));
+                // only wire the events if we have an new widget.
+                if (existingWidget != literalWidget)
+                {
+                    literalWidget.LiteralToggled += (value) => LiteralToggled?.Invoke(port, value);
+                    literalWidget.LiteralValueChanged += (value) => LiteralValueChanged?.Invoke(port, value);
+                }
+                _literalWidgets[port] = literalWidget;
             }
 
-            var portContainer = Prefabs.InstantiateFromScene<PortContainer.PortContainer>();
-            portContainer.MoveToNewParent(container);
-            portContainer.Setup(isLeft, portDefinition.Name, (Control) literalWidget);
+            container.Setup(port.IsInput, portDefinition.Name, (Control) literalWidget);
         }
 
 
-        protected Color ColorFor(PortType portType)
+        protected static Color ColorFor(PortType portType)
         {
             switch (portType)
             {
@@ -178,16 +255,6 @@ namespace OpenScadGraphEditor.Widgets
                 default:
                     throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
             }
-        }
-
-        public ConnectExt.ConnectBinding ConnectChanged()
-        {
-            return this.Connect(nameof(Changed));
-        }
-
-        private void NotifyChanged(bool codeChange)
-        {
-            EmitSignal(nameof(Changed), codeChange);
         }
     }
 }

@@ -1,4 +1,5 @@
-using GodotExt;
+using System;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -6,7 +7,8 @@ namespace OpenScadGraphEditor.Widgets
     {
 
         void SetEnabled(bool enabled);
-
-        ConnectExt.ConnectBinding ConnectChanged();
+        
+        event Action<object > LiteralValueChanged;
+        event Action<bool> LiteralToggled;
     }
 }

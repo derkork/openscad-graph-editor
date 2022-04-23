@@ -43,6 +43,18 @@ namespace OpenScadGraphEditor.Library
             }
             return defaultValue;
         }
+
+
+        public bool GetDataBool(string key, bool defaultValue = false)
+        {
+            if (StoredData.TryGetValue(key, out var resultAsString) && bool.TryParse(resultAsString, out var result))
+            {
+                return result;
+            }
+
+            return defaultValue;
+        }
+        
         
         public void SetData(string key, string value)
         {
@@ -58,5 +70,12 @@ namespace OpenScadGraphEditor.Library
         {
             StoredData[key] = value.ToString(CultureInfo.InvariantCulture);
         }
+
+        public void SetData(string key, bool value)
+        {
+            StoredData[key] = value.ToString();
+        }
+        
+        
     }
 }

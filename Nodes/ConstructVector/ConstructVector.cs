@@ -36,7 +36,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         {
             VectorSize++;
             RebuildInputs();
-            BuildInputPortLiteral(VectorSize-1);
+            BuildPortLiteral(PortId.Input(VectorSize-1));
         }
 
         public void DecreaseVectorSize()
@@ -44,7 +44,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
             GdAssert.That(VectorSize > 1, "Cannot decrease vector size below 1.");
             var idx = VectorSize-1;
 
-            DropInputPortLiteral(idx);
+            DropPortLiteral(PortId.Input(idx));
 
             VectorSize--;
             RebuildInputs();

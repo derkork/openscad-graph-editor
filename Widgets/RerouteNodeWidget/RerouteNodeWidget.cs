@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Widgets.RerouteNodeWidget
 
         private void RefreshType()
         {
-            var portType = BoundNode.GetInputPortType(0);
+            var portType = BoundNode.GetPortType(PortId.Input(0));
             SetSlotColorLeft(0, ColorFor(portType));
             SetSlotTypeLeft(0, (int) portType);
             SetSlotColorRight(0, ColorFor(portType));

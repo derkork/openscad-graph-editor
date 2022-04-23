@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
-using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
@@ -21,7 +20,7 @@ namespace OpenScadGraphEditor.Widgets
     public class ScadGraphEdit : GraphEdit, IScadGraph
     {
         private ScadNode _entryPoint;
-        private readonly HashSet<ScadNodeWidget> _selection = new HashSet<ScadNodeWidget>();
+        private readonly HashSet<string> _selection = new HashSet<string>();
 
         /// <summary>
         /// Emitted when refactorings are requested (e.g. basically any edit except changes in literals).
@@ -39,12 +38,6 @@ namespace OpenScadGraphEditor.Widgets
         /// </summary>
         public event Action<RequestContext> AddDialogRequested;
 
-
-        /// <summary>
-        /// Sent when the graph is changed and needs to be re-rendered.
-        /// </summary>
-        public event Action<bool> Changed;
-
         /// <summary>
         /// Called when data from any list entry is dropped.
         /// </summary>
@@ -53,14 +46,14 @@ namespace OpenScadGraphEditor.Widgets
         public InvokableDescription Description { get; private set; }
 
 
-        private readonly Dictionary<ScadNode, ScadNodeWidget> _widgets = new Dictionary<ScadNode, ScadNodeWidget>();
+        private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
 
         private ScadConnection _pendingDisconnect;
 
 
         public IEnumerable<ScadNode> GetAllNodes()
         {
-            return _widgets.Keys.ToList();
+            return _widgets.Values.Select(it => it.BoundNode);
         }
 
         public override void _Ready()
@@ -109,42 +102,47 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
-        private void CreateWidgetFor(ScadNode node)
+        private ScadNodeWidget CreateOrGet(ScadNode node)
         {
-            var widget = node is RerouteNode
-                ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>()
-                : Prefabs.New<ScadNodeWidget>();
+            if (!_widgets.TryGetValue(node.Id, out var widget))
+            {
+                widget = node is RerouteNode
+                    ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>()
+                    : Prefabs.New<ScadNodeWidget>();
+
+                // this is technically not needed but it would seem that the graph edit gets confused if you don't set
+                // the name of the widget to something unique.
+                widget.Name = node.Id;
+
+                widget.PositionChanged += (position) =>
+                    PerformRefactorings("Move node", new ChangeNodePositionRefactoring(this, node, position));
+                widget.LiteralToggled += (port, enabled) =>
+                    PerformRefactorings( "Toggle literal", new ToggleLiteralRefactoring(this, node, port, enabled));
+                widget.LiteralValueChanged += (port, value) =>
+                    PerformRefactorings("Set literal value", new SetLiteralValueRefactoring(this, node, port, value));
+
+                _widgets[node.Id] = widget;
+                widget.MoveToNewParent(this);
+            }
             
-            // this is technically not needed but it would seem that the graph edit gets confused if you don't set
-            // the name of the widget to something unique.
-            widget.Name = node.Id;
-
-            widget.PositionChanged += (changedNode, position) =>
-                PerformRefactorings("Move node", new ChangeNodePositionRefactoring(this, node, position));
-            widget.ConnectChanged()
-                .To(this, nameof(NotifyUpdateRequired));
-
-            _widgets[node] = widget;
-            widget.MoveToNewParent(this);
             widget.BindTo(this, node);
+            return widget;
         }
 
         public void FocusEntryPoint()
         {
-            var widget = _widgets[_entryPoint];
+            var widget = _widgets[_entryPoint.Id];
             ScrollOffset = widget.Offset - new Vector2(100, 100);
         }
 
         public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
-            Clear();
-
             Description = graph.Description;
 
             foreach (var savedNode in graph.Nodes)
             {
                 var node = NodeFactory.FromSavedNode(savedNode, resolver);
-                CreateWidgetFor(node);
+                CreateOrGet(node);
 
                 if (node is EntryPoint)
                 {
@@ -154,14 +152,28 @@ namespace OpenScadGraphEditor.Widgets
 
             Name = _entryPoint.NodeTitle;
 
+            // redo the connections
+            ClearConnections();
+            
             foreach (var connection in graph.Connections)
             {
                 // connection contain ScadNode ids but we need to connect widgets, so first we need to find the 
-                // node for the given IDs and then the widget
-                var fromNode = _widgets.Keys.First(it => it.Id == connection.FromId);
-                var toNode = _widgets.Keys.First(it => it.Id == connection.ToId);
-
-                ConnectNode(_widgets[fromNode].Name, connection.FromPort, _widgets[toNode].Name, connection.ToPort);
+                // the widget and then connect these widgets.
+                ConnectNode(_widgets[connection.FromId].Name, connection.FromPort, _widgets[connection.ToId].Name, connection.ToPort);
+            }
+            
+            // finally destroy all the widgets that are not in the graph anymore
+            // set of Ids of nodes that are in the graph
+            var nodeIds = graph.Nodes.Select(n => n.Id).ToHashSet();
+            // set of Ids of our widgets
+            var widgetIds = _widgets.Keys.ToHashSet();
+            // difference between the two sets
+            var idsToDestroy = widgetIds.Except(nodeIds).ToList();
+            // destroy all the widgets that are not in the graph anymore
+            foreach (var id in idsToDestroy)
+            {
+                _widgets[id].RemoveAndFree();
+                _widgets.Remove(id);
             }
         }
 
@@ -169,7 +181,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             graph.Description = Description;
 
-            foreach (var node in _widgets.Keys)
+            foreach (var node in _widgets.Values.Select(it => it.BoundNode))
             {
                 var savedNode = Prefabs.New<SavedNode>();
                 node.SaveInto(savedNode);
@@ -247,18 +259,18 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnNodeSelected(ScadNodeWidget node)
         {
-            _selection.Add(node);
+            _selection.Add(node.BoundNode.Id);
         }
 
         private void OnNodeUnselected(ScadNodeWidget node)
         {
-            _selection.Remove(node);
+            _selection.Remove(node.BoundNode.Id);
         }
 
         private void OnDeleteSelection()
         {
             var refactorings = 
-                _selection.Select(it => new DeleteNodeRefactoring(this, it.BoundNode))
+                _selection.Select(it => new DeleteNodeRefactoring(this, _widgets[it].BoundNode))
                     .ToList();
             _selection.Clear();
             PerformRefactorings("Delete selection",  refactorings);
@@ -310,15 +322,6 @@ namespace OpenScadGraphEditor.Widgets
             this.RemoveAndFree();
         }
 
-        private void Clear()
-        {
-            _entryPoint = null;
-            _selection.Clear();
-            ClearConnections();
-            _widgets.Values.ForAll(it => it.RemoveAndFree());
-            _widgets.Clear();
-        }
-
         private void PerformRefactorings(string description, params Refactoring[] refactorings)
         {
             PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
@@ -333,11 +336,6 @@ namespace OpenScadGraphEditor.Widgets
             }
             
             RefactoringsRequested?.Invoke(description, refactoringsAsArray);
-        }
-
-        private void NotifyUpdateRequired(bool codeChange)
-        {
-            Changed?.Invoke(codeChange);
         }
 
 

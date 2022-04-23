@@ -57,7 +57,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("reroute_type", (int) GetInputPortType(0));
+            node.SetData("reroute_type", (int) GetPortType(PortId.Input(0)));
             base.SaveInto(node);
         }
 
@@ -79,7 +79,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public override string Render(IScadGraph context)
         {
-            if (GetOutputPortType(0) != PortType.Flow)
+            if (GetPortType(PortId.Output(0)) != PortType.Flow)
             {
                 throw new InvalidOperationException("Cannot render non-flow type");
             }
@@ -90,7 +90,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public string RenderExpressionOutput(IScadGraph context, int port)
         {
-            var outputPortType = GetOutputPortType(0);
+            var outputPortType = GetPortType(PortId.Output(0));
             if (outputPortType == PortType.Flow || outputPortType == PortType.Reroute)
             {
                 throw new InvalidOperationException("Cannot render non-expression type.");

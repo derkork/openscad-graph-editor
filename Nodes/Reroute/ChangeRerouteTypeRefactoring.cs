@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var currentConnectionType = Node.GetInputPortType(0);
+            var currentConnectionType = Node.GetPortType(PortId.Input(0));
             if (currentConnectionType == _newConnectionType)
             {
                 return; // nothing to do

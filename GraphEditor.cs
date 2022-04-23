@@ -458,8 +458,7 @@ namespace OpenScadGraphEditor
 
         private void AttachTo(ScadGraphEdit editor)
         {
-            editor.Changed += MarkDirty;
-            editor.RefactoringsRequested += (description, refactorings) => PerformRefactorings(description, refactorings);
+            editor.RefactoringsRequested += PerformRefactorings;
             editor.NodePopupRequested += OnNodePopupRequested;
             editor.ItemDataDropped += OnItemDataDropped;
             editor.AddDialogRequested += OnAddDialogRequested;

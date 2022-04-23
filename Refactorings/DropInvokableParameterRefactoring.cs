@@ -107,7 +107,7 @@ namespace OpenScadGraphEditor.Refactorings
 
                 foreach (var literalIndex in inputLiteralsToDrop)
                 {
-                    node.Node.DropInputPortLiteral(literalIndex);
+                    node.Node.DropPortLiteral(PortId.Input(literalIndex));
                 }
 
                 // continue with the output literals
@@ -118,7 +118,7 @@ namespace OpenScadGraphEditor.Refactorings
 
                 foreach (var literalIndex in outputLiteralsToDrop)
                 {
-                    node.Node.DropOutputPortLiteral(literalIndex);
+                    node.Node.DropPortLiteral(PortId.Output(literalIndex));
                 }
             }
         }

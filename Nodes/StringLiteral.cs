@@ -1,6 +1,6 @@
 namespace OpenScadGraphEditor.Nodes
 {
-    public class StringLiteral : IScadLiteral
+    public class StringLiteral : LiteralBase
     {
         public StringLiteral(string value)
         {
@@ -9,9 +9,9 @@ namespace OpenScadGraphEditor.Nodes
 
         public string Value { get; set; }
 
-        public string LiteralValue => "\"" + Value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+        public override string RenderedValue => "\"" + Value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
 
-        public string SerializedValue
+        public override string SerializedValue
         {
             get => Value;
             set => Value = value;

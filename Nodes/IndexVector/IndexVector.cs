@@ -44,17 +44,17 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             RebuildPorts();
             
             // build an input port literal
-            BuildInputPortLiteral(IndexPortCount);
+            BuildPortLiteral(PortId.Input(IndexPortCount));
             // build an output port literal
-            BuildOutputPortLiteral(IndexPortCount-1);
+            BuildPortLiteral(PortId.Output(IndexPortCount-1));
         }
 
         public void DecreasePorts()
         {
             GdAssert.That(IndexPortCount > 1, "Cannot decrease ports below 1.");
-            DropInputPortLiteral(IndexPortCount);
+            DropPortLiteral(PortId.Input(IndexPortCount));
             var idx = IndexPortCount - 1;
-            DropOutputPortLiteral(idx);
+            DropPortLiteral(PortId.Output(idx));
 
             IndexPortCount--;
             RebuildPorts();
