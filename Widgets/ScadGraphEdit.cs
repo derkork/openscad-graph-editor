@@ -115,6 +115,8 @@ namespace OpenScadGraphEditor.Widgets
                 ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>()
                 : Prefabs.New<ScadNodeWidget>();
 
+            widget.PositionChanged += (changedNode, position) =>
+                PerformRefactorings("Move node", new ChangeNodePositionRefactoring(this, node, position));
             widget.ConnectChanged()
                 .To(this, nameof(NotifyUpdateRequired));
 
@@ -329,6 +331,11 @@ namespace OpenScadGraphEditor.Widgets
             ClearConnections();
             _widgets.Values.ForAll(it => it.RemoveAndFree());
             _widgets.Clear();
+        }
+
+        private void PerformRefactorings(string description, params Refactoring[] refactorings)
+        {
+            PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
         }
 
         private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings)

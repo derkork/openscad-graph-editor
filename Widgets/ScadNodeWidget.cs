@@ -11,6 +11,9 @@ namespace OpenScadGraphEditor.Widgets
     {
         [Signal]
         public delegate void Changed(bool codeChange);
+
+        public event Action<ScadNode, Vector2> PositionChanged;
+        
         
         private readonly Dictionary<int, IScadLiteralWidget> _inputLiteralWidgets =
             new Dictionary<int, IScadLiteralWidget>();
@@ -18,6 +21,9 @@ namespace OpenScadGraphEditor.Widgets
         private readonly Dictionary<int, IScadLiteralWidget> _outputLiteralWidgets =
             new Dictionary<int, IScadLiteralWidget>();
 
+        private bool _offsetChangePending;
+        private bool _initializing;
+        
         public override void _Ready()
         {
             this.Connect("offset_changed")
@@ -26,14 +32,38 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnOffsetChanged()
         {
-            BoundNode.Offset = Offset;
-            NotifyChanged(false);
+            // we get offset changes continuously as the mouse is dragged but
+            // we only want to update the code once per drag. Therefore we just
+            // note that the node offset has changed and wait for a mouse release to
+            // actually send the event.
+            _offsetChangePending = !_initializing;
         }
-        
+
+        public override void _Input(InputEvent inputEvent)
+        {
+            if (!_offsetChangePending || !(inputEvent is InputEventMouseButton mouseButtonEvent))
+            {
+                return;
+            }
+
+            if (mouseButtonEvent.IsPressed() || mouseButtonEvent.ButtonIndex != (int) ButtonList.Left)
+            {
+                return;
+            }
+            
+            PositionChanged?.Invoke(BoundNode, Offset);   
+            _offsetChangePending = false;
+        }
+
         public ScadNode BoundNode { get; protected set; }
 
         public virtual void BindTo(ScadNode node)
         {
+            // setting node values may trigger change events which we don't want to
+            // therefore we set _initializing to true to prevent these events from
+            // being observed.
+            _initializing = true;
+            
             BoundNode = node;
             Title = node.NodeTitle;
             HintTooltip = node.NodeDescription;
@@ -60,6 +90,10 @@ namespace OpenScadGraphEditor.Widgets
 
                 idx++;
             }
+            QueueSort();
+            
+            // re-enable event observing
+            _initializing = false;
         }
 
         public virtual void PortConnected(int port, bool isLeft)

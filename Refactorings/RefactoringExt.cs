@@ -50,6 +50,15 @@ namespace OpenScadGraphEditor.Refactorings
             return new ReferencingNode<IReferToAnInvokable, LightWeightGraph>(refactorableGraph, scadNode, (IReferToAnInvokable) scadNode);
         }
 
+        public static ReferencingNode<ScadNode, LightWeightGraph> MakeRefactorable<TGraphType>(
+            this RefactoringContext context, TGraphType graph, ScadNode node) where TGraphType : IScadGraph
+        {
+            var refactorableGraph = context.MakeRefactorable(graph);
+            var scadNode = refactorableGraph.ById(node.Id);
+            return new ReferencingNode<ScadNode, LightWeightGraph>(refactorableGraph, scadNode, scadNode);
+        }
+            
+        
 
         public readonly struct ReferencingNode<T, TGraphType> where TGraphType : IScadGraph
         {
