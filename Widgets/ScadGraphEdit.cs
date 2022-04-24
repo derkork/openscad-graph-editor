@@ -23,11 +23,25 @@ namespace OpenScadGraphEditor.Widgets
         private readonly HashSet<string> _selection = new HashSet<string>();
 
         /// <summary>
-        /// Emitted when refactorings are requested (e.g. basically any edit except changes in literals).
-        /// TODO: probably we also want refactorings for literals as they should participate in the undo/redo stack.
+        /// Emitted when refactorings are requested.
         /// </summary>
         public event Action<string, Refactoring[]> RefactoringsRequested;
+        
+        /// <summary>
+        /// Emitted when the user requested copying nodes.
+        /// </summary>
+        public event Action<ScadGraphEdit, List<ScadNode>> CopyRequested;
 
+        /// <summary>
+        /// Emitted when the user requested cutting nodes.
+        /// </summary>
+        public event Action<ScadGraphEdit, List<ScadNode>> CutRequested;
+        
+        /// <summary>
+        /// Emitted when the user requested pasting nodes. 
+        /// </summary>
+        public event Action<ScadGraphEdit, Vector2> PasteRequested;
+        
         /// <summary>
         /// Emitted when the user right-clicks on a node.
         /// </summary>
@@ -55,6 +69,16 @@ namespace OpenScadGraphEditor.Widgets
         {
             return _widgets.Values.Select(it => it.BoundNode);
         }
+        
+        
+        public void SelectNodes(List<ScadNode> nodes)
+        {
+            var set = nodes.Select(it => it.Id).ToHashSet();
+            _widgets.Values.ForAll(it => it.Selected = set.Contains(it.BoundNode.Id));
+            _selection.Clear();
+            set.ForAll(it => _selection.Add(it));
+        }
+
 
         public override void _Ready()
         {
@@ -223,6 +247,35 @@ namespace OpenScadGraphEditor.Widgets
                 GD.Print("Resolving pending disconnect.");
                 PerformRefactorings("Remove connection", new DropConnectionRefactoring(_pendingDisconnect));
                 _pendingDisconnect = null;
+            }
+
+            if (evt.IsCopy())
+            {
+                CopyRequested?.Invoke(this, _selection.Select(it => _widgets[it].BoundNode).ToList());
+            }
+
+            if (evt.IsCut())
+            {
+                CutRequested?.Invoke(this, _selection.Select(it => _widgets[it].BoundNode).ToList());
+            }
+
+            if (evt.IsPaste())
+            {
+                // get the offset over the mouse position
+                var globalRect = GetGlobalRect();
+                var globalMousePosition = GetGlobalMousePosition();
+
+                // default paste position
+                var pastePosition = ScrollOffset + new Vector2(100, 100);
+                
+                if (globalRect.HasPoint(globalMousePosition))
+                {
+                    // if the mouse is inside the graph, paste the nodes at the mouse position
+                    pastePosition = globalMousePosition - RectGlobalPosition + ScrollOffset;
+                    
+                }
+                
+                PasteRequested?.Invoke(this, pastePosition);
             }
         }
 

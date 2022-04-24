@@ -69,7 +69,7 @@ namespace OpenScadGraphEditor.Library
             }
         }
 
-        private void Clear()
+        public void Clear()
         {
             _entryPoint = null;
             _connections.Clear();

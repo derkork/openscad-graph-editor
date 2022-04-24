@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -59,5 +60,19 @@ namespace OpenScadGraphEditor.Library
             node.RestoreLiteralValues(savedNode, resolver);
             return node;
         }
+
+        
+        /// <summary>
+        /// Duplicates a node. The node will be identical to the original, but will have a different id.
+        /// </summary>
+        public static T Duplicate<T>(T node, IReferenceResolver resolver) where T:ScadNode
+        {
+            var savedNode = Prefabs.New<SavedNode>();
+            node.SaveInto(savedNode);
+
+            savedNode.Id = Guid.NewGuid().ToString();
+            return (T) FromSavedNode(savedNode, resolver);
+        }
+        
     }
 }

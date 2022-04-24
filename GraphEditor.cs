@@ -48,6 +48,8 @@ namespace OpenScadGraphEditor
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
+        private LightWeightGraph _copyBuffer;
+
         private bool _codeChanged;
 
         public override void _Ready()
@@ -71,7 +73,8 @@ namespace OpenScadGraphEditor
                     () => Open(_currentProject.FindDefiningGraph(description)));
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
-            _variableRefactorDialog.RefactoringsRequested += (refactorings) => PerformRefactorings("Rename variable", refactorings);
+            _variableRefactorDialog.RefactoringsRequested +=
+                (refactorings) => PerformRefactorings("Rename variable", refactorings);
 
             _editingInterface = this.WithName<Control>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");
@@ -127,6 +130,8 @@ namespace OpenScadGraphEditor
                 .Connect("timeout")
                 .To(this, nameof(SaveChanges));
 
+            _copyBuffer = new LightWeightGraph();
+            
             OnNewButtonPressed();
         }
 
@@ -147,7 +152,8 @@ namespace OpenScadGraphEditor
                         if (_currentProject.IsDefinedInThisProject(functionDescription))
                         {
                             actions.Add(new QuickAction(title,
-                                () => OnRefactoringRequested(title, new DeleteInvokableRefactoring(functionDescription))));
+                                () => OnRefactoringRequested(title,
+                                    new DeleteInvokableRefactoring(functionDescription))));
                         }
 
                         break;
@@ -155,7 +161,8 @@ namespace OpenScadGraphEditor
                         if (_currentProject.IsDefinedInThisProject(moduleDescription))
                         {
                             actions.Add(new QuickAction(title,
-                                () => OnRefactoringRequested(title, new DeleteInvokableRefactoring(moduleDescription))));
+                                () => OnRefactoringRequested(title,
+                                    new DeleteInvokableRefactoring(moduleDescription))));
                         }
 
                         break;
@@ -178,7 +185,8 @@ namespace OpenScadGraphEditor
                 var removeReferenceTitle = $"Remove reference to {entry.Title}";
                 actions.Add(new QuickAction(removeReferenceTitle,
                     () => OnRefactoringRequested(
-                        removeReferenceTitle, new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
+                        removeReferenceTitle,
+                        new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
             }
 
             _quickActionsPopup.Open(mousePosition, actions);
@@ -206,10 +214,10 @@ namespace OpenScadGraphEditor
         {
             _undoButton.Disabled = !_currentHistoryStack.CanUndo(out var undoDescription);
             _undoButton.HintTooltip = $"Undo : {undoDescription}";
-            
+
             _redoButton.Disabled = !_currentHistoryStack.CanRedo(out var redoDescription);
             _redoButton.HintTooltip = $"Redo : {redoDescription}";
-            
+
             _projectTree.Setup(new List<ProjectTreeEntry>() {new RootProjectTreeEntry(_currentProject)});
 
 
@@ -340,8 +348,9 @@ namespace OpenScadGraphEditor
             var otherNode = context.SourceNode ?? context.DestinationNode;
             var isIncoming = context.SourceNode != null;
             var otherPort = context.LastPort;
-            
-            PerformRefactorings("Add node", new AddNodeRefactoring(context.Source, node, otherNode, otherPort, isIncoming));
+
+            PerformRefactorings("Add node",
+                new AddNodeRefactoring(context.Source, node, otherNode, otherPort, isIncoming));
         }
 
         private ScadGraphEdit Open(IScadGraph toOpen)
@@ -359,7 +368,14 @@ namespace OpenScadGraphEditor
 
             // if not, open a new tab
             var editor = Prefabs.New<ScadGraphEdit>();
-            AttachTo(editor);
+            editor.RefactoringsRequested += PerformRefactorings;
+            editor.NodePopupRequested += OnNodePopupRequested;
+            editor.ItemDataDropped += OnItemDataDropped;
+            editor.AddDialogRequested += OnAddDialogRequested;
+            editor.CopyRequested += OnCopyRequested;
+            editor.PasteRequested += OnPasteRequested;
+            editor.CutRequested += OnCutRequested;
+
             editor.Name = toOpen.Description.NodeNameOrFallback;
             editor.MoveToNewParent(_tabContainer);
             _currentProject.TransferData(toOpen, editor);
@@ -367,6 +383,103 @@ namespace OpenScadGraphEditor
             _tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
             editor.FocusEntryPoint();
             return editor;
+        }
+
+        private void OnCutRequested(ScadGraphEdit source, List<ScadNode> selection)
+        {
+            // first copy the nodes
+            OnCopyRequested(source, selection);
+            
+            // then run refactorings to delete them
+            var deleteRefactorings = selection
+                // only delete nodes which can be deleted
+                .Where(it => !(it is ICannotBeDeleted))
+                // will implicitly also delete the connections.
+                .Select(it => new DeleteNodeRefactoring(source, it))
+                .ToList();
+            
+            PerformRefactorings("Cut nodes", deleteRefactorings);
+        }
+
+        /// <summary>
+        /// Copies the given nodes from the source graph into a copy buffer.
+        /// </summary>
+        private LightWeightGraph MakeCopyBuffer(IScadGraph source, IEnumerable<ScadNode> selection)
+        {
+            var result = new LightWeightGraph();
+            // remove all nodes which cannot be deleted (which are usually nodes that are built in so they cannot be copied either).
+            // also make it a HashSet so we don't have duplicates and have quicker lookups
+            var sanitizedSet = selection
+                .Where(it => !(it is ICannotBeDeleted))
+                .ToHashSet();
+
+            var idMapping = new Dictionary<string, string>();
+            // make copies of all the nodes and put them into the copy buffer
+            foreach (var node in sanitizedSet)
+            {
+                var copy = NodeFactory.Duplicate(node, _currentProject);
+                // make note of the id mapping, because we need this to resolve connections
+                // later
+                idMapping[node.Id] = copy.Id;
+                result.AddNode(copy);
+            }
+
+            //  copy all connections which are between the selected nodes
+            foreach (var connection in source.GetAllConnections())
+            {
+                if (sanitizedSet.Contains(connection.From) && sanitizedSet.Contains(connection.To))
+                {
+                    result.AddConnection(idMapping[connection.From.Id], connection.FromPort,
+                        idMapping[connection.To.Id], connection.ToPort);
+                }
+            }
+
+            return result;
+        }
+        
+        private void OnCopyRequested(ScadGraphEdit source, List<ScadNode> selection)
+        {
+            _copyBuffer = MakeCopyBuffer(source, selection);
+        }
+
+        private void OnPasteRequested(ScadGraphEdit source, Vector2 position)
+        {
+           
+            // now make another copy from the copy buffer and paste that. The reason we do this is because
+            // nodes need unique Ids so for each pasting we need to make a new copy.
+            var copy = MakeCopyBuffer(_copyBuffer, _copyBuffer.GetAllNodes());
+            var scadNodes = copy.GetAllNodes().ToList();
+            if (scadNodes.Count == 0)
+            {
+                return; // nothing to paste
+            }
+            
+            // we now need to normalize the position of the nodes so they are pasted in the correct position
+            // we do this by finding the bounding box of the nodes and then offsetting them by the difference between the position
+            // of the bounding box and the position of the node that is closes to top left
+            
+            // we start with a rectangle that is a point that simply has the position of the first node
+            var boundingBox = new Rect2(scadNodes[0].Offset, Vector2.Zero);
+            // now expand this rectangle so it contains all the points of all the offsets of the nodes
+            boundingBox = scadNodes.Aggregate(boundingBox, (current, node) => current.Expand(node.Offset));
+            // now we calculate the offset of the bounding box position and the desired position
+            var offset = position - boundingBox.Position;
+            
+            // and offset every node by this
+            scadNodes.ForAll(it => it.Offset += offset);
+            
+            // now run the refactorings to add the given nodes and connections
+            var refactorings = new List<Refactoring>();
+            foreach (var node in scadNodes)
+            {
+                refactorings.Add(new AddNodeRefactoring(source, node));
+            }
+            foreach (var connection in copy.GetAllConnections())
+            {
+                refactorings.Add(new AddConnectionRefactoring(new ScadConnection(source, connection.From, connection.FromPort, connection.To, connection.ToPort)));
+            }
+
+            PerformRefactorings("Paste nodes", refactorings,  ()=>source.SelectNodes(scadNodes));
         }
 
         private void OnAddFunctionPressed()
@@ -393,7 +506,7 @@ namespace OpenScadGraphEditor
         {
             PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
         }
-        
+
         private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
             params Action[] after)
         {
@@ -407,7 +520,7 @@ namespace OpenScadGraphEditor
             {
                 _tabContainer.CurrentTab = childCount - 1;
             }
-            
+
             // important, the snapshot must be made _after_ the changes.
             _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
 
@@ -454,18 +567,10 @@ namespace OpenScadGraphEditor
 
             // and finally select the tab that was selected
             _tabContainer.CurrentTab = editorState.CurrentTabIndex;
-            
+
             RefreshControls();
         }
 
-
-        private void AttachTo(ScadGraphEdit editor)
-        {
-            editor.RefactoringsRequested += PerformRefactorings;
-            editor.NodePopupRequested += OnNodePopupRequested;
-            editor.ItemDataDropped += OnItemDataDropped;
-            editor.AddDialogRequested += OnAddDialogRequested;
-        }
 
         private void OnAddDialogRequested(RequestContext context)
         {
@@ -593,6 +698,8 @@ namespace OpenScadGraphEditor
             _currentProject.Load(savedProject, _currentFile);
 
             Open(_currentProject.MainModule);
+            // again, important, must be done after the main module is opened
+            _currentHistoryStack = new HistoryStack(_currentProject, GetEditorState());
             RefreshControls();
 
             RenderScadOutput();
@@ -684,6 +791,19 @@ namespace OpenScadGraphEditor
                 {
                     GD.Print("Cannot save SCAD!");
                 }
+            }
+        }
+
+        public override void _Input(InputEvent evt)
+        {
+            if (evt.IsUndo() && _currentHistoryStack.CanUndo(out _))
+            {
+                Undo();
+            }
+
+            if (evt.IsRedo() && _currentHistoryStack.CanRedo(out _))
+            {
+                Redo();
             }
         }
     }

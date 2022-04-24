@@ -94,7 +94,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             builder.Append(")");
 
             var children = RenderOutput(context, 0);
-            var next = RenderOutput(context, 2);
+            var next = RenderOutput(context, 1+NestLevel);
 
             return $"{builder}{children.AsBlock()}\n{next}";
         }
