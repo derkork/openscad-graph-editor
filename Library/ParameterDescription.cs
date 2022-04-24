@@ -33,12 +33,6 @@ namespace OpenScadGraphEditor.Library
         public PortType TypeHint { get; set; } = PortType.Any;
 
         /// <summary>
-        /// Whether the parameter is auto-coerced into the correct type.
-        /// </summary>
-        [Export]
-        public bool IsAutoCoerced {get; set; }
-
-        /// <summary>
         /// Returns the label of the parameter if set, otherwise it's name.
         /// </summary>
         public string LabelOrFallback => Label.Length > 0 ? Label : Name;

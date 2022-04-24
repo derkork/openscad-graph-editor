@@ -279,8 +279,8 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Array:
                 case PortType.Flow:
                 case PortType.Any:
-                    throw new ArgumentException(
-                        $"Port type {portDefinition.PortType} cannot have a literal input.");
+                    // nothing to do
+                    return;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

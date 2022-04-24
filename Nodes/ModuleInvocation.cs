@@ -52,7 +52,7 @@ namespace OpenScadGraphEditor.Nodes
             {
                 var type = parameter.TypeHint;
                 InputPorts
-                    .OfType(type, parameter.LabelOrFallback, true, parameter.IsAutoCoerced);
+                    .OfType(type, parameter.LabelOrFallback, true);
             }
 
             if (_description.SupportsChildren)

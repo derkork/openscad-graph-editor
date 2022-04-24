@@ -46,14 +46,13 @@ namespace OpenScadGraphEditor.Library
             return this;
         }
 
-        public ModuleBuilder WithParameter(string name, PortType typeHint = PortType.Any, bool isAutoCoerced = false,
+        public ModuleBuilder WithParameter(string name, PortType typeHint = PortType.Any,
             string label = "", string description = "")
         {
             var parameter = Prefabs.New<ParameterDescription>();
             parameter.Name = name;
             parameter.Description = description;
             parameter.TypeHint = typeHint;
-            parameter.IsAutoCoerced = isAutoCoerced;
             parameter.Label = label;
 
             _currentModuleDescription.Parameters.Add(parameter);

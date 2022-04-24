@@ -18,7 +18,7 @@ namespace OpenScadGraphEditor.Widgets.PortContainer
 
         public void Setup(bool left, string text, [CanBeNull] Control widget = null)
         {
-            if (_widget != null && _widget != widget)
+            if (_widget != null && _widget != widget && IsInstanceValid(_widget) && _widget.GetParent() == _innerContainer)
             {
                 _innerContainer.RemoveChild(_widget);
             }

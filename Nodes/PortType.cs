@@ -17,6 +17,31 @@ namespace OpenScadGraphEditor.Nodes
 
     public static class PortTypeExt
     {
+        public static string HumanReadableName(this PortType self)
+        {
+            switch (self)
+            {
+                case PortType.Flow:
+                    return "flow";
+                case PortType.Boolean:
+                    return "boolean";   
+                case PortType.Number:
+                    return "number";
+                case PortType.Vector3:
+                    return "Vector3";
+                case PortType.Array:
+                    return "array";
+                case PortType.String:
+                    return "string";
+                case PortType.Any:
+                    return "any";
+                case PortType.Reroute:
+                    return "";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(self), self, null);
+            }
+        }
+        
         public static bool IsExpressionType(this PortType self)
         {
             switch (self)

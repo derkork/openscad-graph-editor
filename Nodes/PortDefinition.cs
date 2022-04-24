@@ -4,13 +4,12 @@ namespace OpenScadGraphEditor.Nodes
 {
     public class PortDefinition
     {
-        private PortDefinition(PortType portType, string name, bool allowLiteral, bool autoCoerce, object defaultValue = default)
+        private PortDefinition(PortType portType, string name, bool allowLiteral, object defaultValue = default)
         {
             PortType = portType;
             Name = name;
             AllowLiteral = allowLiteral && portType != PortType.Any && portType != PortType.Flow &&
                            PortType != PortType.Array;
-            AutoCoerce = autoCoerce;
             DefaultValue = defaultValue;
         }
 
@@ -18,7 +17,6 @@ namespace OpenScadGraphEditor.Nodes
         public string Name { get; }
 
         public bool AllowLiteral { get; }
-        public bool AutoCoerce { get; }
         
         public object DefaultValue { get; }
 
@@ -29,69 +27,68 @@ namespace OpenScadGraphEditor.Nodes
         public bool DefaultValueAsBoolean => DefaultValue is bool value && value;
 
 
-        public static PortDefinition Boolean(string name = "", bool allowLiteral = true, bool autoCoerce = false, bool defaultValue = false)
+        public static PortDefinition Boolean(string name = "", bool allowLiteral = true, bool defaultValue = false)
         {
-            return new PortDefinition(PortType.Boolean, name, allowLiteral, autoCoerce, defaultValue);
+            return new PortDefinition(PortType.Boolean, name, allowLiteral, defaultValue);
         }
 
 
-        public static PortDefinition Number(string name = "", bool allowLiteral = true, bool autoCoerce = false, double defaultValue = 0)
+        public static PortDefinition Number(string name = "", bool allowLiteral = true, double defaultValue = 0)
         {
-            return new PortDefinition(PortType.Number, name, allowLiteral, autoCoerce, defaultValue);
+            return new PortDefinition(PortType.Number, name, allowLiteral, defaultValue);
         }
 
-        public static PortDefinition String(string name = "", bool allowLiteral = true, bool autoCoerce = false, string defaultValue = "")
+        public static PortDefinition String(string name = "", bool allowLiteral = true, string defaultValue = "")
         {
-            return new PortDefinition(PortType.String, name, allowLiteral, autoCoerce, defaultValue);
+            return new PortDefinition(PortType.String, name, allowLiteral, defaultValue);
         }
 
         public static PortDefinition Any(string name = "")
         {
-            return new PortDefinition(PortType.Any, name, false, false);
+            return new PortDefinition(PortType.Any, name, false);
         }
 
-        public static PortDefinition Vector3(string name = "", bool allowLiteral = true, bool autoCoerce = false)
+        public static PortDefinition Vector3(string name = "", bool allowLiteral = true)
         {
-            return new PortDefinition(PortType.Vector3, name, allowLiteral, autoCoerce);
+            return new PortDefinition(PortType.Vector3, name, allowLiteral);
         }
 
         public static PortDefinition Flow(string name = "")
         {
-            return new PortDefinition(PortType.Flow, name, false, false);
+            return new PortDefinition(PortType.Flow, name, false);
         }
 
         public static PortDefinition Array(string name = "")
         {
-            return new PortDefinition(PortType.Array, name, false, false);
+            return new PortDefinition(PortType.Array, name, false);
         }
 
-        public static PortDefinition OfType(PortType type, string name = "", bool allowLiteral = true,
-            bool autoCoerce = false, object defaultValue = default)
+        public static PortDefinition OfType(PortType type, string name = "", bool allowLiteral = true, object defaultValue = default)
         {
-            return new PortDefinition(type, name, allowLiteral, autoCoerce, defaultValue);
+            return new PortDefinition(type, name, allowLiteral, defaultValue);
         }
     }
 
     public static class PortDefinitionExt
     {
         public static List<PortDefinition> Number(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true, bool autoCoerce = false, double defaultValue = 0)
+            bool allowLiteral = true, double defaultValue = 0)
         {
-            self.Add(PortDefinition.Number(name, allowLiteral, autoCoerce, defaultValue));
+            self.Add(PortDefinition.Number(name, allowLiteral, defaultValue));
             return self;
         }
 
         public static List<PortDefinition> Vector3(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true, bool autoCoerce = false)
+            bool allowLiteral = true)
         {
-            self.Add(PortDefinition.Vector3(name, allowLiteral, autoCoerce));
+            self.Add(PortDefinition.Vector3(name, allowLiteral));
             return self;
         }
 
         public static List<PortDefinition> Boolean(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true, bool autoCoerce = false, bool defaultValue = false)
+            bool allowLiteral = true, bool defaultValue = false)
         {
-            self.Add(PortDefinition.Boolean(name, allowLiteral, autoCoerce, defaultValue));
+            self.Add(PortDefinition.Boolean(name, allowLiteral, defaultValue));
             return self;
         }
 
@@ -102,9 +99,9 @@ namespace OpenScadGraphEditor.Nodes
         }
 
         public static List<PortDefinition> String(this List<PortDefinition> self, string name = "",
-            bool allowLiteral = true, bool autoCoerce = false, string defaultValue = "")
+            bool allowLiteral = true, string defaultValue = "")
         {
-            self.Add(PortDefinition.String(name, allowLiteral, autoCoerce, defaultValue));
+            self.Add(PortDefinition.String(name, allowLiteral, defaultValue));
             return self;
         }
 
@@ -121,9 +118,9 @@ namespace OpenScadGraphEditor.Nodes
         }
 
         public static List<PortDefinition> OfType(this List<PortDefinition> self, PortType portType, string name = "",
-            bool allowLiteral = true, bool autoCoerce = false, object defaultValue = default)
+            bool allowLiteral = true, object defaultValue = default)
         {
-            self.Add(PortDefinition.OfType(portType, name, allowLiteral, autoCoerce, defaultValue));
+            self.Add(PortDefinition.OfType(portType, name, allowLiteral, defaultValue));
             return self;
         }
     }

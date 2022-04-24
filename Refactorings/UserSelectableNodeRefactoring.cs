@@ -16,27 +16,27 @@ namespace OpenScadGraphEditor.Refactorings
         
         public abstract int Order { get; }
 
-        private static readonly List<Type> KnownNodeRefactorings;
+        private static readonly List<IUserSelectableRefactoringFactory> Factories;
         
         protected UserSelectableNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         static UserSelectableNodeRefactoring()
         {
-            KnownNodeRefactorings = Assembly.GetExecutingAssembly()
+            Factories = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => typeof(UserSelectableNodeRefactoring).IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => typeof(IUserSelectableRefactoringFactory).IsAssignableFrom(t) && !t.IsAbstract)
+                .Select(Activator.CreateInstance)
+                .Cast<IUserSelectableRefactoringFactory>()
                 .ToList();
         }
         
-        public static List<UserSelectableNodeRefactoring> GetApplicable(IScadGraph graph, ScadNode node)
+        public static IEnumerable<UserSelectableNodeRefactoring> GetApplicable(IScadGraph graph, ScadNode node)
         {
-            return KnownNodeRefactorings
-                .Select(it => Activator.CreateInstance(it, graph, node))
-                .Cast<UserSelectableNodeRefactoring>()
+            return Factories
+                .SelectMany(it => it.GetRefactorings(graph, node))
                 .Where(it => it.IsApplicableToNode)
-                .OrderBy(it => it.Order)
-                .ToList();
+                .OrderBy(it => it.Order);
         }
 
         

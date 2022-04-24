@@ -97,7 +97,7 @@ namespace OpenScadGraphEditor.Widgets
             var portDefinition = node.GetPortDefinition(port);
             var idx = port.Port;
             
-            var connectorPortType = portDefinition.AutoCoerce ? PortType.Any : portDefinition.PortType;
+            var connectorPortType = portDefinition.PortType;
             if (port.IsInput)
             {
                 SetSlotEnabledLeft(idx, true);
@@ -165,7 +165,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (existingWidget != null && existingWidget != literalWidget)
             {
-                GD.Print("Widget mismatch");
+                GD.Print("Widget type changed");
                 // we replaced the widget with something else, so delete the existing widget
                 ((Node)existingWidget).RemoveAndFree();
                 _literalWidgets.Remove(port);
