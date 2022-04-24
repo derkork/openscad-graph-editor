@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -22,7 +23,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public override string Render(IScadGraph context)
         {
-            return $"[{RenderInput(context, 0)}, {RenderInput(context, 1)}, {RenderInput(context, 2)}]";
+            return $"[{RenderInput(context, 0).OrDefault("0")}, {RenderInput(context, 1).OrDefault("0")}, {RenderInput(context, 2).OrDefault("0")}]";
         }
     }
 }

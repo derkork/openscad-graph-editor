@@ -43,5 +43,10 @@ namespace OpenScadGraphEditor.Utils
             return input.Length == 0 ? "undef" : input;
         }
 
+        public static string OrDefault(this string input, string defaultValue)
+        {
+            return input.Length == 0 ? defaultValue : input;
+        }
+
     }
 }
