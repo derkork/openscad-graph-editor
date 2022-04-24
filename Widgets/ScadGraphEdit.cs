@@ -111,6 +111,9 @@ namespace OpenScadGraphEditor.Widgets
                 .To(this, nameof(OnDeleteSelection));
             this.Connect("popup_request")
                 .To(this, nameof(OnPopupRequest));
+
+            this.Connect("_end_node_move")
+                .To(this, nameof(OnEndNodeMove));
         }
 
         public override bool CanDropData(Vector2 position, object data)
@@ -137,9 +140,6 @@ namespace OpenScadGraphEditor.Widgets
                 // this is technically not needed but it would seem that the graph edit gets confused if you don't set
                 // the name of the widget to something unique.
                 widget.Name = node.Id;
-
-                widget.PositionChanged += (position) =>
-                    PerformRefactorings("Move node", new ChangeNodePositionRefactoring(this, node, position));
                 widget.LiteralToggled += (port, enabled) =>
                     PerformRefactorings( "Toggle literal", new ToggleLiteralRefactoring(this, node, port, enabled));
                 widget.LiteralValueChanged += (port, value) =>
@@ -153,6 +153,15 @@ namespace OpenScadGraphEditor.Widgets
             return widget;
         }
 
+        private void OnEndNodeMove()
+        {
+            // all nodes which are currently selected have moved, so we need to send a refactoring request for them.
+            PerformRefactorings("Move node(s)",
+                GetSelectedNodes()
+                    .Select(it => new ChangeNodePositionRefactoring(this, it, _widgets[it.Id].Offset)));
+
+        }
+        
         public void FocusEntryPoint()
         {
             var widget = _widgets[_entryPoint.Id];
@@ -251,12 +260,12 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsCopy())
             {
-                CopyRequested?.Invoke(this, _selection.Select(it => _widgets[it].BoundNode).ToList());
+                CopyRequested?.Invoke(this, GetSelectedNodes().ToList());
             }
 
             if (evt.IsCut())
             {
-                CutRequested?.Invoke(this, _selection.Select(it => _widgets[it].BoundNode).ToList());
+                CutRequested?.Invoke(this, GetSelectedNodes().ToList());
             }
 
             if (evt.IsPaste())
@@ -277,6 +286,11 @@ namespace OpenScadGraphEditor.Widgets
                 
                 PasteRequested?.Invoke(this, pastePosition);
             }
+        }
+
+        private IEnumerable<ScadNode> GetSelectedNodes()
+        {
+            return _selection.Select(it => _widgets[it].BoundNode);
         }
 
         private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
@@ -323,7 +337,8 @@ namespace OpenScadGraphEditor.Widgets
         private void OnDeleteSelection()
         {
             var refactorings = 
-                _selection.Select(it => new DeleteNodeRefactoring(this, _widgets[it].BoundNode))
+                GetSelectedNodes()
+                    .Select(it => new DeleteNodeRefactoring(this, it))
                     .ToList();
             _selection.Clear();
             PerformRefactorings("Delete selection",  refactorings);

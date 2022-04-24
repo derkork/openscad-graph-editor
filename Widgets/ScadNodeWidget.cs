@@ -11,59 +11,17 @@ namespace OpenScadGraphEditor.Widgets
 {
     public class ScadNodeWidget : GraphNode
     {
-        public event Action<Vector2> PositionChanged;
         public event Action<PortId, object> LiteralValueChanged;
         public event Action<PortId, bool> LiteralToggled;
         
 
         private readonly Dictionary<PortId, IScadLiteralWidget> _literalWidgets = new Dictionary<PortId, IScadLiteralWidget>();
-        
-        private bool _offsetChangePending;
-        private bool _initializing;
-        
-        public override void _Ready()
-        {
-            this.Connect("offset_changed")
-                .To(this, nameof(OnOffsetChanged));
-        }
-
-        private void OnOffsetChanged()
-        {
-            // we get offset changes continuously as the mouse is dragged but
-            // we only want to update the code once per drag. Therefore we just
-            // note that the node offset has changed and wait for a mouse release to
-            // actually send the event.
-            _offsetChangePending = !_initializing;
-        }
-
-        public override void _Input(InputEvent inputEvent)
-        {
-            // if we have an offset change pending and the mouse was released
-            if (!_offsetChangePending || !(inputEvent is InputEventMouseButton mouseButtonEvent))
-            {
-                return;
-            }
-
-            if (mouseButtonEvent.IsPressed() || mouseButtonEvent.ButtonIndex != (int) ButtonList.Left)
-            {
-                return;
-            }
-            
-            // notify about a position change.
-            PositionChanged?.Invoke(Offset);   
-            _offsetChangePending = false;
-        }
 
         public ScadNode BoundNode { get; protected set; }
 
 
         public virtual void BindTo(IScadGraph graph, ScadNode node)
         {
-            // setting node values may trigger change events which we don't want to
-            // therefore we set _initializing to true to prevent these events from
-            // being observed.
-            _initializing = true;
-            
             BoundNode = node;
             Title = node.NodeTitle;
             HintTooltip = node.NodeDescription;
@@ -126,9 +84,6 @@ namespace OpenScadGraphEditor.Widgets
             // deferred as it doesn't seem to have any effect when being called in the same
             // frame as when the widget is created.
             CallDeferred(nameof(Minimize));
-            
-            // re-enable event observing
-            _initializing = false;
         }
 
         private void Minimize()
