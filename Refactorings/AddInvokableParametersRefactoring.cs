@@ -21,6 +21,8 @@ namespace OpenScadGraphEditor.Refactorings
         {
             // find all nodes which are affected by this and make them refactorable
             var affectedNodes = context.Project.FindAllReferencingNodes(_invokableDescription)
+                .ToList() // avoid concurrent modification
+                .Select(context.MakeRefactorable)
                 .ToList(); // avoid concurrent modification
 
             // add the new parameters to the invokable description. Only do this AFTER
@@ -31,7 +33,6 @@ namespace OpenScadGraphEditor.Refactorings
             foreach (var referencingNode in affectedNodes)
             {
                 // make the owning graph refactorable
-                context.MakeRefactorable(referencingNode.Graph);
                 var node = referencingNode.Node;
                 var nodeAsReference = referencingNode.NodeAsReference;
 
