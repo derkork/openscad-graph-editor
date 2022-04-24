@@ -321,6 +321,7 @@ namespace OpenScadGraphEditor
             GdAssert.That(_currentHistoryStack.CanUndo(out _), "Cannot undo");
             var editorState = _currentHistoryStack.Undo(_currentProject);
             RestoreEditorState(editorState);
+            MarkDirty(true);
         }
 
         private void Redo()
@@ -328,6 +329,7 @@ namespace OpenScadGraphEditor
             GdAssert.That(_currentHistoryStack.CanRedo(out _), "Cannot redo");
             var editorState = _currentHistoryStack.Redo(_currentProject);
             RestoreEditorState(editorState);
+            MarkDirty(true);
         }
 
 
