@@ -9,11 +9,11 @@ namespace OpenScadGraphEditor.Refactorings
     /// Drops a connection. Verifies against the connection rules that this connection can actually be dropped.
     /// If it cannot be dropped, the connection stays.
     /// </summary>
-    public class DropConnectionRefactoring : Refactoring
+    public class DeleteConnectionRefactoring : Refactoring
     {
         private readonly ScadConnection _connection;
 
-        public DropConnectionRefactoring(ScadConnection connection)
+        public DeleteConnectionRefactoring(ScadConnection connection)
         {
             _connection = connection;
         }

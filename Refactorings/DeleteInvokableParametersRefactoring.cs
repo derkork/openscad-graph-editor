@@ -5,12 +5,12 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
 {
-    public class DropInvokableParametersRefactoring : Refactoring
+    public class DeleteInvokableParametersRefactoring : Refactoring
     {
         private readonly InvokableDescription _description;
         private readonly int[] _parameterIndicesToDrop;
 
-        public DropInvokableParametersRefactoring(InvokableDescription description, int[] parameterIndicesToDrop)
+        public DeleteInvokableParametersRefactoring(InvokableDescription description, int[] parameterIndicesToDrop)
         {
             _description = description;
             _parameterIndicesToDrop = parameterIndicesToDrop;

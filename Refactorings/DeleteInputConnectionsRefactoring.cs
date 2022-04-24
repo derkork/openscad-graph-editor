@@ -5,11 +5,11 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
 {
-    public class DropOutputConnectionsRefactoring : NodeRefactoring
+    public class DeleteInputConnectionsRefactoring : NodeRefactoring
     {
         private readonly int _port;
 
-        public DropOutputConnectionsRefactoring(IScadGraph holder, ScadNode node, int port) : base(holder, node)
+        public DeleteInputConnectionsRefactoring(IScadGraph holder, ScadNode node, int port) : base(holder, node)
         {
             _port = port;
         }
@@ -18,10 +18,9 @@ namespace OpenScadGraphEditor.Refactorings
         {
             var refactorableGraph = context.MakeRefactorable(Holder);
             refactorableGraph.GetAllConnections()
-                .Where(it => it.From.Id == Node.Id && it.FromPort == _port)
+                .Where(it => it.To.Id == Node.Id && it.ToPort == _port)
                 .ToList()
                 .ForAll(refactorableGraph.RemoveConnection);
         }
-
     }
 }

@@ -26,12 +26,12 @@ namespace OpenScadGraphEditor.Nodes
             // there can only ever be one incoming connection to a port
             AddConnectRule(it => true,
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
-                it => new DropInputConnectionsRefactoring(it.Owner, it.To, it.ToPort));
+                it => new DeleteInputConnectionsRefactoring(it.Owner, it.To, it.ToPort));
 
             // anything that is from a "Flow" port type needs to disconnect the source port (only one flow is allowed)
             AddConnectRule(it => it.IsFromPortType(PortType.Flow),
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
-                it => new DropOutputConnectionsRefactoring(it.Owner, it.From, it.FromPort));
+                it => new DeleteOutputConnectionsRefactoring(it.Owner, it.From, it.FromPort));
 
             // a node can never connect to itself
             AddConnectRule(it => it.From == it.To, OperationRuleDecision.Veto);

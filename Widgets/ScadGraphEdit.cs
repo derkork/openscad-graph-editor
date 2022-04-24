@@ -245,7 +245,7 @@ namespace OpenScadGraphEditor.Widgets
             if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
             {
                 GD.Print("Resolving pending disconnect.");
-                PerformRefactorings("Remove connection", new DropConnectionRefactoring(_pendingDisconnect));
+                PerformRefactorings("Remove connection", new DeleteConnectionRefactoring(_pendingDisconnect));
                 _pendingDisconnect = null;
             }
 

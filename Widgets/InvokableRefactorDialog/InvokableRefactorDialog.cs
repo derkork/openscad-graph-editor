@@ -208,7 +208,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
                     if (indicesToDelete.Length > 0)
                     {
-                        refactorings.Add(new DropInvokableParametersRefactoring(_baseDescription, indicesToDelete));
+                        refactorings.Add(new DeleteInvokableParametersRefactoring(_baseDescription, indicesToDelete));
                     }
 
 

@@ -41,7 +41,7 @@ namespace OpenScadGraphEditor.Refactorings
             }
 
             // drop all connections. Run a proper refactoring for this, so all the side effects are executed as well
-            connections.Select(it => new DropConnectionRefactoring(it)).ForAll(context.PerformRefactoring);
+            connections.Select(it => new DeleteConnectionRefactoring(it)).ForAll(context.PerformRefactoring);
             // and finally the node
             graph.RemoveNode(toDelete);
         }
