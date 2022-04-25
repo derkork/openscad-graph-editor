@@ -15,7 +15,9 @@ namespace OpenScadGraphEditor.Widgets
 {
     /// <summary>
     /// This is our main editing interface for editing graphs of invokable things (functions/modules). It is the
-    /// heavyweight alternative to <see cref="LightWeightGraph"/>
+    /// heavyweight alternative to <see cref="LightWeightGraph"/>. In contrast to <see cref="LightWeightGraph"/>,
+    /// this graph never really changes the actual graph data but just invokes refactoring events in response to
+    /// user input that will do the proper refactoring actions.
     /// </summary>
     public class ScadGraphEdit : GraphEdit, IScadGraph
     {
@@ -61,13 +63,15 @@ namespace OpenScadGraphEditor.Widgets
 
 
         private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
+        private readonly Dictionary<string, ScadNode> _allNodes = new Dictionary<string,ScadNode>();
+        private readonly List<ScadConnection> _allConnections = new List<ScadConnection>();
 
         private ScadConnection _pendingDisconnect;
 
 
         public IEnumerable<ScadNode> GetAllNodes()
         {
-            return _widgets.Values.Select(it => it.BoundNode);
+            return _allNodes.Values;
         }
         
         
@@ -171,10 +175,13 @@ namespace OpenScadGraphEditor.Widgets
         public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
             Description = graph.Description;
+            _allNodes.Clear();
+            _allConnections.Clear();
 
             foreach (var savedNode in graph.Nodes)
             {
                 var node = NodeFactory.FromSavedNode(savedNode, resolver);
+                _allNodes[node.Id] = node;
                 CreateOrGet(node);
 
                 if (node is EntryPoint)
@@ -190,6 +197,10 @@ namespace OpenScadGraphEditor.Widgets
             
             foreach (var connection in graph.Connections)
             {
+                var scadConnection = new ScadConnection(this, _allNodes[connection.FromId], connection.FromPort,
+                    _allNodes[connection.ToId], connection.ToPort);
+                _allConnections.Add(scadConnection);
+                
                 // connection contain ScadNode ids but we need to connect widgets, so first we need to find the 
                 // the widget and then connect these widgets.
                 ConnectNode(_widgets[connection.FromId].Name, connection.FromPort, _widgets[connection.ToId].Name, connection.ToPort);
@@ -214,7 +225,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             graph.Description = Description;
 
-            foreach (var node in _widgets.Values.Select(it => it.BoundNode))
+            foreach (var node in _allNodes.Values)
             {
                 var savedNode = Prefabs.New<SavedNode>();
                 node.SaveInto(savedNode);
@@ -308,9 +319,6 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
-        
-        
-
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
             var context = RequestContext.From(this, ScrollOffset+releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
@@ -374,15 +382,7 @@ namespace OpenScadGraphEditor.Widgets
 
         public IEnumerable<ScadConnection> GetAllConnections()
         {
-            return GetConnectionList()
-                .Cast<Godot.Collections.Dictionary>()
-                .Select(item => new ScadConnection(
-                    this,
-                    ScadNodeForWidgetName((string) item["from"]),
-                    (int) item["from_port"],
-                    ScadNodeForWidgetName((string) item["to"]),
-                    (int) item["to_port"]
-                ));
+            return _allConnections;
         }
 
         public void Discard()

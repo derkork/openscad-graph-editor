@@ -20,9 +20,6 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            // it is important that we make the graph refactorable no matter what, as we need to re-draw the graph in any case
-            // to synchronize the connection state with the visual graph.
-            // I don't like to have this side effect here but I don't know how to do it better right now
             var graph = context.MakeRefactorable(_connection.Owner);
 
             var result = ConnectionRules.CanDisconnect(_connection);
