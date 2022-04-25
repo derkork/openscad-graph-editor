@@ -444,12 +444,27 @@ namespace OpenScadGraphEditor
             _copyBuffer = MakeCopyBuffer(source, selection);
         }
 
-        private void OnPasteRequested(ScadGraphEdit source, Vector2 position)
+        private void OnPasteRequested(ScadGraphEdit target, Vector2 position)
         {
-           
             // now make another copy from the copy buffer and paste that. The reason we do this is because
             // nodes need unique Ids so for each pasting we need to make a new copy.
             var copy = MakeCopyBuffer(_copyBuffer, _copyBuffer.GetAllNodes());
+            
+            // now the clipboard may contain nodes that are not allowed in the given target graph. So we need
+            // to filter these out here and also delete all connections to these nodes.
+            var disallowedNodes = copy.GetAllNodes()
+                .Where(it => !target.Description.CanUse(it))
+                .ToList();
+            
+            // delete all connections to the disallowed nodes
+            copy.GetAllConnections()
+                .Where(it => disallowedNodes.Any(it.InvolvesNode))
+                .ToList() // avoid concurrent modification
+                .ForAll(it => copy.RemoveConnection(it));
+            
+            // and the nodes themselves
+            disallowedNodes.ForAll(it => copy.RemoveNode(it));
+
             var scadNodes = copy.GetAllNodes().ToList();
             if (scadNodes.Count == 0)
             {
@@ -474,14 +489,14 @@ namespace OpenScadGraphEditor
             var refactorings = new List<Refactoring>();
             foreach (var node in scadNodes)
             {
-                refactorings.Add(new AddNodeRefactoring(source, node));
+                refactorings.Add(new AddNodeRefactoring(target, node));
             }
             foreach (var connection in copy.GetAllConnections())
             {
-                refactorings.Add(new AddConnectionRefactoring(new ScadConnection(source, connection.From, connection.FromPort, connection.To, connection.ToPort)));
+                refactorings.Add(new AddConnectionRefactoring(new ScadConnection(target, connection.From, connection.FromPort, connection.To, connection.ToPort)));
             }
 
-            PerformRefactorings("Paste nodes", refactorings,  ()=>source.SelectNodes(scadNodes));
+            PerformRefactorings("Paste nodes", refactorings,  ()=>target.SelectNodes(scadNodes));
         }
 
         private void OnAddFunctionPressed()
