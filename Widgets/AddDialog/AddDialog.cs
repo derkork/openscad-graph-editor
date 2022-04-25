@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -10,7 +11,6 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     [UsedImplicitly]
     public class AddDialog : WindowDialog
     {
-        
         private LineEdit _lineEdit;
         private ItemList _itemList;
         private List<IAddDialogEntry> _entries = new List<IAddDialogEntry>();
@@ -35,20 +35,30 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
                 .Connect("toggled")
                 .To(this, nameof(OnFilterByContextCheckboxToggled));
         }
-        
+
         private void Refresh()
         {
             var searchTerm = _lineEdit.Text;
 
             var filterByContext = _filterByContextCheckbox.Pressed;
-            
+
             _itemList.Clear();
             var entries = _entries.Where(it =>
-                (it.Title.ContainsIgnoreCase(searchTerm) ||
-                 it.Keywords.ContainsIgnoreCase(searchTerm)) &&
-                (!filterByContext || it.Matches(_context))
+                {
+                    var check = it.CanAdd(_context);
+                    switch (check)
+                    {
+                        case EntryFittingDecision.Veto:
+                        case EntryFittingDecision.DoesNotFit when filterByContext:
+                            return false;
+                        case EntryFittingDecision.Fits:
+                        default:
+                            return it.Title.ContainsIgnoreCase(searchTerm) ||
+                                   it.Keywords.ContainsIgnoreCase(searchTerm);
+                    }
+                }
             );
-            
+
             foreach (var entry in entries)
             {
                 _itemList.AddItem(entry.Title);
@@ -98,7 +108,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             entry.Action(_context);
             Visible = false;
         }
-        
+
         private void OnFilterByContextCheckboxToggled([UsedImplicitly] bool _)
         {
             _lineEdit.GrabFocus();

@@ -26,8 +26,8 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         Texture Icon { get; }
 
         /// <summary>
-        /// Whether or not the entry is applicable in the given request context.
+        /// Whether or not the entry can be added given the current context.
         /// </summary>
-        bool Matches(RequestContext context);
+        EntryFittingDecision CanAdd(RequestContext context);
     }
 }

@@ -838,11 +838,14 @@ namespace OpenScadGraphEditor
             Icon = icon;
         }
 
-        // TODO: we need a distinction here whether the node simply doesn't fit context
-        // or if it is actually not allowed to be used here. E.g. right now we can use
-        // module calls in functions which we should not be able to do.
-        public bool Matches(RequestContext context)
+        public EntryFittingDecision CanAdd(RequestContext context)
         {
+            if (!context.Source.Description.CanUse(_template))
+            {
+                // if the node is not allowed to be used here, we can't use it
+                return EntryFittingDecision.Veto;
+            }
+            
             // if this came from a node left of us, check if we have a matching input port
             if (context.SourceNode != null)
             {
@@ -852,7 +855,7 @@ namespace OpenScadGraphEditor
                         i);
                     if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                     {
-                        return true;
+                        return EntryFittingDecision.Fits;
                     }
                 }
             }
@@ -866,13 +869,13 @@ namespace OpenScadGraphEditor
                         context.LastPort);
                     if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                     {
-                        return true;
+                        return EntryFittingDecision.Fits;
                     }
                 }
             }
 
-            // otherwise it doesn't match
-            return false;
+            // otherwise it doesn't match, but could still be added.
+            return EntryFittingDecision.DoesNotFit;
         }
     }
 }
