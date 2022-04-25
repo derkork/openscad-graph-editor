@@ -131,7 +131,7 @@ namespace OpenScadGraphEditor
                 .To(this, nameof(SaveChanges));
 
             _copyBuffer = new LightWeightGraph();
-            
+
             OnNewButtonPressed();
         }
 
@@ -391,7 +391,7 @@ namespace OpenScadGraphEditor
         {
             // first copy the nodes
             OnCopyRequested(source, selection);
-            
+
             // then run refactorings to delete them
             var deleteRefactorings = selection
                 // only delete nodes which can be deleted
@@ -399,7 +399,7 @@ namespace OpenScadGraphEditor
                 // will implicitly also delete the connections.
                 .Select(it => new DeleteNodeRefactoring(source, it))
                 .ToList();
-            
+
             PerformRefactorings("Cut nodes", deleteRefactorings);
         }
 
@@ -438,7 +438,7 @@ namespace OpenScadGraphEditor
 
             return result;
         }
-        
+
         private void OnCopyRequested(ScadGraphEdit source, List<ScadNode> selection)
         {
             _copyBuffer = MakeCopyBuffer(source, selection);
@@ -449,19 +449,19 @@ namespace OpenScadGraphEditor
             // now make another copy from the copy buffer and paste that. The reason we do this is because
             // nodes need unique Ids so for each pasting we need to make a new copy.
             var copy = MakeCopyBuffer(_copyBuffer, _copyBuffer.GetAllNodes());
-            
+
             // now the clipboard may contain nodes that are not allowed in the given target graph. So we need
             // to filter these out here and also delete all connections to these nodes.
             var disallowedNodes = copy.GetAllNodes()
                 .Where(it => !target.Description.CanUse(it))
                 .ToList();
-            
+
             // delete all connections to the disallowed nodes
             copy.GetAllConnections()
                 .Where(it => disallowedNodes.Any(it.InvolvesNode))
                 .ToList() // avoid concurrent modification
                 .ForAll(it => copy.RemoveConnection(it));
-            
+
             // and the nodes themselves
             disallowedNodes.ForAll(it => copy.RemoveNode(it));
 
@@ -470,33 +470,40 @@ namespace OpenScadGraphEditor
             {
                 return; // nothing to paste
             }
-            
+
             // we now need to normalize the position of the nodes so they are pasted in the correct position
             // we do this by finding the bounding box of the nodes and then offsetting them by the difference between the position
             // of the bounding box and the position of the node that is closes to top left
-            
+
             // we start with a rectangle that is a point that simply has the position of the first node
             var boundingBox = new Rect2(scadNodes[0].Offset, Vector2.Zero);
             // now expand this rectangle so it contains all the points of all the offsets of the nodes
             boundingBox = scadNodes.Aggregate(boundingBox, (current, node) => current.Expand(node.Offset));
             // now we calculate the offset of the bounding box position and the desired position
             var offset = position - boundingBox.Position;
-            
+
             // and offset every node by this
             scadNodes.ForAll(it => it.Offset += offset);
-            
+
             // now run the refactorings to add the given nodes and connections
             var refactorings = new List<Refactoring>();
             foreach (var node in scadNodes)
             {
                 refactorings.Add(new AddNodeRefactoring(target, node));
             }
+
             foreach (var connection in copy.GetAllConnections())
             {
-                refactorings.Add(new AddConnectionRefactoring(new ScadConnection(target, connection.From, connection.FromPort, connection.To, connection.ToPort)));
+                refactorings.Add(
+                    new AddConnectionRefactoring(
+                        new ScadConnection(target, connection.From, connection.FromPort, connection.To,
+                            connection.ToPort
+                        )
+                    )
+                );
             }
 
-            PerformRefactorings("Paste nodes", refactorings,  ()=>target.SelectNodes(scadNodes));
+            PerformRefactorings("Paste nodes", refactorings, () => target.SelectNodes(scadNodes));
         }
 
         private void OnAddFunctionPressed()
@@ -860,7 +867,7 @@ namespace OpenScadGraphEditor
                 // if the node is not allowed to be used here, we can't use it
                 return EntryFittingDecision.Veto;
             }
-            
+
             // if this came from a node left of us, check if we have a matching input port
             if (context.SourceNode != null)
             {
