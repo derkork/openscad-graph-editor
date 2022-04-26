@@ -35,7 +35,7 @@ namespace OpenScadGraphEditor.Utils
         public static string UniqueStableVariableName(this string id, int index)
         {
             
-            return $"var{index}{Regex.Replace(Convert.ToBase64String(Guid.Parse(id).ToByteArray()), "[/+=]", "")}";
+            return $"var{index}__{Regex.Replace(Convert.ToBase64String(Guid.Parse(id).ToByteArray()), "[/+=]", "")}";
         }
         
         public static string OrUndef(this string input)
