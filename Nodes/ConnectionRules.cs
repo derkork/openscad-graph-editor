@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Nodes.ForLoop;
 using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Nodes
@@ -33,8 +34,8 @@ namespace OpenScadGraphEditor.Nodes
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
                 it => new DeleteOutputConnectionsRefactoring(it.Owner, it.From, it.FromPort));
 
-            // a node can never connect to itself
-            AddConnectRule(it => it.From == it.To, OperationRuleDecision.Veto);
+            // a node can never connect to itself unless it is marked as such
+            AddConnectRule(it => it.From == it.To && !(it.From is ICanConnectToMyself), OperationRuleDecision.Veto);
 
             // connections of the same type can always be made
             AddConnectRule(it =>
