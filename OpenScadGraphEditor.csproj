@@ -22,9 +22,6 @@
       <CustomToolNamespace>OpenScadGraphEditor.Library.External</CustomToolNamespace>
     </Antlr4>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Widgets\ScadItemList" />
-  </ItemGroup>
 
   <PropertyGroup>
     <Antlr4UseCSharpGenerator>True</Antlr4UseCSharpGenerator>
