@@ -33,8 +33,8 @@ namespace OpenScadGraphEditor.Library
                 // TODO: add remaining built-in modules
                 ModuleBuilder.NewBuiltInModule("cube", "Cube")
                     .WithDescription("Creates a cube in the first octant.\nWhen center is true, the cube is\ncentered on the origin.")
-                    .WithParameter("size", PortType.Vector3, label: "Size")
-                    .WithParameter("center", PortType.Boolean, label: "Center")
+                    .WithParameter("size", PortType.Vector3, label: "Size", optional: true)
+                    .WithParameter("center", PortType.Boolean, label: "Center", optional: true)
                     .Build(),
                 ModuleBuilder.NewBuiltInModule("translate", "Translate")
                     .WithDescription("Translates (moves) its child\nelements along the specified offset.")
@@ -188,6 +188,20 @@ namespace OpenScadGraphEditor.Library
                   .WithParameter("value_count", PortType.Number)
                   .WithParameter("seed", PortType.Number, optional: true)
                   .Build()              
+              
+              ,
+              // norm
+              FunctionBuilder.NewBuiltInFunction("norm", "Norm", PortType.Number)
+                  .WithDescription("Returns the norm of a vector.")
+                  .WithParameter("vector", PortType.Array)
+                  .Build()
+              ,
+              // cross
+              FunctionBuilder.NewBuiltInFunction("cross", "Cross", PortType.Array)
+                  .WithDescription("Returns the cross product of two vectors.")
+                  .WithParameter("vector1", PortType.Array)
+                  .WithParameter("vector2", PortType.Array)
+                  .Build()
             };
 
             Variables = new List<VariableDescription>()

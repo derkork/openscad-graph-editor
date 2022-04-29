@@ -47,13 +47,14 @@ namespace OpenScadGraphEditor.Library
         }
 
         public ModuleBuilder WithParameter(string name, PortType typeHint = PortType.Any,
-            string label = "", string description = "")
+            string label = "", string description = "", bool optional = false)
         {
             var parameter = Prefabs.New<ParameterDescription>();
             parameter.Name = name;
             parameter.Description = description;
             parameter.TypeHint = typeHint;
             parameter.Label = label;
+            parameter.IsOptional = optional;
 
             _currentModuleDescription.Parameters.Add(parameter);
             return this;
