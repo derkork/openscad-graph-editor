@@ -28,7 +28,6 @@ namespace OpenScadGraphEditor.Widgets
 
         private void NotifyChanged([UsedImplicitly] bool value)
         {
-            GD.Print(value);
             EmitValueChange(value);
         }
     }

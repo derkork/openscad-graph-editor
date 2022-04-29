@@ -37,6 +37,13 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
             VectorSize++;
             RebuildInputs();
             BuildPortLiteral(PortId.Input(VectorSize-1));
+            
+            // as a convenience copy the literal set style of the existing one, this makes it easier for the user.
+            if (TryGetLiteral(PortId.Input(VectorSize - 2), out var previousLiteral) && TryGetLiteral(PortId.Input(VectorSize-1), out var newLiteral))
+            {
+                newLiteral.IsSet = previousLiteral.IsSet;
+            }
+            
         }
 
         public void DecreaseVectorSize()

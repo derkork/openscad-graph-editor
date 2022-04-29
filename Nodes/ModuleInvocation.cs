@@ -68,15 +68,6 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public void AddParameterInstance(string name)
-        {
-            
-        }
-
-        public void RemoveParameterInstance(string name)
-        {
-            
-        }
 
         public override string Render(IScadGraph context)
         {
@@ -97,7 +88,7 @@ namespace OpenScadGraphEditor.Nodes
             var nextNodes = RenderOutput(context, _description.SupportsChildren ? 1 : 0);
             if (childNodes.Length > 0)
             {
-                return result + childNodes.AsBlock() + ";" + nextNodes;
+                return result + childNodes.AsBlock() + nextNodes;
             }
 
             return result + ";\n" + nextNodes;

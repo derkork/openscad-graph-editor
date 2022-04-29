@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using GodotExt;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
@@ -49,6 +51,8 @@ namespace OpenScadGraphEditor.Library
         public ModuleBuilder WithParameter(string name, PortType typeHint = PortType.Any,
             string label = "", string description = "", bool optional = false)
         {
+            GdAssert.That(_currentModuleDescription.Parameters.All(it => it.Name != name), $"Parameter with name '{name}' already exists");
+            
             var parameter = Prefabs.New<ParameterDescription>();
             parameter.Name = name;
             parameter.Description = description;
@@ -58,6 +62,13 @@ namespace OpenScadGraphEditor.Library
 
             _currentModuleDescription.Parameters.Add(parameter);
             return this;
+        }
+
+        public ModuleBuilder WithFragmentParameters()
+        {
+            return WithParameter("$fa", PortType.Number, label: "Minimum angle", optional: true)
+                .WithParameter("$fs", PortType.Number, label: "Minimum length", optional: true)
+                .WithParameter("$fn", PortType.Number, label: "Minimum # segments", optional: true);
         }
 
         public ModuleDescription Build()

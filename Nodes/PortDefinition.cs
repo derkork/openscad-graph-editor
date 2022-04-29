@@ -52,6 +52,12 @@ namespace OpenScadGraphEditor.Nodes
         {
             return new PortDefinition(PortType.Vector3, name, allowLiteral);
         }
+        
+        public static PortDefinition Vector2(string name, bool allowLiteral)
+        {
+            return new PortDefinition(PortType.Vector2, name, allowLiteral);
+        }
+
 
         public static PortDefinition Flow(string name = "")
         {
@@ -82,6 +88,13 @@ namespace OpenScadGraphEditor.Nodes
             bool allowLiteral = true)
         {
             self.Add(PortDefinition.Vector3(name, allowLiteral));
+            return self;
+        }
+        
+        public static List<PortDefinition> Vector2(this List<PortDefinition> self, string name = "",
+            bool allowLiteral = true)
+        {
+            self.Add(PortDefinition.Vector2(name, allowLiteral));
             return self;
         }
 

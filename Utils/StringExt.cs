@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using Godot;
 
 namespace OpenScadGraphEditor.Utils
 {
@@ -9,7 +10,15 @@ namespace OpenScadGraphEditor.Utils
 
         public static string Indent(this string source)
         {
-            return IndentString + source.Replace("\n", "\n" + IndentString);
+            while (true)
+            {
+                // do not indent trailing newlines
+                if (!source.EndsWith("\n"))
+                {
+                    return IndentString + source.Replace("\n", "\n" + IndentString);
+                }
+                source = source.Substring(0, source.Length - 1);
+            }
         }
 
         public static string PrefixUnlessEmpty(this string source, string prefix)
