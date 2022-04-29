@@ -1,9 +1,11 @@
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class Difference : ScadNode
+    [UsedImplicitly]
+    public class Difference : ScadNode, ICanHaveModifier
     {
         public override string NodeTitle => "Difference";
 

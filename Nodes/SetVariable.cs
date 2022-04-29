@@ -28,6 +28,7 @@ namespace OpenScadGraphEditor.Nodes
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             VariableDescription = referenceResolver.ResolveVariableReference(node.GetData("variable_description_id")); 
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)

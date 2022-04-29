@@ -36,6 +36,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
         {
             IndexPortCount = node.GetDataInt("ports", 1);
             RebuildPorts();
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public void IncreasePorts()

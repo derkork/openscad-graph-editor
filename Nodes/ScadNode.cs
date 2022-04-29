@@ -19,7 +19,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public int InputPortCount => InputPorts.Count;
         public int OutputPortCount => OutputPorts.Count;
-        
+
         protected readonly List<PortDefinition> InputPorts = new List<PortDefinition>();
         protected readonly List<PortDefinition> OutputPorts = new List<PortDefinition>();
 
@@ -30,6 +30,13 @@ namespace OpenScadGraphEditor.Nodes
             new Dictionary<int, IScadLiteral>();
 
 
+        /// <summary>
+        /// Custom node attributes.
+        /// </summary>
+        private readonly Dictionary<string, string> _customAttributes
+            = new Dictionary<string, string>();
+
+
         public bool TryGetLiteral(PortId port, out IScadLiteral result)
         {
             if (port.IsInput)
@@ -38,7 +45,7 @@ namespace OpenScadGraphEditor.Nodes
             }
             else
             {
-                return _outputLiterals.TryGetValue(port.Port, out  result);
+                return _outputLiterals.TryGetValue(port.Port, out result);
             }
         }
 
@@ -83,7 +90,7 @@ namespace OpenScadGraphEditor.Nodes
                 _inputLiterals.Remove(index0);
             }
         }
-        
+
         public void SwapOutputLiterals(int index0, int index1)
         {
             var hasFirst = _outputLiterals.TryGetValue(index0, out var literal0);
@@ -107,7 +114,7 @@ namespace OpenScadGraphEditor.Nodes
                 _outputLiterals.Remove(index0);
             }
         }
-        
+
         public virtual void SaveInto(SavedNode node)
         {
             node.Id = Id;
@@ -129,6 +136,8 @@ namespace OpenScadGraphEditor.Nodes
                     node.SetData($"output_literal_value.{i}", _outputLiterals[i].SerializedValue);
                     node.SetData($"output_literal_set.{i}", _outputLiterals[i].IsSet);
                 });
+
+            _customAttributes.ForAll(it => { node.SetData($"custom_attribute.{it.Key}", it.Value); });
         }
 
 
@@ -157,6 +166,11 @@ namespace OpenScadGraphEditor.Nodes
         /// </summary>
         public virtual void RestorePortDefinitions(SavedNode node, IReferenceResolver resolver)
         {
+            _customAttributes.Clear();
+            // restore custom attributes
+            node.StoredData
+                .Where(it => it.Key.StartsWith("custom_attribute."))
+                .ForAll(it => _customAttributes[it.Key.Substring("custom_attribute.".Length)] = it.Value);
         }
 
         /// <summary>
@@ -167,7 +181,7 @@ namespace OpenScadGraphEditor.Nodes
         public virtual void RestoreLiteralStructures(SavedNode node, IReferenceResolver resolver)
         {
             PrepareLiteralsFromPortDefinitions();
-        } 
+        }
 
         /// <summary>
         /// Loading Phase 3: Called to restore the literal values from the saved node. 
@@ -215,7 +229,7 @@ namespace OpenScadGraphEditor.Nodes
                     {
                         return multiNode.RenderExpressionOutput(context, otherPort.Port);
                     }
-                    
+
                     return node.Render(context);
                 }
             }
@@ -226,7 +240,14 @@ namespace OpenScadGraphEditor.Nodes
                 {
                     if (context.TryGetConnectedNode(this, port, out var node, out _))
                     {
-                        return node.Render(context);
+                        var rendered = node.Render(context);
+                        var renderModifier = node.BuildRenderModifier();
+                        if (!renderModifier.Empty())
+                        {
+                            return string.Format(renderModifier, rendered);
+                        }
+
+                        return rendered;
                     }
                 }
             }
@@ -239,9 +260,52 @@ namespace OpenScadGraphEditor.Nodes
 
             // otherwise return nothing
             return "";
-            
         }
-        
+
+        private string BuildRenderModifier()
+        {
+            var effectiveModifiers = this.GetModifiers();
+            this.TryGetColorModifier(out var effectiveColor);
+
+            // we also need to set a render modifier so the modifiers are rendered
+            var renderModifier = "";
+            if (effectiveModifiers.HasFlag(ScadNodeModifier.Debug))
+            {
+                renderModifier = "# {0}";
+            }
+
+            if (effectiveModifiers.HasFlag(ScadNodeModifier.Background))
+            {
+                renderModifier = "% {0}";
+            }
+
+            if (effectiveModifiers.HasFlag(ScadNodeModifier.Root))
+            {
+                renderModifier = "! {0}";
+            }
+
+            if (effectiveModifiers.HasFlag(ScadNodeModifier.Disable))
+            {
+                renderModifier = "* {0}";
+            }
+
+            if (effectiveModifiers.HasFlag(ScadNodeModifier.Color))
+            {
+                var colorModifier =
+                    $"color([{effectiveColor.r}, {effectiveColor.g}, {effectiveColor.b}, {effectiveColor.a}]) {{0}}";
+                if (renderModifier.Empty())
+                {
+                    renderModifier = colorModifier;
+                }
+                else
+                {
+                    renderModifier = string.Format(renderModifier, colorModifier);
+                }
+            }
+
+            return renderModifier;
+        }
+
         protected string RenderInput(IScadGraph context, int index)
         {
             return RenderPort(context, PortId.Input(index));
@@ -255,7 +319,7 @@ namespace OpenScadGraphEditor.Nodes
         public void BuildPortLiteral(PortId port)
         {
             var portDefinition = GetPortDefinition(port);
-            
+
             if (!portDefinition.AllowLiteral)
             {
                 return;
@@ -296,6 +360,21 @@ namespace OpenScadGraphEditor.Nodes
             {
                 _outputLiterals[port.Port] = literal;
             }
+        }
+
+        public void SetCustomAttribute(string key, string value)
+        {
+            _customAttributes[key] = value;
+        }
+
+        public bool TryGetCustomAttribute(string key, out string value)
+        {
+            return _customAttributes.TryGetValue(key, out value);
+        }
+
+        public void UnsetCustomAttribute(string key)
+        {
+            _customAttributes.Remove(key);
         }
     }
 }

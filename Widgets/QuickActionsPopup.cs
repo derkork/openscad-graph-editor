@@ -28,7 +28,17 @@ namespace OpenScadGraphEditor.Widgets
             Clear();
             foreach (var action in _actions)
             {
-                AddItem(action.Title);
+                if (action.IsCheckbox)
+                {
+                    AddCheckItem(action.Title);
+                }
+                else
+                {
+                    AddItem(action.Title);
+                }
+
+                var itemCount = GetItemCount()-1;
+                SetItemChecked(itemCount, action.IsChecked);
             }
 
             SetGlobalPosition(position);

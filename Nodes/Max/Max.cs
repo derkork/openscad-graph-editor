@@ -29,7 +29,7 @@ namespace OpenScadGraphEditor.Nodes.Max
 
             OutputPorts
                 .Clear();
-            
+
             OutputPorts
                 .Array();
 
@@ -70,6 +70,7 @@ namespace OpenScadGraphEditor.Nodes.Max
         {
             InputCount = node.GetDataInt("input_count", 1);
             RebuildPorts();
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)

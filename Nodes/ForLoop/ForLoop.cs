@@ -7,7 +7,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes.ForLoop
 {
     [UsedImplicitly]
-    public class ForLoop : ScadNode, IHaveMultipleExpressionOutputs
+    public class ForLoop : ScadNode, IHaveMultipleExpressionOutputs, ICanHaveModifier
     {
         public override string NodeTitle => "For Each";
         public override string NodeDescription => "Executes its children for each entry in the given vector.";
@@ -73,6 +73,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         {
             NestLevel = node.GetDataInt("nest_level", 1);
             RebuildPorts();
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)

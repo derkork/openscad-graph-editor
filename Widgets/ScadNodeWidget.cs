@@ -6,6 +6,7 @@ using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
+using Color = Godot.Color;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -26,6 +27,16 @@ namespace OpenScadGraphEditor.Widgets
             Title = node.NodeTitle;
             HintTooltip = node.NodeDescription;
             Offset = node.Offset;
+
+            var modifiers = BoundNode.GetModifiers();
+            if (modifiers.HasFlag(ScadNodeModifier.Disable))
+            {
+                Modulate = new Color(1, 1, 1, 0.3f);
+            }
+            else
+            {
+                Modulate = Colors.White;
+            }
 
             var maxPorts = Mathf.Max(node.InputPortCount, node.OutputPortCount);
             
@@ -220,6 +231,38 @@ namespace OpenScadGraphEditor.Widgets
                     return new Color(0, 0.8f, 0);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
+            }
+        }
+
+        public override void _Notification(int what)
+        {
+            // if we have a modifier color for this node, draw a boundary of that color
+            if (what != NotificationDraw || BoundNode == null )
+            {
+                return;
+            }
+
+            if (BoundNode.TryGetColorModifier(out var color))
+            {
+                var size = RectSize;
+                DrawRect(new Rect2(-3, -3, size.x + 3, size.y + 3), color, false, 3);
+            }
+
+            var modifiers = BoundNode.GetModifiers();
+            var widthOffset = RectSize.x / 2;
+            if (modifiers.HasFlag(ScadNodeModifier.Debug))
+            {
+                DrawTextureRect(Resources.DebugIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
+            }
+
+            if (modifiers.HasFlag(ScadNodeModifier.Root))
+            {
+                DrawTextureRect(Resources.RootIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
+            }
+
+            if (modifiers.HasFlag(ScadNodeModifier.Background))
+            {
+                DrawTextureRect(Resources.BackgroundIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
             }
         }
     }

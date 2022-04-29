@@ -70,6 +70,7 @@ namespace OpenScadGraphEditor.Nodes.Echo
         {
             InputCount = node.GetDataInt("input_count", 1);
             RebuildPorts();
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)

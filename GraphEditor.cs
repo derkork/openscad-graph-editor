@@ -686,6 +686,37 @@ namespace OpenScadGraphEditor
                 );
             }
 
+            if (node is ICanHaveModifier)
+            {
+                var currentModifiers = node.GetModifiers();
+
+                var hasDebug = currentModifiers.HasFlag(ScadNodeModifier.Debug);
+                actions = actions.Append(
+                    new QuickAction("Debug subtree",
+                        () => OnRefactoringRequested("Debug subtree",
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Debug, !hasDebug)), true, hasDebug));
+                
+                var hasRoot = currentModifiers.HasFlag(ScadNodeModifier.Root);
+                actions = actions.Append(
+                    new QuickAction("Make node root",
+                        () => OnRefactoringRequested("Make node root",
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Root, !hasRoot)), true, hasRoot));
+
+                
+                var hasBackground = currentModifiers.HasFlag(ScadNodeModifier.Background);
+                actions = actions.Append(
+                    new QuickAction("Background subtree",
+                        () => OnRefactoringRequested("Background subtree",
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Background, !hasBackground)), true, hasBackground));
+
+                var hasDisable = currentModifiers.HasFlag(ScadNodeModifier.Disable);
+                actions = actions.Append(
+                    new QuickAction("Disable subtree",
+                        () => OnRefactoringRequested("Disable subtree",
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Disable, !hasDisable)), true, hasDisable));
+
+            }
+
             _quickActionsPopup.Open(position, actions);
         }
 

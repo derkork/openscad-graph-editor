@@ -30,6 +30,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         {
             VectorSize = node.GetDataInt("vector_size", 1);
             RebuildInputs();
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public void IncreaseVectorSize()

@@ -36,6 +36,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             var functionDescriptionId = node.GetData("module_description_id");
             SetupPorts(referenceResolver.ResolveModuleReference(functionDescriptionId));
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public void SetupPorts(InvokableDescription description)

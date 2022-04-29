@@ -6,7 +6,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class ModuleInvocation : ScadNode, IReferToAnInvokable
+    public class ModuleInvocation : ScadNode, IReferToAnInvokable, ICanHaveModifier
     {
         private ModuleDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -36,6 +36,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             var moduleDescriptionId = node.GetData("module_description_id");
             SetupPorts(referenceResolver.ResolveModuleReference(moduleDescriptionId));
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public void SetupPorts(InvokableDescription description)

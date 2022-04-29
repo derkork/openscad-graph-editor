@@ -65,6 +65,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
         {
             var type = (PortType) node.GetDataInt("reroute_type");
             UpdatePortType(type);
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public void UpdatePortType(PortType type)

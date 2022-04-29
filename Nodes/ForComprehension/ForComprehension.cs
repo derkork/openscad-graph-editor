@@ -85,6 +85,7 @@ namespace OpenScadGraphEditor.Nodes.ForComprehension
         {
             NestLevel = node.GetDataInt("nest_level", 1);
             RebuildPorts();
+            base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)
