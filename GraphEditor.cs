@@ -666,7 +666,8 @@ namespace OpenScadGraphEditor
 
 
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.
-            if (node is IReferToAnInvokable iReferToAnInvokable)
+            // and one to go to the definition. Only do this if the invokable is part of this project (and not built-in or included).
+            if (node is IReferToAnInvokable iReferToAnInvokable && _currentProject.IsDefinedInThisProject(iReferToAnInvokable.InvokableDescription))
             {
                 var name = iReferToAnInvokable.InvokableDescription.Name;
                 // if the node isn't actually the entry point, add an action to go to the entrypoint
@@ -693,26 +694,26 @@ namespace OpenScadGraphEditor
                 var hasDebug = currentModifiers.HasFlag(ScadNodeModifier.Debug);
                 actions = actions.Append(
                     new QuickAction("Debug subtree",
-                        () => OnRefactoringRequested("Debug subtree",
+                        () => OnRefactoringRequested("Toggle: Debug subtree",
                             new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Debug, !hasDebug)), true, hasDebug));
                 
                 var hasRoot = currentModifiers.HasFlag(ScadNodeModifier.Root);
                 actions = actions.Append(
                     new QuickAction("Make node root",
-                        () => OnRefactoringRequested("Make node root",
+                        () => OnRefactoringRequested("Toggle: Make node root",
                             new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Root, !hasRoot)), true, hasRoot));
 
                 
                 var hasBackground = currentModifiers.HasFlag(ScadNodeModifier.Background);
                 actions = actions.Append(
                     new QuickAction("Background subtree",
-                        () => OnRefactoringRequested("Background subtree",
+                        () => OnRefactoringRequested("Toggle: Background subtree",
                             new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Background, !hasBackground)), true, hasBackground));
 
                 var hasDisable = currentModifiers.HasFlag(ScadNodeModifier.Disable);
                 actions = actions.Append(
                     new QuickAction("Disable subtree",
-                        () => OnRefactoringRequested("Disable subtree",
+                        () => OnRefactoringRequested("Toggle: Disable subtree",
                             new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Disable, !hasDisable)), true, hasDisable));
 
             }

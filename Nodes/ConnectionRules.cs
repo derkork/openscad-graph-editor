@@ -65,6 +65,13 @@ namespace OpenScadGraphEditor.Nodes
                 OperationRuleDecision.Allow
             );
             
+            // same for Vector2
+            AddConnectRule(it =>
+                    it.TryGetToPortType(out var toType) && toType == PortType.Array &&
+                    it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector2,
+                OperationRuleDecision.Allow
+            );
+            
         }
 
         public static void AddConnectRule(Predicate<ScadConnection> predicate, OperationRuleDecision decision,

@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class Branch : ScadNode
+    public class Branch : ScadNode, ICanHaveModifier
     {
         public override string NodeTitle => "Branch";
 
@@ -26,7 +26,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public override string Render(IScadGraph context)
         {
-            var condition = RenderInput(context, 1);
+            var condition = RenderInput(context, 1).OrUndef();
             var ifBranch = RenderOutput(context, 0);
             var elseBranch = RenderOutput(context, 1);
             var after = RenderOutput(context, 2);

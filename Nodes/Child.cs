@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Library;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class Child : ScadNode
+    public class Child : ScadNode, ICanHaveModifier
     {
         public override string NodeTitle => "Child";
         public override string NodeDescription => "Renders a single child of a module.";

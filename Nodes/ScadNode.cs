@@ -241,6 +241,10 @@ namespace OpenScadGraphEditor.Nodes
                     if (context.TryGetConnectedNode(this, port, out var node, out _))
                     {
                         var rendered = node.Render(context);
+                        if (rendered.Empty())
+                        {
+                            return rendered; // if the node is empty, no point adding any modifiers to it.
+                        }
                         var renderModifier = node.BuildRenderModifier();
                         if (!renderModifier.Empty())
                         {

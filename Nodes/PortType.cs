@@ -52,6 +52,7 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Boolean:
                 case PortType.Number:
                 case PortType.Vector3:
+                case PortType.Vector2:
                 case PortType.Array:
                 case PortType.String:
                 case PortType.Any:
