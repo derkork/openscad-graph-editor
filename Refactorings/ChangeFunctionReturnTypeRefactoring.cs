@@ -43,42 +43,27 @@ namespace OpenScadGraphEditor.Refactorings
 
             foreach (var nodeReference in affectedNodes)
             {
-                var affectedConnections = new List<ScadConnection>();
                 var scadNode = nodeReference.Node;
                 var graph = nodeReference.Graph;
                 var node = (IReferToAFunction) nodeReference.NodeAsReference;
 
-                // check which input port is responsible for the return value
-                var inputPort = node.GetReturnValueInputPort();
-                if (inputPort != -1)
-                {
-                    affectedConnections.AddRange(graph.GetAllConnections().Where(it => it.IsTo(scadNode, inputPort)));
-                }
+                // get all ports representing the return value
+                var returnValuePorts = node.GetPortsReferringToReturnValue().ToList();
 
-                // same for the output ports
-                var outputPort = node.GetReturnValueOutputPort();
-                if (outputPort != -1)
-                {
-                    affectedConnections.AddRange(graph.GetAllConnections()
-                        .Where(it => it.IsFrom(scadNode, outputPort)));
-                }
+                // save all connections that go to any port representing the return value.
+                var affectedConnections = graph.GetAllConnections()
+                    .Where(it => it.InvolvesAnyPort(scadNode, returnValuePorts))
+                    .ToList();
 
                 // now instruct the node to rebuild its ports using the updated return type
                 node.SetupPorts(_description);
 
                 // and rebuild the literal for the affected ports
-                if (inputPort != -1)
+                returnValuePorts.ForAll(it =>
                 {
-                    scadNode.DropPortLiteral(PortId.Input(inputPort));
-                    scadNode.BuildPortLiteral(PortId.Input(inputPort));
-                }
-
-                if (outputPort != -1)
-                {
-                    scadNode.DropPortLiteral(PortId.Output(outputPort));
-                    scadNode.BuildPortLiteral(PortId.Output(outputPort));
-                }
-
+                    scadNode.DropPortLiteral(it);
+                    scadNode.BuildPortLiteral(it);
+                });
 
                 // now for all the connections we have saved, check if they are still valid.
                 affectedConnections

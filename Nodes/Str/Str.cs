@@ -1,21 +1,24 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes.Echo
+namespace OpenScadGraphEditor.Nodes.Str
 {
     [UsedImplicitly]
-    public class Echo : ScadNode
+    public class Str : ScadNode, IAmAnExpression
     {
-        public override string NodeTitle => "Echo";
-        public override string NodeDescription => "Writes one or more values to the console";
+        public override string NodeTitle => "Str";
+        public override string NodeDescription => "Convert all arguments to string and concatenate them.";
 
         public int InputCount { get; private set; } = 1;
 
-        public Echo()
+        public Str()
         {
             RebuildPorts();
         }
@@ -24,19 +27,16 @@ namespace OpenScadGraphEditor.Nodes.Echo
         {
             InputPorts
                 .Clear();
-            InputPorts
-                .Flow();
 
             OutputPorts
                 .Clear();
             OutputPorts
-                .Flow();
+                .String(allowLiteral: false);
 
             for (var i = 0; i < InputCount; i++)
             {
                 InputPorts.Any($"Input {i + 1}");
             }
-
         }
 
         /// <summary>
@@ -75,12 +75,10 @@ namespace OpenScadGraphEditor.Nodes.Echo
         public override string Render(IScadGraph context)
         {
             var parameters = InputCount.Range()
-                .Select(it => RenderInput(context, it + 1).OrUndef())
+                .Select(it => RenderInput(context, it).OrUndef())
                 .JoinToString(", ");
 
-            var next = RenderOutput(context, 0);
-
-            return $"echo({parameters});\n{next}";
+            return $"str({parameters})";
         }
     }
 }

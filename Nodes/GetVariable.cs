@@ -2,7 +2,7 @@ using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class GetVariable : ScadExpressionNode, IReferToAVariable
+    public class GetVariable : ScadNode, IReferToAVariable, IAmAnExpression
     {
         public VariableDescription VariableDescription { get; private set; }
         public override string NodeTitle => $"Get {VariableDescription?.Name ?? "Variable"}";

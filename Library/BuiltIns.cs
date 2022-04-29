@@ -72,14 +72,128 @@ namespace OpenScadGraphEditor.Library
             
             Functions = new List<FunctionDescription>()
             {
-                // TODO: add remaining built-in functions
+              // abs
               FunctionBuilder.NewBuiltInFunction("abs", "Abs", PortType.Number)
                   .WithDescription("Returns the absolute value of a number.")
                   .WithParameter("number", PortType.Number)
                   .Build()
+              ,
+              // sign
+              FunctionBuilder.NewBuiltInFunction("sign", "Sign", PortType.Number)
+                  .WithDescription("Returns the sign of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              
+              ,
+              // sin
+              FunctionBuilder.NewBuiltInFunction("sin", "Sin", PortType.Number)
+                  .WithDescription("Returns the sine of an angle given in degrees.")
+                  .WithParameter("degrees", PortType.Number)
+                  .Build()
+              
+              ,
+              // cos
+              FunctionBuilder.NewBuiltInFunction("cos", "Cos", PortType.Number)
+                  .WithDescription("Returns the cosine of an angle given in degrees.")
+                  .WithParameter("degrees", PortType.Number)
+                  .Build()
+              
+              ,
+              // tan
+              FunctionBuilder.NewBuiltInFunction("tan", "Tan", PortType.Number)
+                  .WithDescription("Returns the tangent of an angle given in degrees.")
+                  .WithParameter("degrees", PortType.Number)
+                  .Build()
+              ,
+              // acos
+              FunctionBuilder.NewBuiltInFunction("acos", "Acos", PortType.Number)
+                  .WithDescription("Returns the arccosine of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              
+              ,
+              // asin
+              FunctionBuilder.NewBuiltInFunction("asin", "Asin", PortType.Number)
+                  .WithDescription("Returns the arcsine of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              
+              ,
+              // atan
+              FunctionBuilder.NewBuiltInFunction("atan", "Atan", PortType.Number)
+                  .WithDescription("Returns the arctangent of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              ,
+              // atan2
+              FunctionBuilder.NewBuiltInFunction("atan2", "Atan2", PortType.Number)
+                  .WithDescription("Returns the arctangent of number. Variant with two parameters that spans the whole 360 degrees.")
+                  .WithParameter("y", PortType.Number)
+                  .WithParameter("x", PortType.Number)
+                  .Build()
+              
+              ,
+              // floor
+              FunctionBuilder.NewBuiltInFunction("floor", "Floor", PortType.Number)
+                  .WithDescription("Returns the largest integer less than or equal to a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              
+              ,
+              // round
+              FunctionBuilder.NewBuiltInFunction("round", "Round", PortType.Number)
+                  .WithDescription("Returns the nearest integer to a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              
+              ,
+              // ceil
+              FunctionBuilder.NewBuiltInFunction("ceil", "Ceil", PortType.Number)
+                  .WithDescription("Returns the smallest integer greater than or equal to a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              
+              ,
+              // ln
+              FunctionBuilder.NewBuiltInFunction("ln", "Ln", PortType.Number)
+                  .WithDescription("Returns the natural logarithm of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+
+              ,
+              // len
+              FunctionBuilder.NewBuiltInFunction("len", "Len", PortType.Number)
+                  .WithDescription("Returns the length of a string, vector or array.")
+                  .WithParameter("value")
+                  .Build()
+              ,
+              // log
+              FunctionBuilder.NewBuiltInFunction("log", "Log", PortType.Number)
+                  .WithDescription("Returns the base 10 logarithm of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              ,
+              // sqrt
+              FunctionBuilder.NewBuiltInFunction("sqrt", "Sqrt", PortType.Number)
+                  .WithDescription("Returns the square root of a number.")
+                  .WithParameter("number", PortType.Number)
+                  .Build()
+              ,
+              
+              // rands
+              FunctionBuilder.NewBuiltInFunction("rands", "Rands", PortType.Number)
+                  .WithDescription("Random number generator. Generates a constant vector of pseudo random numbers, much like an array. The numbers are doubles not integers.")
+                  .WithParameter("min_value", PortType.Number)
+                  .WithParameter("max_value", PortType.Number)
+                  .WithParameter("value_count", PortType.Number)
+                  .WithParameter("seed", PortType.Number, optional: true)
+                  .Build()              
             };
 
-            Variables = new List<VariableDescription>();
+            Variables = new List<VariableDescription>()
+            {
+                VariableBuilder.NewVariable("PI", "__builtin__variable__PI")
+            };
         }
     }
 }

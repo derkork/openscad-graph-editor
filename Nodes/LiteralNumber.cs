@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
@@ -5,7 +6,8 @@ namespace OpenScadGraphEditor.Nodes
     /// <summary>
     /// A node representing a literal number.
     /// </summary>
-    public class LiteralNumber  :ScadExpressionNode
+    [UsedImplicitly]
+    public class LiteralNumber  :ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Number";
         public override string NodeDescription => "A number.";

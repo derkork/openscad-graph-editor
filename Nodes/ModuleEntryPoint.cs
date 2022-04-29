@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class ModuleEntryPoint : EntryPoint, IMultiExpressionOutputNode, IReferToAnInvokable
+    public class ModuleEntryPoint : EntryPoint, IHaveMultipleExpressionOutputs, IReferToAnInvokable
     {
         private ModuleDescription _description;
 

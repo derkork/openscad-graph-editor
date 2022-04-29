@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using GodotExt;
 using OpenScadGraphEditor.Library;
@@ -5,7 +6,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class FunctionEntryPoint : EntryPoint, IMultiExpressionOutputNode, IReferToAFunction
+    public class FunctionEntryPoint : EntryPoint, IHaveMultipleExpressionOutputs, IReferToAFunction
     {
         private FunctionDescription _description;
 
@@ -36,16 +37,11 @@ namespace OpenScadGraphEditor.Nodes
             return parameterIndex + 1;
         }
 
-        public int GetReturnValueInputPort()
+        public IEnumerable<PortId> GetPortsReferringToReturnValue()
         {
-            return -1;
+            // entry point has no return value
+            return Enumerable.Empty<PortId>();
         }
-
-        public int GetReturnValueOutputPort()
-        {
-            return -1;
-        }
-
 
         public override void SaveInto(SavedNode node)
         {

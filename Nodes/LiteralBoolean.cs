@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
@@ -5,7 +6,8 @@ namespace OpenScadGraphEditor.Nodes
     /// <summary>
     /// A node representing a literal string.
     /// </summary>
-    public class LiteralBoolean  :ScadExpressionNode
+    [UsedImplicitly]
+    public class LiteralBoolean  :ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Boolean";
         public override string NodeDescription => "A boolean.";

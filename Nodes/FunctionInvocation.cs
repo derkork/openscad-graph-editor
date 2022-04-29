@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
@@ -9,7 +10,7 @@ namespace OpenScadGraphEditor.Nodes
     /// <summary>
     /// A function invocation.
     /// </summary>
-    public class FunctionInvocation : ScadExpressionNode, IReferToAFunction
+    public class FunctionInvocation : ScadNode, IAmAnExpression, IReferToAFunction
     {
         private FunctionDescription _description;
         public override string NodeTitle => _description.NodeNameOrFallback;
@@ -36,14 +37,10 @@ namespace OpenScadGraphEditor.Nodes
             return -1;
         }
 
-        public int GetReturnValueInputPort()
+        public IEnumerable<PortId> GetPortsReferringToReturnValue()
         {
-            return -1;
-        }
-
-        public int GetReturnValueOutputPort()
-        {
-            return 0;
+            // function invocation does not have a port for the return value
+            return Enumerable.Empty<PortId>();
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
@@ -73,23 +70,18 @@ namespace OpenScadGraphEditor.Nodes
 
         public override string Render(IScadGraph context)
         {
+           var parameters = _description.Parameters.Count.Range()
+                .Select(it =>
+                {
+                    var parameterDescription = _description.Parameters[it];
+                    var value = RenderInput(context, it);
+                    return value.Empty() && parameterDescription.IsOptional
+                        ? ""
+                        : $"{parameterDescription.Name} = {value.OrUndef()}";
+                })
+                .Where(it => !it.Empty())
+                .JoinToString(", ");
             
-            var parameters = string.Join(", ",
-                InputPorts
-                    .Indices()
-                    .Select(it =>
-                    {
-                        var parameterName = _description.Parameters[it].Name;
-
-                        var value = RenderInput(context, it);
-                        if (value.Empty())
-                        {
-                            return "";
-                        }
-                        return $"{parameterName} = {value}";
-                    })
-                    .Where(it => !it.Empty())
-            );
             return $"{_description.Name}({parameters})";
         }
     }

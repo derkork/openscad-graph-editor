@@ -33,6 +33,18 @@ namespace OpenScadGraphEditor.Library
         public PortType TypeHint { get; set; } = PortType.Any;
 
         /// <summary>
+        /// Whether the parameter is optional.
+        /// </summary>
+        [Export]
+        public bool IsOptional { get; set; } = false;
+        
+        /// <summary>
+        /// Whether this parameter can appear multiple times in the same invocation.
+        /// </summary>
+        [Export]
+        public bool CanAppearMultipleTimes { get; set; } = false;
+        
+        /// <summary>
         /// Returns the label of the parameter if set, otherwise it's name.
         /// </summary>
         public string LabelOrFallback => Label.Length > 0 ? Label : Name;

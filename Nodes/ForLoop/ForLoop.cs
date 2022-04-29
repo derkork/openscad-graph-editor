@@ -7,7 +7,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes.ForLoop
 {
     [UsedImplicitly]
-    public class ForLoop : ScadNode, IMultiExpressionOutputNode
+    public class ForLoop : ScadNode, IHaveMultipleExpressionOutputs
     {
         public override string NodeTitle => "For Each";
         public override string NodeDescription => "Executes its children for each entry in the given vector.";

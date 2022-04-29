@@ -5,8 +5,11 @@ using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
+    /// <summary>
+    /// Node for splitting a Vector3 into its components.
+    /// </summary>
     [UsedImplicitly]
-    public class SplitVector3 : ScadExpressionNode, IMultiExpressionOutputNode
+    public class SplitVector3 : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs
     {
         public override string NodeTitle => "Split Vector3";
         public override string NodeDescription => "Splits a Vector3 into its components.";

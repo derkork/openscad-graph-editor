@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Nodes
     /// Utility node that does a pairwise multiplication of two vectors.
     /// </summary>
     [UsedImplicitly]
-    public class PairwiseMultiplyVector3 : ScadExpressionNode
+    public class PairwiseMultiplyVector3 : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Pairwise multiply (Vector3)";
         

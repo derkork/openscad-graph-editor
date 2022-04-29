@@ -1,9 +1,14 @@
 using Godot;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class NegateOperator : ScadExpressionNode
+    /// <summary>
+    /// Operator for negating a value.
+    /// </summary>
+    [UsedImplicitly]
+    public class NegateOperator : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Negate";
         public override string NodeDescription => "Returns the negative of the input";
@@ -21,7 +26,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(IScadGraph context)
         {
             var value = RenderInput(context, 0);
-            return value.Empty() ? "" : $"-{value}";
+            return value.Empty() ? "" : $"-({value})";
         }
     }
 }

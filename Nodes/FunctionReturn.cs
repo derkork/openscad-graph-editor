@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 
@@ -30,15 +31,12 @@ namespace OpenScadGraphEditor.Nodes
             return -1;
         }
 
-        public int GetReturnValueInputPort()
+
+        public IEnumerable<PortId> GetPortsReferringToReturnValue()
         {
-            return 1;
+            return new[] {PortId.Input(1)};
         }
 
-        public int GetReturnValueOutputPort()
-        {
-            return -1;
-        }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {

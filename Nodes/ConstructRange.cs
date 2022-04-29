@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class ConstructRange : ScadExpressionNode
+    public class ConstructRange : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Construct Range";
         public override string NodeDescription => "Constructs a range of integers.";

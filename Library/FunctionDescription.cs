@@ -16,7 +16,7 @@ namespace OpenScadGraphEditor.Library
 
         public override bool CanUse(ScadNode node)
         {
-            return node is ScadExpressionNode;
+            return node is IAmAnExpression;
         }
     }
 }

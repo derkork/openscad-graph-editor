@@ -211,7 +211,7 @@ namespace OpenScadGraphEditor.Nodes
                 {
                     // there is a specialty for input ports, they may be connected to a multi expression output
                     // node, so we need to instruct the other node to render the correct output port
-                    if (node is IMultiExpressionOutputNode multiNode)
+                    if (node is IHaveMultipleExpressionOutputs multiNode)
                     {
                         return multiNode.RenderExpressionOutput(context, otherPort.Port);
                     }

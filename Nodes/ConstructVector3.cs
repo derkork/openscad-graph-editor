@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class ConstructVector3 : ScadExpressionNode
+    public class ConstructVector3 : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Construct Vector3";
         public override string NodeDescription => "Constructs a Vector3 from its components.";

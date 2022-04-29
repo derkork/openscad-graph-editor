@@ -4,8 +4,11 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
+    /// <summary>
+    /// Ternary operator node.
+    /// </summary>
     [UsedImplicitly]
-    public class TernaryOperator : ScadExpressionNode
+    public class TernaryOperator : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Conditional if/else (?:)";
         public override string NodeDescription => "A function that uses a test to determine which of 2 values to return. Also known as the ternary operator.";

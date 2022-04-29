@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
     /// Node which allows to access vector indices.
     /// </summary>
     [UsedImplicitly]
-    public class IndexVector : ScadExpressionNode, IMultiExpressionOutputNode
+    public class IndexVector : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs
     {
         public override string NodeTitle => "Index Vector";
         public override string NodeDescription => "Returns the value of the vector at the given index";

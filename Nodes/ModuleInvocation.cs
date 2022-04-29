@@ -68,23 +68,30 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
+        public void AddParameterInstance(string name)
+        {
+            
+        }
+
+        public void RemoveParameterInstance(string name)
+        {
+            
+        }
+
         public override string Render(IScadGraph context)
         {
-            var parameters = string.Join(", ",
-                InputPorts
-                    .Indices()
-                    .Skip(1)
-                    .Select(it =>
-                    {
-                        var value = RenderInput(context, it);
-                        if (value.Empty())
-                        {
-                            return "";
-                        }
-                        return $"{_description.Parameters[it - 1].Name} = {value}";
-                    })
-                    .Where(it => !it.Empty())
-            );
+            var parameters = _description.Parameters.Count.Range()
+                .Select(it =>
+                {
+                    var parameterDescription = _description.Parameters[it];
+                    var value = RenderInput(context, it + 1);
+                    return value.Empty() && parameterDescription.IsOptional
+                        ? ""
+                        : $"{parameterDescription.Name} = {value.OrUndef()}";
+                })
+                .Where(it => !it.Empty())
+                .JoinToString(", ");
+       
             var result = $"{_description.Name}({parameters})";
             var childNodes = _description.SupportsChildren ? RenderOutput(context, 0) : "";
             var nextNodes = RenderOutput(context, _description.SupportsChildren ? 1 : 0);

@@ -27,7 +27,8 @@ namespace OpenScadGraphEditor.Library
             return builder;
         }
 
-        public static FunctionBuilder NewBuiltInFunction(string name, string nodeName = "", PortType returnType = PortType.Any,  string idSuffix = "")
+        public static FunctionBuilder NewBuiltInFunction(string name, string nodeName = "",
+            PortType returnType = PortType.Any, string idSuffix = "")
         {
             var builder = NewFunction(name, "__builtin__function__" + name + idSuffix, returnType);
             builder._currentFunctionDescription.IsBuiltin = true;
@@ -42,13 +43,14 @@ namespace OpenScadGraphEditor.Library
         }
 
         public FunctionBuilder WithParameter(string name, PortType typeHint = PortType.Any,
-            string label = "", string description = "")
+            string label = "", string description = "", bool optional = false)
         {
             var parameter = Prefabs.New<ParameterDescription>();
             parameter.Name = name;
             parameter.Description = description;
             parameter.TypeHint = typeHint;
             parameter.Label = label;
+            parameter.IsOptional = optional;
 
             _currentFunctionDescription.Parameters.Add(parameter);
             return this;

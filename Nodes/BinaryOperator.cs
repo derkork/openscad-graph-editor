@@ -3,7 +3,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public abstract class BinaryOperator : ScadExpressionNode
+    public abstract class BinaryOperator : ScadNode, IAmAnExpression
     {
         
         protected abstract string OperatorSign { get; }

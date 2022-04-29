@@ -7,10 +7,13 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes.ForComprehension
 {
+    /// <summary>
+    /// For comprehension node for building lists from other lists.
+    /// </summary>
     [UsedImplicitly]
-    public class ForComprehension : ScadExpressionNode, IMultiExpressionOutputNode, ICanConnectToMyself
+    public class ForComprehension : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs, ICanConnectToMyself
     {
-        public override string NodeTitle => "Map";
+        public override string NodeTitle => "Map ('for'-comprehension)";
         public override string NodeDescription => "Maps a list or range into a new list. Also known as a 'for' list comprehension.";
 
         public int NestLevel { get; private set; } = 1;

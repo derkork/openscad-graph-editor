@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace OpenScadGraphEditor.Nodes
 {
     public static class ScadConnectionExt
@@ -16,6 +19,12 @@ namespace OpenScadGraphEditor.Nodes
 
             return connection.From == node && connection.FromPort == port.Port;
         }
+
+        public static bool InvolvesAnyPort(this ScadConnection connection, ScadNode node, IEnumerable<PortId> ports)
+        {
+            return ports.Any(port => connection.InvolvesPort(node, port));
+        }
+        
 
         public static bool IsFrom(this ScadConnection connection, ScadNode node, int port)
         {

@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             _targetPortType = targetPortType;
         }
 
-        public override int Order => (_isFirstOperand ? 1 : 2) * (int) _targetPortType;
+        public override int Order => (_isFirstOperand ? 1 : 2) * (int) _targetPortType + 1;
 
         public override string Title => $"Switch {(_isFirstOperand ? "first" : "second")} operand to {_targetPortType.HumanReadableName()}";
         public override bool IsApplicableToNode => Node is SwitchableBinaryOperator switchableBinaryOperator && switchableBinaryOperator.GetPortType(PortId.Input(_isFirstOperand ? 0 : 1)) != _targetPortType;

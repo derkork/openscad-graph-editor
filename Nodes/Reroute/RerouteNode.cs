@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Library;
 namespace OpenScadGraphEditor.Nodes.Reroute
 {
     [UsedImplicitly]
-    public class RerouteNode : ScadNode, IMultiExpressionOutputNode
+    public class RerouteNode : ScadNode, IHaveMultipleExpressionOutputs
     {
         public override string NodeTitle => "Reroute";
         public override string NodeDescription => "Rerouting node which aids in making cleaner visual graphs.";

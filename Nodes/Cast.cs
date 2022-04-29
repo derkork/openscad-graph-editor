@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Library;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class Cast : ScadExpressionNode
+    public class Cast : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Cast";
         public override string NodeDescription => "Allows you to cast a value to another type.";
