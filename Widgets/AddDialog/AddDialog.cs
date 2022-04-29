@@ -54,7 +54,8 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
                         case EntryFittingDecision.Fits:
                         default:
                             return it.Title.ContainsIgnoreCase(searchTerm) ||
-                                   it.Keywords.ContainsIgnoreCase(searchTerm);
+                                   it.Keywords.ContainsIgnoreCase(searchTerm) ||
+                                   CamelSearchTerm(it.Title).ContainsIgnoreCase(searchTerm);
                     }
                 }
             );
@@ -72,6 +73,14 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             }
         }
 
+        /// <summary>
+        /// Takes all uppercase letters from the given string and concatenates them.
+        /// </summary>
+        private static string CamelSearchTerm(string input)
+        {
+            return string.Join("", input.Select(it => char.IsUpper(it) ? it.ToString() : string.Empty));
+        }
+        
 
         public void Open(List<IAddDialogEntry> entries, RequestContext context)
         {
