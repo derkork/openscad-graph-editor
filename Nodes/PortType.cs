@@ -12,7 +12,8 @@ namespace OpenScadGraphEditor.Nodes
         Array = 5,
         String = 6,
         Any = 8,
-        Reroute = 9
+        Reroute = 9,
+        Vector2 = 10,
     }
 
     public static class PortTypeExt
@@ -28,7 +29,9 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Number:
                     return "number";
                 case PortType.Vector3:
-                    return "Vector3";
+                    return "vector3";
+                case PortType.Vector2:
+                    return "vector2";
                 case PortType.Array:
                     return "vector";
                 case PortType.String:

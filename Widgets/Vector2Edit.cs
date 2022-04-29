@@ -6,23 +6,21 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
 {
-    public class Vector3Edit : LiteralWidgetBase<GridContainer, Vector3Literal>
+    public class Vector2Edit : LiteralWidgetBase<GridContainer, Vector2Literal>
     {
         private LineEdit _x;
         private LineEdit _y;
-        private LineEdit _z;
         
         protected override void DoSetEnabled(bool enabled)
         {
             _x.Editable = enabled;
             _y.Editable = enabled;
-            _z.Editable = enabled;
         }
 
         protected override GridContainer CreateControl()
         {
             var root = new GridContainer();
-            root.Columns = 3;
+            root.Columns = 2;
             
             // build X field
             _x = Prefabs.New<SelectOnFocusLineEdit>();
@@ -37,11 +35,6 @@ namespace OpenScadGraphEditor.Widgets
                 .To(this, nameof(OnFocusExited));
             _y.MoveToNewParent(root);
             
-            // build Z field
-            _z = Prefabs.New<SelectOnFocusLineEdit>();
-            _z.Connect("focus_exited")
-                .To(this, nameof(OnFocusExited));
-            _z.MoveToNewParent(root);
 
             return root;
         }
@@ -50,7 +43,6 @@ namespace OpenScadGraphEditor.Widgets
         {
             _x.Text = Literal.X.ToString(CultureInfo.InvariantCulture);
             _y.Text = Literal.Y.ToString(CultureInfo.InvariantCulture);
-            _z.Text = Literal.Z.ToString(CultureInfo.InvariantCulture);
         }
 
         private void OnFocusExited()
@@ -59,7 +51,6 @@ namespace OpenScadGraphEditor.Widgets
             {
                 ParseDouble(_x),
                 ParseDouble(_y),
-                ParseDouble(_z)
             };
             
             EmitValueChange(array);

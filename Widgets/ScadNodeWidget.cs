@@ -160,6 +160,15 @@ namespace OpenScadGraphEditor.Widgets
                         vector3Edit.BindTo(vector3Literal, port.IsOutput);
                         literalWidget = vector3Edit;
                         break;
+                    
+                    case Vector2Literal vector2Literal:
+                        if (!(existingWidget is Vector2Edit vector2Edit))
+                        {
+                            vector2Edit = Prefabs.New<Vector2Edit>();
+                        }
+                        vector2Edit.BindTo(vector2Literal, port.IsOutput);
+                        literalWidget = vector2Edit;
+                        break;
                 }
             }
 
@@ -199,6 +208,8 @@ namespace OpenScadGraphEditor.Widgets
                     return new Color(1, 0.8f, 0.4f);
                 case PortType.Vector3:
                     return new Color(.8f, 0.8f, 1f);
+                case PortType.Vector2:
+                    return new Color(.9f, 0.9f, 1f);
                 case PortType.Array:
                     return new Color(.5f, 0.5f, 1f);
                 case PortType.String:

@@ -35,10 +35,15 @@ namespace OpenScadGraphEditor.Refactorings
                     stringLiteral.Value = (string) _value;
                     break;
                 case Vector3Literal vector3Literal:
-                    var array = (double[]) _value;
-                    vector3Literal.X = array[0];
-                    vector3Literal.Y = array[1];
-                    vector3Literal.Z = array[2];
+                    var arrayVector3 = (double[]) _value;
+                    vector3Literal.X = arrayVector3[0];
+                    vector3Literal.Y = arrayVector3[1];
+                    vector3Literal.Z = arrayVector3[2];
+                    break;
+                case Vector2Literal vector3Literal:
+                    var arrayVector2 = (double[]) _value;
+                    vector3Literal.X = arrayVector2[0];
+                    vector3Literal.Y = arrayVector2[1];
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(literal));

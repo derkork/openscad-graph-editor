@@ -276,6 +276,9 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Vector3:
                     literal = new Vector3Literal();
                     break;
+                case PortType.Vector2:
+                    literal = new Vector2Literal();
+                    break;
                 case PortType.Array:
                 case PortType.Flow:
                 case PortType.Any:
