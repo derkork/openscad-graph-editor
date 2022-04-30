@@ -141,7 +141,7 @@ namespace OpenScadGraphEditor.Widgets
                             booleanEdit = Prefabs.New<BooleanEdit>();
                         }
 
-                        booleanEdit.BindTo(booleanLiteral, port.IsOutput);
+                        booleanEdit.BindTo(booleanLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
                         literalWidget = booleanEdit;
                         break;
 
@@ -150,7 +150,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             numberEdit = Prefabs.New<NumberEdit>();
                         }
-                        numberEdit.BindTo(numberLiteral, port.IsOutput);
+                        numberEdit.BindTo(numberLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
                         literalWidget = numberEdit;
                         break;
 
@@ -159,7 +159,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             stringEdit = Prefabs.New<StringEdit>();
                         }
-                        stringEdit.BindTo(stringLiteral, port.IsOutput);
+                        stringEdit.BindTo(stringLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
                         literalWidget = stringEdit;
                         break;
 
@@ -168,7 +168,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             vector3Edit = Prefabs.New<Vector3Edit>();
                         }
-                        vector3Edit.BindTo(vector3Literal, port.IsOutput);
+                        vector3Edit.BindTo(vector3Literal, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
                         literalWidget = vector3Edit;
                         break;
                     
@@ -177,7 +177,7 @@ namespace OpenScadGraphEditor.Widgets
                         {
                             vector2Edit = Prefabs.New<Vector2Edit>();
                         }
-                        vector2Edit.BindTo(vector2Literal, port.IsOutput);
+                        vector2Edit.BindTo(vector2Literal, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
                         literalWidget = vector2Edit;
                         break;
                 }
@@ -193,7 +193,6 @@ namespace OpenScadGraphEditor.Widgets
 
             if (literalWidget != null)
             {
-                literalWidget.SetEnabled(port.IsOutput || !isConnected);
                 // only wire the events if we have an new widget.
                 if (existingWidget != literalWidget)
                 {

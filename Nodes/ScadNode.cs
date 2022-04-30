@@ -257,7 +257,7 @@ namespace OpenScadGraphEditor.Nodes
             }
 
             // try rendering the literal
-            if (TryGetLiteral(port, out var literal) && literal.IsSet)
+            if (TryGetLiteral(port, out var literal) && (literal.IsSet || GetPortDefinition(port).LiteralIsAutoSet))
             {
                 return literal.RenderedValue;
             }

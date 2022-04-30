@@ -7,11 +7,6 @@ namespace OpenScadGraphEditor.Widgets
 {
     public class BooleanEdit : LiteralWidgetBase<CheckBox, BooleanLiteral>
     {
-        protected override void DoSetEnabled(bool enabled)
-        {
-            Control.Disabled = !enabled;
-        }
-
         protected override CheckBox CreateControl()
         {
             var checkBox = new CheckBox();

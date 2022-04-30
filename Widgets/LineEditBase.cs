@@ -8,11 +8,6 @@ namespace OpenScadGraphEditor.Widgets
     public abstract class LineEditBase<TLiteral> : LiteralWidgetBase<LineEdit, TLiteral> where TLiteral : IScadLiteral
     {
         protected abstract string LiteralValue { get; }
-        
-        protected override void DoSetEnabled(bool enabled)
-        {
-            Control.Editable = enabled;
-        }
 
         protected override LineEdit CreateControl()
         {

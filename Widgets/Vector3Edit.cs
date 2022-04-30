@@ -11,13 +11,6 @@ namespace OpenScadGraphEditor.Widgets
         private LineEdit _x;
         private LineEdit _y;
         private LineEdit _z;
-        
-        protected override void DoSetEnabled(bool enabled)
-        {
-            _x.Editable = enabled;
-            _y.Editable = enabled;
-            _z.Editable = enabled;
-        }
 
         protected override GridContainer CreateControl()
         {

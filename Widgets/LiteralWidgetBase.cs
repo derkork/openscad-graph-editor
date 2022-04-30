@@ -17,7 +17,7 @@ namespace OpenScadGraphEditor.Widgets
 
         protected abstract TControl CreateControl();
 
-        public void BindTo(TLiteral literal, bool isOutput)
+        public void BindTo(TLiteral literal, bool isOutput, bool isAutoSet, bool isConnected)
         {
             void MakeControl()
             {
@@ -59,13 +59,16 @@ namespace OpenScadGraphEditor.Widgets
             }
 
             Literal = literal;
+
+            // Toggle button is only visible for input literals that are unconnected and not auto-set
+            _toggleButton.Visible = !isConnected && !isAutoSet && !isOutput;
             _toggleButton.Pressed = literal.IsSet;
-            Control.Visible = literal.IsSet;
+            // Control is always visible for output literals, for input literals it is only visible if the literal
+            // is unconnected and either auto-set or explicitly enabled.
+            Control.Visible = isOutput || (!isConnected && (isAutoSet || literal.IsSet));
+
             
-            if (literal.IsSet)
-            {
-                ApplyControlValue();
-            }
+            ApplyControlValue();
         }
 
 
@@ -76,15 +79,5 @@ namespace OpenScadGraphEditor.Widgets
         {
             LiteralValueChanged?.Invoke(value);
         }
-
-        public void SetEnabled(bool enabled)
-        {
-            if (Literal.IsSet)
-            {
-                DoSetEnabled(enabled);
-            }
-        }
-        
-        protected abstract void DoSetEnabled(bool enabled);
     }
 }

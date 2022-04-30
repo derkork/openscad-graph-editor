@@ -178,32 +178,45 @@ namespace OpenScadGraphEditor.Widgets
             _allNodes.Clear();
             _allConnections.Clear();
 
+            // first restore data to internal structures
+            
             foreach (var savedNode in graph.Nodes)
             {
                 var node = NodeFactory.FromSavedNode(savedNode, resolver);
                 _allNodes[node.Id] = node;
-                CreateOrGet(node);
-
                 if (node is EntryPoint)
                 {
                     _entryPoint = node;
                 }
             }
 
-            Name = _entryPoint.NodeTitle;
-
-            // redo the connections
-            ClearConnections();
-            
             foreach (var connection in graph.Connections)
             {
                 var scadConnection = new ScadConnection(this, _allNodes[connection.FromId], connection.FromPort,
                     _allNodes[connection.ToId], connection.ToPort);
                 _allConnections.Add(scadConnection);
+            }
+
+            Name = _entryPoint.NodeTitle;
+
+            // now rebuild the widgets and visual connections
+
+
+            // rebuild the nodes
+            foreach (var node in _allNodes.Values)
+            {
+                CreateOrGet(node); 
                 
+            }
+
+            // redo the connections
+            ClearConnections();
+            
+            foreach (var connection in _allConnections)
+            {
                 // connection contain ScadNode ids but we need to connect widgets, so first we need to find the 
                 // the widget and then connect these widgets.
-                ConnectNode(_widgets[connection.FromId].Name, connection.FromPort, _widgets[connection.ToId].Name, connection.ToPort);
+                ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
             }
             
             // finally destroy all the widgets that are not in the graph anymore
