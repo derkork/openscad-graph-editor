@@ -4,17 +4,37 @@ namespace OpenScadGraphEditor.Utils
 {
     public static class Resources
     {
-        public static Texture FunctionIcon => GD.Load<Texture>("res://Icons/function0000.png");
-        public static Texture VariableIcon => GD.Load<Texture>("res://Icons/variable0000.png");
-        public static Texture ModuleIcon => GD.Load<Texture>("res://Icons/module0000.png");
-        public static Texture ScadBuiltinIcon => GD.Load<Texture>("res://Icons/scad_builtin0000.png");
-        public static Texture ImportIcon => GD.Load<Texture>("res://Icons/import0000.png");
-        public static Texture TransitiveImportIcon => GD.Load<Texture>("res://Icons/transitive_import0000.png");
-        public static Texture EditIcon => GD.Load<Texture>("res://Icons/pencil0000.png");
+        public static readonly Texture FunctionIcon = GD.Load<Texture>("res://Icons/function0000.png");
+        public static readonly Texture VariableIcon = GD.Load<Texture>("res://Icons/variable0000.png");
+        public static readonly Texture ModuleIcon = GD.Load<Texture>("res://Icons/module0000.png");
+        public static readonly Texture ScadBuiltinIcon = GD.Load<Texture>("res://Icons/scad_builtin0000.png");
+        public static readonly Texture ImportIcon = GD.Load<Texture>("res://Icons/import0000.png");
+        public static readonly Texture TransitiveImportIcon = GD.Load<Texture>("res://Icons/transitive_import0000.png");
+        public static readonly Texture EditIcon = GD.Load<Texture>("res://Icons/pencil0000.png");
         
-        public static Texture DebugIcon => GD.Load<Texture>("res://Icons/debug0000.png");
-        public static Texture BackgroundIcon => GD.Load<Texture>("res://Icons/background0000.png");
-        public static Texture RootIcon = GD.Load<Texture>("res://Icons/root0000.png");
+        public static readonly Texture DebugIcon = GD.Load<Texture>("res://Icons/debug0000.png");
+        public static readonly Texture BackgroundIcon = GD.Load<Texture>("res://Icons/background0000.png");
+        public static readonly Texture RootIcon = GD.Load<Texture>("res://Icons/root0000.png");
         
+        
+        // icons for node background
+        public static readonly Texture PlusIcon = GD.Load<Texture>("res://Icons/plus0000.png");
+        public static readonly Texture MinusIcon = GD.Load<Texture>("res://Icons/minus0000.png");
+        public static readonly Texture TimesIcon = GD.Load<Texture>("res://Icons/times0000.png");
+        public static readonly Texture DivideIcon = GD.Load<Texture>("res://Icons/divide0000.png");
+        public static readonly Texture ExpIcon = GD.Load<Texture>("res://Icons/exp0000.png");
+        public static readonly Texture GreaterIcon = GD.Load<Texture>("res://Icons/greater0000.png");
+        public static readonly Texture GreaterEqualIcon = GD.Load<Texture>("res://Icons/greater_equal0000.png");
+        public static readonly Texture LessIcon = GD.Load<Texture>("res://Icons/less0000.png");
+        public static readonly Texture LessEqualIcon = GD.Load<Texture>("res://Icons/less_equal0000.png");
+        
+        public static readonly Texture Vector3SplitIcon = GD.Load<Texture>("res://Icons/vector3split0000.png");
+        public static readonly Texture Vector3MergeIcon = GD.Load<Texture>("res://Icons/vector3merge0000.png");
+        public static readonly Texture Vector2SplitIcon = GD.Load<Texture>("res://Icons/vector2split0000.png");
+        public static readonly Texture Vector2MergeIcon = GD.Load<Texture>("res://Icons/vector2merge0000.png");
+
+        public static readonly Theme SimpleNodeWidgetTheme = GD.Load<Theme>("res://Widgets/SimpleNodeWidgetTheme.tres");
+        public static readonly Theme StandardNodeWidgetTheme = GD.Load<Theme>("res://Widgets/StandardNodeWidgetTheme.tres");
+
     }
 }

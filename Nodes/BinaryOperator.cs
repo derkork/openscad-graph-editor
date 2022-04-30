@@ -1,9 +1,11 @@
+using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public abstract class BinaryOperator : ScadNode, IAmAnExpression
+    public abstract class BinaryOperator : ScadNode, IAmAnExpression, IHaveCustomWidget, IHaveNodeBackground
     {
         
         protected abstract string OperatorSign { get; }
@@ -15,5 +17,12 @@ namespace OpenScadGraphEditor.Nodes
 
             return $"(({left.OrUndef()}) {OperatorSign} ({right.OrUndef()}))";
         }
+
+        public ScadNodeWidget InstantiateCustomWidget()
+        {
+            return Prefabs.New<SmallNodeWidget>();
+        }
+
+        public abstract Texture NodeBackground { get; }
     }
 }

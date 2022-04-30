@@ -1,4 +1,6 @@
+using Godot;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -8,5 +10,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "<";
         public override string NodeDescription => "Compares if the first operand is\nless than the second operand.";
         protected override string OperatorSign => "<";
+
+        public override Texture NodeBackground => Resources.LessIcon;
     }
 }

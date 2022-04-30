@@ -9,23 +9,22 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Nodes
 {
     /// <summary>
-    /// Node for splitting a Vector3 into its components.
+    /// Node for splitting a Vector2 into its components.
     /// </summary>
     [UsedImplicitly]
-    public class SplitVector3 : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs, IHaveCustomWidget, IHaveNodeBackground
+    public class SplitVector2 : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs, IHaveCustomWidget, IHaveNodeBackground
     {
-        public override string NodeTitle => "Split Vector3";
-        public override string NodeDescription => "Splits a Vector3 into its components.";
+        public override string NodeTitle => "Split Vector2";
+        public override string NodeDescription => "Splits a Vector2 into its components.";
 
-        public SplitVector3()
+        public SplitVector2()
         {
             InputPorts
                 .Vector3(allowLiteral: false);
-                
+
             OutputPorts
-                .Number(allowLiteral: false)
-                .Number(allowLiteral: false)
-                .Number(allowLiteral: false);
+                .Number(allowLiteral:false)
+                .Number(allowLiteral:false);
 
         }
 
@@ -45,8 +44,6 @@ namespace OpenScadGraphEditor.Nodes
                     return $"({input}).x";
                 case 1:
                     return $"({input}).y";
-                case 2:
-                    return $"({input}).z";
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -57,6 +54,6 @@ namespace OpenScadGraphEditor.Nodes
             return Prefabs.New<SmallNodeWidget>();
         }
 
-        public Texture NodeBackground => Resources.Vector3SplitIcon;
+        public Texture NodeBackground => Resources.Vector2SplitIcon;
     }
 }

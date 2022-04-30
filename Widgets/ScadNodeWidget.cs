@@ -18,7 +18,15 @@ namespace OpenScadGraphEditor.Widgets
 
         private readonly Dictionary<PortId, IScadLiteralWidget> _literalWidgets = new Dictionary<PortId, IScadLiteralWidget>();
 
+        protected virtual Theme UseTheme => Resources.StandardNodeWidgetTheme;
+
         public ScadNode BoundNode { get; protected set; }
+
+        public override void _Ready()
+        {
+            Theme = UseTheme;
+            RectMinSize = new Vector2(32, 64);
+        }
 
 
         public virtual void BindTo(IScadGraph graph, ScadNode node)
@@ -236,12 +244,12 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void _Notification(int what)
         {
-            // if we have a modifier color for this node, draw a boundary of that color
             if (what != NotificationDraw || BoundNode == null )
             {
                 return;
             }
 
+            // if we have a modifier color for this node, draw a boundary of that color
             if (BoundNode.TryGetColorModifier(out var color))
             {
                 var size = RectSize;

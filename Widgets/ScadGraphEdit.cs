@@ -137,8 +137,8 @@ namespace OpenScadGraphEditor.Widgets
         {
             if (!_widgets.TryGetValue(node.Id, out var widget))
             {
-                widget = node is RerouteNode
-                    ? Prefabs.InstantiateFromScene<RerouteNodeWidget.RerouteNodeWidget>()
+                widget = node is IHaveCustomWidget iUseCustomWidget
+                    ? iUseCustomWidget.InstantiateCustomWidget()
                     : Prefabs.New<ScadNodeWidget>();
 
                 // this is technically not needed but it would seem that the graph edit gets confused if you don't set

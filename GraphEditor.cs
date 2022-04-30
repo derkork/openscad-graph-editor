@@ -538,7 +538,7 @@ namespace OpenScadGraphEditor
             GdAssert.That(!_refactoringInProgress, "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
             
             _refactoringInProgress = true;
-            GD.Print("-- Refactorings start --");
+            GD.Print(">> Refactorings start ");
             var context = new RefactoringContext(_currentProject);
             context.PerformRefactorings(refactorings, after);
 
@@ -561,7 +561,7 @@ namespace OpenScadGraphEditor
             RefreshControls();
             MarkDirty(true);
             _refactoringInProgress = false;
-            GD.Print("-- Refactorings end --");
+            GD.Print("<< Refactorings end");
         }
 
         private void OnNewButtonPressed()

@@ -1,11 +1,13 @@
 using System;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Nodes.Reroute
 {
     [UsedImplicitly]
-    public class RerouteNode : ScadNode, IHaveMultipleExpressionOutputs
+    public class RerouteNode : ScadNode, IHaveMultipleExpressionOutputs, IHaveCustomWidget
     {
         public override string NodeTitle => "Reroute";
         public override string NodeDescription => "Rerouting node which aids in making cleaner visual graphs.";
@@ -92,12 +94,17 @@ namespace OpenScadGraphEditor.Nodes.Reroute
         public string RenderExpressionOutput(IScadGraph context, int port)
         {
             var outputPortType = GetPortType(PortId.Output(0));
-            if (outputPortType == PortType.Flow || outputPortType == PortType.Reroute)
+            if (!outputPortType.IsExpressionType())
             {
-                throw new InvalidOperationException("Cannot render non-expression type.");
+                throw new InvalidOperationException("Cannot render non-expression type");
             }
 
             return RenderInput(context, 0);
+        }
+
+        public ScadNodeWidget InstantiateCustomWidget()
+        {
+            return Prefabs.New<RerouteNodeWidget>();
         }
     }
 }
