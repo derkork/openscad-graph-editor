@@ -51,6 +51,7 @@ namespace OpenScadGraphEditor
         private LightWeightGraph _copyBuffer;
 
         private bool _codeChanged;
+        private bool _refactoringInProgress;
 
         public override void _Ready()
         {
@@ -534,6 +535,10 @@ namespace OpenScadGraphEditor
         private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
             params Action[] after)
         {
+            GdAssert.That(!_refactoringInProgress, "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
+            
+            _refactoringInProgress = true;
+            GD.Print("-- Refactorings start --");
             var context = new RefactoringContext(_currentProject);
             context.PerformRefactorings(refactorings, after);
 
@@ -545,11 +550,18 @@ namespace OpenScadGraphEditor
                 _tabContainer.CurrentTab = childCount - 1;
             }
 
+            foreach (var graph in _tabContainer.GetChildNodes<ScadGraphEdit>())
+            {
+                GdAssert.That(_currentProject.AllDeclaredInvokables.Contains(graph), "Graph not in project");
+            }
+            
             // important, the snapshot must be made _after_ the changes.
             _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
 
             RefreshControls();
             MarkDirty(true);
+            _refactoringInProgress = false;
+            GD.Print("-- Refactorings end --");
         }
 
         private void OnNewButtonPressed()

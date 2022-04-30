@@ -64,5 +64,26 @@ namespace OpenScadGraphEditor.Nodes
                     throw new ArgumentOutOfRangeException(nameof(self), self, null);
             } 
         }
+
+
+        public static bool SupportsLiteral(this PortType self)
+        {
+            switch (self)
+            {
+                case PortType.Boolean:
+                case PortType.Number:
+                case PortType.Vector3:
+                case PortType.String:
+                case PortType.Vector2:
+                    return true;
+                case PortType.Reroute:
+                case PortType.Any:
+                case PortType.Array:
+                case PortType.Flow: 
+                    return false;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(self), self, null);
+            }
+        }
     }
 }

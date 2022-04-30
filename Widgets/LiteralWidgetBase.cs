@@ -17,8 +17,14 @@ namespace OpenScadGraphEditor.Widgets
 
         protected abstract TControl CreateControl();
 
+        private bool _silenceEvents = false;
+
         public void BindTo(TLiteral literal, bool isOutput, bool isAutoSet, bool isConnected)
         {
+            // we need this because hte controls may fire events while we update their state programmatically and 
+            // we don't want this to happen.
+            _silenceEvents = true;
+            
             void MakeControl()
             {
                 if (Control == null)
@@ -41,7 +47,13 @@ namespace OpenScadGraphEditor.Widgets
                     _toggleButton.ToggleMode = true;
                     _toggleButton.Icon = Resources.EditIcon;
                     _toggleButton.RectMinSize = new Vector2(20, 20);
-                    _toggleButton.ButtonToggled += (value) => LiteralToggled?.Invoke(value);
+                    _toggleButton.ButtonToggled += (value) =>
+                    {
+                        if (!_silenceEvents)
+                        {
+                            LiteralToggled?.Invoke(value);
+                        }
+                    };
                 }
             }
 
@@ -60,15 +72,31 @@ namespace OpenScadGraphEditor.Widgets
 
             Literal = literal;
 
-            // Toggle button is only visible for input literals that are unconnected and not auto-set
-            _toggleButton.Visible = !isConnected && !isAutoSet && !isOutput;
+            // for output literals, the toggle button is visible when port is not set to auto-set
+            if (isOutput)
+            {
+                _toggleButton.Visible = !isAutoSet;
+            }
+            // for input literals, the toggle button disappears when the port is connected and is only visible when the port is not set to auto-set
+            else
+            {
+                _toggleButton.Visible = !isConnected && !isAutoSet;
+            }
             _toggleButton.Pressed = literal.IsSet;
-            // Control is always visible for output literals, for input literals it is only visible if the literal
-            // is unconnected and either auto-set or explicitly enabled.
-            Control.Visible = isOutput || (!isConnected && (isAutoSet || literal.IsSet));
-
+            // the output literal is always visible when the port is auto-set, otherwise it follows the IsSet of the literal
+            if (isOutput)
+            {
+                Control.Visible = isAutoSet || literal.IsSet;
+            }
+            // for input literals the control is visible when the port is not connected and the port is auto-set otherwise it follows the IsSet of the literal
+            else
+            {
+                Control.Visible = !isConnected && (isAutoSet || literal.IsSet);
+            }
             
             ApplyControlValue();
+
+            _silenceEvents = false;
         }
 
 
@@ -77,7 +105,10 @@ namespace OpenScadGraphEditor.Widgets
 
         protected void EmitValueChange(object value)
         {
-            LiteralValueChanged?.Invoke(value);
+            if (!_silenceEvents)
+            {
+                LiteralValueChanged?.Invoke(value);
+            }
         }
     }
 }

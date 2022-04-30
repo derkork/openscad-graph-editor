@@ -31,7 +31,6 @@ namespace OpenScadGraphEditor.Refactorings
                 return; // nothing to do.
             }
 
-
             // find all nodes that refer to this description
             var nodes = context.Project.FindAllReferencingNodes(_description)
                 .ToList() // avoid concurrent modification
@@ -74,14 +73,30 @@ namespace OpenScadGraphEditor.Refactorings
                 // and rebuild the literal for the affected ports
                 if (inputPort != -1)
                 {
-                    scadNode.DropPortLiteral(PortId.Input(inputPort));
-                    scadNode.BuildPortLiteral(PortId.Input(inputPort));
+                    var portId = PortId.Input(inputPort);
+                    // try to keep the "is set" state. as it was before
+                    var wasSet = scadNode.TryGetLiteral(portId, out var literal) && literal.IsSet;
+                    
+                    scadNode.DropPortLiteral(portId);
+                    scadNode.BuildPortLiteral(portId);
+                    
+                    if (scadNode.TryGetLiteral(portId, out var newLiteral))
+                    {
+                        newLiteral.IsSet = wasSet;
+                    }
                 }
 
                 if (outputPort != -1)
                 {
-                    scadNode.DropPortLiteral(PortId.Output(outputPort));
-                    scadNode.BuildPortLiteral(PortId.Output(outputPort));
+                    var portId = PortId.Output(outputPort);
+                    // try to keep the "is set" state. as it was before
+                    var wasSet = scadNode.TryGetLiteral(portId, out var literal) && literal.IsSet;
+                    scadNode.DropPortLiteral(portId);
+                    scadNode.BuildPortLiteral(portId);
+                    if (scadNode.TryGetLiteral(portId, out var newLiteral))
+                    {
+                        newLiteral.IsSet = wasSet;
+                    }
                 }
 
 
@@ -91,6 +106,13 @@ namespace OpenScadGraphEditor.Refactorings
                     .ToList()
                     // and remove the ones that are vetoed.
                     .ForAll(it => graph.RemoveConnection(it));
+                
+                // finally if the parameter was optional before but the new parameter type does not support literals
+                // then we need to make the parameter mandatory
+                if (_description.Parameters[parameterIndex].IsOptional && !_newPortType.SupportsLiteral())
+                {
+                    context.PerformRefactoring(new ChangeInvokableParameterOptionalStateRefactoring(_description, parameterIndex, false));
+                }
             }
         }
     }

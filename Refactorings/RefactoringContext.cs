@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using GodotExt;
 using OpenScadGraphEditor.Library;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -115,6 +116,8 @@ namespace OpenScadGraphEditor.Refactorings
         /// </summary>
         internal LightWeightGraph MakeRefactorable(IScadGraph graph)
         {
+            GdAssert.That(Project.AllDeclaredInvokables.Contains(graph) || _modifiedVisibleGraphsReverse.ContainsKey(graph), "Graph is not declared in the project");
+
             if (graph is LightWeightGraph lightWeightGraph)
             {
                 return lightWeightGraph;

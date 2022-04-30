@@ -188,6 +188,7 @@ namespace OpenScadGraphEditor.Widgets
                 GD.Print("Widget type changed");
                 // we replaced the widget with something else, so delete the existing widget
                 ((Node)existingWidget).RemoveAndFree();
+                existingWidget = null;
                 _literalWidgets.Remove(port);
             }
 
