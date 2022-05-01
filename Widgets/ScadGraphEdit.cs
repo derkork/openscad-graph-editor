@@ -148,6 +148,8 @@ namespace OpenScadGraphEditor.Widgets
                     PerformRefactorings( "Toggle literal", new ToggleLiteralRefactoring(this, node, port, enabled));
                 widget.LiteralValueChanged += (port, value) =>
                     PerformRefactorings("Set literal value", new SetLiteralValueRefactoring(this, node, port, value));
+                widget.SizeChanged += (size) =>
+                    PerformRefactorings("Change size", new ChangeNodeSizeRefactoring(this, node, size));
 
                 _widgets[node.Id] = widget;
                 widget.MoveToNewParent(this);

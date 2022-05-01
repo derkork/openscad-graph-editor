@@ -14,6 +14,12 @@ namespace OpenScadGraphEditor.Widgets
     {
         public event Action<PortId, object> LiteralValueChanged;
         public event Action<PortId, bool> LiteralToggled;
+
+        /// <summary>
+        /// Event raised when the size is changed. This is actually only supported by the comment node so
+        /// all handling for this is moved down to the CommentWidget class.
+        /// </summary>
+        public event Action<Vector2> SizeChanged;
         
 
         private readonly Dictionary<PortId, IScadLiteralWidget> _literalWidgets = new Dictionary<PortId, IScadLiteralWidget>();
@@ -272,6 +278,11 @@ namespace OpenScadGraphEditor.Widgets
             {
                 DrawTextureRect(Resources.BackgroundIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
             }
+        }
+
+        protected void RaiseSizeChanged(Vector2 newSize)
+        {
+            SizeChanged?.Invoke(newSize);
         }
     }
 }

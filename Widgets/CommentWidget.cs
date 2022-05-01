@@ -2,7 +2,6 @@ using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
@@ -12,6 +11,8 @@ namespace OpenScadGraphEditor.Widgets
         private RichTextLabel _rtl;
         protected override Theme UseTheme => Resources.StandardNodeWidgetTheme;
 
+        private bool _resizePending;
+        
         public override void _Ready()
         {
             Comment = true;
@@ -41,15 +42,38 @@ namespace OpenScadGraphEditor.Widgets
         
         private void OnResizeRequested(Vector2 size)
         {
+            // we will not immediately fire the resize event because resize is a continuous event
+            // that happens multiple times per frame and is actually only finished when the user
+            // releases the mouse button. Therefore we will just note down that a resize event has
+            // started but wait to fire it until the user actually releases the mouse button
+            _resizePending = true;
             RectMinSize = size;
             QueueSort();
         }
-        
+
+        public override void _GuiInput(InputEvent evt)
+        {
+            if (!_resizePending)
+            {
+                return;
+            }
+            
+            // check if it was a mouse up event and if so fire the resize event
+            if (!(evt is InputEventMouseButton mouseButton) || mouseButton.Pressed || mouseButton.ButtonIndex != (int)ButtonList.Left)
+            {
+                return;
+            }
+            _resizePending = false;
+            RaiseSizeChanged(RectMinSize);
+
+        }
+
         public override void BindTo(IScadGraph graph, ScadNode node)
         {
             BoundNode = node;
             Offset = node.Offset;
             Title = node.NodeTitle;
+            RectMinSize = ((Comment) node).Size;
             _rtl.Text = node.NodeDescription;
         }
     }
