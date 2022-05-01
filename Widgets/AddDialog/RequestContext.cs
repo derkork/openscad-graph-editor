@@ -35,5 +35,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         public ScadNode SourceNode { get; }
         public ScadNode DestinationNode { get; }
         public int LastPort { get; }
+        
+        public bool HasContext => SourceNode != null || DestinationNode != null;
     }
 }

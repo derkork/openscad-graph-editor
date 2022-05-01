@@ -1,0 +1,105 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Widgets/NodeColorDialog/NodeColorDialog.cs" type="Script" id=1]
+[ext_resource path="res://Widgets/ColorButton/ColorButton.tscn" type="PackedScene" id=2]
+
+[node name="Control" type="WindowDialog"]
+margin_right = 413.0
+margin_bottom = 145.0
+window_title = "Choose Color"
+script = ExtResource( 1 )
+
+[node name="Root" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 20
+custom_constants/margin_top = 20
+custom_constants/margin_left = 20
+custom_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root"]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 393.0
+margin_bottom = 130.0
+custom_constants/separation = 20
+
+[node name="ButtonRow" type="HBoxContainer" parent="Root/VBoxContainer"]
+margin_right = 373.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 0, 45 )
+alignment = 1
+
+[node name="ColorButton" parent="Root/VBoxContainer/ButtonRow" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 1.0
+margin_right = 56.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+Color = Color( 0.964706, 0.313726, 0.313726, 1 )
+
+[node name="ColorButton2" parent="Root/VBoxContainer/ButtonRow" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 64.0
+margin_right = 119.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+Color = Color( 1, 1, 0.376471, 1 )
+
+[node name="ColorButton3" parent="Root/VBoxContainer/ButtonRow" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 127.0
+margin_right = 182.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+Color = Color( 0.572549, 0.603922, 0.980392, 1 )
+
+[node name="ColorButton4" parent="Root/VBoxContainer/ButtonRow" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 190.0
+margin_right = 245.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+Color = Color( 0.819608, 0.603922, 0.121569, 1 )
+
+[node name="ColorButton5" parent="Root/VBoxContainer/ButtonRow" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 253.0
+margin_right = 308.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+Color = Color( 0.756863, 0.101961, 0.552941, 1 )
+
+[node name="ColorButton6" parent="Root/VBoxContainer/ButtonRow" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 316.0
+margin_right = 371.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 55, 45 )
+Color = Color( 0.137255, 0.384314, 0.0745098, 1 )
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Root/VBoxContainer"]
+margin_top = 65.0
+margin_right = 373.0
+margin_bottom = 110.0
+alignment = 1
+
+[node name="ClearButton" type="Button" parent="Root/VBoxContainer/HBoxContainer2"]
+margin_left = 72.0
+margin_right = 182.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 45 )
+text = "Clear"
+
+[node name="CancelButton" type="Button" parent="Root/VBoxContainer/HBoxContainer2"]
+margin_left = 190.0
+margin_right = 300.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 45 )
+text = "Cancel"

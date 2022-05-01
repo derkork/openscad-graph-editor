@@ -16,6 +16,7 @@ using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
+using OpenScadGraphEditor.Widgets.NodeColorDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 
@@ -47,6 +48,7 @@ namespace OpenScadGraphEditor
         private GlobalLibrary _rootResolver;
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
+        private NodeColorDialog _nodeColorDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private LightWeightGraph _copyBuffer;
 
@@ -65,6 +67,16 @@ namespace OpenScadGraphEditor
             _importDialog = this.WithName<ImportDialog>("ImportDialog");
             _importDialog.OnNewImportRequested += OnNewImportRequested;
 
+            _nodeColorDialog = this.WithName<NodeColorDialog>("NodeColorDialog");
+            _nodeColorDialog.ColorSelected +=
+                (graph, node, color) => PerformRefactorings("Change node color",
+                    new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, true, color));
+            
+            _nodeColorDialog.ColorCleared +=
+                (graph, node) => PerformRefactorings("Clear node color",
+                    new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, false));
+
+            
             _invokableRefactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
             _invokableRefactorDialog.InvokableModificationRequested +=
                 (description, refactorings) => PerformRefactorings($"Change {description.Name}", refactorings);
@@ -727,6 +739,19 @@ namespace OpenScadGraphEditor
                     new QuickAction("Disable subtree",
                         () => OnRefactoringRequested("Toggle: Disable subtree",
                             new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Disable, !hasDisable)), true, hasDisable));
+
+                
+                actions = actions.Append(
+                    new QuickAction("Set color",
+                    () => _nodeColorDialog.Open(editor, node)));
+
+                if (currentModifiers.HasFlag(ScadNodeModifier.Color))
+                {
+                    actions = actions.Append(
+                        new QuickAction("Clear color",
+                            () => OnRefactoringRequested("Remove color",
+                                new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Color, false))));
+                }
 
             }
 

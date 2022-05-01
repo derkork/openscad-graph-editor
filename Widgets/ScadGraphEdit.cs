@@ -5,7 +5,6 @@ using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets.AddDialog;
@@ -268,10 +267,13 @@ namespace OpenScadGraphEditor.Widgets
 
             if (matchingWidgets == null)
             {
+                // right-click in empty space yields you the add dialog
+                AddDialogRequested?.Invoke(RequestContext.AtPosition(this, relativePosition + ScrollOffset));
                 return;
             }
 
             NodePopupRequested?.Invoke(this, matchingWidgets.BoundNode, position);
+            
         }
 
 

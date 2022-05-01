@@ -42,9 +42,10 @@ namespace OpenScadGraphEditor.Refactorings
             
             // if we remove the modifier, this is easy as we don't need to have any constraints in mind, we can just
             // remove the modifier
+            var currentModifiers = reference.Node.GetModifiers();
+
             if (!_enable)
             {
-                var currentModifiers = reference.Node.GetModifiers();
                 if (currentModifiers.HasFlag(_modifier))
                 {
                     // remove the modifier
@@ -58,6 +59,7 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     // add it to the effective modifiers and overwrite the color
                     effectiveColor = _newColor;
+                    effectiveModifiers =  currentModifiers | ScadNodeModifier.Color;
                 }
                 else
                 {

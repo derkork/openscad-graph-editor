@@ -255,29 +255,47 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
 
+            var hasColor = false;
             // if we have a modifier color for this node, draw a boundary of that color
             if (BoundNode.TryGetColorModifier(out var color))
             {
                 var size = RectSize;
-                DrawRect(new Rect2(-3, -3, size.x + 3, size.y + 3), color, false, 3);
+                DrawRect(new Rect2(16, -35, size.x - 32, 35), color);
+                hasColor = true;
             }
 
             var modifiers = BoundNode.GetModifiers();
+            
             var widthOffset = RectSize.x / 2;
+            Texture icon = null;
             if (modifiers.HasFlag(ScadNodeModifier.Debug))
             {
-                DrawTextureRect(Resources.DebugIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
+                icon = Resources.DebugIcon;
             }
 
             if (modifiers.HasFlag(ScadNodeModifier.Root))
             {
-                DrawTextureRect(Resources.RootIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
+                icon = Resources.RootIcon;
             }
 
             if (modifiers.HasFlag(ScadNodeModifier.Background))
             {
-                DrawTextureRect(Resources.BackgroundIcon, new Rect2(widthOffset-16, -32, 32, 32 ), false);
+                icon = Resources.BackgroundIcon;
             }
+
+            if (icon == null)
+            {
+                return;
+            }
+            
+            if (hasColor)
+            {
+                // draw an underlay so we can see the icon no matter which color is currently used
+                DrawRect(new Rect2(widthOffset - 20, -35, 40, 35), new Color(0, 0, 0, 0.5f));
+            }
+
+            DrawTextureRect(icon, new Rect2(widthOffset - 16, -32, 32, 32), false);
+
         }
 
         protected void RaiseSizeChanged(Vector2 newSize)
