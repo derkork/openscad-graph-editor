@@ -147,7 +147,7 @@ namespace OpenScadGraphEditor.Widgets
                     PerformRefactorings( "Toggle literal", new ToggleLiteralRefactoring(this, node, port, enabled));
                 widget.LiteralValueChanged += (port, value) =>
                     PerformRefactorings("Set literal value", new SetLiteralValueRefactoring(this, node, port, value));
-                widget.SizeChanged += (size) =>
+                widget.SizeChanged += size =>
                     PerformRefactorings("Change size", new ChangeNodeSizeRefactoring(this, node, size));
 
                 _widgets[node.Id] = widget;
@@ -295,7 +295,7 @@ namespace OpenScadGraphEditor.Widgets
             {
                 CutRequested?.Invoke(this, GetSelectedNodes().ToList());
             }
-
+            
             if (evt.IsPaste())
             {
                 // get the offset over the mouse position
@@ -313,6 +313,109 @@ namespace OpenScadGraphEditor.Widgets
                 }
                 
                 PasteRequested?.Invoke(this, pastePosition);
+            }
+
+            if (evt.IsStraighten())
+            {
+                StraightenSelection();
+            }
+        }
+
+        private void StraightenSelection()
+        {
+            // all selected nodes 
+            var selectedNodes = GetSelectedNodes().ToHashSet();
+
+            // relevant connections, these are all connections between the selected nodes
+            var relevantConnections = GetAllConnections()
+                .Where(it => selectedNodes.Contains(it.From) && selectedNodes.Contains(it.To))
+                .ToList();
+
+            // first up remove all nodes which do not have any connections to any other selected node, there is nothing to
+            // straighten for them.
+            selectedNodes.RemoveWhere(it => !relevantConnections.Any(connection => connection.InvolvesNode(it)));
+            
+            // now we have two sets, one is the set of nodes that are starting points for straightening, the other
+            // is the set of nodes we have not yet laid out.
+            var nodesToStraighten = selectedNodes.ToHashSet();
+            var startingPoints = new HashSet<ScadNode>();
+
+            // We are going to move the nodes around but only do so after the 
+            // straightening refactoring is run. However some calculations depend on knowing where
+            // the node will be after the refactoring. So we make ourselves a little lookup table where
+            // we have the current node positions by id, which we overwrite during the layout process
+            var nodePositions = new Dictionary<string, Vector2>(); 
+            nodesToStraighten.ForAll(it => nodePositions[it.Id] = it.Offset);
+            
+            var refactorings = new List<Refactoring>();
+            
+            // now while we still have nodes in the set
+            while (nodesToStraighten.Count > 0)
+            {
+                // first check if we have any starting points, if not, take the rightmost node we still have to 
+                // straighten and use that one as a starting point.
+                if (!startingPoints.Any())
+                {
+                    var newStartingPoint = nodesToStraighten.OrderByDescending(it => it.Offset.x).First();
+                    startingPoints.Add(newStartingPoint);
+                    nodesToStraighten.Remove(newStartingPoint);
+                }
+                
+                GdAssert.That(startingPoints.Any(), "Should have at least one starting point");
+                
+                // now pop a node from the starting points and go from there
+                var currentNode = startingPoints.First();
+                startingPoints.Remove(currentNode);
+                
+                var currentNodeConnections = relevantConnections
+                    .Where(it => it.To == currentNode)
+                    .OrderBy(it => it.ToPort);
+                
+                // now walk over the connections and see if we can straighten them
+                foreach (var connection in currentNodeConnections)
+                {
+                    if (!nodesToStraighten.Contains(connection.From))
+                    {
+                        // the connection is to a node we already moved, so go to the next one.
+                        continue;
+                    }
+                    // good, we can straighten this connection
+                    // to do this, we need to get the port offset of the right side of the connection
+                    // and then move the left side of the connection to that offset
+                    var rightSideWidget = _widgets[connection.To.Id];
+                    var leftSideWidget = _widgets[connection.From.Id];
+
+                    var rightOffset = nodePositions[connection.To.Id];
+                    var rightConnectorPosition = rightSideWidget.GetConnectionInputPosition(connection.ToPort) + rightOffset;
+                    var leftOffset = nodePositions[connection.From.Id];
+                    var leftConnectorPosition = leftSideWidget.GetConnectionOutputPosition(connection.FromPort) + leftOffset;
+                        
+                    // we only move the left node and we only change the y axis
+                    var deltaY = rightConnectorPosition.y - leftConnectorPosition.y;
+                    
+                    // only run a refactoring if we actually need to
+                    if (Mathf.Abs(deltaY) > 0.001f)
+                    {
+                        var newLeftOffset = new Vector2(leftOffset.x,  leftOffset.y + deltaY);
+                        // write it down into our intermediate node position lookup table
+                        nodePositions[connection.From.Id] = newLeftOffset;
+                        refactorings.Add(new ChangeNodePositionRefactoring(this, connection.From, newLeftOffset));
+                    }
+                    
+                    // now we can remove the node from the set of nodes to straighten but it can still be a starting
+                    // point for other nodes
+                    nodesToStraighten.Remove(connection.From);
+                    startingPoints.Add(connection.From);
+                }
+            }
+
+            if (refactorings.Any())
+            {
+                PerformRefactorings("Straighten connections", refactorings);
+            }
+            else
+            {
+                GD.Print("All is already straightened.");
             }
         }
 

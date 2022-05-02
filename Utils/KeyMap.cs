@@ -51,7 +51,8 @@ namespace OpenScadGraphEditor.Utils
         public static bool IsUndo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z);
         public static bool IsRedo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z) && inputEvent.IsShiftPressed();
         
-        
+        // straighten
+        public static bool IsStraighten(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.Q);
         
     }
 }

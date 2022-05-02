@@ -32,6 +32,10 @@ namespace OpenScadGraphEditor.Utils
         public static readonly Texture Vector3MergeIcon = GD.Load<Texture>("res://Icons/vector3merge0000.png");
         public static readonly Texture Vector2SplitIcon = GD.Load<Texture>("res://Icons/vector2split0000.png");
         public static readonly Texture Vector2MergeIcon = GD.Load<Texture>("res://Icons/vector2merge0000.png");
+        
+        public static readonly Texture CastIcon = GD.Load<Texture>("res://Icons/cast0000.png");
+        public static readonly Texture RangeIcon = GD.Load<Texture>("res://Icons/range0000.png");
+        
 
         public static readonly Theme SimpleNodeWidgetTheme = GD.Load<Theme>("res://Widgets/SimpleNodeWidgetTheme.tres");
         public static readonly Theme StandardNodeWidgetTheme = GD.Load<Theme>("res://Widgets/StandardNodeWidgetTheme.tres");
