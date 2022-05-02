@@ -16,6 +16,8 @@ namespace OpenScadGraphEditor.Refactorings
         
         public abstract int Order { get; }
 
+        public virtual string Group => "";
+
         private static readonly List<IUserSelectableRefactoringFactory> Factories;
         
         protected UserSelectableNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)

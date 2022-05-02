@@ -728,7 +728,21 @@ namespace OpenScadGraphEditor
             // build a list of quick actions that include all refactorings that would apply to the selected node
             var actions = UserSelectableNodeRefactoring
                 .GetApplicable(editor, node)
-                .Select(it => new QuickAction(it.Title, () => OnRefactoringRequested(it.Title, it)));
+                .OrderBy(it => it.Order)
+                .GroupBy(it => it.Group)
+                .SelectMany(it =>
+                {
+                    // add a separator item if we have more than one refactoring in the group
+                    var results = Enumerable.Empty<QuickAction>();
+                    if (it.Count() > 1 && !it.Key.Empty())
+                    {
+                        results = results.Append(new QuickAction(it.Key));
+                    }
+
+
+                    return results.Concat(it.Select(refa =>
+                        new QuickAction(refa.Title, () => OnRefactoringRequested(refa.Title, refa))));
+                });
 
             if (node is Comment comment)
             {
@@ -763,6 +777,8 @@ namespace OpenScadGraphEditor
 
             if (node is ICanHaveModifier)
             {
+                actions = actions.Append(new QuickAction("Debugging aids"));
+                
                 var currentModifiers = node.GetModifiers();
 
                 var hasDebug = currentModifiers.HasFlag(ScadNodeModifier.Debug);

@@ -23,6 +23,8 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             base.SaveInto(node);
         }
 
+        public abstract bool Supports(PortType portType);
+
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver resolver)
         {
             var firstOperandPortType = (PortType) node.GetDataInt("first_operand_port_type", (int) PortType.Any);

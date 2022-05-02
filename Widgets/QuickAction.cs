@@ -14,7 +14,9 @@ namespace OpenScadGraphEditor.Widgets
         public bool IsCheckbox { get; }
         
         public bool IsChecked { get; }
-        
+
+        public bool IsSeparator { get; set; }
+
         public QuickAction(string title, Action onSelect, bool isCheckbox = false, bool isChecked = false)
         {
             Title = title;
@@ -22,6 +24,13 @@ namespace OpenScadGraphEditor.Widgets
             IsCheckbox = isCheckbox;
             IsChecked = isChecked;
         }
-        
+
+        public QuickAction(string title)
+        {
+            Title = title;
+            OnSelect = () => { };
+            IsSeparator = true;
+        }
+
     }
 }

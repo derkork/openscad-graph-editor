@@ -11,6 +11,16 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription => "Subtracts the given inputs.";
         protected override string OperatorSign => "-";
 
+
+        public override bool Supports(PortType portType)
+        {
+            return portType == PortType.Number
+                   || portType == PortType.Vector2
+                   || portType == PortType.Vector3 
+                   || portType == PortType.Array
+                   || portType == PortType.Any;
+        }
+
         public override Texture NodeBackground => Resources.MinusIcon;
     }
 }

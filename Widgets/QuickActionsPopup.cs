@@ -32,6 +32,10 @@ namespace OpenScadGraphEditor.Widgets
                 {
                     AddCheckItem(action.Title);
                 }
+                else if (action.IsSeparator)
+                {
+                    AddSeparator(action.Title);
+                }
                 else
                 {
                     AddItem(action.Title);
@@ -40,7 +44,7 @@ namespace OpenScadGraphEditor.Widgets
                 var itemCount = GetItemCount()-1;
                 SetItemChecked(itemCount, action.IsChecked);
             }
-
+            
             SetGlobalPosition(position);
             SetAsMinsize();
             Popup_();

@@ -27,6 +27,7 @@ namespace OpenScadGraphEditor.Utils
         public static readonly Texture GreaterEqualIcon = GD.Load<Texture>("res://Icons/greater_equal0000.png");
         public static readonly Texture LessIcon = GD.Load<Texture>("res://Icons/less0000.png");
         public static readonly Texture LessEqualIcon = GD.Load<Texture>("res://Icons/less_equal0000.png");
+        public static readonly Texture EqualIcon = GD.Load<Texture>("res://Icons/equal0000.png");
         
         public static readonly Texture Vector3SplitIcon = GD.Load<Texture>("res://Icons/vector3split0000.png");
         public static readonly Texture Vector3MergeIcon = GD.Load<Texture>("res://Icons/vector3merge0000.png");
@@ -35,6 +36,10 @@ namespace OpenScadGraphEditor.Utils
         
         public static readonly Texture CastIcon = GD.Load<Texture>("res://Icons/cast0000.png");
         public static readonly Texture RangeIcon = GD.Load<Texture>("res://Icons/range0000.png");
+        
+        public static readonly Texture AndIcon = GD.Load<Texture>("res://Icons/and0000.png");
+        public static readonly Texture OrIcon = GD.Load<Texture>("res://Icons/or0000.png");
+        public static readonly Texture NotIcon = GD.Load<Texture>("res://Icons/not0000.png");
         
 
         public static readonly Theme SimpleNodeWidgetTheme = GD.Load<Theme>("res://Widgets/SimpleNodeWidgetTheme.tres");

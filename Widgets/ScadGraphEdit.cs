@@ -128,7 +128,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             if (data is ProjectTreeDragData itemListDragData)
             {
-                ItemDataDropped?.Invoke(this, itemListDragData.Entry, GetGlobalMousePosition(), position + ScrollOffset);
+                ItemDataDropped?.Invoke(this, itemListDragData.Entry, GetGlobalMousePosition(), LocalToGraphRelative(position));
             }
         }
 
@@ -256,19 +256,39 @@ namespace OpenScadGraphEditor.Widgets
                 graph.Connections.Add(savedConnection);
             }
         }
+        
+        /// <summary>
+        /// Calculates the graph relative position for any global coordinate taking zoom and scroll offset into account.
+        /// </summary>
+        private Vector2 GlobalToGraphRelative(Vector2 globalPosition)
+        {
+            var localPosition = globalPosition - RectGlobalPosition;
+            return LocalToGraphRelative(localPosition);
+        }
+
+        /// <summary>
+        /// Calculates the graph relative position for any local coordinate (relative to this editor) taking zoom and scroll offset into account.
+        /// </summary>
+        private Vector2 LocalToGraphRelative(Vector2 localPosition)
+        {
+            var relativePosition = localPosition;
+            relativePosition += ScrollOffset;
+            relativePosition /= Zoom;
+            return relativePosition;
+        }
+        
 
         private void OnPopupRequest(Vector2 position)
         {
-            var relativePosition = position - RectGlobalPosition;
-            relativePosition *= Zoom;
+            var relativePosition = GlobalToGraphRelative(position);
 
             var matchingWidgets = _widgets.Values
-                .FirstOrDefault(it => new Rect2((it.Offset - ScrollOffset) * Zoom, it.RectSize * Zoom).HasPoint(relativePosition));
+                .FirstOrDefault(it => new Rect2(it.Offset, it.RectSize).HasPoint(relativePosition));
 
             if (matchingWidgets == null)
             {
                 // right-click in empty space yields you the add dialog
-                AddDialogRequested?.Invoke(RequestContext.ForPosition(this, relativePosition + ScrollOffset));
+                AddDialogRequested?.Invoke(RequestContext.ForPosition(this, relativePosition));
                 return;
             }
 
@@ -308,8 +328,8 @@ namespace OpenScadGraphEditor.Widgets
                 if (globalRect.HasPoint(globalMousePosition))
                 {
                     // if the mouse is inside the graph, paste the nodes at the mouse position
-                    pastePosition = globalMousePosition - RectGlobalPosition + ScrollOffset;
-                    
+                    pastePosition = GlobalToGraphRelative(globalMousePosition);
+
                 }
                 
                 PasteRequested?.Invoke(this, pastePosition);
@@ -441,14 +461,14 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            var context = RequestContext.FromPort(this, ScrollOffset+releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
+            var context = RequestContext.FromPort(this, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(fromWidgetName), fromPort);
             AddDialogRequested?.Invoke(context);
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
             
-            var context = RequestContext.ToPort(this, releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
+            var context = RequestContext.ToPort(this, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(toWidgetName), toPort);
             AddDialogRequested?.Invoke(context);
         }
 
