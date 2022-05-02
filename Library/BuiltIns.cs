@@ -138,7 +138,7 @@ namespace OpenScadGraphEditor.Library
                     .WithParameter("convexity", PortType.Number, label: "Convexity", optional: true)
                     .WithParameter("twist", PortType.Number, label: "Twist", optional: true)
                     .WithParameter("slices", PortType.Number, label: "Slices", optional: true)
-                    .WithParameter("scale", PortType.Vector3, label: "Scale", optional: true)
+                    .WithParameter("scale", PortType.Vector2, label: "Scale", optional: true)
                     .WithParameter("$fn", PortType.Number, label: "Resolution", optional: true)
                     .WithChildren()
                     .Build(),
