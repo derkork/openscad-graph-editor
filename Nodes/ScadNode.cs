@@ -28,6 +28,7 @@ namespace OpenScadGraphEditor.Nodes
 
         private readonly Dictionary<int, IScadLiteral> _outputLiterals =
             new Dictionary<int, IScadLiteral>();
+        
 
 
         /// <summary>

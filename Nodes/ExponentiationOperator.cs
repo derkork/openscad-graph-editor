@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class ExponentiationOperator : BinaryOperator
     {
         public override string NodeTitle => "^";
-        public override string NodeDescription => "Exponentiation of the given inputs.";
+        public override string NodeDescription => "Exponentiation of the given inputs (first to the power of second).";
         protected override string OperatorSign => "^";
 
         public override Texture NodeBackground => Resources.ExpIcon;
@@ -20,7 +20,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Number();
 
             OutputPorts
-                .Number();
+                .Number(allowLiteral: false);
         }
     }
 }

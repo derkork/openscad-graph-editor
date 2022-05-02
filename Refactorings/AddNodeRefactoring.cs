@@ -1,3 +1,4 @@
+using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
@@ -12,18 +13,17 @@ namespace OpenScadGraphEditor.Refactorings
     {
         [CanBeNull]
         private readonly ScadNode _other;
-        private readonly int _otherPort;
-        private readonly bool _isIncoming;
+        private PortId _otherPort;
 
         public AddNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         
-        public AddNodeRefactoring(IScadGraph holder, ScadNode node, [CanBeNull] ScadNode other, int otherPort, bool isIncoming) : base(holder, node)
+        public AddNodeRefactoring(IScadGraph holder, ScadNode node, [CanBeNull] ScadNode other, PortId otherPort) : base(holder, node)
         {
-            _other = other;
             _otherPort = otherPort;
-            _isIncoming = isIncoming;
+            GdAssert.That(other == null || otherPort.IsDefined, "otherPort must be defined when a node is given");
+            _other = other;
         }
 
         public override void PerformRefactoring(RefactoringContext context)
@@ -33,13 +33,14 @@ namespace OpenScadGraphEditor.Refactorings
             
             if (_other != null)
             {
+                // TODO: we could simplify this if we use PortIds all the way.
                 var otherNode = graph.ById(_other.Id);
-                if (_isIncoming)
+                if (_otherPort.IsOutput)
                 {
                     // try build a connection from the other node to an input port of the new node.
                     for (var i = 0; i < Node.InputPortCount; i++)
                     {
-                        var connection = new ScadConnection(graph, otherNode, _otherPort, Node,  i);
+                        var connection = new ScadConnection(graph, otherNode, _otherPort.Port, Node,  i);
                         if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                         {
                             context.PerformRefactoring(new AddConnectionRefactoring(connection));
@@ -51,7 +52,7 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     for (var i = 0; i < Node.OutputPortCount; i++)
                     {
-                        var connection = new ScadConnection(graph, Node, i, otherNode, _otherPort);
+                        var connection = new ScadConnection(graph, Node, i, otherNode, _otherPort.Port);
                         if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                         {
                             context.PerformRefactoring(new AddConnectionRefactoring(connection));

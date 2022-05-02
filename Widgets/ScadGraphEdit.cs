@@ -46,7 +46,7 @@ namespace OpenScadGraphEditor.Widgets
         /// <summary>
         /// Emitted when the user right-clicks on a node.
         /// </summary>
-        public event Action<ScadGraphEdit, ScadNode, Vector2> NodePopupRequested;
+        public event Action<RequestContext> NodePopupRequested;
 
         /// <summary>
         /// Emitted when the user requires the dialog to add a node.
@@ -268,11 +268,11 @@ namespace OpenScadGraphEditor.Widgets
             if (matchingWidgets == null)
             {
                 // right-click in empty space yields you the add dialog
-                AddDialogRequested?.Invoke(RequestContext.AtPosition(this, relativePosition + ScrollOffset));
+                AddDialogRequested?.Invoke(RequestContext.ForPosition(this, relativePosition + ScrollOffset));
                 return;
             }
 
-            NodePopupRequested?.Invoke(this, matchingWidgets.BoundNode, position);
+            NodePopupRequested?.Invoke(RequestContext.ForNode(this, position, matchingWidgets.BoundNode));
             
         }
 
@@ -338,14 +338,14 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            var context = RequestContext.From(this, ScrollOffset+releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
+            var context = RequestContext.FromPort(this, ScrollOffset+releasePosition, ScadNodeForWidgetName(fromWidgetName), fromPort);
             AddDialogRequested?.Invoke(context);
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
             
-            var context = RequestContext.To(this, releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
+            var context = RequestContext.ToPort(this, releasePosition, ScadNodeForWidgetName(toWidgetName), toPort);
             AddDialogRequested?.Invoke(context);
         }
 

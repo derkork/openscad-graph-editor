@@ -32,8 +32,6 @@ namespace OpenScadGraphEditor.Widgets
             _rtl.MouseFilter = MouseFilterEnum.Ignore;
             _rtl.MoveToNewParent(mc);
             mc.MoveToNewParent(this);
-
-            RectMinSize = new Vector2(100, 100);
             this.Connect("resize_request")
                 .To(this, nameof(OnResizeRequested));
 
@@ -47,7 +45,7 @@ namespace OpenScadGraphEditor.Widgets
             // releases the mouse button. Therefore we will just note down that a resize event has
             // started but wait to fire it until the user actually releases the mouse button
             _resizePending = true;
-            RectMinSize = size;
+            RectSize = size;
             QueueSort();
         }
 
@@ -64,17 +62,18 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
             _resizePending = false;
-            RaiseSizeChanged(RectMinSize);
+            RaiseSizeChanged(RectSize);
 
         }
 
         public override void BindTo(IScadGraph graph, ScadNode node)
         {
             BoundNode = node;
+            var comment = (Comment) node;
             Offset = node.Offset;
-            Title = node.NodeTitle;
-            RectMinSize = ((Comment) node).Size;
-            _rtl.Text = node.NodeDescription;
+            Title = comment.CommentTitle;
+            RectSize = comment.Size;
+            _rtl.Text = comment.CommentDescription;
         }
     }
 }

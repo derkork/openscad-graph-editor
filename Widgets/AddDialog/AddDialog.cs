@@ -86,7 +86,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         {
             _entries = entries;
             _context = context;
-            _filterByContextCheckbox.Pressed = context.HasContext;
+            _filterByContextCheckbox.Pressed = context.TryGetNodeAndPort(out _, out _);
             _lineEdit.Text = "";
             Refresh();
             PopupCentered();

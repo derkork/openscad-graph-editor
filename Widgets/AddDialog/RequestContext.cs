@@ -6,36 +6,69 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     public class RequestContext
     {
 
-        public static RequestContext AtPosition(ScadGraphEdit source, Vector2 position)
+        public static RequestContext ForPosition(ScadGraphEdit source, Vector2 position)
         {
-            return new RequestContext(source, position, null, null, 0);
+            return new RequestContext(source, position);
         }
 
-        public static RequestContext From(ScadGraphEdit source, Vector2 position, ScadNode node, int port)
+        public static RequestContext ForPort(ScadGraphEdit source, Vector2 position, ScadNode node, PortId portId)
         {
-            return new RequestContext(source, position, node, null, port);
+            return new RequestContext(source, position, node, portId);
         }
-        public static RequestContext To(ScadGraphEdit source, Vector2 position, ScadNode node, int port)
+        
+        public static RequestContext FromPort(ScadGraphEdit source, Vector2 position, ScadNode node, int port)
         {
-            return new RequestContext(source, position, null, node, port);
+            return ForPort(source, position, node, PortId.Output(port));
+        }
+        public static RequestContext ToPort(ScadGraphEdit source, Vector2 position, ScadNode node, int port)
+        {
+            return ForPort(source, position, node, PortId.Input(port));
         }
 
-        private RequestContext(ScadGraphEdit source, Vector2 lastReleasePosition, ScadNode sourceNode, ScadNode destinationNode,
-            int lastPort)
+        public static RequestContext ForNode(ScadGraphEdit source, Vector2 position, ScadNode node)
+        {
+            return new RequestContext(source, position, node);
+        }
+
+        private RequestContext(ScadGraphEdit source, Vector2 position, ScadNode node = null, PortId portId = default )
         {
             Source = source;
-            LastReleasePosition = lastReleasePosition;
-            SourceNode = sourceNode;
-            DestinationNode = destinationNode;
-            LastPort = lastPort;
+            Position = position;
+            _node = node;
+            _port = portId;
         }
 
         public ScadGraphEdit Source { get; }
-        public Vector2 LastReleasePosition { get; }
-        public ScadNode SourceNode { get; }
-        public ScadNode DestinationNode { get; }
-        public int LastPort { get; }
+        public Vector2 Position { get; }
+
+        private readonly ScadNode _node;
+        private readonly PortId _port;
+
+        public bool TryGetNodeAndPort(out ScadNode node, out PortId port)
+        {
+            if (_node == null || !_port.IsDefined)
+            {
+                node = null;
+                port = default;
+                return false;
+            }
+
+            node = _node;
+            port = _port;
+            return true;
+        }
+
+        public bool TryGetNode(out ScadNode node)
+        {
+            if (_node == null)
+            {
+                node = default;
+                return false;
+            }
+
+            node = _node;
+            return true;
+        }
         
-        public bool HasContext => SourceNode != null || DestinationNode != null;
     }
 }

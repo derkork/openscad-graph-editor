@@ -13,6 +13,7 @@ using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.CommentEditingDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
@@ -49,6 +50,7 @@ namespace OpenScadGraphEditor
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
         private NodeColorDialog _nodeColorDialog;
+        private CommentEditingDialog _commentEditingDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private LightWeightGraph _copyBuffer;
 
@@ -66,17 +68,20 @@ namespace OpenScadGraphEditor
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
             _importDialog = this.WithName<ImportDialog>("ImportDialog");
             _importDialog.OnNewImportRequested += OnNewImportRequested;
+            
+            _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
+            _commentEditingDialog.CommentChanged += OnCommentChanged;
 
             _nodeColorDialog = this.WithName<NodeColorDialog>("NodeColorDialog");
             _nodeColorDialog.ColorSelected +=
                 (graph, node, color) => PerformRefactorings("Change node color",
                     new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, true, color));
-            
+
             _nodeColorDialog.ColorCleared +=
                 (graph, node) => PerformRefactorings("Clear node color",
                     new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, false));
 
-            
+
             _invokableRefactorDialog = this.WithName<InvokableRefactorDialog>("InvokableRefactorDialog");
             _invokableRefactorDialog.InvokableModificationRequested +=
                 (description, refactorings) => PerformRefactorings($"Change {description.Name}", refactorings);
@@ -146,6 +151,24 @@ namespace OpenScadGraphEditor
             _copyBuffer = new LightWeightGraph();
 
             OnNewButtonPressed();
+        }
+
+        private void OnCommentChanged(RequestContext context, string title, string text)
+        {
+            var refactorings =  new List<Refactoring>();
+            var stepName = "Change comment";
+            if (!context.TryGetNode(out var node))
+            {
+                stepName = "Create comment";
+                // create a new node
+                node = NodeFactory.Build<Comment>();
+                node.Offset = context.Position;
+                refactorings.Add(new AddNodeRefactoring(context.Source, node));
+            }
+            
+            // update the comment
+            refactorings.Add(new ChangeCommentRefactoring(context.Source, (Comment) node, title, text));
+            PerformRefactorings(stepName, refactorings);
         }
 
         private void OnNewImportRequested(string path, IncludeMode includeMode)
@@ -327,6 +350,20 @@ namespace OpenScadGraphEditor
                         )
                 );
             }
+            
+            // add an entry for creating a comment
+            _addDialogEntries.Add(
+                new NodeBasedEntry(
+                    Resources.ScadBuiltinIcon,
+                    NodeFactory.Build<Comment>,
+                    AddComment
+                )
+            );
+        }
+
+        private void AddComment(RequestContext context, NodeBasedEntry entry)
+        {
+            _commentEditingDialog.Open(RequestContext.ForPosition(context.Source, context.Position));
         }
 
         private void Undo()
@@ -345,6 +382,8 @@ namespace OpenScadGraphEditor
             MarkDirty(true);
         }
 
+        
+        
 
         private void OnImportScadFile()
         {
@@ -359,13 +398,11 @@ namespace OpenScadGraphEditor
 
         private void AddNode(RequestContext context, ScadNode node)
         {
-            node.Offset = context.LastReleasePosition;
-            var otherNode = context.SourceNode ?? context.DestinationNode;
-            var isIncoming = context.SourceNode != null;
-            var otherPort = context.LastPort;
+            node.Offset = context.Position;
+            context.TryGetNodeAndPort(out var otherNode, out var otherPort);
 
             PerformRefactorings("Add node",
-                new AddNodeRefactoring(context.Source, node, otherNode, otherPort, isIncoming));
+                new AddNodeRefactoring(context.Source, node, otherNode, otherPort));
         }
 
         private ScadGraphEdit Open(IScadGraph toOpen)
@@ -384,7 +421,7 @@ namespace OpenScadGraphEditor
             // if not, open a new tab
             var editor = Prefabs.New<ScadGraphEdit>();
             editor.RefactoringsRequested += PerformRefactorings;
-            editor.NodePopupRequested += OnNodePopupRequested;
+            editor.NodePopupRequested += OnNodeContextMenuRequested;
             editor.ItemDataDropped += OnItemDataDropped;
             editor.AddDialogRequested += OnAddDialogRequested;
             editor.CopyRequested += OnCopyRequested;
@@ -547,8 +584,9 @@ namespace OpenScadGraphEditor
         private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
             params Action[] after)
         {
-            GdAssert.That(!_refactoringInProgress, "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
-            
+            GdAssert.That(!_refactoringInProgress,
+                "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
+
             _refactoringInProgress = true;
             GD.Print(">> Refactorings start ");
             var context = new RefactoringContext(_currentProject);
@@ -566,7 +604,7 @@ namespace OpenScadGraphEditor
             {
                 GdAssert.That(_currentProject.AllDeclaredInvokables.Contains(graph), "Graph not in project");
             }
-            
+
             // important, the snapshot must be made _after_ the changes.
             _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
 
@@ -681,17 +719,29 @@ namespace OpenScadGraphEditor
             }
         }
 
-        private void OnNodePopupRequested(ScadGraphEdit editor, ScadNode node, Vector2 position)
+        private void OnNodeContextMenuRequested(RequestContext requestContext)
         {
+            var editor = requestContext.Source;
+            var position = requestContext.Position;
+            requestContext.TryGetNode(out var node);
+            
             // build a list of quick actions that include all refactorings that would apply to the selected node
             var actions = UserSelectableNodeRefactoring
                 .GetApplicable(editor, node)
                 .Select(it => new QuickAction(it.Title, () => OnRefactoringRequested(it.Title, it)));
 
-
+            if (node is Comment comment)
+            {
+                actions = actions.Append(
+                    new QuickAction("Edit comment",
+                    () => _commentEditingDialog.Open(requestContext, comment.CommentTitle, comment.CommentDescription))
+                    );
+            }
+            
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.
             // and one to go to the definition. Only do this if the invokable is part of this project (and not built-in or included).
-            if (node is IReferToAnInvokable iReferToAnInvokable && _currentProject.IsDefinedInThisProject(iReferToAnInvokable.InvokableDescription))
+            if (node is IReferToAnInvokable iReferToAnInvokable &&
+                _currentProject.IsDefinedInThisProject(iReferToAnInvokable.InvokableDescription))
             {
                 var name = iReferToAnInvokable.InvokableDescription.Name;
                 // if the node isn't actually the entry point, add an action to go to the entrypoint
@@ -719,31 +769,35 @@ namespace OpenScadGraphEditor
                 actions = actions.Append(
                     new QuickAction("Debug subtree",
                         () => OnRefactoringRequested("Toggle: Debug subtree",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Debug, !hasDebug)), true, hasDebug));
-                
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Debug, !hasDebug)), true,
+                        hasDebug));
+
                 var hasRoot = currentModifiers.HasFlag(ScadNodeModifier.Root);
                 actions = actions.Append(
                     new QuickAction("Make node root",
                         () => OnRefactoringRequested("Toggle: Make node root",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Root, !hasRoot)), true, hasRoot));
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Root, !hasRoot)), true,
+                        hasRoot));
 
-                
+
                 var hasBackground = currentModifiers.HasFlag(ScadNodeModifier.Background);
                 actions = actions.Append(
                     new QuickAction("Background subtree",
                         () => OnRefactoringRequested("Toggle: Background subtree",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Background, !hasBackground)), true, hasBackground));
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Background, !hasBackground)),
+                        true, hasBackground));
 
                 var hasDisable = currentModifiers.HasFlag(ScadNodeModifier.Disable);
                 actions = actions.Append(
                     new QuickAction("Disable subtree",
                         () => OnRefactoringRequested("Toggle: Disable subtree",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Disable, !hasDisable)), true, hasDisable));
+                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Disable, !hasDisable)), true,
+                        hasDisable));
 
-                
+
                 actions = actions.Append(
                     new QuickAction("Set color",
-                    () => _nodeColorDialog.Open(editor, node)));
+                        () => _nodeColorDialog.Open(editor, node)));
 
                 if (currentModifiers.HasFlag(ScadNodeModifier.Color))
                 {
@@ -752,7 +806,6 @@ namespace OpenScadGraphEditor
                             () => OnRefactoringRequested("Remove color",
                                 new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Color, false))));
                 }
-
             }
 
             _quickActionsPopup.Open(position, actions);
@@ -937,33 +990,39 @@ namespace OpenScadGraphEditor
                 return EntryFittingDecision.Veto;
             }
 
-            // if this came from a node left of us, check if we have a matching input port
-            if (context.SourceNode != null)
+            // TODO: this can also be simplified if we use PortIds all the way same as in AddNodeRefactoring
+            if (context.TryGetNodeAndPort(out var contextNode, out var contextPort))
             {
-                for (var i = 0; i < _template.InputPortCount; i++)
+                // if this came from a node left of us, check if we have a matching input port
+                if (contextPort.IsOutput)
                 {
-                    var connection = new ScadConnection(context.Source, context.SourceNode, context.LastPort, _template,
-                        i);
-                    if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
+                    for (var i = 0; i < _template.InputPortCount; i++)
                     {
-                        return EntryFittingDecision.Fits;
+                        var connection = new ScadConnection(context.Source, contextNode, contextPort.Port, _template,
+                            i);
+                        if (ConnectionRules.CanConnect(connection).Decision ==
+                            ConnectionRules.OperationRuleDecision.Allow)
+                        {
+                            return EntryFittingDecision.Fits;
+                        }
+                    }
+                }
+                // if this came from a node right of us, check if we have a matching output port
+                else
+                {
+                    for (var i = 0; i < _template.OutputPortCount; i++)
+                    {
+                        var connection = new ScadConnection(context.Source, _template, i, contextNode,
+                            contextPort.Port);
+                        if (ConnectionRules.CanConnect(connection).Decision ==
+                            ConnectionRules.OperationRuleDecision.Allow)
+                        {
+                            return EntryFittingDecision.Fits;
+                        }
                     }
                 }
             }
 
-            // if this came from a node right of us, check if we have a matching output port
-            if (context.DestinationNode != null)
-            {
-                for (var i = 0; i < _template.OutputPortCount; i++)
-                {
-                    var connection = new ScadConnection(context.Source, _template, i, context.DestinationNode,
-                        context.LastPort);
-                    if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
-                    {
-                        return EntryFittingDecision.Fits;
-                    }
-                }
-            }
 
             // otherwise it doesn't match, but could still be added.
             return EntryFittingDecision.DoesNotFit;
