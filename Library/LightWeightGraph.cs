@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
@@ -33,7 +34,7 @@ namespace OpenScadGraphEditor.Library
         public void Main()
         {
             Clear();
-            Description = Prefabs.New<MainModuleDescription>();
+            Description = new MainModuleDescription();
             _entryPoint = NodeFactory.Build<MainEntryPoint>();
             _nodes.Add(_entryPoint);
         }
@@ -69,7 +70,7 @@ namespace OpenScadGraphEditor.Library
             }
         }
 
-        public void Clear()
+        private void Clear()
         {
             _entryPoint = null;
             _connections.Clear();
@@ -85,7 +86,7 @@ namespace OpenScadGraphEditor.Library
         {
             Clear();
 
-            Description = graph.Description;
+            Description = IoExt.FromSavedState(graph.Description);
 
             foreach (var savedNode in graph.Nodes)
             {
@@ -108,13 +109,11 @@ namespace OpenScadGraphEditor.Library
 
         public void SaveInto(SavedGraph graph)
         {
-            graph.Description = Description;
+            graph.Description = IoExt.ToSavedState(Description);
 
             foreach (var node in (IEnumerable<ScadNode>) _nodes)
             {
-                var savedNode = Prefabs.New<SavedNode>();
-                node.SaveInto(savedNode);
-                graph.Nodes.Add(savedNode);
+                graph.Nodes.Add(node.ToSavedState());
             }
 
             foreach (var connection in GetAllConnections())

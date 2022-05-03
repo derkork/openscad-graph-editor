@@ -2,7 +2,7 @@ using Godot;
 using Godot.Collections;
 using OpenScadGraphEditor.Library.External;
 
-namespace OpenScadGraphEditor.Library
+namespace OpenScadGraphEditor.Library.IO
 {
     /// <summary>
     /// A saved project.
@@ -27,14 +27,14 @@ namespace OpenScadGraphEditor.Library
         /// <summary>
         /// All defined variables.
         /// </summary>
-        [Export] public Array<VariableDescription> Variables = new Array<VariableDescription>();
+        [Export] public Array<SavedVariableDescription> Variables = new Array<SavedVariableDescription>();
         
                 
         /// <summary>
         /// All references to external files.
         /// </summary>
         [Export]
-        public Array<ExternalReference> ExternalReferences = new Array<ExternalReference>();
+        public Array<SavedExternalReference> ExternalReferences = new Array<SavedExternalReference>();
 
     }
 }

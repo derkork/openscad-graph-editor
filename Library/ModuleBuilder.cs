@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using GodotExt;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -17,7 +16,7 @@ namespace OpenScadGraphEditor.Library
 
         public static ModuleBuilder NewModule(string name, string id = "")
         {
-            var builder = new ModuleBuilder(Prefabs.New<ModuleDescription>())
+            var builder = new ModuleBuilder(new ModuleDescription())
             {
                 _currentModuleDescription =
                 {
@@ -52,13 +51,15 @@ namespace OpenScadGraphEditor.Library
             string label = "", string description = "", bool optional = false)
         {
             GdAssert.That(_currentModuleDescription.Parameters.All(it => it.Name != name), $"Parameter with name '{name}' already exists");
-            
-            var parameter = Prefabs.New<ParameterDescription>();
-            parameter.Name = name;
-            parameter.Description = description;
-            parameter.TypeHint = typeHint;
-            parameter.Label = label;
-            parameter.IsOptional = optional;
+
+            var parameter = new ParameterDescription
+            {
+                Name = name,
+                Description = description,
+                TypeHint = typeHint,
+                Label = label,
+                IsOptional = optional
+            };
 
             _currentModuleDescription.Parameters.Add(parameter);
             return this;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GodotExt;
 using OpenScadGraphEditor.Library.External;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
@@ -51,8 +52,7 @@ namespace OpenScadGraphEditor.Library
             GdAssert.That(from == MainModule || _functions.Contains(from) || _modules.Contains(from),
                 "'from' graph is not part of this project.");
 
-            var savedGraph = Prefabs.New<SavedGraph>();
-            from.SaveInto(savedGraph);
+            var savedGraph = from.ToSavedState();
             to.LoadFrom(savedGraph, this);
 
             switch (to.Description)
@@ -152,24 +152,26 @@ namespace OpenScadGraphEditor.Library
             // Step 1: load function descriptions so we can resolve them in step 4
             foreach (var function in project.Functions)
             {
-                _projectFunctionDescriptions[function.Description.Id] = (FunctionDescription) function.Description;
+                _projectFunctionDescriptions[function.Description.Id] = 
+                    (FunctionDescription)  function.Description.FromSavedState();
             }
 
             foreach (var module in project.Modules)
             {
-                _projectModuleDescriptions[module.Description.Id] = (ModuleDescription) module.Description;
+                _projectModuleDescriptions[module.Description.Id] =
+                    (ModuleDescription) module.Description.FromSavedState();
             }
 
             // Step 2: load variable descriptions so we can resolve them in step 4
             foreach (var variable in project.Variables)
             {
-                _projectVariables.Add(variable.Id, variable);
+                _projectVariables.Add(variable.Id, variable.FromSavedState());
             }
 
             // Step 3: load external references so we can resolve them in step 4
             foreach (var external in project.ExternalReferences)
             {
-                _externalReferences.Add(external.Id, external);
+                _externalReferences.Add(external.Id, external.FromSavedState());
             }
 
             // Step 4: load the actual graphs, which can now resolve references to other functions.
@@ -195,31 +197,25 @@ namespace OpenScadGraphEditor.Library
         {
             var result = Prefabs.New<SavedProject>();
 
-            _externalReferences.ForAll(it => result.ExternalReferences.Add(it.Value));
+            _externalReferences.ForAll(it => result.ExternalReferences.Add(it.Value.ToSavedState()));
 
             foreach (var function in _functions)
             {
-                var savedGraph = Prefabs.New<SavedGraph>();
-                function.SaveInto(savedGraph);
-                result.Functions.Add(savedGraph);
+                result.Functions.Add(function.ToSavedState());
             }
 
             foreach (var module in _modules)
             {
-                var savedGraph = Prefabs.New<SavedGraph>();
-                module.SaveInto(savedGraph);
-                result.Modules.Add(savedGraph);
+                result.Modules.Add(module.ToSavedState());
             }
 
             foreach (var variable in _projectVariables.Values)
             {
-                result.Variables.Add(variable);
+                result.Variables.Add(variable.ToSavedState());
             }
 
             {
-                var savedGraph = Prefabs.New<SavedGraph>();
-                MainModule.SaveInto(savedGraph);
-                result.MainModule = savedGraph;
+                result.MainModule = MainModule.ToSavedState();
             }
 
             return result;

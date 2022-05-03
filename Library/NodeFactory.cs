@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
@@ -67,9 +68,7 @@ namespace OpenScadGraphEditor.Library
         /// </summary>
         public static T Duplicate<T>(T node, IReferenceResolver resolver) where T:ScadNode
         {
-            var savedNode = Prefabs.New<SavedNode>();
-            node.SaveInto(savedNode);
-
+            var savedNode = node.ToSavedState();
             savedNode.Id = Guid.NewGuid().ToString();
             return (T) FromSavedNode(savedNode, resolver);
         }

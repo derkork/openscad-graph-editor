@@ -1,6 +1,7 @@
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Library.IO;
 
 namespace OpenScadGraphEditor.Nodes.IndexVector
 {

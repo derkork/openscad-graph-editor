@@ -1,7 +1,7 @@
 using Godot;
 using Godot.Collections;
 
-namespace OpenScadGraphEditor.Library
+namespace OpenScadGraphEditor.Library.IO
 {
     /// <summary>
     /// This resource represents a module or function implementation as a node graph.
@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Library
     public class SavedGraph : Resource
     {
         [Export]
-        public InvokableDescription Description;
+        public SavedInvokableDescription Description;
         
         [Export]
         public Array<SavedNode> Nodes = new Array<SavedNode>();

@@ -1,6 +1,6 @@
 using Godot;
 
-namespace OpenScadGraphEditor.Library
+namespace OpenScadGraphEditor.Library.IO
 {
     /// <summary>
     /// This resource represents a saved connection between nodes.

@@ -1,4 +1,5 @@
 using Godot;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -11,12 +12,24 @@ namespace OpenScadGraphEditor.Library
         /// <summary>
         /// The hinted return type of the function.
         /// </summary>
-        [Export]
         public PortType ReturnTypeHint { get; set; } = PortType.Any;
 
         public override bool CanUse(ScadNode node)
         {
             return node is IAmAnExpression;
+        }
+        
+        
+        public void LoadFrom(SavedFunctionDescription savedInvokableDescription)
+        {
+            ReturnTypeHint = savedInvokableDescription.ReturnTypeHint;
+            base.LoadFrom(savedInvokableDescription);
+        }
+
+        public void SaveInto(SavedFunctionDescription savedInvokableDescription)
+        {
+            savedInvokableDescription.ReturnTypeHint = ReturnTypeHint;
+            base.SaveInto(savedInvokableDescription);
         }
     }
 }

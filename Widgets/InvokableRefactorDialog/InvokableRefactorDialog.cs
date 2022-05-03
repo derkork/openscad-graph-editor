@@ -221,9 +221,11 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                         .Where(it => it.OriginalName == null)
                         .Select(it =>
                         {
-                            var parameterDescription = Prefabs.New<ParameterDescription>();
-                            parameterDescription.Name = it.Name;
-                            parameterDescription.TypeHint = it.TypeHint;
+                            var parameterDescription = new ParameterDescription
+                            {
+                                Name = it.Name,
+                                TypeHint = it.TypeHint
+                            };
                             return parameterDescription;
                         })
                         .ToArray();

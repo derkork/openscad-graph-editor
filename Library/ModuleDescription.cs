@@ -1,4 +1,4 @@
-using Godot;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -11,12 +11,23 @@ namespace OpenScadGraphEditor.Library
         /// <summary>
         /// Whether or not this module supports children 
         /// </summary>
-        [Export]
         public bool SupportsChildren { get; set; }
 
         public override bool CanUse(ScadNode node)
         {
             return true;
+        }
+
+        public void LoadFrom(SavedModuleDescription savedInvokableDescription)
+        {
+            SupportsChildren = savedInvokableDescription.SupportsChildren;
+            base.LoadFrom(savedInvokableDescription);
+        }
+
+        public void SaveInto(SavedModuleDescription savedInvokableDescription)
+        {
+            savedInvokableDescription.SupportsChildren = SupportsChildren;
+            base.SaveInto(savedInvokableDescription);
         }
     }
 }

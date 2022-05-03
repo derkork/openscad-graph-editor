@@ -1,4 +1,5 @@
 using System;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -20,6 +21,16 @@ namespace OpenScadGraphEditor.Library
         public override bool CanUse(ScadNode node)
         {
             return !(node is Child || node is Children);
+        }
+        
+        public void LoadFrom(SavedMainModuleDescription savedInvokableDescription)
+        {
+            base.LoadFrom(savedInvokableDescription);
+        }
+
+        public void SaveInto(SavedMainModuleDescription savedInvokableDescription)
+        {
+            base.SaveInto(savedInvokableDescription);
         }
     }
 }

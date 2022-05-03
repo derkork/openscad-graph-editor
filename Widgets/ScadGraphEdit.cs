@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -175,7 +176,7 @@ namespace OpenScadGraphEditor.Widgets
 
         public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
-            Description = graph.Description;
+            Description = IoExt.FromSavedState(graph.Description);
             _allNodes.Clear();
             _allConnections.Clear();
 
@@ -237,7 +238,7 @@ namespace OpenScadGraphEditor.Widgets
 
         public void SaveInto(SavedGraph graph)
         {
-            graph.Description = Description;
+            graph.Description = Description.ToSavedState();
 
             foreach (var node in _allNodes.Values)
             {

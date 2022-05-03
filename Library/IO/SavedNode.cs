@@ -1,9 +1,8 @@
-using System;
 using System.Globalization;
 using Godot;
 using Godot.Collections;
 
-namespace OpenScadGraphEditor.Library
+namespace OpenScadGraphEditor.Library.IO
 {
     /// <summary>
     /// This resource represents a saved graph

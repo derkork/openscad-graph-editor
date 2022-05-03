@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Library
 
         public static FunctionBuilder NewFunction(string name, string id = "", PortType returnType = PortType.Any)
         {
-            var builder = new FunctionBuilder(Prefabs.New<FunctionDescription>())
+            var builder = new FunctionBuilder(new FunctionDescription())
             {
                 _currentFunctionDescription =
                 {
@@ -45,12 +45,14 @@ namespace OpenScadGraphEditor.Library
         public FunctionBuilder WithParameter(string name, PortType typeHint = PortType.Any,
             string label = "", string description = "", bool optional = false)
         {
-            var parameter = Prefabs.New<ParameterDescription>();
-            parameter.Name = name;
-            parameter.Description = description;
-            parameter.TypeHint = typeHint;
-            parameter.Label = label;
-            parameter.IsOptional = optional;
+            var parameter = new ParameterDescription
+            {
+                Name = name,
+                Description = description,
+                TypeHint = typeHint,
+                Label = label,
+                IsOptional = optional
+            };
 
             _currentFunctionDescription.Parameters.Add(parameter);
             return this;

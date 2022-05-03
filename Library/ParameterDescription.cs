@@ -1,4 +1,4 @@
-using Godot;
+using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
@@ -6,47 +6,55 @@ namespace OpenScadGraphEditor.Library
     /// <summary>
     /// A description of a parameter of an Invokable.
     /// </summary>
-    public sealed class ParameterDescription : Resource
+    public sealed class ParameterDescription 
     {
         /// <summary>
         /// The name of the parameter.
         /// </summary>
-        [Export]
         public string Name { get; set; }
 
         /// <summary>
         /// The label of the parameter to be used when being rendered as a node.
         /// </summary>
-        [Export]
         public string Label { get; set; } = "";
 
         /// <summary>
         /// The description of the parameter.
         /// </summary>
-        [Export]
         public string Description { get; set; } = "";
         
         /// <summary>
         /// A type hint for the parameter.
         /// </summary>
-        [Export]
         public PortType TypeHint { get; set; } = PortType.Any;
 
         /// <summary>
         /// Whether the parameter is optional.
         /// </summary>
-        [Export]
         public bool IsOptional { get; set; } = false;
-        
-        /// <summary>
-        /// Whether this parameter can appear multiple times in the same invocation.
-        /// </summary>
-        [Export]
-        public bool CanAppearMultipleTimes { get; set; } = false;
+   
         
         /// <summary>
         /// Returns the label of the parameter if set, otherwise it's name.
         /// </summary>
         public string LabelOrFallback => Label.Length > 0 ? Label : Name;
+
+        public void LoadFrom(SavedParameterDescription parameter)
+        {
+            Name = parameter.Name;
+            Label = parameter.Label;
+            Description = parameter.Description;
+            TypeHint = parameter.TypeHint;
+            IsOptional = parameter.IsOptional;
+        }
+
+        public void SaveInto(SavedParameterDescription parameter)
+        {
+            parameter.Name = Name;
+            parameter.Label = Label;
+            parameter.Description = Description;
+            parameter.TypeHint = TypeHint;
+            parameter.IsOptional = IsOptional;
+        }
     }
 }
