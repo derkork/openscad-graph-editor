@@ -171,12 +171,24 @@ namespace OpenScadGraphEditor.Widgets
         public void FocusEntryPoint()
         {
             var widget = _widgets[_entryPoint.Id];
+            // move it somewhere top left
             ScrollOffset = widget.Offset - new Vector2(100, 100);
         }
+        
+        public void FocusNode(ScadNode node)
+        {
+           var widget = _widgets[node.Id];
+           var middle = RectSize / 2;
+           
+           // calculate the offset we need to move to get the widget into the middle.
+           ScrollOffset = widget.Offset - (middle * Zoom);
+           widget.Flash();
+        }
+        
 
         public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
         {
-            Description = IoExt.FromSavedState(graph.Description);
+            Description = graph.Description.FromSavedState();
             _allNodes.Clear();
             _allConnections.Clear();
 

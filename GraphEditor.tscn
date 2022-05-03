@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -17,6 +17,8 @@
 [ext_resource path="res://Widgets/IconButton/IconButton.tscn" type="PackedScene" id=15]
 [ext_resource path="res://Widgets/NodeColorDialog/NodeColorDialog.tscn" type="PackedScene" id=16]
 [ext_resource path="res://Widgets/CommentEditingDialog/CommentEditingDialog.tscn" type="PackedScene" id=17]
+[ext_resource path="res://Widgets/NotificationService.cs" type="Script" id=18]
+[ext_resource path="res://Widgets/UsageDialog/UsageDialog.tscn" type="PackedScene" id=19]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -269,3 +271,30 @@ margin_left = 374.0
 margin_right = 1920.0
 margin_bottom = 1007.0
 tab_align = 0
+
+[node name="UsageDialog" parent="MarginContainer/VBoxContainer" instance=ExtResource( 19 )]
+visible = false
+anchor_right = 0.0
+margin_top = 780.0
+margin_right = 1920.0
+margin_bottom = 1080.0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer"]
+margin_right = 1920.0
+margin_bottom = 1080.0
+mouse_filter = 2
+custom_constants/margin_right = 100
+custom_constants/margin_top = 100
+custom_constants/margin_left = 100
+custom_constants/margin_bottom = 100
+
+[node name="NotificationLayer" type="VBoxContainer" parent="MarginContainer/MarginContainer"]
+margin_left = 1820.0
+margin_top = 980.0
+margin_right = 1820.0
+margin_bottom = 980.0
+mouse_filter = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+custom_constants/separation = 10
+script = ExtResource( 18 )

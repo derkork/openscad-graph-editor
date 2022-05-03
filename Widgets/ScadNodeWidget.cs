@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
@@ -27,6 +28,8 @@ namespace OpenScadGraphEditor.Widgets
         protected virtual Theme UseTheme => Resources.StandardNodeWidgetTheme;
 
         public ScadNode BoundNode { get; protected set; }
+
+        private Tween _tween;
 
         public override void _Ready()
         {
@@ -111,6 +114,32 @@ namespace OpenScadGraphEditor.Widgets
             CallDeferred(nameof(Minimize));
         }
 
+        public async void Flash()
+        {
+            if (_tween != null)
+            {
+                return;
+            }
+
+            _tween = new Tween();
+            _tween.MoveToNewParent(this);
+            
+            var initialModulate = Modulate;
+            
+            _tween.InterpolateProperty(this, "modulate", Modulate, Colors.Yellow, 0.5f);
+            _tween.Start();
+
+            await _tween.AreAllCompleted();
+            
+            _tween.InterpolateProperty(this, "modulate", Modulate, initialModulate, 0.5f);
+            _tween.Start();
+
+            await _tween.AreAllCompleted();
+            
+            _tween.RemoveAndFree();
+            _tween = null;
+        }
+        
         private void Minimize()
         {
             SetSize(new Vector2(1,1));

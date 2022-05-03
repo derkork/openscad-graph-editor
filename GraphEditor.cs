@@ -20,6 +20,7 @@ using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 using OpenScadGraphEditor.Widgets.NodeColorDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
+using OpenScadGraphEditor.Widgets.UsageDialog;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 
 namespace OpenScadGraphEditor
@@ -52,6 +53,7 @@ namespace OpenScadGraphEditor
         private VariableRefactorDialog _variableRefactorDialog;
         private NodeColorDialog _nodeColorDialog;
         private CommentEditingDialog _commentEditingDialog;
+        private UsageDialog _usageDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private LightWeightGraph _copyBuffer;
 
@@ -69,6 +71,8 @@ namespace OpenScadGraphEditor
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
             _importDialog = this.WithName<ImportDialog>("ImportDialog");
             _importDialog.OnNewImportRequested += OnNewImportRequested;
+            _usageDialog = this.WithName<UsageDialog>("UsageDialog");
+            _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
             
             _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
             _commentEditingDialog.CommentChanged += OnCommentChanged;
@@ -152,6 +156,24 @@ namespace OpenScadGraphEditor
             _copyBuffer = new LightWeightGraph();
 
             OnNewButtonPressed();
+
+            NotificationService.ShowNotification("Welcome to OpenScad Graph Editor");
+        }
+
+        private void OnNodeHighlightRequested(UsagePointInformation information)
+        {
+            var graph = _currentProject.AllDeclaredInvokables.FirstOrDefault(it => it.Description.Id == information.GraphId);
+            if (graph != null)
+            {
+                var node = graph.GetAllNodes().FirstOrDefault(it => it.Id == information.NodeId);
+                if (node != null)
+                {
+                    var edit = Open(graph);
+                    edit.FocusNode(node);
+                    return;
+                }
+            }
+            NotificationService.ShowNotification("This usage no longer exists.");
         }
 
         private void OnCommentChanged(RequestContext context, string title, string text)
@@ -192,7 +214,7 @@ namespace OpenScadGraphEditor
                                 () => OnRefactoringRequested(title,
                                     new DeleteInvokableRefactoring(functionDescription))));
                         }
-
+                        
                         break;
                     case ModuleDescription moduleDescription:
                         if (_currentProject.IsDefinedInThisProject(moduleDescription))
@@ -204,6 +226,12 @@ namespace OpenScadGraphEditor
 
                         break;
                 }
+
+                if (!(invokableTreeEntry.Description is MainModuleDescription) && !(invokableTreeEntry.Description.IsBuiltin))
+                {
+                    actions.Add(new QuickAction($"Find usages of {invokableTreeEntry.Description.Name}", 
+                        () => FindAndShowUsages(invokableTreeEntry.Description)));
+                }
             }
 
             if (entry is ScadVariableTreeEntry scadVariableListEntry)
@@ -214,6 +242,9 @@ namespace OpenScadGraphEditor
                         () => OnRefactoringRequested(
                             title, new DeleteVariableRefactoring(scadVariableListEntry.Description))));
                 }
+                
+                actions.Add(new QuickAction($"Find usages of {scadVariableListEntry.Description.Name}", 
+                    () => FindAndShowUsages(scadVariableListEntry.Description)));
             }
 
             if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry &&
@@ -762,26 +793,38 @@ namespace OpenScadGraphEditor
             
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.
             // and one to go to the definition. Only do this if the invokable is part of this project (and not built-in or included).
-            if (node is IReferToAnInvokable iReferToAnInvokable &&
-                _currentProject.IsDefinedInThisProject(iReferToAnInvokable.InvokableDescription))
+            if (node is IReferToAnInvokable iReferToAnInvokable)
             {
                 var name = iReferToAnInvokable.InvokableDescription.Name;
-                // if the node isn't actually the entry point, add an action to go to the entrypoint
-                if (!(node is EntryPoint))
+                if (_currentProject.IsDefinedInThisProject(iReferToAnInvokable.InvokableDescription))
                 {
+                    // if the node isn't actually the entry point, add an action to go to the entrypoint
+                    if (!(node is EntryPoint))
+                    {
+                        actions = actions.Append(
+                            new QuickAction($"Go to definition of {name}",
+                                () => Open(_currentProject.FindDefiningGraph(iReferToAnInvokable.InvokableDescription))
+                            )
+                        );
+                    }
+
                     actions = actions.Append(
-                        new QuickAction($"Go to definition of {name}",
-                            () => Open(_currentProject.FindDefiningGraph(iReferToAnInvokable.InvokableDescription))
+                        new QuickAction($"Refactor {name}",
+                            () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)
                         )
                     );
                 }
 
-                actions = actions.Append(
-                    new QuickAction($"Refactor {name}",
-                        () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)
-                    )
-                );
+                if (!iReferToAnInvokable.InvokableDescription.IsBuiltin)
+                {
+                    actions = actions.Append(
+                        new QuickAction($"Find usages of {name}",
+                            () => FindAndShowUsages(iReferToAnInvokable.InvokableDescription)
+                        )
+                    );
+                }
             }
+            
 
             if (node is ICanHaveModifier)
             {
@@ -975,6 +1018,40 @@ namespace OpenScadGraphEditor
             {
                 Redo();
             }
+        }
+        
+        private void FindAndShowUsages(VariableDescription variableDescription)
+        {
+            var usagePoints = _currentProject.FindAllReferencingNodes(variableDescription)
+                .Select(it => new UsagePointInformation($"{it.Node.NodeTitle} in ({it.Graph.Description.Name})",
+                    it.Graph.Description.Id, it.Node.Id))
+                .ToList();
+
+            if (usagePoints.Count == 0)
+            {
+                NotificationService.ShowNotification("No usages found.");
+                return;
+            }
+            
+            _usageDialog.Open($"Usages of variable {variableDescription.Name}", usagePoints);
+
+        }
+
+        private void FindAndShowUsages(InvokableDescription invokableDescription)
+        {
+            var usagePoints = _currentProject.FindAllReferencingNodes(invokableDescription)
+                .Select(it => new UsagePointInformation($"{it.Node.NodeTitle} in ({it.Graph.Description.Name})",
+                    it.Graph.Description.Id, it.Node.Id))
+                .ToList();
+
+            if (usagePoints.Count == 0)
+            {
+                NotificationService.ShowNotification("No usages found.");
+                return;
+            }
+
+            var type = invokableDescription is FunctionDescription ? "function" : "module";
+            _usageDialog.Open($"Usages of {type} {invokableDescription.Name}", usagePoints);
         }
     }
 
