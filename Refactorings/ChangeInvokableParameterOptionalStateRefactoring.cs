@@ -50,9 +50,12 @@ namespace OpenScadGraphEditor.Refactorings
                 foreach (var referencingNode in affectedNodes)
                 {
                     var matchingInputPort = referencingNode.NodeAsReference.GetParameterInputPort(_parameterIndex);
-                    if (referencingNode.Node.TryGetLiteral(PortId.Input(matchingInputPort), out var matchingLiteral))
+                    if (matchingInputPort != -1)
                     {
-                        matchingLiteral.IsSet = true;
+                        if (referencingNode.Node.TryGetLiteral(PortId.Input(matchingInputPort), out var matchingLiteral))
+                        {
+                            matchingLiteral.IsSet = true;
+                        }
                     }
                 }
             }
