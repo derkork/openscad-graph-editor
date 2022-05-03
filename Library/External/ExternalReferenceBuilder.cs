@@ -15,5 +15,15 @@ namespace OpenScadGraphEditor.Library.External
 
             return reference;
         }
+        public static ExternalReference BuildEmptyCopy(ExternalReference original)
+        {
+            var reference = Prefabs.New<ExternalReference>();
+            reference.Id = Guid.NewGuid().ToString();
+            reference.Mode = original.Mode;
+            reference.IncludePath = original.IncludePath;
+            reference.IncludedBy = original.IncludedBy;
+
+            return reference;
+        }
     }
 }

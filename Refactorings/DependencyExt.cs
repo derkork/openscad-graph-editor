@@ -38,32 +38,11 @@ namespace OpenScadGraphEditor.Refactorings
                 GD.Print($"Reference to '{fullPath}' already exists in project.");
                 return;
             }
-
-            string text;
-            try
-            {
-                // read text from file
-                text = System.IO.File.ReadAllText(fullPath, Encoding.UTF8);
-            }
-            catch (Exception e)
-            {
-                GD.PrintErr("Cannot read file. " + e.Message);
-                // TODO better error handling
-                return;
-            }
-
             // build an external reference to parse into
             var externalReference = ExternalReferenceBuilder.Build(mode, includePath, owner);
-            try
+
+            if (!externalReference.ParseFile(fullPath))
             {
-                GD.Print("Parsing SCAD file: " + fullPath);
-                // parse contents and fill the reference with data
-                ExternalFileParser.Parse(text, externalReference);
-            }
-            catch (Exception e)
-            {
-                GD.PrintErr("Cannot parse file. " + e.Message);
-                // TODO better error handling
                 return;
             }
 
@@ -77,8 +56,64 @@ namespace OpenScadGraphEditor.Refactorings
                 AddReferenceToScadFile(project, fullPath, transitiveReference, IncludeMode.Include, externalReference);
             }
         }
+
+        public static bool TryResolveFullPath(this ExternalReference reference, ScadProject project, out string result)
+        {
+            // first we need to find out if the reference is included from the root or was included by another reference
+            if (reference.IncludedBy.Empty())
+            {
+                // this is a root reference.
+                return PathResolver.TryResolve(project.ProjectPath, reference.IncludePath, out result);
+            }
+            
+            // this is a transitive reference.
+            // we first determine the full path of the parent reference and then use that to resolve the path of this reference
+            var previousReference = project.ResolveExternalReference(reference.IncludedBy);
+            if (TryResolveFullPath(previousReference, project, out var fullPathToParent))
+            {
+                // now we got everything
+                return PathResolver.TryResolve(fullPathToParent, reference.IncludePath, out result);
+            }
+            
+            // we could not resolve the full path
+            result = default;
+            return false;
+        }
         
-        
+        public static bool ParseFile(this ExternalReference externalReference, string fullPath)
+        {
+            GdAssert.That(!externalReference.IsLoaded, "External reference is already loaded.");
+            
+            string text;
+            try
+            {
+                // read text from file
+                text = System.IO.File.ReadAllText(fullPath, Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                GD.PrintErr("Cannot read file. " + e.Message);
+                // TODO better error handling
+                return false;
+            }
+
+            try
+            {
+                GD.Print("Parsing SCAD file: " + fullPath);
+                // parse contents and fill the reference with data
+                ExternalFileParser.Parse(text, externalReference);
+            }
+            catch (Exception e)
+            {
+                GD.PrintErr("Cannot parse file. " + e.Message);
+                // TODO better error handling
+                return false;
+            }
+
+            return true;
+        }
+
+
         /// <summary>
         /// Prepares a reference for removal. Returns a list of all references that will be removed.
         /// The list may contain more than one item if the reference included other references. The function will ensure

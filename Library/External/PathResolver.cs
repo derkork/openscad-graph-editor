@@ -120,7 +120,7 @@ namespace OpenScadGraphEditor.Library.External
             var relativeToDirectoryParts = NormalizePath(relativeToDirectory).Split('/');
 
             // Get the shortest of the two paths
-            var len = absoluteDirectoryParts.Length < relativeToDirectoryParts.Length ? absoluteDirectoryParts.Length : relativeToDirectoryParts.Length;
+            var len =Mathf.Min(absoluteDirectoryParts.Length, relativeToDirectoryParts.Length);
 
             // Use to determine where in the loop we exited
             var lastCommonRoot = -1;
@@ -147,7 +147,7 @@ namespace OpenScadGraphEditor.Library.External
 
             // Add on the ..
             // exclude the last element as this is a file name.
-            for (var index = lastCommonRoot + 1; index < absoluteDirectoryParts.Length - 1; index++)
+            for (var index = lastCommonRoot + 1; index < relativeToDirectoryParts.Length; index++)
             {
                 if (absoluteDirectoryParts[index].Length > 0)
                 {

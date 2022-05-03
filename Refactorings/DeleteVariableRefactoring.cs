@@ -1,4 +1,5 @@
 using System.Linq;
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
 
@@ -22,9 +23,24 @@ namespace OpenScadGraphEditor.Refactorings
                 .ToList() // avoid modifying the project while still reading it
                 // and perform the deletion refactorings
                 .ForAll(context.PerformRefactoring);
-            
-            // finally delete the variable entry from the project
-            context.Project.RemoveVariable(_description);
+
+            if (context.Project.IsDefinedInThisProject(_description))
+            {
+                // finally delete the variable entry from the project
+                context.Project.RemoveVariable(_description);
+            }
+            else
+            {
+                // find the external reference that defined it
+                if (context.Project.TryGetExternalReferenceHolding(_description, out var externalReference))
+                {
+                    externalReference.Variables.Remove(externalReference.Variables.First(it => it.Id == _description.Id));
+                }
+                else
+                {
+                    GdAssert.That(false, "Could not find external reference holding the variable");
+                }
+            }
         }
     }
 }

@@ -223,6 +223,13 @@ namespace OpenScadGraphEditor
                     () => OnRefactoringRequested(
                         removeReferenceTitle,
                         new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
+                
+                
+                var refreshReferenceTitle = $"Refresh reference to {entry.Title}";
+                actions.Add(new QuickAction(refreshReferenceTitle,
+                    () => OnRefactoringRequested(
+                        refreshReferenceTitle,
+                        new RefreshExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
             }
 
             _quickActionsPopup.Open(mousePosition, actions);

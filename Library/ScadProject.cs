@@ -327,6 +327,39 @@ namespace OpenScadGraphEditor.Library
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        public bool TryGetExternalReferenceHolding(InvokableDescription description, out ExternalReference result)
+        {
+            foreach (var reference in _externalReferences.Values)
+            {
+                switch (description)
+                {
+                    case FunctionDescription _ when reference.Functions.Any(it => it.Id == description.Id):
+                        result = reference;
+                        return true;
+                    case ModuleDescription _ when reference.Modules.Any(it => it.Id == description.Id):
+                        result = reference;
+                        return true;
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryGetExternalReferenceHolding(VariableDescription description, out ExternalReference result)
+        {
+            foreach (var externalReference in _externalReferences.Values
+                         .Where(externalReference => externalReference.Variables.Any(it => it.Id == description.Id)))
+            {
+                result = externalReference;
+                return true;
+            }
+            
+            result = default;
+            return false;
+        }
+        
         
         public bool IsDefinedInThisProject(FunctionDescription description)
         {

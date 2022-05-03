@@ -22,14 +22,40 @@ namespace OpenScadGraphEditor.Refactorings
                 .ToList() // avoid concurrent modification
                 .ForAll(context.PerformRefactoring);
             
-            // finally delete the graph defining the invokable itself.
-            var definingGraph = context.Project.FindDefiningGraph(_description);
-            GdAssert.That(definingGraph != null, "definingGraph != null");
-            
-            var refactorable = context.MakeRefactorable(definingGraph);
-            context.Project.RemoveInvokable(_description);
+            // if the invokable is defined in the project, delete the graph
+            if (context.Project.IsDefinedInThisProject(_description))
+            {
+                var definingGraph = context.Project.FindDefiningGraph(_description);
+                GdAssert.That(definingGraph != null, "definingGraph != null");
 
-            context.MarkDeleted(refactorable);
+                var refactorable = context.MakeRefactorable(definingGraph);
+                context.Project.RemoveInvokable(_description);
+                
+                // make sure the graph is not shown again anymore
+                context.MarkDeleted(refactorable);
+            }
+            else
+            {
+                // invokable came from an external reference
+                if (context.Project.TryGetExternalReferenceHolding(_description, out var externalReference))
+                {
+                    switch (_description)
+                    {
+                        case FunctionDescription _:
+                            externalReference.Functions.Remove(
+                                externalReference.Functions.First(it => it.Id == _description.Id));
+                            break;
+                        case ModuleDescription _:
+                            externalReference.Modules.Remove(
+                                externalReference.Modules.First(it => it.Id == _description.Id));
+                            break;        
+                    }
+                }
+                else
+                {
+                    GdAssert.That(false, "Could not find external reference holding the invokable");
+                }
+            }
         }
     }
 }

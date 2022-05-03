@@ -18,6 +18,11 @@ namespace OpenScadGraphEditor.Library.External
         }
 
 
+        /// <summary>
+        /// Makes an identifier for a thing in an openSCAD file. We want to have things with the same
+        /// name inside the same file to get the same ID, so we can later have less trouble finding stuff
+        /// that has changed. 
+        /// </summary>
         private string MakeId(string type, string name)
         {
             return $"{_sourceFileHash}_{type}_{name}";
