@@ -73,7 +73,7 @@ namespace OpenScadGraphEditor
             _importDialog.OnNewImportRequested += OnNewImportRequested;
             _usageDialog = this.WithName<UsageDialog>("UsageDialog");
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
-            
+
             _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
             _commentEditingDialog.CommentChanged += OnCommentChanged;
 
@@ -162,7 +162,8 @@ namespace OpenScadGraphEditor
 
         private void OnNodeHighlightRequested(UsagePointInformation information)
         {
-            var graph = _currentProject.AllDeclaredInvokables.FirstOrDefault(it => it.Description.Id == information.GraphId);
+            var graph = _currentProject.AllDeclaredInvokables.FirstOrDefault(it =>
+                it.Description.Id == information.GraphId);
             if (graph != null)
             {
                 var node = graph.GetAllNodes().FirstOrDefault(it => it.Id == information.NodeId);
@@ -173,12 +174,13 @@ namespace OpenScadGraphEditor
                     return;
                 }
             }
+
             NotificationService.ShowNotification("This usage no longer exists.");
         }
 
         private void OnCommentChanged(RequestContext context, string title, string text)
         {
-            var refactorings =  new List<Refactoring>();
+            var refactorings = new List<Refactoring>();
             var stepName = "Change comment";
             if (!context.TryGetNode(out var node))
             {
@@ -188,7 +190,7 @@ namespace OpenScadGraphEditor
                 node.Offset = context.Position;
                 refactorings.Add(new AddNodeRefactoring(context.Source, node));
             }
-            
+
             // update the comment
             refactorings.Add(new ChangeCommentRefactoring(context.Source, (Comment) node, title, text));
             PerformRefactorings(stepName, refactorings);
@@ -202,35 +204,29 @@ namespace OpenScadGraphEditor
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
         {
             var actions = new List<QuickAction>();
-            var title = $"Delete {entry.Title}";
+            var deleteTitle = $"Delete {entry.Title}";
             if (entry is ScadInvokableTreeEntry invokableTreeEntry)
             {
-                switch (invokableTreeEntry.Description)
+                var invokableDescription = invokableTreeEntry.Description;
+                if (_currentProject.IsDefinedInThisProject(invokableDescription))
                 {
-                    case FunctionDescription functionDescription:
-                        if (_currentProject.IsDefinedInThisProject(functionDescription))
-                        {
-                            actions.Add(new QuickAction(title,
-                                () => OnRefactoringRequested(title,
-                                    new DeleteInvokableRefactoring(functionDescription))));
-                        }
-                        
-                        break;
-                    case ModuleDescription moduleDescription:
-                        if (_currentProject.IsDefinedInThisProject(moduleDescription))
-                        {
-                            actions.Add(new QuickAction(title,
-                                () => OnRefactoringRequested(title,
-                                    new DeleteInvokableRefactoring(moduleDescription))));
-                        }
+                    if (!(invokableDescription is MainModuleDescription))
+                    {
+                        actions.Add(new QuickAction($"Refactor {invokableDescription.Name}",
+                                () => _invokableRefactorDialog.Open(invokableDescription)
+                            )
+                        );
 
-                        break;
+                        actions.Add(new QuickAction(deleteTitle,
+                            () => OnRefactoringRequested(deleteTitle,
+                                new DeleteInvokableRefactoring(invokableDescription))));
+                    }
                 }
 
-                if (!(invokableTreeEntry.Description is MainModuleDescription) && !(invokableTreeEntry.Description.IsBuiltin))
+                if (!(invokableDescription is MainModuleDescription) && !(invokableDescription.IsBuiltin))
                 {
-                    actions.Add(new QuickAction($"Find usages of {invokableTreeEntry.Description.Name}", 
-                        () => FindAndShowUsages(invokableTreeEntry.Description)));
+                    actions.Add(new QuickAction($"Find usages of {invokableDescription.Name}",
+                        () => FindAndShowUsages(invokableDescription)));
                 }
             }
 
@@ -238,12 +234,12 @@ namespace OpenScadGraphEditor
             {
                 if (_currentProject.IsDefinedInThisProject(scadVariableListEntry.Description))
                 {
-                    actions.Add(new QuickAction(title,
+                    actions.Add(new QuickAction(deleteTitle,
                         () => OnRefactoringRequested(
-                            title, new DeleteVariableRefactoring(scadVariableListEntry.Description))));
+                            deleteTitle, new DeleteVariableRefactoring(scadVariableListEntry.Description))));
                 }
-                
-                actions.Add(new QuickAction($"Find usages of {scadVariableListEntry.Description.Name}", 
+
+                actions.Add(new QuickAction($"Find usages of {scadVariableListEntry.Description.Name}",
                     () => FindAndShowUsages(scadVariableListEntry.Description)));
             }
 
@@ -255,8 +251,8 @@ namespace OpenScadGraphEditor
                     () => OnRefactoringRequested(
                         removeReferenceTitle,
                         new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
-                
-                
+
+
                 var refreshReferenceTitle = $"Refresh reference to {entry.Title}";
                 actions.Add(new QuickAction(refreshReferenceTitle,
                     () => OnRefactoringRequested(
@@ -389,7 +385,7 @@ namespace OpenScadGraphEditor
                         )
                 );
             }
-            
+
             // add an entry for creating a comment
             _addDialogEntries.Add(
                 new NodeBasedEntry(
@@ -421,8 +417,6 @@ namespace OpenScadGraphEditor
             MarkDirty(true);
         }
 
-        
-        
 
         private void OnImportScadFile()
         {
@@ -763,7 +757,7 @@ namespace OpenScadGraphEditor
             var editor = requestContext.Source;
             var position = requestContext.Position;
             requestContext.TryGetNode(out var node);
-            
+
             // build a list of quick actions that include all refactorings that would apply to the selected node
             var actions = UserSelectableNodeRefactoring
                 .GetApplicable(editor, node)
@@ -787,10 +781,11 @@ namespace OpenScadGraphEditor
             {
                 actions = actions.Append(
                     new QuickAction("Edit comment",
-                    () => _commentEditingDialog.Open(requestContext, comment.CommentTitle, comment.CommentDescription))
-                    );
+                        () => _commentEditingDialog.Open(requestContext, comment.CommentTitle,
+                            comment.CommentDescription))
+                );
             }
-            
+
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.
             // and one to go to the definition. Only do this if the invokable is part of this project (and not built-in or included).
             if (node is IReferToAnInvokable iReferToAnInvokable)
@@ -824,12 +819,12 @@ namespace OpenScadGraphEditor
                     );
                 }
             }
-            
+
 
             if (node is ICanHaveModifier)
             {
                 actions = actions.Append(new QuickAction("Debugging aids"));
-                
+
                 var currentModifiers = node.GetModifiers();
 
                 var hasDebug = currentModifiers.HasFlag(ScadNodeModifier.Debug);
@@ -1019,7 +1014,7 @@ namespace OpenScadGraphEditor
                 Redo();
             }
         }
-        
+
         private void FindAndShowUsages(VariableDescription variableDescription)
         {
             var usagePoints = _currentProject.FindAllReferencingNodes(variableDescription)
@@ -1032,9 +1027,8 @@ namespace OpenScadGraphEditor
                 NotificationService.ShowNotification("No usages found.");
                 return;
             }
-            
-            _usageDialog.Open($"Usages of variable {variableDescription.Name}", usagePoints);
 
+            _usageDialog.Open($"Usages of variable {variableDescription.Name}", usagePoints);
         }
 
         private void FindAndShowUsages(InvokableDescription invokableDescription)

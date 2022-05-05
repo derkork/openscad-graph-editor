@@ -292,7 +292,7 @@ namespace OpenScadGraphEditor.Library
 
         public IScadGraph FindDefiningGraph(InvokableDescription invokableDescription)
         {
-            return AllDeclaredInvokables.First(it => it.Description == invokableDescription);
+            return AllDeclaredInvokables.First(it => it.Description.Id == invokableDescription.Id);
         }
 
         public void AddExternalReference(ExternalReference reference)
