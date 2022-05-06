@@ -24,13 +24,7 @@ namespace OpenScadGraphEditor.Refactorings
             {
                 return; // nothing to do
             }
-            
-            // first find all graphs that are affected by this and make them refactorable
-            // this will force a re-draw of all graphs that may be currently open.
-            context.Project.FindAllReferencingNodes(_description)
-                .ToList()// avoid modification during enumeration
-                .ForAll(it => context.MakeRefactorable(it));
-            
+
             // changing a parameter name is actually quite trivial, we just need to change it
             // in the description. 
             _description.Parameters.First(it => it.Name == _oldParameterName).Name = _newParameterName;

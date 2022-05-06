@@ -109,7 +109,7 @@ namespace OpenScadGraphEditor.Library
 
         public void SaveInto(SavedGraph graph)
         {
-            graph.Description = IoExt.ToSavedState(Description);
+            graph.Description = Description.ToSavedState();
 
             foreach (var node in (IEnumerable<ScadNode>) _nodes)
             {

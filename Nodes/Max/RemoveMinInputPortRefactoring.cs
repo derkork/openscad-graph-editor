@@ -19,14 +19,13 @@ namespace OpenScadGraphEditor.Nodes.Max
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (Max) graph.ById(Node.Id);
+            var node = (Max) Node;
 
             // remove the connection that goes into the port to be removed.
-            graph.GetAllConnections()
+            Holder.GetAllConnections()
                 .Where(it => it.IsTo(node, node.InputPortCount))
                 .ToList() // make a new list, so we don't change the collection while iterating over it
-                .ForAll(it => graph.RemoveConnection(it));
+                .ForAll(it => Holder.RemoveConnection(it));
             
             node.RemoveInput();
         }

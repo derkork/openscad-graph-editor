@@ -18,10 +18,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (ConstructVector) graph.ById(Node.Id);
-
-            node.IncreaseVectorSize();
+            ((ConstructVector) Node).IncreaseVectorSize();
         }
     }
 }

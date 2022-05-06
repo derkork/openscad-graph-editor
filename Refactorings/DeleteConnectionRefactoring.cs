@@ -20,7 +20,7 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(_connection.Owner);
+            var graph = _connection.Owner;
 
             var result = ConnectionRules.CanDisconnect(_connection);
             if (result.Decision == ConnectionRules.OperationRuleDecision.Veto)

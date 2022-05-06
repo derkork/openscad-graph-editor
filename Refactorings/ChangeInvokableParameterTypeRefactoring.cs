@@ -33,9 +33,6 @@ namespace OpenScadGraphEditor.Refactorings
 
             // find all nodes that refer to this description
             var nodes = context.Project.FindAllReferencingNodes(_description)
-                .ToList() // avoid concurrent modification
-                // make their graphs editable
-                .Select(context.MakeRefactorable)
                 .ToList(); // ensure this is all done before we start modifying the graphs
 
             // only change the type AFTER we have made everything refactorable, otherwise the internal state of the

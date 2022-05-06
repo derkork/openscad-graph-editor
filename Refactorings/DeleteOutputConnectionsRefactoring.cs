@@ -16,12 +16,10 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var refactorableGraph = context.MakeRefactorable(Holder);
-            refactorableGraph.GetAllConnections()
+            Holder.GetAllConnections()
                 .Where(it => it.From.Id == Node.Id && it.FromPort == _port)
                 .ToList()
-                .ForAll(refactorableGraph.RemoveConnection);
+                .ForAll(Holder.RemoveConnection);
         }
-
     }
 }

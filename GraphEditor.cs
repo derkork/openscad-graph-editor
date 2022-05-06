@@ -59,6 +59,7 @@ namespace OpenScadGraphEditor
 
         private bool _codeChanged;
         private bool _refactoringInProgress;
+        private Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
 
         public override void _Ready()
         {
@@ -278,6 +279,9 @@ namespace OpenScadGraphEditor
             _currentHistoryStack = null;
             _currentFile = null;
             _fileNameLabel.Text = "<not yet saved to a file>";
+            _tabContainer.GetChildNodes<ScadGraphEdit>().ForAll(it => it.RemoveAndFree());
+            _openEditors.Clear();
+            _projectTree.Clear();
         }
 
 
@@ -441,14 +445,11 @@ namespace OpenScadGraphEditor
         private ScadGraphEdit Open(IScadGraph toOpen)
         {
             // check if it is already open
-            for (var i = 0; i < _tabContainer.GetChildCount(); i++)
+            if (_openEditors.TryGetValue(toOpen.Description.Id, out var existingEditor))
             {
-                var existingEditor = _tabContainer.GetChild<ScadGraphEdit>(i);
-                if (existingEditor.Description.Id == toOpen.Description.Id)
-                {
-                    _tabContainer.CurrentTab = i;
-                    return existingEditor;
-                }
+                _tabContainer.CurrentTab = existingEditor.GetIndex();
+                existingEditor.Render(toOpen);
+                return existingEditor;
             }
 
             // if not, open a new tab
@@ -463,11 +464,17 @@ namespace OpenScadGraphEditor
 
             editor.Name = toOpen.Description.NodeNameOrFallback;
             editor.MoveToNewParent(_tabContainer);
-            _currentProject.TransferData(toOpen, editor);
-            toOpen.Discard();
+            editor.Render(toOpen);
+            _openEditors[toOpen.Description.Id] = editor;
             _tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
             editor.FocusEntryPoint();
             return editor;
+        }
+
+        private void Close(ScadGraphEdit editor)
+        {
+            _openEditors.Remove(editor.Graph.Description.Id);
+            editor.RemoveAndFree();
         }
 
         private void OnCutRequested(ScadGraphEdit source, List<ScadNode> selection)
@@ -480,7 +487,7 @@ namespace OpenScadGraphEditor
                 // only delete nodes which can be deleted
                 .Where(it => !(it is ICannotBeDeleted))
                 // will implicitly also delete the connections.
-                .Select(it => new DeleteNodeRefactoring(source, it))
+                .Select(it => new DeleteNodeRefactoring(source.Graph, it))
                 .ToList();
 
             PerformRefactorings("Cut nodes", deleteRefactorings);
@@ -524,7 +531,7 @@ namespace OpenScadGraphEditor
 
         private void OnCopyRequested(ScadGraphEdit source, List<ScadNode> selection)
         {
-            _copyBuffer = MakeCopyBuffer(source, selection);
+            _copyBuffer = MakeCopyBuffer(source.Graph, selection);
         }
 
         private void OnPasteRequested(ScadGraphEdit target, Vector2 position)
@@ -536,7 +543,7 @@ namespace OpenScadGraphEditor
             // now the clipboard may contain nodes that are not allowed in the given target graph. So we need
             // to filter these out here and also delete all connections to these nodes.
             var disallowedNodes = copy.GetAllNodes()
-                .Where(it => !target.Description.CanUse(it))
+                .Where(it => !target.Graph.Description.CanUse(it))
                 .ToList();
 
             // delete all connections to the disallowed nodes
@@ -572,14 +579,14 @@ namespace OpenScadGraphEditor
             var refactorings = new List<Refactoring>();
             foreach (var node in scadNodes)
             {
-                refactorings.Add(new AddNodeRefactoring(target, node));
+                refactorings.Add(new AddNodeRefactoring(target.Graph, node));
             }
 
             foreach (var connection in copy.GetAllConnections())
             {
                 refactorings.Add(
                     new AddConnectionRefactoring(
-                        new ScadConnection(target, connection.From, connection.FromPort, connection.To,
+                        new ScadConnection(target.Graph, connection.From, connection.FromPort, connection.To,
                             connection.ToPort
                         )
                     )
@@ -625,21 +632,21 @@ namespace OpenScadGraphEditor
             var context = new RefactoringContext(_currentProject);
             context.PerformRefactorings(refactorings, after);
 
-            // in case a module or function was deleted the current tab may be off
-            var currentTabId = _tabContainer.CurrentTab;
-            var childCount = _tabContainer.GetChildCount<ScadGraphEdit>();
-            if (currentTabId >= childCount)
+            // close all tabs referring to graphs which are no longer in the project
+            _tabContainer.GetChildNodes<ScadGraphEdit>()
+                .Where(it => !_currentProject.IsDefinedInThisProject(it.Graph.Description))
+                .ToList()
+                .ForAll(Close);
+            
+            // update the graph renderings.
+            foreach (var editor in _tabContainer.GetChildNodes<ScadGraphEdit>())
             {
-                _tabContainer.CurrentTab = childCount - 1;
+                editor.Render(editor.Graph);
             }
-
-            foreach (var graph in _tabContainer.GetChildNodes<ScadGraphEdit>())
-            {
-                GdAssert.That(_currentProject.AllDeclaredInvokables.Contains(graph), "Graph not in project");
-            }
-
+            
             // important, the snapshot must be made _after_ the changes.
             _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
+            
 
             RefreshControls();
             MarkDirty(true);
@@ -660,19 +667,16 @@ namespace OpenScadGraphEditor
         private EditorState GetEditorState()
         {
             // create a list of currently open tabs
-            var tabs =
-                _tabContainer.GetChildNodes<ScadGraphEdit>()
-                    .Select((it, idx) =>
-                        new EditorOpenTab(it.Description.Id, it.ScrollOffset));
+            var tabs = _openEditors.Select(it => new EditorOpenTab(it.Key, it.Value.ScrollOffset));
             return new EditorState(tabs, _tabContainer.CurrentTab);
         }
 
         private void RestoreEditorState(EditorState editorState)
         {
             // close all open tabs
-            foreach (var tab in _tabContainer.GetChildNodes<ScadGraphEdit>())
+            foreach (var tab in _openEditors.Values.ToList())
             {
-                tab.Discard();
+                Close(tab);
             }
 
             // open all tabs that were open back then
@@ -727,7 +731,7 @@ namespace OpenScadGraphEditor
                 }
 
                 node.Offset = virtualPosition;
-                OnRefactoringRequested("Add node", new AddNodeRefactoring(graph, node));
+                OnRefactoringRequested("Add node", new AddNodeRefactoring(graph.Graph, node));
             }
 
             // did we drag a variable from the list to the graph?
@@ -743,9 +747,9 @@ namespace OpenScadGraphEditor
                 var actions = new List<QuickAction>
                 {
                     new QuickAction($"Get {variableListEntry.Description.Name}",
-                        () => OnRefactoringRequested("Add node", new AddNodeRefactoring(graph, getNode))),
+                        () => OnRefactoringRequested("Add node", new AddNodeRefactoring(graph.Graph, getNode))),
                     new QuickAction($"Set {variableListEntry.Description.Name}",
-                        () => OnRefactoringRequested("Add node", new AddNodeRefactoring(graph, setNode)))
+                        () => OnRefactoringRequested("Add node", new AddNodeRefactoring(graph.Graph, setNode)))
                 };
 
                 _quickActionsPopup.Open(mousePosition, actions);
@@ -754,13 +758,13 @@ namespace OpenScadGraphEditor
 
         private void OnNodeContextMenuRequested(RequestContext requestContext)
         {
-            var editor = requestContext.Source;
+            var graph = requestContext.Source;
             var position = requestContext.Position;
             requestContext.TryGetNode(out var node);
 
             // build a list of quick actions that include all refactorings that would apply to the selected node
             var actions = UserSelectableNodeRefactoring
-                .GetApplicable(editor, node)
+                .GetApplicable(graph, node)
                 .OrderBy(it => it.Order)
                 .GroupBy(it => it.Group)
                 .SelectMany(it =>
@@ -831,14 +835,14 @@ namespace OpenScadGraphEditor
                 actions = actions.Append(
                     new QuickAction("Debug subtree",
                         () => OnRefactoringRequested("Toggle: Debug subtree",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Debug, !hasDebug)), true,
+                            new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Debug, !hasDebug)), true,
                         hasDebug));
 
                 var hasRoot = currentModifiers.HasFlag(ScadNodeModifier.Root);
                 actions = actions.Append(
                     new QuickAction("Make node root",
                         () => OnRefactoringRequested("Toggle: Make node root",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Root, !hasRoot)), true,
+                            new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Root, !hasRoot)), true,
                         hasRoot));
 
 
@@ -846,27 +850,27 @@ namespace OpenScadGraphEditor
                 actions = actions.Append(
                     new QuickAction("Background subtree",
                         () => OnRefactoringRequested("Toggle: Background subtree",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Background, !hasBackground)),
+                            new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Background, !hasBackground)),
                         true, hasBackground));
 
                 var hasDisable = currentModifiers.HasFlag(ScadNodeModifier.Disable);
                 actions = actions.Append(
                     new QuickAction("Disable subtree",
                         () => OnRefactoringRequested("Toggle: Disable subtree",
-                            new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Disable, !hasDisable)), true,
+                            new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Disable, !hasDisable)), true,
                         hasDisable));
 
 
                 actions = actions.Append(
                     new QuickAction("Set color",
-                        () => _nodeColorDialog.Open(editor, node)));
+                        () => _nodeColorDialog.Open(graph, node)));
 
                 if (currentModifiers.HasFlag(ScadNodeModifier.Color))
                 {
                     actions = actions.Append(
                         new QuickAction("Clear color",
                             () => OnRefactoringRequested("Remove color",
-                                new ToggleModifierRefactoring(editor, node, ScadNodeModifier.Color, false))));
+                                new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, false))));
                 }
             }
 
@@ -909,7 +913,6 @@ namespace OpenScadGraphEditor
             // again, important, must be done after the main module is opened
             _currentHistoryStack = new HistoryStack(_currentProject, GetEditorState());
             RefreshControls();
-
             RenderScadOutput();
         }
 

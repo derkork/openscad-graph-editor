@@ -18,5 +18,11 @@ namespace OpenScadGraphEditor.Library
 
         void Discard();
 
+        // TODO: make sure this is only ever called through a refactoring
+        void RemoveConnection(ScadConnection it);
+        // TODO: this can use nodes now, no ids.
+        void AddConnection(string fromId, int fromPort, string toId, int toPort);
+        void AddNode(ScadNode node);
+        void RemoveNode(ScadNode node);
     }
 }

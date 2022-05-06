@@ -26,11 +26,8 @@ namespace OpenScadGraphEditor.Refactorings
                 return;
             }
 
-            var graph = context.MakeRefactorable(Holder);
-            var toDelete = graph.ById(Node.Id);
-
-            var connections = graph.GetAllConnections()
-                .Where(it => it.InvolvesNode(toDelete))
+            var connections = Holder.GetAllConnections()
+                .Where(it => it.InvolvesNode(Node))
                 .ToList();
 
             if (connections.Select(ConnectionRules.CanDisconnect)
@@ -43,7 +40,7 @@ namespace OpenScadGraphEditor.Refactorings
             // drop all connections. Run a proper refactoring for this, so all the side effects are executed as well
             connections.Select(it => new DeleteConnectionRefactoring(it)).ForAll(context.PerformRefactoring);
             // and finally the node
-            graph.RemoveNode(toDelete);
+            Holder.RemoveNode(Node);
         }
     }
 }

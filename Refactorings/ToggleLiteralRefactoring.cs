@@ -1,4 +1,3 @@
-using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
@@ -18,17 +17,15 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var reference = context.MakeRefactorable(Holder, Node);
-
-            var hasLiteral = reference.Node.TryGetLiteral(_port, out var literal);
+            var hasLiteral = Node.TryGetLiteral(_port, out var literal);
             GdAssert.That(hasLiteral, "Tried to toggle a literal that doesn't exist");
 
             literal.IsSet = _enabled;
 
             // if the literal is for a parameter of a function or module entry point
             // toggling the literal implicitly sets the "optional" status of the respective parameter.
-            if (!_port.IsOutput || !(reference.Node is EntryPoint) ||
-                !(reference.Node is IReferToAnInvokable iReferToAnInvokable))
+            if (!_port.IsOutput || !(Node is EntryPoint) ||
+                !(Node is IReferToAnInvokable iReferToAnInvokable))
             {
                 // this is not the case so we're done here.
                 return;

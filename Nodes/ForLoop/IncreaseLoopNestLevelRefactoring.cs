@@ -18,18 +18,17 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (ForLoop) graph.ById(Node.Id);
+            var node = (ForLoop) Node;
             // when increasing nest level, we need to fix the connection to the "After" port, as it moves one port down.
             var afterPort = node.NestLevel + 1;
 
             node.IncreaseNestLevel();
             
-            var existingConnection = graph.GetAllConnections().FirstOrDefault(it => it.IsFrom(node, afterPort));
+            var existingConnection = Holder.GetAllConnections().FirstOrDefault(it => it.IsFrom(node, afterPort));
             if (existingConnection != null)
             {
-                graph.RemoveConnection(existingConnection);
-                graph.AddConnection(existingConnection.From.Id, existingConnection.FromPort +1,
+                Holder.RemoveConnection(existingConnection);
+                Holder.AddConnection(existingConnection.From.Id, existingConnection.FromPort +1,
                     existingConnection.To.Id, existingConnection.ToPort);
             }
         }

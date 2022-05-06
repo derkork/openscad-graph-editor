@@ -17,11 +17,9 @@ namespace OpenScadGraphEditor.Refactorings
         public override void PerformRefactoring(RefactoringContext context)
         {
             GdAssert.That(Node is Comment, "Resize is only supported for comments");
-            // make it refactorable
-            var reference = context.MakeRefactorable(Holder, Node);
 
-            // and set the new size
-            ((Comment) reference.Node).Size = _newSize;
+            // set the new size
+            ((Comment) Node).Size = _newSize;
         }
     }
 }

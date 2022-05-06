@@ -4,24 +4,19 @@ using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Refactorings
 {
-    public class ChangeNodePositionRefactoring :Refactoring
+    public class ChangeNodePositionRefactoring :NodeRefactoring
     {
-        private readonly IScadGraph _graph;
-        private readonly ScadNode _node;
         private readonly Vector2 _newPosition;
         
-        public ChangeNodePositionRefactoring(IScadGraph graph, ScadNode node, Vector2 newPosition)
+        public ChangeNodePositionRefactoring(IScadGraph graph, ScadNode node, Vector2 newPosition) : base(graph, node)
         {
-            _graph = graph;
-            _node = node;
             _newPosition = newPosition;
         }
         
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var reference = context.MakeRefactorable(_graph, _node);
-            reference.Node.Offset = _newPosition;
+            Node.Offset = _newPosition;
         }
     }
 }

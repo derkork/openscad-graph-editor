@@ -25,14 +25,7 @@ namespace OpenScadGraphEditor.Refactorings
             // if the invokable is defined in the project, delete the graph
             if (context.Project.IsDefinedInThisProject(_description))
             {
-                var definingGraph = context.Project.FindDefiningGraph(_description);
-                GdAssert.That(definingGraph != null, "definingGraph != null");
-
-                var refactorable = context.MakeRefactorable(definingGraph);
                 context.Project.RemoveInvokable(_description);
-                
-                // make sure the graph is not shown again anymore
-                context.MarkDeleted(refactorable);
             }
             else
             {

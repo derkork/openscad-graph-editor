@@ -18,10 +18,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (IndexVector) graph.ById(Node.Id);
-
-            node.IncreasePorts();
+            ((IndexVector) Node).IncreasePorts();
         }
     }
 }

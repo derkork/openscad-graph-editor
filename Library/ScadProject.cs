@@ -46,33 +46,6 @@ namespace OpenScadGraphEditor.Library
             MainModule = mainModuleGraph;
         }
 
-
-        public void TransferData(IScadGraph from, IScadGraph to)
-        {
-            GdAssert.That(from == MainModule || _functions.Contains(from) || _modules.Contains(from),
-                "'from' graph is not part of this project.");
-
-            var savedGraph = from.ToSavedState();
-            to.LoadFrom(savedGraph, this);
-
-            switch (to.Description)
-            {
-                case MainModuleDescription _:
-                    MainModule = to;
-                    break;
-                case FunctionDescription _:
-                    _functions.Remove(from);
-                    _functions.Add(to);
-                    break;
-                case ModuleDescription _:
-                    _modules.Remove(from);
-                    _modules.Add(to);
-                    break;
-                default:
-                    throw new InvalidOperationException("unknown description type.");
-            }
-        }
-
         public FunctionDescription ResolveFunctionReference(string id)
         {
             if (_projectFunctionDescriptions.TryGetValue(id, out var functionDescription))
@@ -355,14 +328,14 @@ namespace OpenScadGraphEditor.Library
             result = default;
             return false;
         }
-        
-        
-        public bool IsDefinedInThisProject(FunctionDescription description)
+
+
+        private bool IsDefinedInThisProject(FunctionDescription description)
         {
             return _projectFunctionDescriptions.ContainsKey(description.Id);
         }
 
-        public bool IsDefinedInThisProject(ModuleDescription description)
+        private bool IsDefinedInThisProject(ModuleDescription description)
         {
             return _projectModuleDescriptions.ContainsKey(description.Id);
         }

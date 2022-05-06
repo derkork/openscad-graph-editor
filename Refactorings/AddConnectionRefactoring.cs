@@ -34,7 +34,7 @@ namespace OpenScadGraphEditor.Refactorings
             }
             
             // then create the connection
-            var graph = context.MakeRefactorable(_connection.Owner);
+            var graph =_connection.Owner;
             graph.AddConnection(_connection.From.Id, _connection.FromPort, _connection.To.Id, _connection.ToPort);
         }
     }

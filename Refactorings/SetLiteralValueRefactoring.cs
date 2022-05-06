@@ -18,9 +18,7 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var reference = context.MakeRefactorable(Holder, Node);
-
-            var hasLiteral = reference.Node.TryGetLiteral(_port, out var literal);
+            var hasLiteral = Node.TryGetLiteral(_port, out var literal);
             GdAssert.That(hasLiteral, "Tried to change a literal that doesn't exist");
 
             switch (literal)

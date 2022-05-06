@@ -19,8 +19,8 @@ namespace OpenScadGraphEditor.Nodes.ForComprehension
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (ForComprehension) graph.ById(Node.Id);
+            var graph = Holder;
+            var node = (ForComprehension) Node;
             
             // the result port will move one level up, so we need to save the connection that goes into this port
             var resultConnection = graph.GetAllConnections()

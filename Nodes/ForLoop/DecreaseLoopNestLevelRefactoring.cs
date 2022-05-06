@@ -19,21 +19,20 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (ForLoop) graph.ById(Node.Id);
+            var node = (ForLoop) Node;
 
             // when decreasing nest level, we loose connections (incoming and outgoing)
             // incoming connections
-            graph.GetAllConnections()
+            Holder.GetAllConnections()
                 .Where(it => it.IsTo(node, node.NestLevel))
                 .ToList() // make a new list, so we don't change the collection while iterating over it
-                .ForAll(it => graph.RemoveConnection(it));
+                .ForAll(it => Holder.RemoveConnection(it));
             
             // outgoing connections
-            graph.GetAllConnections()
+            Holder.GetAllConnections()
                 .Where(it => it.IsFrom(node, node.NestLevel))
                 .ToList() // make a new list, so we don't change the collection while iterating over it
-                .ForAll(it => graph.RemoveConnection(it));
+                .ForAll(it => Holder.RemoveConnection(it));
             
             
             node.DecreaseNestLevel();

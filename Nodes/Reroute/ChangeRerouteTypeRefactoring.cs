@@ -20,11 +20,8 @@ namespace OpenScadGraphEditor.Nodes.Reroute
                 return; // nothing to do
             }
 
-            var graph = context.MakeRefactorable(Holder);
-            var node = (RerouteNode) graph.ById(Node.Id);
-            
             // update the port type
-            node.UpdatePortType(_newConnectionType);
+            ((RerouteNode) Node).UpdatePortType(_newConnectionType);
           
         }
     }

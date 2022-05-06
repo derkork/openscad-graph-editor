@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes.Concat
     {
         public override string Title => "Remove input port";
         public override int Order => 1;
-        public override bool IsApplicableToNode => Node is Concat echo && echo.InputPortCount > 1;
+        public override bool IsApplicableToNode => Node is Concat concat && concat.InputPortCount > 1;
 
         public RemoveConcatInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
         {
@@ -19,16 +19,14 @@ namespace OpenScadGraphEditor.Nodes.Concat
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (Concat) graph.ById(Node.Id);
 
             // remove the connection that goes into the port to be removed.
-            graph.GetAllConnections()
-                .Where(it => it.IsTo(node, node.InputPortCount))
+            Holder.GetAllConnections()
+                .Where(it => it.IsTo(Node, Node.InputPortCount))
                 .ToList() // make a new list, so we don't change the collection while iterating over it
-                .ForAll(it => graph.RemoveConnection(it));
+                .ForAll(it => Holder.RemoveConnection(it));
             
-            node.RemoveInput();
+            ((Concat)Node).RemoveInput();
         }
     }
 }

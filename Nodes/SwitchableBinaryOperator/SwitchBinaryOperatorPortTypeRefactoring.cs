@@ -27,8 +27,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var nodeReference = context.MakeRefactorable(Holder, Node);
-            var switchableBinaryOperator = (SwitchableBinaryOperator) nodeReference.Node;
+            var switchableBinaryOperator = (SwitchableBinaryOperator) Node;
             if (_isFirstOperand)
             {
                 switchableBinaryOperator.SwitchPortType(PortId.Input(0), _targetPortType);
@@ -42,9 +41,9 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             var portId = _isFirstOperand ? PortId.Input(0) : PortId.Input(1);
 
 
-            var deleteRefactorings = nodeReference.Graph.GetAllConnections()
+            var deleteRefactorings = Holder.GetAllConnections()
                 // all connections to the port we are switching
-                .Where(it => it.InvolvesPort(nodeReference.Node, portId))
+                .Where(it => it.InvolvesPort(Node, portId))
                 // check if they are still valid
                 .Where(it => ConnectionRules.CanConnect(it).Decision == ConnectionRules.OperationRuleDecision.Veto)
                 // create a refactoring for each invalid

@@ -17,10 +17,9 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (RerouteNode) graph.ById(Node.Id);
+            var node = (RerouteNode) Node;
 
-            var connections = graph
+            var connections = Holder
                 .GetAllConnections()
                 .Where(it => it.InvolvesNode(node))
                 .ToList();

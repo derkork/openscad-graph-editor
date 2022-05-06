@@ -17,12 +17,6 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            // make all graphs refactorable that contain a reference to the given invokable. This will force
-            // a redraw of them in case they were currently open for editing.
-            context.Project.FindAllReferencingNodes(_description)
-                .ToList() // avoid concurrent modification
-                .ForAll(it => context.MakeRefactorable(it));
-            
             // change the name
             _description.Name = _newName;
         }

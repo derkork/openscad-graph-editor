@@ -20,16 +20,15 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (IndexVector) graph.ById(Node.Id);
+            var node = (IndexVector) Node;
 
             var lastInputPort = node.IndexPortCount;
             var lastOutputPort = node.IndexPortCount - 1;
             
             // we now need to remove all connections that go to the last input or output port
-            graph.GetAllConnections()
+            Holder.GetAllConnections()
                 .Where(it => it.IsFrom(node, lastOutputPort) || it.IsTo(node, lastInputPort))
-                .ForAll(it => graph.RemoveConnection(it));
+                .ForAll(it => Holder.RemoveConnection(it));
             
             node.DecreasePorts();
         }

@@ -22,27 +22,26 @@ namespace OpenScadGraphEditor.Refactorings
         public override void PerformRefactoring(RefactoringContext context)
         {
             // first make the node & graph refactorable
-            var reference = context.MakeRefactorable(Holder, Node);
             
             // as a convenience, when we enable the root modifier, we automatically disable it on any other
             // node in the same graph that may currently have it.
             if (_modifier == ScadNodeModifier.Root && _enable)
             {
-                reference.Graph.GetAllNodes()
+                Holder.GetAllNodes()
                     .Where(it => it.GetModifiers().HasFlag(ScadNodeModifier.Root))
-                    .Select(it => new ToggleModifierRefactoring(reference.Graph, it, ScadNodeModifier.Root, false))
+                    .Select(it => new ToggleModifierRefactoring(Holder, it, ScadNodeModifier.Root, false))
                     .ForAll(context.PerformRefactoring);
             }
 
             var effectiveModifiers = _modifier;
-            var hasCurrentColor = reference.Node.TryGetColorModifier(out var effectiveColor);
+            var hasCurrentColor = Node.TryGetColorModifier(out var effectiveColor);
 
             // we have the debugging modifiers and the color modifier. only one of the debug modifiers can be active at a time
             // the color modifier can be active at the same time as the debug modifiers
             
             // if we remove the modifier, this is easy as we don't need to have any constraints in mind, we can just
             // remove the modifier
-            var currentModifiers = reference.Node.GetModifiers();
+            var currentModifiers = Node.GetModifiers();
 
             if (!_enable)
             {
@@ -75,8 +74,7 @@ namespace OpenScadGraphEditor.Refactorings
             
 
             // finally we set the modifiers
-            reference.Node.SetModifiers(effectiveModifiers, effectiveColor);
-            
+            Node.SetModifiers(effectiveModifiers, effectiveColor);
         }
     }
 }

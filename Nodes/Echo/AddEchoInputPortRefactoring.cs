@@ -18,11 +18,8 @@ namespace OpenScadGraphEditor.Nodes.Echo
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (Echo) graph.ById(Node.Id);
-            
             // this is really simple just add a new input.
-            node.AddInput();
+            ((Echo) Node).AddInput();
         }
     }
 }

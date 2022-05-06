@@ -18,8 +18,7 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var reference = context.MakeRefactorable(Holder, Node);
-            var comment = (Comment)reference.Node;
+            var comment = (Comment)Node;
 
             comment.CommentTitle = _title;
             comment.CommentDescription = _description;

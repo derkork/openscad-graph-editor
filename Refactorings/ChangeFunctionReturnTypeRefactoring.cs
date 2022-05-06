@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
@@ -25,11 +24,8 @@ namespace OpenScadGraphEditor.Refactorings
             }
 
 
-            // first find all graphs that are affected by this and make them refactorable
+            // first find all nodes that are affected by this
             var affectedNodes = context.Project.FindAllReferencingNodes(_description)
-                .ToList()
-                .Select(context.MakeRefactorable)
-                // ensure it is all done before we continue
                 .ToList();
 
 

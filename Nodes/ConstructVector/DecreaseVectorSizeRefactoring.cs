@@ -20,16 +20,15 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            var node = (ConstructVector) graph.ById(Node.Id);
+            var node = (ConstructVector) Node;
 
             var lastInputPort = node.VectorSize-1;
             
             // we now need to remove all connections that go to the last input port
-            graph.GetAllConnections()
+            Holder.GetAllConnections()
                 .Where(it => it.IsTo(node, lastInputPort))
                 .ToList() // we need to copy the list because we are modifying it
-                .ForAll(it => graph.RemoveConnection(it));
+                .ForAll(it => Holder.RemoveConnection(it));
             
             node.DecreaseVectorSize();
         }

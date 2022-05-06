@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Refactorings
     {
         [CanBeNull]
         private readonly ScadNode _other;
-        private PortId _otherPort;
+        private readonly PortId _otherPort;
 
         public AddNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
         {
@@ -28,19 +28,17 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var graph = context.MakeRefactorable(Holder);
-            graph.AddNode(Node);
+            Holder.AddNode(Node);
             
             if (_other != null)
             {
                 // TODO: we could simplify this if we use PortIds all the way.
-                var otherNode = graph.ById(_other.Id);
                 if (_otherPort.IsOutput)
                 {
                     // try build a connection from the other node to an input port of the new node.
                     for (var i = 0; i < Node.InputPortCount; i++)
                     {
-                        var connection = new ScadConnection(graph, otherNode, _otherPort.Port, Node,  i);
+                        var connection = new ScadConnection(Holder, _other, _otherPort.Port, Node,  i);
                         if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                         {
                             context.PerformRefactoring(new AddConnectionRefactoring(connection));
@@ -52,7 +50,7 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     for (var i = 0; i < Node.OutputPortCount; i++)
                     {
-                        var connection = new ScadConnection(graph, Node, i, otherNode, _otherPort.Port);
+                        var connection = new ScadConnection(Holder, Node, i, _other, _otherPort.Port);
                         if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
                         {
                             context.PerformRefactoring(new AddConnectionRefactoring(connection));

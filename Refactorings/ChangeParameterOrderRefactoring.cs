@@ -28,8 +28,6 @@ namespace OpenScadGraphEditor.Refactorings
 
             // first find all the nodes that may be affected by this refactoring and make their graphs refactorable
             var affectedNodes = context.Project.FindAllReferencingNodes(_description)
-                .ToList() // avoid modification during enumeration
-                .Select(context.MakeRefactorable)
                 .ToList(); // ensure this is done before the rest of the refactoring
 
             // iterate over the parameter names and find one position that is not in the correct order
