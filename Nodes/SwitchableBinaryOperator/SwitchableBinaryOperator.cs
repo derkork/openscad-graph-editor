@@ -9,9 +9,10 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 
         protected SwitchableBinaryOperator()
         {
+            // number is going to be the most common case, so we start with this by default
             InputPorts
-                .Any()
-                .Any();
+                .Number()
+                .Number();
 
             OutputPorts
                 .OfType(PortType.Any, allowLiteral: false);
