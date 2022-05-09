@@ -10,8 +10,8 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = -300.0
 margin_top = -150.0
-margin_right = 300.0
-margin_bottom = 150.0
+margin_right = 500.0
+margin_bottom = 352.0
 rect_min_size = Vector2( 800, 400 )
 window_title = "Setup"
 resizable = true
@@ -29,57 +29,44 @@ custom_constants/margin_bottom = 10
 margin_left = 10.0
 margin_top = 10.0
 margin_right = 790.0
-margin_bottom = 390.0
+margin_bottom = 492.0
 custom_constants/separation = 10
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
 margin_right = 780.0
-margin_bottom = 146.0
+margin_bottom = 90.0
 custom_constants/hseparation = 15
 columns = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 10.0
-margin_right = 156.0
+margin_right = 126.0
 margin_bottom = 35.0
 text = "Name"
 
 [node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 171.0
+margin_left = 141.0
 margin_right = 780.0
 margin_bottom = 45.0
 size_flags_horizontal = 3
 
 [node name="ReturnTypeLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 59.0
-margin_right = 156.0
+margin_right = 126.0
 margin_bottom = 84.0
 text = "Return type"
 
 [node name="ReturnTypeSelector" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 171.0
+margin_left = 141.0
 margin_top = 53.0
 margin_right = 780.0
 margin_bottom = 90.0
 text = "Item 0"
 
-[node name="AllowChildrenLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_top = 109.0
-margin_right = 156.0
-margin_bottom = 134.0
-text = "Allow Children"
-
-[node name="AllowChildrenCheckbox" type="CheckBox" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 171.0
-margin_top = 98.0
-margin_right = 780.0
-margin_bottom = 146.0
-pressed = true
-
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 156.0
+margin_top = 100.0
 margin_right = 780.0
-margin_bottom = 213.0
+margin_bottom = 157.0
 custom_constants/margin_top = 20
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer"]
@@ -106,15 +93,15 @@ margin_bottom = 37.0
 text = "+"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 223.0
+margin_top = 167.0
 margin_right = 780.0
-margin_bottom = 290.0
+margin_bottom = 392.0
 size_flags_vertical = 3
 scroll_horizontal_enabled = false
 
 [node name="ParameterGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
 margin_right = 780.0
-margin_bottom = 67.0
+margin_bottom = 225.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 5
@@ -151,18 +138,18 @@ margin_bottom = 45.0
 text = "x"
 
 [node name="ErrorLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_top = 300.0
+margin_top = 402.0
 margin_right = 780.0
-margin_bottom = 325.0
+margin_bottom = 427.0
 custom_colors/font_color = Color( 1, 1, 0, 1 )
 text = "Error Message!"
 align = 2
 autowrap = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 335.0
+margin_top = 437.0
 margin_right = 780.0
-margin_bottom = 380.0
+margin_bottom = 482.0
 alignment = 2
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]

@@ -29,7 +29,7 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     context.Project
                         .FindAllReferencingNodes(invokableDescription)
-                        .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
+                        .Select(it => new DeleteNodeRefactoring(it.Graph, it.Node))
                         .ToList() // avoid still reading from the project while running the refactorings
                         .ForAll(context.PerformRefactoring);
                 }
@@ -39,7 +39,7 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     context.Project
                         .FindAllReferencingNodes(variable)
-                        .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
+                        .Select(it => new DeleteNodeRefactoring(it.Graph, it.Node))
                         .ToList() // avoid still reading from the project while running the refactorings
                         .ForAll(context.PerformRefactoring);
                 }

@@ -19,7 +19,7 @@ namespace OpenScadGraphEditor.Refactorings
             // find all nodes that somehow refer to this variable
             context.Project.FindAllReferencingNodes(_description)
                 // create a deletion refactoring for them
-                .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node) )
+                .Select(it => new DeleteNodeRefactoring(it.Graph, it.Node) )
                 .ToList() // avoid modifying the project while still reading it
                 // and perform the deletion refactorings
                 .ForAll(context.PerformRefactoring);

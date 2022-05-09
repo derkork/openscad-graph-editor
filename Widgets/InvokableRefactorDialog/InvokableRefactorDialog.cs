@@ -20,8 +20,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;
         private OptionButton _returnTypeOptionButton;
-        private Label _allowChildrenLabel;
-        private CheckBox _allowChildrenCheckbox;
         private InvokableDescription _baseDescription;
         private LineEdit _templateParameterName;
         private OptionButton _templateParameterTypeHint;
@@ -46,9 +44,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 .To(this, nameof(OnIdentifierChanged));
             _returnTypeLabel = this.WithName<Label>("ReturnTypeLabel");
             _returnTypeOptionButton = this.WithName<OptionButton>("ReturnTypeSelector");
-
-            _allowChildrenLabel = this.WithName<Label>("AllowChildrenLabel");
-            _allowChildrenCheckbox = this.WithName<CheckBox>("AllowChildrenCheckbox");
 
             _errorLabel = this.WithName<Label>("ErrorLabel");
 
@@ -120,8 +115,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeLabel.Visible = true;
             _returnTypeOptionButton.Visible = true;
             _returnTypeOptionButton.Select(_indexByPortTypes[PortType.Any]);
-            _allowChildrenLabel.Visible = false;
-            _allowChildrenCheckbox.Visible = false;
             ValidateAll();
             SetAsMinsize();
             PopupCentered();
@@ -133,9 +126,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _mode = DialogMode.CreateModule;
             _returnTypeLabel.Visible = false;
             _returnTypeOptionButton.Visible = false;
-            _allowChildrenLabel.Visible = true;
-            _allowChildrenCheckbox.Visible = true;
-            _allowChildrenCheckbox.Pressed = true;
             ValidateAll();
             SetAsMinsize();
             PopupCentered();
@@ -153,16 +143,11 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 case FunctionDescription functionDescription:
                     _returnTypeLabel.Visible = true;
                     _returnTypeOptionButton.Visible = true;
-                    _allowChildrenLabel.Visible = false;
-                    _allowChildrenCheckbox.Visible = false;
                     _returnTypeOptionButton.Select(_indexByPortTypes[functionDescription.ReturnTypeHint]);
                     break;
-                case ModuleDescription moduleDescription:
+                case ModuleDescription _:
                     _returnTypeLabel.Visible = false;
                     _returnTypeOptionButton.Visible = false;
-                    _allowChildrenLabel.Visible = true;
-                    _allowChildrenCheckbox.Visible = true;
-                    _allowChildrenCheckbox.Pressed = moduleDescription.SupportsChildren;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -294,8 +279,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
                 case DialogMode.CreateModule:
                     var moduleDescription = ModuleBuilder
-                        .NewModule(_nameEdit.Text)
-                        .WithChildren(_allowChildrenCheckbox.Pressed);
+                        .NewModule(_nameEdit.Text);
 
                     foreach (var line in _parameterLines)
                     {
@@ -335,7 +319,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             Hide();
         }
 
-        private void OnIdentifierChanged(string _)
+        private void OnIdentifierChanged([UsedImplicitly] string _)
         {
             ValidateAll();
             SetAsMinsize();

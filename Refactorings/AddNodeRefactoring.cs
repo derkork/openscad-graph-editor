@@ -59,6 +59,12 @@ namespace OpenScadGraphEditor.Refactorings
                     }
                 }
             }
+
+            // if the user added a node that implies that the module can have children, set the "SupportsChildren" flag.
+            if (Holder.Description is ModuleDescription moduleDescription && Node is IImplyChildren)
+            {
+                context.PerformRefactoring(new EnableChildrenRefactoring(moduleDescription));
+            } 
         }
     }
 }

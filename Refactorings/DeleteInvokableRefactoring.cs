@@ -18,7 +18,7 @@ namespace OpenScadGraphEditor.Refactorings
         {
             // find all nodes that refer to this invokable and delete them including all connections
             context.Project.FindAllReferencingNodes(_description)
-                .Select(it => new DeleteNodeRefactoringSimple(it.Graph, it.Node))
+                .Select(it => new DeleteNodeRefactoring(it.Graph, it.Node))
                 .ToList() // avoid concurrent modification
                 .ForAll(context.PerformRefactoring);
             
