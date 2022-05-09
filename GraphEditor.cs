@@ -730,6 +730,12 @@ namespace OpenScadGraphEditor
                     throw new InvalidOperationException("Unknown invokable type.");
                 }
 
+                // ensure we don't drag in stuff that isn't usable by the graph in question.
+                if (!graph.Graph.Description.CanUse(node))
+                {
+                    return;
+                }
+                
                 node.Offset = virtualPosition;
                 OnRefactoringRequested("Add node", new AddNodeRefactoring(graph.Graph, node));
             }
