@@ -196,7 +196,7 @@ namespace OpenScadGraphEditor
                     // nothing to do
                     return;
                 }
-                
+
                 stepName = "Create comment";
                 // create a new node
                 node = NodeFactory.Build<Comment>();
@@ -205,7 +205,7 @@ namespace OpenScadGraphEditor
             }
 
             // update the comment
-            refactorings.Add(new ChangeCommentRefactoring(context.Source,  node, text, title));
+            refactorings.Add(new ChangeCommentRefactoring(context.Source, node, text, title));
             PerformRefactorings(stepName, refactorings);
         }
 
@@ -649,22 +649,22 @@ namespace OpenScadGraphEditor
                 .Where(it => !_currentProject.IsDefinedInThisProject(it.Graph.Description))
                 .ToList()
                 .ForAll(Close);
-            
+
             // update the graph renderings.
             foreach (var editor in _tabContainer.GetChildNodes<ScadGraphEdit>())
             {
                 editor.Render(editor.Graph);
             }
-            
+
             // important, the snapshot must be made _after_ the changes.
             _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
-            
+
 
             RefreshControls();
             MarkDirty(true);
             _refactoringInProgress = false;
             GD.Print("<< Refactorings end");
-            
+
             after.ForAll(it => it());
         }
 
@@ -756,7 +756,7 @@ namespace OpenScadGraphEditor
                 {
                     return;
                 }
-                
+
                 node.Offset = virtualPosition;
                 OnRefactoringRequested("Add node", new AddNodeRefactoring(graph.Graph, node));
             }
@@ -818,10 +818,11 @@ namespace OpenScadGraphEditor
             }
             else
             {
-                var hasComment = node.TryGetComment(out var existingComment );
+                var hasComment = node.TryGetComment(out var existingComment);
                 actions = actions.Append(
                     new QuickAction(hasComment ? "Edit comment" : "Add comment",
-                        () => _commentEditingDialog.Open(requestContext, description: hasComment ? existingComment : "", showTitle: false)
+                        () => _commentEditingDialog.Open(requestContext, description: hasComment ? existingComment : "",
+                            showTitle: false)
                     )
                 );
 
@@ -837,15 +838,12 @@ namespace OpenScadGraphEditor
 
             if (node is RerouteNode rerouteNode)
             {
-                if (rerouteNode.IsWireless)
-                {
-                    actions = actions.Append(
-                        new QuickAction("Make wired",
-                            () => OnRefactoringRequested("Remove comment",
-                                new ChangeCommentRefactoring(graph, node, "", "")))
-                    );
-                    
-                }
+                var text = rerouteNode.IsWireless ? "Make wired" : "Make wireless";
+
+                actions = actions.Append(
+                    new QuickAction(text,
+                        () => OnRefactoringRequested(text, new ToggleWirelessRefactoring(graph, rerouteNode)))
+                );
             }
 
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.
