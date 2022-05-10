@@ -309,7 +309,7 @@ namespace OpenScadGraphEditor.Widgets
             var relevantConnections = _graph.GetAllConnections()
                 .Where(it => selectedNodes.Contains(it.From) && selectedNodes.Contains(it.To))
                 // also exclude connections which have a wireless node as target, as we don't layout those
-                .Where(it => it.To is RerouteNode rerouteNode && !rerouteNode.IsWireless)
+                .Where(it => !(it.To is RerouteNode rerouteNode && rerouteNode.IsWireless))
                 .ToList();
 
             // first up remove all nodes which do not have any connections to any other selected node, there is nothing to
