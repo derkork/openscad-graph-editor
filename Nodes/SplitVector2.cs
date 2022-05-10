@@ -20,7 +20,7 @@ namespace OpenScadGraphEditor.Nodes
         public SplitVector2()
         {
             InputPorts
-                .Vector3(allowLiteral: false);
+                .Vector2(allowLiteral: false);
 
             OutputPorts
                 .Number(allowLiteral:false)
