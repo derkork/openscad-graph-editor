@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes.ForLoop;
 using OpenScadGraphEditor.Refactorings;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -34,8 +37,9 @@ namespace OpenScadGraphEditor.Nodes
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
                 it => new DeleteOutputConnectionsRefactoring(it.Owner, it.From, it.FromPort));
 
-            // a node can never connect to itself unless it is marked as such
-            AddConnectRule(it => it.From == it.To && !(it.From is ICanConnectToMyself), OperationRuleDecision.Veto);
+            // We can never connect nodes as a circle, unless the node is marked with ICanConnectToMyself, and then
+            // the node is responsible for allowing the connection.
+            AddConnectRule(it =>  !(it.To is ICanConnectToMyself) && WouldCreateCircle(it), OperationRuleDecision.Veto);
 
             // connections of the same type can always be made
             AddConnectRule(it =>
@@ -74,6 +78,32 @@ namespace OpenScadGraphEditor.Nodes
             
         }
 
+        public static bool WouldCreateCircle(ScadConnection connection)
+        {
+         
+            // starting at the given connection, walk the graph and check if we would create a circle
+            var openSet = new HashSet<ScadConnection> {connection};
+
+            while (openSet.Count > 0)
+            {
+                var current = openSet.First();
+                openSet.Remove(current);
+
+                if (current.To == connection.From)
+                {
+                    GD.Print("Found circle!");
+                    return true;
+                }
+                
+                // now check all outgoing connections of the current node.
+                connection.Owner.GetAllConnections()
+                    .Where(it => it.From == current.To)
+                    .ForAll(it => openSet.Add(it));
+            }
+
+            return false;
+        }
+        
         public static void AddConnectRule(Predicate<ScadConnection> predicate, OperationRuleDecision decision,
             params Func<ScadConnection, Refactoring>[] refactorings)
         {
@@ -213,5 +243,6 @@ namespace OpenScadGraphEditor.Nodes
                 return new OperationResult(OperationRuleDecision.Undecided, refactorings);
             }
         }
+        
     }
 }
