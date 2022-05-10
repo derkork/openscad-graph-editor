@@ -5,6 +5,7 @@ using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets.AddDialog;
@@ -69,7 +70,7 @@ namespace OpenScadGraphEditor.Widgets
             var set = nodes.Select(it => it.Id).ToHashSet();
             _widgets.Values.ForAll(it => it.Selected = set.Contains(it.BoundNode.Id));
             _selection.Clear();
-            set.ForAll(it => _selection.Add(it));
+            set.ForAll(it => OnNodeSelected(_widgets[it]));
         }
 
 
@@ -189,7 +190,13 @@ namespace OpenScadGraphEditor.Widgets
             
             foreach (var connection in _graph.GetAllConnections())
             {
-                // connection contain ScadNode ids but we need to connect widgets, so first we need to find the 
+                // do not show connections to wireless reroutes by default, unless the reroute node is currently selected
+                if (connection.To is RerouteNode rerouteNode && rerouteNode.IsWireless && !_selection.Contains(connection.To.Id))
+                {
+                    continue; 
+                }
+
+                // connection contains ScadNode ids but we need to connect widgets, so first we need to find the 
                 // the widget and then connect these widgets.
                 ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
             }
@@ -301,6 +308,8 @@ namespace OpenScadGraphEditor.Widgets
             // relevant connections, these are all connections between the selected nodes
             var relevantConnections = _graph.GetAllConnections()
                 .Where(it => selectedNodes.Contains(it.From) && selectedNodes.Contains(it.To))
+                // also exclude connections which have a wireless node as target, as we don't layout those
+                .Where(it => it.To is RerouteNode rerouteNode && !rerouteNode.IsWireless)
                 .ToList();
 
             // first up remove all nodes which do not have any connections to any other selected node, there is nothing to
@@ -338,7 +347,12 @@ namespace OpenScadGraphEditor.Widgets
                 // now pop a node from the starting points and go from there
                 var currentNode = startingPoints.First();
                 startingPoints.Remove(currentNode);
-                
+
+                if (currentNode is RerouteNode rerouteNode && rerouteNode.IsWireless)
+                {
+                    continue; // a wireless node has no incoming connections that could be straightened
+                }
+
                 var currentNodeConnections = relevantConnections
                     .Where(it => it.To == currentNode)
                     .OrderBy(it => it.ToPort);
@@ -427,11 +441,35 @@ namespace OpenScadGraphEditor.Widgets
         private void OnNodeSelected(ScadNodeWidget node)
         {
             _selection.Add(node.BoundNode.Id);
+            
+            // if the node was a wireless node, then temporarily show its wireless connection
+            if (node.BoundNode is RerouteNode rerouteNode && rerouteNode.IsWireless)
+            {
+                var relevantConnections = _graph.GetAllConnections()
+                    .Where(it => it.To == node.BoundNode);
+
+                foreach (var connection in relevantConnections)
+                {
+                    ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
+                }
+            }
+
         }
 
         private void OnNodeUnselected(ScadNodeWidget node)
         {
             _selection.Remove(node.BoundNode.Id);
+            
+            // if the node was a wireless node, then hide its wireless connections
+            if (node.BoundNode is RerouteNode rerouteNode && rerouteNode.IsWireless)
+            {
+                var relevantConnections = _graph.GetAllConnections()
+                    .Where(it => it.To == node.BoundNode);
+                foreach(var connection in relevantConnections)
+                {
+                    DisconnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
+                }
+            }
         }
 
         private void OnDeleteSelection()

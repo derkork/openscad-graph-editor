@@ -1,4 +1,5 @@
 using System;
+using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
@@ -8,10 +9,12 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Nodes.Reroute
 {
     [UsedImplicitly]
-    public class RerouteNode : ScadNode, IHaveMultipleExpressionOutputs, IHaveCustomWidget
+    public class RerouteNode : ScadNode, IHaveMultipleExpressionOutputs, IHaveCustomWidget, IHaveNodeBackground
     {
         public override string NodeTitle => "Reroute";
         public override string NodeDescription => "Rerouting node which aids in making cleaner visual graphs.";
+
+        public bool IsWireless { get; set; }
 
         static RerouteNode()
         {
@@ -61,11 +64,13 @@ namespace OpenScadGraphEditor.Nodes.Reroute
         public override void SaveInto(SavedNode node)
         {
             node.SetData("reroute_type", (int) GetPortType(PortId.Input(0)));
+            node.SetData("is_wireless", IsWireless);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
+            IsWireless = node.GetDataBool("is_wireless");
             var type = (PortType) node.GetDataInt("reroute_type");
             UpdatePortType(type);
             base.RestorePortDefinitions(node, referenceResolver);
@@ -107,5 +112,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
         {
             return Prefabs.New<RerouteNodeWidget>();
         }
+
+        public Texture NodeBackground => IsWireless ? Resources.WirelessIcon : null;
     }
 }

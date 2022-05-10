@@ -1,12 +1,7 @@
-[gd_resource type="Theme" load_steps=7 format=2]
+[gd_resource type="Theme" load_steps=5 format=2]
 
 [ext_resource path="res://Icons/node_simple_unselected0000.png" type="Texture" id=1]
 [ext_resource path="res://Icons/node_simple_selected0000.png" type="Texture" id=2]
-[ext_resource path="res://Fonts/Lato-Bold.ttf" type="DynamicFontData" id=3]
-
-[sub_resource type="DynamicFont" id=3]
-size = 32
-font_data = ExtResource( 3 )
 
 [sub_resource type="StyleBoxTexture" id=1]
 texture = ExtResource( 1 )
@@ -27,6 +22,5 @@ margin_bottom = 8.0
 [resource]
 GraphNode/constants/port_offset = 2
 GraphNode/constants/title_offset = 0
-GraphNode/fonts/title_font = SubResource( 3 )
 GraphNode/styles/frame = SubResource( 1 )
 GraphNode/styles/selectedframe = SubResource( 2 )

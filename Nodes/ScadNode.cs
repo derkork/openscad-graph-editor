@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Nodes
         public abstract string NodeTitle { get; }
 
         public abstract string NodeDescription { get; }
-
+        
         public string Id { get; private set; } = Guid.NewGuid().ToString();
 
         public Vector2 Offset { get; set; }

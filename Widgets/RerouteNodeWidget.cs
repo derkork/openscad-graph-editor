@@ -7,7 +7,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
 {
-    public class RerouteNodeWidget : ScadNodeWidget
+    public class RerouteNodeWidget : SmallNodeWidget
     {
         private PortType _portType;
         protected override Theme UseTheme => Resources.SimpleNodeWidgetTheme;
@@ -18,8 +18,8 @@ namespace OpenScadGraphEditor.Widgets
             var box = new HBoxContainer();
             box.SizeFlagsVertical = (int)SizeFlags.ExpandFill;
             box.MoveToNewParent(this);
-            SetSize(new Vector2(48   ,32));
-            RectMinSize = new Vector2(32, 32);
+            RectMinSize = new Vector2(64, 64);
+            SetSize(new Vector2(64   ,64));
             SetSlotEnabledLeft(0, true);
             SetSlotEnabledRight(0, true);
             QueueSort();

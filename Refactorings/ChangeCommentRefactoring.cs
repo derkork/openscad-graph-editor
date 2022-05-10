@@ -9,8 +9,7 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly string _title;
         private readonly string _description;
 
-        // ReSharper disable once SuggestBaseTypeForParameterInConstructor
-        public ChangeCommentRefactoring(IScadGraph holder, Comment node, string title, string description) : base(holder, node)
+        public ChangeCommentRefactoring(IScadGraph holder, ScadNode node, string description, string title = "") : base(holder, node)
         {
             _title = title;
             _description = description;
@@ -18,11 +17,23 @@ namespace OpenScadGraphEditor.Refactorings
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var comment = (Comment)Node;
-
-            comment.CommentTitle = _title;
-            comment.CommentDescription = _description;
-
+            if (Node is Comment comment)
+            {
+                if (_title.Empty() && _description.Empty())
+                {
+                    context.PerformRefactoring(new DeleteNodeRefactoring(Holder, Node));
+                }
+                else // just update the comment
+                {
+                    comment.CommentTitle = _title;
+                    comment.CommentDescription = _description;
+                }
+            }
+            else
+            {
+                // normal nodes do not support title
+                Node.SetComment(_description);
+            }
         }
     }
 }

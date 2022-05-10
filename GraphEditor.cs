@@ -76,7 +76,7 @@ namespace OpenScadGraphEditor
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
 
             _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
-            _commentEditingDialog.CommentChanged += OnCommentChanged;
+            _commentEditingDialog.CommentAndTitleChanged += OnCommentAndTitleChanged;
 
             _nodeColorDialog = this.WithName<NodeColorDialog>("NodeColorDialog");
             _nodeColorDialog.ColorSelected +=
@@ -179,12 +179,24 @@ namespace OpenScadGraphEditor
             NotificationService.ShowNotification("This usage no longer exists.");
         }
 
-        private void OnCommentChanged(RequestContext context, string title, string text)
+        private void OnCommentAndTitleChanged(RequestContext context, string title, string text)
         {
             var refactorings = new List<Refactoring>();
             var stepName = "Change comment";
+
+            if (title.Empty() && text.Empty())
+            {
+                stepName = "Remove comment";
+            }
+
             if (!context.TryGetNode(out var node))
             {
+                if (title.Empty() && text.Empty())
+                {
+                    // nothing to do
+                    return;
+                }
+                
                 stepName = "Create comment";
                 // create a new node
                 node = NodeFactory.Build<Comment>();
@@ -193,7 +205,7 @@ namespace OpenScadGraphEditor
             }
 
             // update the comment
-            refactorings.Add(new ChangeCommentRefactoring(context.Source, (Comment) node, title, text));
+            refactorings.Add(new ChangeCommentRefactoring(context.Source,  node, text, title));
             PerformRefactorings(stepName, refactorings);
         }
 
@@ -700,7 +712,14 @@ namespace OpenScadGraphEditor
             // when shift is pressed this means we want to have a reroute node.
             if (Input.IsKeyPressed((int) KeyList.Shift))
             {
-                AddNode(context, NodeFactory.Build<RerouteNode>());
+                var rerouteNode = NodeFactory.Build<RerouteNode>();
+                // when also CTRL is down, we make the reroute node a wireless node
+                if (Input.IsKeyPressed((int) KeyList.Control))
+                {
+                    rerouteNode.IsWireless = true;
+                }
+
+                AddNode(context, rerouteNode);
                 return;
             }
 
@@ -794,6 +813,37 @@ namespace OpenScadGraphEditor
                         () => _commentEditingDialog.Open(requestContext, comment.CommentTitle,
                             comment.CommentDescription))
                 );
+            }
+            else
+            {
+                var hasComment = node.TryGetComment(out var existingComment );
+                actions = actions.Append(
+                    new QuickAction(hasComment ? "Edit comment" : "Add comment",
+                        () => _commentEditingDialog.Open(requestContext, description: hasComment ? existingComment : "", showTitle: false)
+                    )
+                );
+
+                if (hasComment)
+                {
+                    actions = actions.Append(
+                        new QuickAction("Remove comment",
+                            () => OnRefactoringRequested("Remove comment",
+                                new ChangeCommentRefactoring(graph, node, "", "")))
+                    );
+                }
+            }
+
+            if (node is RerouteNode rerouteNode)
+            {
+                if (rerouteNode.IsWireless)
+                {
+                    actions = actions.Append(
+                        new QuickAction("Make wired",
+                            () => OnRefactoringRequested("Remove comment",
+                                new ChangeCommentRefactoring(graph, node, "", "")))
+                    );
+                    
+                }
             }
 
             // if the node references some invokable, add an action to open the refactor dialog for this invokable.

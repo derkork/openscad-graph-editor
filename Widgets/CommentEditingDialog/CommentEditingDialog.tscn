@@ -25,7 +25,7 @@ margin_right = 776.0
 margin_bottom = 430.0
 custom_constants/separation = 10
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 margin_right = 766.0
 margin_bottom = 25.0
 text = "Title"
@@ -57,6 +57,13 @@ margin_top = 375.0
 margin_right = 766.0
 margin_bottom = 420.0
 alignment = 2
+
+[node name="RemoveCommentButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 305.0
+margin_right = 530.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 110, 45 )
+text = "Remove Comment"
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 538.0

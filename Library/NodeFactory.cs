@@ -16,9 +16,9 @@ namespace OpenScadGraphEditor.Library
         /// <summary>
         /// Builds a node of the given type.
         /// </summary>
-        public static ScadNode Build<[MeansImplicitUse] T>() where T : ScadNode
+        public static T Build<[MeansImplicitUse] T>() where T : ScadNode
         {
-            return Build(typeof(T));
+            return (T) Build(typeof(T));
         }
 
         public static ScadNode Build<[MeansImplicitUse] T>(InvokableDescription description)
