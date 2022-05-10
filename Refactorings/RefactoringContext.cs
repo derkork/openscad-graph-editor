@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -41,7 +40,7 @@ namespace OpenScadGraphEditor.Refactorings
             _phase = RefactoringPhase.Default;
         }
 
-        public void PerformRefactorings(IEnumerable<Refactoring> refactorings, params Action[] after )
+        public void PerformRefactorings(IEnumerable<Refactoring> refactorings)
         {
             _refactorings.AddRange(refactorings);
             
@@ -66,10 +65,6 @@ namespace OpenScadGraphEditor.Refactorings
                 refactoring.PerformRefactoring(this);
             }
 
-            foreach (var afterAction in after)
-            {
-                afterAction();
-            }
             _refactorings.Clear();
         }
 

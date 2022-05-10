@@ -642,7 +642,7 @@ namespace OpenScadGraphEditor
             _refactoringInProgress = true;
             GD.Print(">> Refactorings start ");
             var context = new RefactoringContext(_currentProject);
-            context.PerformRefactorings(refactorings, after);
+            context.PerformRefactorings(refactorings);
 
             // close all tabs referring to graphs which are no longer in the project
             _tabContainer.GetChildNodes<ScadGraphEdit>()
@@ -664,6 +664,8 @@ namespace OpenScadGraphEditor
             MarkDirty(true);
             _refactoringInProgress = false;
             GD.Print("<< Refactorings end");
+            
+            after.ForAll(it => it());
         }
 
         private void OnNewButtonPressed()
