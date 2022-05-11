@@ -205,7 +205,7 @@ namespace OpenScadGraphEditor
             }
 
             // update the comment
-            refactorings.Add(new ChangeCommentRefactoring(context.Source, node, text, title));
+            refactorings.Add(new ChangeCommentRefactoring(context.Source, node, title, text));
             PerformRefactorings(stepName, refactorings);
         }
 
@@ -473,6 +473,7 @@ namespace OpenScadGraphEditor
             editor.CopyRequested += OnCopyRequested;
             editor.PasteRequested += OnPasteRequested;
             editor.CutRequested += OnCutRequested;
+            editor.EditCommentRequested += OnEditCommentRequested;
 
             editor.Name = toOpen.Description.NodeNameOrFallback;
             editor.MoveToNewParent(_tabContainer);
@@ -503,6 +504,25 @@ namespace OpenScadGraphEditor
                 .ToList();
 
             PerformRefactorings("Cut nodes", deleteRefactorings);
+        }
+
+        /// <summary>
+        ///  Called when the user wants to edit the comment of a node.
+        /// </summary>
+        private void OnEditCommentRequested(RequestContext requestContext)
+        {
+            var hasNode = requestContext.TryGetNode(out var node);
+            GdAssert.That(hasNode, "No node found");
+            
+            if (hasNode && node is Comment comment)
+            {
+                _commentEditingDialog.Open(requestContext, comment.CommentTitle, comment.CommentDescription);
+            }
+            else
+            {
+                var hasComment = node.TryGetComment(out var existingComment);
+                _commentEditingDialog.Open(requestContext, hasComment ? existingComment : "", showDescription: false );
+            }
         }
 
         /// <summary>
@@ -822,7 +842,7 @@ namespace OpenScadGraphEditor
                 actions = actions.Append(
                     new QuickAction(hasComment ? "Edit comment" : "Add comment",
                         () => _commentEditingDialog.Open(requestContext, description: hasComment ? existingComment : "",
-                            showTitle: false)
+                            showDescription: false)
                     )
                 );
 

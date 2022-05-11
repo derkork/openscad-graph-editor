@@ -44,7 +44,6 @@ script = ExtResource( 5 )
 
 [node name="InvokableRefactorDialog" parent="." instance=ExtResource( 4 )]
 visible = false
-margin_right = 500.0
 margin_bottom = 250.0
 
 [node name="NodeColorDialog" parent="." instance=ExtResource( 16 )]

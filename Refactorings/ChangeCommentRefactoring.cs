@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly string _title;
         private readonly string _description;
 
-        public ChangeCommentRefactoring(IScadGraph holder, ScadNode node, string description, string title = "") : base(holder, node)
+        public ChangeCommentRefactoring(IScadGraph holder, ScadNode node, string title, string description = "") : base(holder, node)
         {
             _title = title;
             _description = description;
@@ -31,8 +31,8 @@ namespace OpenScadGraphEditor.Refactorings
             }
             else
             {
-                // normal nodes do not support title
-                Node.SetComment(_description);
+                // normal nodes do not support description
+                Node.SetComment(_title);
             }
         }
     }

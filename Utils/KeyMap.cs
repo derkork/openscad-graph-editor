@@ -54,5 +54,8 @@ namespace OpenScadGraphEditor.Utils
         // straighten
         public static bool IsStraighten(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.Q);
         
+        // edit comment
+        public static bool IsEditComment(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.F2);
+        
     }
 }
