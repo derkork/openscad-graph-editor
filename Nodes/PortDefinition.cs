@@ -4,25 +4,22 @@ namespace OpenScadGraphEditor.Nodes
 {
     public class PortDefinition
     {
-        private PortDefinition(PortType portType, bool allowLiteral, string name,
+        private PortDefinition(PortType portType, LiteralType literalType, string name,
             bool literalIsAutoSet = true, object defaultValue = default)
         {
             PortType = portType;
             Name = name;
-            AllowLiteral = allowLiteral && portType != PortType.Any && portType != PortType.Flow &&
-                           PortType != PortType.Array;
+            LiteralType = literalType;
             LiteralIsAutoSet = literalIsAutoSet;
             DefaultValue = defaultValue;
         }
 
         public PortType PortType { get; }
+
+        public LiteralType LiteralType { get; }
+        
         public string Name { get; }
 
-        /// <summary>
-        /// Whether a literal is allowed for this port.
-        /// </summary>
-        public bool AllowLiteral { get; }
-        
         /// <summary>
         /// Whether a literal should be automatically set when the port is disconnected and unset when the port is connected.
         /// </summary>
@@ -32,56 +29,88 @@ namespace OpenScadGraphEditor.Nodes
 
         public double DefaultValueAsDouble => (DefaultValue is double value ? value : 0);
 
-        public string DefaultValueAsString => DefaultValue is string value ? value : "";
+        public string DefaultValueAsString => DefaultValue as string ?? "";
 
         public bool DefaultValueAsBoolean => DefaultValue is bool value && value;
 
 
         public static PortDefinition Boolean(string name = "", bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true,  bool defaultValue = false)
         {
-            return new PortDefinition(PortType.Boolean, allowLiteral, name, autoSetLiteralWhenPortIsDisconnected, defaultValue);
+            return new PortDefinition(PortType.Boolean,
+                allowLiteral
+                    ? LiteralType.Boolean
+                    : LiteralType.None,
+                name,
+                autoSetLiteralWhenPortIsDisconnected,
+                defaultValue);
         }
 
 
         public static PortDefinition Number(string name = "", bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true, double defaultValue = 0)
         {
-            return new PortDefinition(PortType.Number, allowLiteral, name, autoSetLiteralWhenPortIsDisconnected, defaultValue);
+            return new PortDefinition(PortType.Number,
+                allowLiteral
+                    ? LiteralType.Number
+                    : LiteralType.None,
+                name,
+                autoSetLiteralWhenPortIsDisconnected,
+                defaultValue);
         }
 
         public static PortDefinition String(string name = "", bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true, string defaultValue = "")
         {
-            return new PortDefinition(PortType.String, allowLiteral, name, autoSetLiteralWhenPortIsDisconnected, defaultValue);
+            return new PortDefinition(PortType.String,
+                allowLiteral
+                    ? LiteralType.String
+                    : LiteralType.None,
+                name,
+                autoSetLiteralWhenPortIsDisconnected,
+                defaultValue);
         }
 
         public static PortDefinition Any(string name = "")
         {
-            return new PortDefinition(PortType.Any, false, name);
+            return new PortDefinition(PortType.Any, LiteralType.None, name);
         }
 
         public static PortDefinition Vector3(string name = "", bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true)
         {
-            return new PortDefinition(PortType.Vector3, allowLiteral, name, autoSetLiteralWhenPortIsDisconnected);
+            return new PortDefinition(PortType.Vector3,
+                allowLiteral
+                    ? LiteralType.Vector3
+                    : LiteralType.None,
+                name,
+                autoSetLiteralWhenPortIsDisconnected);
         }
         
         public static PortDefinition Vector2(string name, bool allowLiteral, bool autoSetLiteralWhenPortIsDisconnected = true)
         {
-            return new PortDefinition(PortType.Vector2, allowLiteral, name, autoSetLiteralWhenPortIsDisconnected);
+            return new PortDefinition(PortType.Vector2,
+                allowLiteral
+                    ? LiteralType.Vector2
+                    : LiteralType.None,
+                name,
+                autoSetLiteralWhenPortIsDisconnected);
         }
 
 
         public static PortDefinition Flow(string name = "")
         {
-            return new PortDefinition(PortType.Flow, false, name);
+            return new PortDefinition(PortType.Flow, LiteralType.None, name);
         }
 
         public static PortDefinition Array(string name = "")
         {
-            return new PortDefinition(PortType.Array, false, name);
+            return new PortDefinition(PortType.Array, LiteralType.None, name);
         }
 
-        public static PortDefinition OfType(PortType type, string name = "", bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true, object defaultValue = default)
+        public static PortDefinition OfType(PortType type,
+            string name = "",
+            LiteralType literalType = LiteralType.None,
+            bool autoSetLiteralWhenPortIsDisconnected = true,
+            object defaultValue = default)
         {
-            return new PortDefinition(type, allowLiteral, name, autoSetLiteralWhenPortIsDisconnected, defaultValue);
+            return new PortDefinition(type, literalType, name, autoSetLiteralWhenPortIsDisconnected, defaultValue);
         }
     }
 
@@ -141,9 +170,9 @@ namespace OpenScadGraphEditor.Nodes
         }
 
         public static List<PortDefinition> OfType(this List<PortDefinition> self, PortType portType, string name = "",
-            bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true, object defaultValue = default)
+           LiteralType literalType = LiteralType.None, bool autoSetLiteralWhenPortIsDisconnected = true, object defaultValue = default)
         {
-            self.Add(PortDefinition.OfType(portType, name, allowLiteral, autoSetLiteralWhenPortIsDisconnected, defaultValue));
+            self.Add(PortDefinition.OfType(portType, name, literalType, autoSetLiteralWhenPortIsDisconnected, defaultValue));
             return self;
         }
     }

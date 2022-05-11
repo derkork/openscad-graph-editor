@@ -214,6 +214,15 @@ namespace OpenScadGraphEditor.Widgets
                         stringEdit.BindTo(stringLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
                         literalWidget = stringEdit;
                         break;
+                    
+                    case NameLiteral nameLiteral:
+                        if (!(existingWidget is NameEdit nameEdit))
+                        {
+                            nameEdit = Prefabs.New<NameEdit>();
+                        }
+                        nameEdit.BindTo(nameLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
+                        literalWidget = nameEdit;
+                        break;
 
                     case Vector3Literal vector3Literal:
                         if (!(existingWidget is Vector3Edit vector3Edit))

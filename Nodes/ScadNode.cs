@@ -326,32 +326,29 @@ namespace OpenScadGraphEditor.Nodes
         {
             var portDefinition = GetPortDefinition(port);
 
-            if (!portDefinition.AllowLiteral)
-            {
-                return;
-            }
-
             IScadLiteral literal;
-            switch (portDefinition.PortType)
+            switch (portDefinition.LiteralType)
             {
-                case PortType.Boolean:
+                
+                case LiteralType.Boolean:
                     literal = new BooleanLiteral(portDefinition.DefaultValueAsBoolean);
                     break;
-                case PortType.Number:
+                case LiteralType.Number:
                     literal = new NumberLiteral(portDefinition.DefaultValueAsDouble);
                     break;
-                case PortType.String:
+                case LiteralType.String:
                     literal = new StringLiteral(portDefinition.DefaultValueAsString);
                     break;
-                case PortType.Vector3:
+                case LiteralType.Vector3:
                     literal = new Vector3Literal();
                     break;
-                case PortType.Vector2:
+                case LiteralType.Vector2:
                     literal = new Vector2Literal();
                     break;
-                case PortType.Array:
-                case PortType.Flow:
-                case PortType.Any:
+                case LiteralType.Name:
+                    literal = new NameLiteral(portDefinition.DefaultValueAsString);
+                    break;
+                case LiteralType.None:
                     // nothing to do
                     return;
                 default:

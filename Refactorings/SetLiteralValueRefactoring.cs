@@ -32,6 +32,9 @@ namespace OpenScadGraphEditor.Refactorings
                 case StringLiteral stringLiteral:
                     stringLiteral.Value = (string) _value;
                     break;
+                case NameLiteral nameLiteral:
+                    nameLiteral.Value = (string) _value;
+                    break;
                 case Vector3Literal vector3Literal:
                     var arrayVector3 = (double[]) _value;
                     vector3Literal.X = arrayVector3[0];

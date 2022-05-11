@@ -56,9 +56,9 @@ namespace OpenScadGraphEditor.Nodes.Reroute
         public RerouteNode()
         {
             InputPorts
-                .OfType(PortType.Reroute, allowLiteral: false);
+                .OfType(PortType.Reroute);
             OutputPorts
-                .OfType(PortType.Reroute, allowLiteral: false);
+                .OfType(PortType.Reroute);
         }
 
         public override void SaveInto(SavedNode node)
@@ -81,9 +81,9 @@ namespace OpenScadGraphEditor.Nodes.Reroute
             InputPorts.Clear();
             OutputPorts.Clear();
             InputPorts
-                .OfType(type, allowLiteral: false);
+                .OfType(type);
             OutputPorts
-                .OfType(type, allowLiteral: false);
+                .OfType(type);
         }
 
         public override string Render(IScadGraph context)

@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 .Number();
 
             OutputPorts
-                .OfType(PortType.Any, allowLiteral: false);
+                .OfType(PortType.Any);
         }
 
         public override void SaveInto(SavedNode node)

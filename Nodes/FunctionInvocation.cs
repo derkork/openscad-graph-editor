@@ -65,11 +65,11 @@ namespace OpenScadGraphEditor.Nodes
             {
                 var type = parameter.TypeHint;
                 InputPorts
-                    .OfType(type, parameter.LabelOrFallback, true, !parameter.IsOptional);
+                    .OfType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional);
             }
 
             OutputPorts
-                    .OfType( _description.ReturnTypeHint, allowLiteral: false);
+                    .OfType( _description.ReturnTypeHint);
         }
 
         public override string Render(IScadGraph context)
