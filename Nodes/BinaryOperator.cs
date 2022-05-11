@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Nodes
             var left = RenderInput(context, 0);
             var right = RenderInput(context, 1);
 
-            return $"(({left.OrUndef()}) {OperatorSign} ({right.OrUndef()}))";
+            return $"({left.OrUndef()} {OperatorSign} {right.OrUndef()})";
         }
 
         public ScadNodeWidget InstantiateCustomWidget()

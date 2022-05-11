@@ -120,9 +120,7 @@ namespace OpenScadGraphEditor.Nodes.ForComprehension
                     }
                 }
                 builder.Append(") ")
-                    .Append("(")
                     .Append(innerExpression)
-                    .Append(")")
                     .Append("]");
                 return builder.ToString();
             }

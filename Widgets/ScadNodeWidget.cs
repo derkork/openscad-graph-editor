@@ -48,6 +48,11 @@ namespace OpenScadGraphEditor.Widgets
             HintTooltip = node.NodeDescription;
             Offset = node.Offset;
 
+            if (node is IAmAnExpression && !(node is IHaveMultipleExpressionOutputs))
+            {
+                HintTooltip = node.Render(graph);
+            }
+            
             var modifiers = BoundNode.GetModifiers();
             if (modifiers.HasFlag(ScadNodeModifier.Disable))
             {

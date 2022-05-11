@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -7,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     /// A node representing a literal string.
     /// </summary>
     [UsedImplicitly]
-    public class LiteralString  :ScadNode, IAmAnExpression
+    public class LiteralString  :ScadNode, IAmAnExpression, IHaveCustomWidget
     {
         public override string NodeTitle => "String";
         public override string NodeDescription => "A string.";
@@ -22,5 +23,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             return RenderOutput(context, 0);
         }
+
+        public ScadNodeWidget InstantiateCustomWidget() => new SmallNodeWidget();
     }
 }

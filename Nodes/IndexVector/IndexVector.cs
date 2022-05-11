@@ -84,7 +84,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             GdAssert.That(port >= 0 && port < IndexPortCount, "Port index out of range.");
             var vector = RenderInput(context, 0);
             var index = RenderInput(context, port+1);
-            return $"({vector})[{index}]";
+            return $"{vector}[{index}]";
         }
     }
 }

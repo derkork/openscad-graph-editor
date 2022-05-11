@@ -41,9 +41,9 @@ namespace OpenScadGraphEditor.Nodes
             switch (port)
             {
                 case 0:
-                    return $"({input}).x";
+                    return $"{input}.x";
                 case 1:
-                    return $"({input}).y";
+                    return $"{input}.y";
                 default:
                     throw new ArgumentOutOfRangeException();
             }

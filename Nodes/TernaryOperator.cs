@@ -32,7 +32,7 @@ namespace OpenScadGraphEditor.Nodes
             var trueValue = RenderInput(context, 1);
             var falseValue = RenderInput(context, 2);
             
-            return $"({condition.OrUndef()}) ? ({trueValue.OrUndef()}) : ({falseValue.OrUndef()})";
+            return $"{condition.OrUndef()} ? {trueValue.OrUndef()} : {falseValue.OrUndef()}";
         }
     }
 }

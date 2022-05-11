@@ -26,7 +26,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(IScadGraph context)
         {
             var value = RenderInput(context, 0);
-            return value.Empty() ? "" : $"-({value})";
+            return value.Empty() ? "" : $"-{value}";
         }
     }
 }
