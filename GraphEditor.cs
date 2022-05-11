@@ -61,6 +61,8 @@ namespace OpenScadGraphEditor
         private bool _refactoringInProgress;
         private Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
 
+        private Configuration _configuration = new Configuration();
+
         public override void _Ready()
         {
             OS.LowProcessorUsageMode = true;
@@ -131,9 +133,10 @@ namespace OpenScadGraphEditor
                 .Connect("toggled")
                 .To(this, nameof(OnPreviewToggled));
 
-            this.WithName<Button>("OpenButton")
-                .Connect("pressed")
-                .To(this, nameof(OnOpenFilePressed));
+            var openButton = this.WithName<OpenButton>("OpenButton");
+            openButton.OpenFileRequested += OnOpenFile;
+            openButton.OpenFileDialogRequested += OnOpenFileDialogRequested;
+            openButton.Init(_configuration);
 
             this.WithName<Button>("SaveAsButton")
                 .Connect("pressed")
@@ -154,10 +157,9 @@ namespace OpenScadGraphEditor
                 .Connect("timeout")
                 .To(this, nameof(SaveChanges));
 
+            _configuration.Load();
             _copyBuffer = new LightWeightGraph();
-
             OnNewButtonPressed();
-
             NotificationService.ShowNotification("Welcome to OpenScad Graph Editor");
         }
 
@@ -953,7 +955,7 @@ namespace OpenScadGraphEditor
             _quickActionsPopup.Open(position, actions);
         }
 
-        private void OnOpenFilePressed()
+        private void OnOpenFileDialogRequested()
         {
             _fileDialog.Mode = FileDialog.ModeEnum.OpenFile;
             _fileDialog.PopupCentered();
@@ -980,6 +982,7 @@ namespace OpenScadGraphEditor
             Clear();
 
             _currentFile = filename;
+            _configuration.AddRecentFile(filename);
             _fileNameLabel.Text = filename;
 
             _currentProject = new ScadProject(_rootResolver);
@@ -1004,6 +1007,7 @@ namespace OpenScadGraphEditor
         private void OnSaveFileSelected(string filename)
         {
             _currentFile = filename;
+            _configuration.AddRecentFile(filename);
             _fileNameLabel.Text = filename;
             MarkDirty(true);
         }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -19,6 +19,7 @@
 [ext_resource path="res://Widgets/CommentEditingDialog/CommentEditingDialog.tscn" type="PackedScene" id=17]
 [ext_resource path="res://Widgets/NotificationService.cs" type="Script" id=18]
 [ext_resource path="res://Widgets/UsageDialog/UsageDialog.tscn" type="PackedScene" id=19]
+[ext_resource path="res://Widgets/OpenButton.cs" type="Script" id=20]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -99,31 +100,35 @@ margin_right = 1906.0
 margin_bottom = 59.0
 
 [node name="NewButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_right = 73.0
+margin_right = 125.0
 margin_bottom = 45.0
+rect_min_size = Vector2( 125, 45 )
 hint_tooltip = "Create a new project"
 shortcut_in_tooltip = false
 text = "New"
 
-[node name="OpenButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 81.0
-margin_right = 164.0
+[node name="OpenButton" type="MenuButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 133.0
+margin_right = 258.0
 margin_bottom = 45.0
-hint_tooltip = "Open an existing project"
+rect_min_size = Vector2( 125, 45 )
 text = "Open"
+flat = false
+script = ExtResource( 20 )
 
 [node name="SaveAsButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 172.0
-margin_right = 295.0
+margin_left = 266.0
+margin_right = 391.0
 margin_bottom = 45.0
+rect_min_size = Vector2( 125, 45 )
 hint_tooltip = "Save the current project to a file."
 text = "Save as..."
 
 [node name="UndoButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 303.0
-margin_right = 348.0
+margin_left = 399.0
+margin_right = 444.0
 margin_bottom = 45.0
 rect_min_size = Vector2( 45, 45 )
 Icon = ExtResource( 14 )
@@ -132,8 +137,8 @@ Padding = Vector2( 8, 8 )
 [node name="RedoButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 356.0
-margin_right = 401.0
+margin_left = 452.0
+margin_right = 497.0
 margin_bottom = 45.0
 rect_min_size = Vector2( 45, 45 )
 Icon = ExtResource( 13 )
@@ -141,13 +146,13 @@ HintTooltip = null
 Padding = Vector2( 8, 8 )
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 409.0
-margin_right = 1049.0
+margin_left = 505.0
+margin_right = 1097.0
 margin_bottom = 45.0
 size_flags_horizontal = 3
 
 [node name="FileNameLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1057.0
+margin_left = 1105.0
 margin_top = 10.0
 margin_right = 1698.0
 margin_bottom = 35.0
