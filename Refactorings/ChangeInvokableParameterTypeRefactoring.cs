@@ -106,7 +106,7 @@ namespace OpenScadGraphEditor.Refactorings
                 
                 // finally if the parameter was optional before but the new parameter type does not support literals
                 // then we need to make the parameter mandatory
-                if (_description.Parameters[parameterIndex].IsOptional && !_newPortType.SupportsLiteral())
+                if (_description.Parameters[parameterIndex].IsOptional && _newPortType.GetMatchingLiteralType() == LiteralType.None)
                 {
                     context.PerformRefactoring(new ChangeInvokableParameterOptionalStateRefactoring(_description, parameterIndex, false));
                 }

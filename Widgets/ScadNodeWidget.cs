@@ -96,6 +96,7 @@ namespace OpenScadGraphEditor.Widgets
                 else
                 {
                     left.Clear();
+                    SetSlotEnabledLeft(idx, false);
                 }
 
                 if (node.OutputPortCount > idx)
@@ -105,6 +106,7 @@ namespace OpenScadGraphEditor.Widgets
                 else
                 {
                     right.Clear();
+                    SetSlotEnabledRight(idx, false);
                 }
 
                 idx++;
@@ -113,6 +115,8 @@ namespace OpenScadGraphEditor.Widgets
             // remove any remaining containers
             for (var i = idx; i < existingContainers.Count; i++)
             {
+                SetSlotEnabledLeft(i, false);
+                SetSlotEnabledRight(i, false);
                 existingContainers[i].RemoveAndFree();
             }
 

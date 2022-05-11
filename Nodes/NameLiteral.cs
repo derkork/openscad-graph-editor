@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
         }
 
         public string Value { get; set; }
-
+        
         public override string RenderedValue =>  Value;
 
         public override string SerializedValue

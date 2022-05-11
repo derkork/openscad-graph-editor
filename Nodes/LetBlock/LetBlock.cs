@@ -5,17 +5,16 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes.ForLoop
+namespace OpenScadGraphEditor.Nodes.LetBlock
 {
     [UsedImplicitly]
-    public class ForLoop : ScadNode, IHaveMultipleExpressionOutputs, ICanHaveModifier
+    public class LetBlock : ScadNode, IHaveMultipleExpressionOutputs
     {
-        public override string NodeTitle => "For Each";
-        public override string NodeDescription => "Executes its children for each entry in the given vector.";
+        public override string NodeTitle => "Let (Block)";
+        public override string NodeDescription  => "Allows to define temporary variables";
+         public int VariableCount { get; private set; } = 1;
 
-        public int NestLevel { get; private set; } = 1;
-
-        public ForLoop()
+        public LetBlock()
         {
             RebuildPorts();
         }
@@ -32,10 +31,10 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             OutputPorts
                 .Flow("Children");
 
-            for (var i = 0; i < NestLevel; i++)
+            for (var i = 0; i < VariableCount; i++)
             {
-                InputPorts.Array($"Vector {i + 1}");
-                OutputPorts.OfType(PortType.Any, literalType: LiteralType.Name);
+                InputPorts.Any($"Expression {i + 1}");
+                OutputPorts.OfType(PortType.Any, literalType: LiteralType.Name, autoSetLiteralWhenPortIsDisconnected: true);
             }
 
             OutputPorts
@@ -43,69 +42,69 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         }
 
         /// <summary>
-        /// Adds a nested for loop level. The caller is responsible for fixing up port connections.
+        /// Adds a slot for a variable.
         /// </summary>
-        public void IncreaseNestLevel()
+        public void IncreaseVariableCount()
         {
-            NestLevel += 1;
+            VariableCount += 1;
             RebuildPorts();
+            
             // add a port literal for the new variable
-            BuildPortLiteral(PortId.Output(NestLevel));
+            BuildPortLiteral(PortId.Output(VariableCount));
         }
 
         /// <summary>
-        /// Removes a nested for loop level. The caller is responsible for fixing up port connections.
+        /// Removes a slot for a variable.
         /// </summary>
-        public void DecreaseNestLevel()
+        public void DecreaseVariableCount()
         {
-            GdAssert.That(NestLevel > 1, "Cannot decrease nest level any further.");
-            DropPortLiteral(PortId.Output(NestLevel));
-            NestLevel -= 1;
+            GdAssert.That(VariableCount > 1, "Cannot decrease nest level any further.");
+            // remove the port literal for the removed variable
+            DropPortLiteral(PortId.Output(VariableCount));
+            VariableCount -= 1;
             RebuildPorts();
-            // since we have no literals here, we can skip re-building port literals
         }
 
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("nest_level", NestLevel);
+            node.SetData("variable_count", VariableCount);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            NestLevel = node.GetDataInt("nest_level", 1);
+            VariableCount = node.GetDataInt("variable_count", 1);
             RebuildPorts();
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(IScadGraph context)
         {
-            var builder = new StringBuilder("for(");
-            for (var i = 0; i < NestLevel; i++)
+            var builder = new StringBuilder("let(");
+            for (var i = 0; i < VariableCount; i++)
             {
                 var variableName = RenderExpressionOutput(context, i + 1);
-                var array = RenderInput(context, 1 + i);
+                var expression = RenderInput(context,  i + 1).OrUndef();
                 builder.Append(variableName)
                     .Append(" = ")
-                    .Append(array);
-                if (i + 1 < NestLevel)
+                    .Append(expression);
+                if (i + 1 < VariableCount)
                 {
                     builder.Append(", ");
                 }
             }
-
             builder.Append(")");
 
             var children = RenderOutput(context, 0);
-            var next = RenderOutput(context, 1+NestLevel);
+            var next = RenderOutput(context, 1+VariableCount);
 
             return $"{builder}{children.AsBlock()}\n{next}";
         }
 
         public string RenderExpressionOutput(IScadGraph context, int port)
         {
-            GdAssert.That(port > 0 && port <= NestLevel, "port out of range");
+            GdAssert.That(port > 0 && port <= VariableCount, "port out of range");
             return RenderOutput(context, port).OrDefault(Id.UniqueStableVariableName(port - 1));
         }
     }
