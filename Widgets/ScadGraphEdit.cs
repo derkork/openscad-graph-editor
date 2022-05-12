@@ -387,9 +387,9 @@ namespace OpenScadGraphEditor.Widgets
                     var leftSideWidget = _widgets[connection.From.Id];
 
                     var rightOffset = nodePositions[connection.To.Id];
-                    var rightConnectorPosition = rightSideWidget.GetConnectionInputPosition(connection.ToPort) + rightOffset;
+                    var rightConnectorPosition = GlobalToGraphRelative(rightSideWidget.GetConnectionInputPosition(connection.ToPort)) + rightOffset;
                     var leftOffset = nodePositions[connection.From.Id];
-                    var leftConnectorPosition = leftSideWidget.GetConnectionOutputPosition(connection.FromPort) + leftOffset;
+                    var leftConnectorPosition = GlobalToGraphRelative(leftSideWidget.GetConnectionOutputPosition(connection.FromPort)) + leftOffset;
                         
                     // we only move the left node and we only change the y axis
                     var deltaY = rightConnectorPosition.y - leftConnectorPosition.y;
