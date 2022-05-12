@@ -34,7 +34,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
 
             for (var i = 0; i < NestLevel; i++)
             {
-                InputPorts.Array($"Vector {i + 1}");
+                InputPorts.Array();
                 OutputPorts.OfType(PortType.Any, literalType: LiteralType.Name);
             }
 

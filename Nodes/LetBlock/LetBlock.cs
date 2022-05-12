@@ -33,7 +33,7 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
 
             for (var i = 0; i < VariableCount; i++)
             {
-                InputPorts.Any($"Expression {i + 1}");
+                InputPorts.Any();
                 OutputPorts.OfType(PortType.Any, literalType: LiteralType.Name, autoSetLiteralWhenPortIsDisconnected: true);
             }
 

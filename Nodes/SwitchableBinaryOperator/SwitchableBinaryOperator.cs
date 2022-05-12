@@ -33,8 +33,8 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             var secondOperandPortType = (PortType) node.GetDataInt("second_operand_port_type", (int) PortType.Any);
             InputPorts.Clear();
             InputPorts
-                .OfType(firstOperandPortType)
-                .OfType(secondOperandPortType);
+                .OfType(firstOperandPortType, literalType: firstOperandPortType.GetMatchingLiteralType())
+                .OfType(secondOperandPortType, literalType: secondOperandPortType.GetMatchingLiteralType());
 
             base.RestorePortDefinitions(node, resolver);
         }
