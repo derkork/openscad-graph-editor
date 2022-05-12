@@ -67,9 +67,9 @@ namespace OpenScadGraphEditor.Library
 
         public ModuleBuilder WithFragmentParameters()
         {
-            return WithParameter("$fa", PortType.Number, label: "Minimum angle", optional: true)
-                .WithParameter("$fs", PortType.Number, label: "Minimum length", optional: true)
-                .WithParameter("$fn", PortType.Number, label: "Minimum # segments", optional: true);
+            return WithParameter("$fa", PortType.Number, label: "Minimum angle", optional: true, description: "The minimum angle between fragments")
+                .WithParameter("$fs", PortType.Number, label: "Minimum length", optional: true, description: "The minimum length of a fragment")
+                .WithParameter("$fn", PortType.Number, label: "Minimum # segments", optional: true, description: "The minimum number of segments that should be created.");
         }
 
         public ModuleDescription Build()

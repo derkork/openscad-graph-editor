@@ -11,7 +11,33 @@ namespace OpenScadGraphEditor.Nodes
     public class TernaryOperator : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Conditional if/else (?:)";
-        public override string NodeDescription => "A function that uses a test to determine which of 2 values to return. Also known as the ternary operator.";
+        public override string NodeDescription => "Checks a condition to determine which of 2 values to return. Also known as the ternary operator.";
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                switch (portId.Port)
+                {
+                    case 0:
+                        return "The condition that should be checked.";
+                    case 1:
+                        return "The value to return if the condition is true.";
+                    case 2:
+                        return "The value to return if the condition is false.";
+                }
+            }
+
+            if (portId.IsOutput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "The result of the conditional operator.";
+                }
+            }
+
+            return "";
+        }
 
 
         public TernaryOperator()

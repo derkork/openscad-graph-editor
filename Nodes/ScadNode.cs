@@ -16,6 +16,16 @@ namespace OpenScadGraphEditor.Nodes
         
         public string Id { get; private set; } = Guid.NewGuid().ToString();
 
+        /// <summary>
+        /// The documentation of the port with the given Id.
+        /// </summary>
+        /// <param name="portId"></param>
+        /// <returns></returns>
+        public virtual string GetPortDocumentation(PortId portId)
+        {
+            return "lorem ipsum";
+        }
+
         public Vector2 Offset { get; set; }
 
         public int InputPortCount => InputPorts.Count;

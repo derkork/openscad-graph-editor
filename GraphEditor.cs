@@ -15,6 +15,7 @@ using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.CommentEditingDialog;
+using OpenScadGraphEditor.Widgets.HelpDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
@@ -53,6 +54,7 @@ namespace OpenScadGraphEditor
         private VariableRefactorDialog _variableRefactorDialog;
         private NodeColorDialog _nodeColorDialog;
         private CommentEditingDialog _commentEditingDialog;
+        private HelpDialog _helpDialog;
         private UsageDialog _usageDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private LightWeightGraph _copyBuffer;
@@ -76,6 +78,8 @@ namespace OpenScadGraphEditor
             _importDialog.OnNewImportRequested += OnNewImportRequested;
             _usageDialog = this.WithName<UsageDialog>("UsageDialog");
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
+            
+            _helpDialog = this.WithName<HelpDialog>("HelpDialog");
 
             _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
             _commentEditingDialog.CommentAndTitleChanged += OnCommentAndTitleChanged;
@@ -476,6 +480,7 @@ namespace OpenScadGraphEditor
             editor.PasteRequested += OnPasteRequested;
             editor.CutRequested += OnCutRequested;
             editor.EditCommentRequested += OnEditCommentRequested;
+            editor.HelpRequested += OnHelpRequested;
 
             editor.Name = toOpen.Description.NodeNameOrFallback;
             editor.MoveToNewParent(_tabContainer);
@@ -484,6 +489,14 @@ namespace OpenScadGraphEditor
             _tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
             editor.FocusEntryPoint();
             return editor;
+        }
+
+        private void OnHelpRequested(RequestContext obj)
+        {
+            if (obj.TryGetNode(out var node))
+            {
+                _helpDialog.Open(obj.Source, node);
+            }
         }
 
         private void Close(ScadGraphEdit editor)

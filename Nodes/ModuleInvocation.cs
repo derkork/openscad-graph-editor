@@ -15,6 +15,25 @@ namespace OpenScadGraphEditor.Nodes
 
         public InvokableDescription InvokableDescription => _description;
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "Input flow";
+                } 
+                return _description.Parameters[portId.Port - 1].Description;
+            }
+
+            if (portId.IsOutput)
+            {
+                return "Output flow";
+            }
+
+            return "";
+        }
+
         public override void SaveInto(SavedNode node)
         {
             base.SaveInto(node);

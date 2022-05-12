@@ -58,6 +58,11 @@ namespace OpenScadGraphEditor.Widgets
         public event Action<RequestContext> EditCommentRequested;
 
         /// <summary>
+        /// Emitted when the user requests help on a certain node.
+        /// </summary>
+        public event Action<RequestContext> HelpRequested;
+
+        /// <summary>
         /// Called when data from any list entry is dropped.
         /// </summary>
         public event Action<ScadGraphEdit,ProjectTreeEntry, Vector2, Vector2> ItemDataDropped;
@@ -309,6 +314,13 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
 
+            if (evt.IsShowHelp() && _selection.Count == 1)
+            {
+                var selectedNode = Graph.GetAllNodes().First(it => it.Id == _selection.First());
+                HelpRequested?.Invoke(RequestContext.ForNode(Graph, selectedNode.Offset, selectedNode));
+                return;
+            }
+            
             if (evt.IsStraighten())
             {
                 StraightenSelection();

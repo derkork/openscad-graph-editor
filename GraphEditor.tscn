@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -20,6 +20,7 @@
 [ext_resource path="res://Widgets/NotificationService.cs" type="Script" id=18]
 [ext_resource path="res://Widgets/UsageDialog/UsageDialog.tscn" type="PackedScene" id=19]
 [ext_resource path="res://Widgets/OpenButton.cs" type="Script" id=20]
+[ext_resource path="res://Widgets/HelpDialog/HelpDialog.tscn" type="PackedScene" id=21]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -302,3 +303,10 @@ size_flags_horizontal = 8
 size_flags_vertical = 8
 custom_constants/separation = 10
 script = ExtResource( 18 )
+
+[node name="HelpDialog" parent="MarginContainer" instance=ExtResource( 21 )]
+visible = false
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 1920.0
+margin_bottom = 1080.0
