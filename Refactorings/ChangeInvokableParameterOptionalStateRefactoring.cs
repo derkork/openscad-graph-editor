@@ -57,6 +57,12 @@ namespace OpenScadGraphEditor.Refactorings
                     }
                 }
             }
+            
+            // finally we also need to re-setup the ports of all affected nodes (so they reflect the optional state)s
+            foreach (var referencingNode in affectedNodes)
+            {
+                referencingNode.NodeAsReference.SetupPorts(_description);
+            }
         }
     }
 }
