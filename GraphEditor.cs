@@ -843,7 +843,7 @@ namespace OpenScadGraphEditor
                 var hasComment = node.TryGetComment(out var existingComment);
                 actions = actions.Append(
                     new QuickAction(hasComment ? "Edit comment" : "Add comment",
-                        () => _commentEditingDialog.Open(requestContext, description: hasComment ? existingComment : "",
+                        () => _commentEditingDialog.Open(requestContext, title: hasComment ? existingComment : "",
                             showDescription: false)
                     )
                 );
