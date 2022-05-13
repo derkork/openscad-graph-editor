@@ -14,6 +14,11 @@ namespace OpenScadGraphEditor.Library
         /// </summary>
         public PortType ReturnTypeHint { get; set; } = PortType.Any;
 
+        /// <summary>
+        /// Description of the return value.
+        /// </summary>
+        public string ReturnValueDescription { get; set; } = "";
+        
         public override bool CanUse(ScadNode node)
         {
             return node is IAmAnExpression;
@@ -23,12 +28,14 @@ namespace OpenScadGraphEditor.Library
         public void LoadFrom(SavedFunctionDescription savedInvokableDescription)
         {
             ReturnTypeHint = savedInvokableDescription.ReturnTypeHint;
+            ReturnValueDescription = savedInvokableDescription.ReturnValueDescription;
             base.LoadFrom(savedInvokableDescription);
         }
 
         public void SaveInto(SavedFunctionDescription savedInvokableDescription)
         {
             savedInvokableDescription.ReturnTypeHint = ReturnTypeHint;
+            savedInvokableDescription.ReturnValueDescription = ReturnValueDescription;
             base.SaveInto(savedInvokableDescription);
         }
     }

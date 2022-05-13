@@ -20,6 +20,22 @@ namespace OpenScadGraphEditor.Nodes
                 .Flow();
         }
 
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "Input flow";
+                case 1 when portId.IsInput:
+                    return "The value to which the variable should be set.";
+                case 0 when portId.IsOutput:
+                    return "Output flow";
+                default:
+                    return "";
+            }
+        }
+
         public override void SaveInto(SavedNode node)
         {
             node.SetData("variable_description_id", VariableDescription.Id);

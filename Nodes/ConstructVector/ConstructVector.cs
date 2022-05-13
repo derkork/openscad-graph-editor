@@ -20,6 +20,21 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
                 .Array();
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                return "An element to be added to the vector";
+            }
+
+            if (portId.IsOutput)
+            {
+                return "The constructed vector";
+            }
+
+            return "";
+        }
+
 
         public override void SaveInto(SavedNode node)
         {

@@ -11,13 +11,39 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
     public class ForLoop : ScadNode, IHaveMultipleExpressionOutputs, ICanHaveModifier
     {
         public override string NodeTitle => "For Each";
-        public override string NodeDescription => "Executes its children for each entry in the given vector.";
+        public override string NodeDescription => "Executes its children for each entry in the given vector. If multiple vectors are given, the children are executed for each combination of all elements of the given vectors.";
 
         public int NestLevel { get; private set; } = 1;
 
         public ForLoop()
         {
             RebuildPorts();
+        }
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "Input flow";
+                }
+
+                return "Vector to iterate over";
+            }
+
+            if (portId.IsOutput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "Output flow";
+                }
+
+                return
+                    "The current element of the vector from the left. You may give it a custom name. If you don't give it a name, one will be generated.";
+            }
+
+            return "";
         }
 
         private void RebuildPorts()

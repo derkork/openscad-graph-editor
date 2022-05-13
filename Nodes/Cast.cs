@@ -20,7 +20,20 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts
                 .Any();
         }
-        
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "The value to cast.";
+                case 0 when portId.IsOutput:
+                    return "The casted value.";
+                default:
+                    return "";
+            }
+        }
+
         public override string Render(IScadGraph context)
         {
             // openscad doesn't really have casts, so we simply output the input, the casting is just for the editor.

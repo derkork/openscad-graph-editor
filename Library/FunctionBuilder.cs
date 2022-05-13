@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Library
             _currentFunctionDescription = currentFunctionDescription;
         }
 
-        public static FunctionBuilder NewFunction(string name, string id = "", PortType returnType = PortType.Any)
+        public static FunctionBuilder NewFunction(string name, string id = "", PortType returnType = PortType.Any, string returnValueDescription = "")
         {
             var builder = new FunctionBuilder(new FunctionDescription())
             {
@@ -21,16 +21,17 @@ namespace OpenScadGraphEditor.Library
                 {
                     Name = name,
                     ReturnTypeHint = returnType,
-                    Id = id.Length > 0 ? id : Guid.NewGuid().ToString()
+                    Id = id.Length > 0 ? id : Guid.NewGuid().ToString(),
+                    ReturnValueDescription = returnValueDescription
                 }
             };
             return builder;
         }
 
         public static FunctionBuilder NewBuiltInFunction(string name, string nodeName = "",
-            PortType returnType = PortType.Any, string idSuffix = "")
+            PortType returnType = PortType.Any, string idSuffix = "", string returnValueDescription = "")
         {
-            var builder = NewFunction(name, "__builtin__function__" + name + idSuffix, returnType);
+            var builder = NewFunction(name, "__builtin__function__" + name + idSuffix, returnType, returnValueDescription);
             builder._currentFunctionDescription.IsBuiltin = true;
             builder._currentFunctionDescription.NodeName = nodeName;
             return builder;

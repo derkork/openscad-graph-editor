@@ -20,26 +20,17 @@ namespace OpenScadGraphEditor.Nodes
 
         public override string GetPortDocumentation(PortId portId)
         {
-            if (portId.IsInput)
+            switch (portId.Port)
             {
-                switch (portId.Port)
-                {
-                    case 0:
-                        return "The first operand.";
-                    case 1:
-                        return "The second operand.";
-                }
-            }
-
-            if (portId.IsOutput)
-            {
-                if (portId.Port == 0)
-                {
+                case 0 when portId.IsInput:
+                    return "The first operand.";
+                case 1 when portId.IsInput:
+                    return "The second operand.";
+                case 0 when portId.IsOutput:
                     return "The result of the operation.";
-                }
+                default:
+                    return "";
             }
-
-            return "";
         }
 
         public ScadNodeWidget InstantiateCustomWidget()

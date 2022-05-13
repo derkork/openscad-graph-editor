@@ -23,6 +23,23 @@ namespace OpenScadGraphEditor.Nodes
                 .Vector3(allowLiteral: false);
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "X component of the vector";
+                case 1 when portId.IsInput:
+                    return "Y component of the vector";
+                case 2 when portId.IsInput:
+                    return "Z component of the vector";
+                case 0 when portId.IsOutput:
+                    return "The resulting Vector3.";
+                default:
+                    return "";
+            }
+        }
+        
         public override string Render(IScadGraph context)
         {
             return $"[{RenderInput(context, 0).OrDefault("0")}, {RenderInput(context, 1).OrDefault("0")}, {RenderInput(context, 2).OrDefault("0")}]";

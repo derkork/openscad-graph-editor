@@ -33,6 +33,35 @@ namespace OpenScadGraphEditor.Nodes.ForComprehension
             RebuildPorts();
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (portId.Port < NestLevel)
+                {
+                    return "A list or range to be mapped.";
+                }
+
+                return "An expression that should be used to make up the new elements of the list.";
+            }
+
+            if (portId.IsOutput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "The result of the mapping operation.";
+                }
+
+                if (portId.Port <= NestLevel)
+                {
+                    return
+                        "The current element of the input list. This can be used to create expressions that can be connected into the 'Result' input port.";
+                }
+            }
+
+            return "";
+        }
+
         private void RebuildPorts()
         {
             InputPorts

@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "Difference";
 
         public override string NodeDescription =>
-            "Subtracts the 2nd (and all further) child nodes from the first one (logical and not).";
+            "Subtracts the child nodes from the first one (logical and not).";
 
         public Difference()
         {
@@ -22,7 +22,24 @@ namespace OpenScadGraphEditor.Nodes
                 .Flow("Subtract")
                 .Flow("After");
         }
-        
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "Input flow";
+                case 0 when portId.IsOutput:
+                    return "The geometry from which the other geometry should be subtracted.";
+                case 1 when portId.IsOutput:
+                    return "The geometry that should be subtracted from the first geometry.";
+                case 2 when portId.IsOutput:
+                    return "Output flow";
+                default:
+                    return "";
+            }
+        }
+
         public override string Render(IScadGraph context)
         {
             var first = $"union(){RenderOutput(context, 0).AsBlock()}";

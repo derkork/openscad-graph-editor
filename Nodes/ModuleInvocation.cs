@@ -28,7 +28,20 @@ namespace OpenScadGraphEditor.Nodes
 
             if (portId.IsOutput)
             {
-                return "Output flow";
+                if (_description.SupportsChildren)
+                {
+                    switch (portId.Port)
+                    {
+                        case 0:
+                            return "Children. Everything connected here will be affected by this module.";
+                        case 1:
+                            return "Output flow.";
+                    }
+                }
+                else
+                {
+                    return "Output flow";
+                }
             }
 
             return "";

@@ -25,8 +25,22 @@ namespace OpenScadGraphEditor.Nodes
             node.SetData("function_description_id", _description.Id);
         }
 
-        
-        
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                return _description.Parameters[portId.Port].Description;
+            }
+
+            if (portId.IsOutput)
+            {
+                return _description.ReturnValueDescription;
+            }
+
+            return "";
+        }
+
         public int GetParameterInputPort(int parameterIndex)
         {
             // as function invocations have no flow ports, the n-th parameter port is the n-th input port.

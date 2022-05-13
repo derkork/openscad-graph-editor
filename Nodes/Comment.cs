@@ -16,7 +16,12 @@ namespace OpenScadGraphEditor.Nodes
 
         public string CommentTitle { get; set; } = "";
         public string CommentDescription { get; set; } = "";
-        
+
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            return "";
+        }
 
         public override void SaveInto(SavedNode node)
         {

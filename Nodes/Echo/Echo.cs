@@ -21,6 +21,25 @@ namespace OpenScadGraphEditor.Nodes.Echo
             RebuildPorts();
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "Input flow";
+                }
+                return "A value that will be written to the console";
+            }
+
+            if (portId.IsOutput)
+            {
+                return "Output flow";
+            }
+
+            return "";
+        }
+
         private void RebuildPorts()
         {
             InputPorts

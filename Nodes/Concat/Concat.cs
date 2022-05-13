@@ -18,6 +18,22 @@ namespace OpenScadGraphEditor.Nodes.Concat
 
         public int InputCount { get; private set; } = 1;
 
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                return "An element to append to the vector.";
+            }
+            
+            if (portId.IsOutput)
+            {
+                return "The resulting vector.";
+            }
+
+            return "";
+        }
+
         public Concat()
         {
             RebuildPorts();

@@ -62,6 +62,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
                 
                 var label = new Label();
                 label.Text = helpText;
+                label.Autowrap = true;
                 label.Align = Label.AlignEnum.Right;
                 label.MoveToNewParent(_leftContainer);
             }
@@ -72,19 +73,22 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
                 
                 var label = new Label();
                 label.Text = helpText;
+                label.Autowrap = true;
                 label.Align = Label.AlignEnum.Left;
                 label.MoveToNewParent(_rightContainer);
             }
 
-            Update();
             Visible = true;
-
-
+            CallDeferred("update");
         }
-
 
         public override void _Draw()
         {
+            if (!Visible)
+            {
+                return;
+            }
+            
             const float lineWidth = 2;
             DrawRect(GetRect(), new Color(0.1f,0.1f,0.1f,0.9f));
             var leftLabels = _leftContainer.GetChildNodes<Control>().ToList();

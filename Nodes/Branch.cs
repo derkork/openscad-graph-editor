@@ -10,12 +10,12 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "Branch";
 
         public override string NodeDescription =>
-            "Performs a test to determine\nif the actions in a sub scope\nshould be performed or not.";
+            "Performs a test to determine if the actions in a sub scope should be performed or not.";
 
         public Branch()
         {
             InputPorts
-                .Flow("In")
+                .Flow()
                 .Boolean("Condition");
 
             OutputPorts
@@ -23,6 +23,26 @@ namespace OpenScadGraphEditor.Nodes
                 .Flow("False")
                 .Flow("After");
         }
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "Input flow";
+                case 1 when portId.IsInput:
+                    return "The condition that should be tested.";
+                case 0 when portId.IsOutput:
+                    return "The flow that is executed if the condition is true.";
+                case 1 when portId.IsOutput:
+                    return "The flow that is executed if the condition is false.";
+                case 2 when portId.IsOutput:
+                    return "The flow that is executed after the condition is tested.";
+                default:
+                    return "";
+            }
+        }
+
 
         public override string Render(IScadGraph context)
         {
