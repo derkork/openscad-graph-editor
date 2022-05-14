@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeDescription => "Calculates the modulus the given inputs.";
         protected override string OperatorSign => "%";
 
-        public override Texture NodeBackground => Resources.PlusIcon; // TODO wrong icon
+        public override Texture NodeBackground => Resources.ModulusIcon; 
 
         public ModuloOperator()
         {
@@ -20,7 +20,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Number();
 
             OutputPorts
-                .Number();
+                .Number(allowLiteral: false);
         }
     }
 }
