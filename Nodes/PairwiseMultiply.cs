@@ -2,6 +2,7 @@ using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -9,7 +10,7 @@ namespace OpenScadGraphEditor.Nodes
     /// Utility node that does a pairwise multiplication of two arrays.
     /// </summary>
     [UsedImplicitly]
-    public class PairwiseMultiply : ScadNode, IAmAnExpression
+    public class PairwiseMultiply : ScadNode, IAmAnExpression, IHaveCustomWidget, IHaveNodeBackground
     {
         public override string NodeTitle => "Pairwise multiply";
         public override string NodeDescription => "Multiplies the given two vectors pairwise (each element of the first vector is multiplied with the corresponding element of the second vector).";
@@ -57,5 +58,12 @@ namespace OpenScadGraphEditor.Nodes
             
             return $"let({var1} = {first}, {var2} = {second}) [for(i =[0:max(len({var1}), len({var2}))-1]) (i < len({var1}) ? {var1}[i] : 0) * (i < len({var2}) ? {var2}[i] : 0)]";
         }
+
+        public ScadNodeWidget InstantiateCustomWidget()
+        {
+            return Prefabs.New<SmallNodeWidget>();
+        }
+
+        public Texture NodeBackground => Resources.PairwiseMultiplyIcon;
     }
 }

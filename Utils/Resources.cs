@@ -29,6 +29,7 @@ namespace OpenScadGraphEditor.Utils
         public static readonly Texture LessEqualIcon = GD.Load<Texture>("res://Icons/less_equal0000.png");
         public static readonly Texture EqualIcon = GD.Load<Texture>("res://Icons/equal0000.png");
         public static readonly Texture ModulusIcon = GD.Load<Texture>("res://Icons/modulus0000.png");
+        public static readonly Texture PairwiseMultiplyIcon = GD.Load<Texture>("res://Icons/pairwise_multiply0000.png");
         
         public static readonly Texture Vector3SplitIcon = GD.Load<Texture>("res://Icons/vector3split0000.png");
         public static readonly Texture Vector3MergeIcon = GD.Load<Texture>("res://Icons/vector3merge0000.png");

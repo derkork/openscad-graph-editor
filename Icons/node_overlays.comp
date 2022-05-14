@@ -2,7 +2,7 @@ Composition {
 	CurrentTime = 0,
 	RenderRange = { 0, 0 },
 	GlobalRange = { 0, 1 },
-	CurrentID = 436,
+	CurrentID = 440,
 	HiQ = true,
 	PlaybackUpdateMode = 0,
 	Version = "Fusion Studio 17.4.6 build 4",
@@ -32,7 +32,8 @@ Composition {
 		"comp:/and.png",
 		"comp:/greater_equal.png",
 		"comp:/equal.png",
-		"comp:/modulus.png"
+		"comp:/modulus.png",
+		"comp:/pairwise_multiply.png"
 	},
 	Tools = {
 		Saver1_1_1_1_1_1_1_4_1_1 = Saver {
@@ -1169,7 +1170,7 @@ Composition {
 					Disabled = true,
 				},
 			},
-			ViewInfo = OperatorInfo { Pos = { 336, 519.212 } },
+			ViewInfo = OperatorInfo { Pos = { 403.333, 519.212 } },
 		},
 		InnerWand = sRectangle {
 			NameSet = true,
@@ -1598,7 +1599,6 @@ Composition {
 			ViewInfo = OperatorInfo { Pos = { 402, 43.1212 } },
 		},
 		Modulus = TextPlus {
-			CtrlWZoom = false,
 			NameSet = true,
 			Inputs = {
 				GlobalOut = Input { Value = 1, },
@@ -1643,6 +1643,84 @@ Composition {
 				["PNGFormat.PreDivide"] = Input { Value = 1, },
 			},
 			ViewInfo = OperatorInfo { Pos = { 497.333, 441.303 } },
+		},
+		PairwiseMultiply = TextPlus {
+			NameSet = true,
+			Inputs = {
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Center = Input { Value = { 0.505524861878453, 0.507078729281769 }, },
+				StyledText = Input { Value = "x * y\nx * y", },
+				Font = Input { Value = "Open Sans", },
+				Style = Input { Value = "Bold", },
+				Size = Input { Value = 0.504, },
+				VerticalJustificationNew = Input { Value = 3, },
+				HorizontalJustificationNew = Input { Value = 3, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 191.999, 570.394 } },
+		},
+		Brackets = TextPlus {
+			NameSet = true,
+			Inputs = {
+				GlobalOut = Input { Value = 1, },
+				Width = Input { Value = 64, },
+				Height = Input { Value = 64, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Center = Input { Value = { 0.505524861878453, 0.569578729281769 }, },
+				StyledText = Input { Value = "[  ]", },
+				Font = Input { Value = "Open Sans", },
+				Style = Input { Value = "Light", },
+				Size = Input { Value = 1.606, },
+				VerticalJustificationNew = Input { Value = 3, },
+				HorizontalJustificationNew = Input { Value = 3, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 52.666, 563.121 } },
+		},
+		Merge4 = Merge {
+			CtrlWZoom = false,
+			Inputs = {
+				Background = Input {
+					SourceOp = "PairwiseMultiply",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "Brackets",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 301.999, 570.394 } },
+		},
+		Saver1_1_1_1_1_1_1_1_2 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/pairwise_multiply.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "Merge4",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 484.666, 569.181 } },
 		}
 	},
 	Frames = {
@@ -1734,7 +1812,7 @@ Composition {
 						Direction = "Horizontal",
 						PipeStyle = "Direct",
 						RootScale = 1,
-						RootOffset = { 209.334, -371 }
+						RootOffset = { 209.334, -373.424 }
 					}
 				},
 				Keyframes = MultiView {
@@ -1900,6 +1978,8 @@ Composition {
 		Comp = {
 			Views = {
 				RightView = {
+					Viewer = {
+					},
 				},
 				LeftView = {
 					Viewer = {
