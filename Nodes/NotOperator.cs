@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Nodes
     public class NotOperator : ScadNode, IAmAnExpression, IHaveCustomWidget,IHaveNodeBackground
     {
         public override string NodeTitle => "Not";
-        public override string NodeDescription => "Boolean NOT (!)";
+        public override string NodeDescription => "Negates a boolean value (boolean NOT, !).";
 
 
         public NotOperator()
@@ -24,6 +24,20 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts
                 .Boolean(allowLiteral:false);
         }
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "The value to negate.";
+                case 0 when portId.IsOutput:
+                    return "The negative of the input.";
+                default: 
+                    return "";
+            }
+        }
+
 
         public ScadNodeWidget InstantiateCustomWidget()
         {

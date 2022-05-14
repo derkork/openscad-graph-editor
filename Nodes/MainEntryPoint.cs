@@ -12,7 +12,12 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts
                 .Flow();
         }
-        
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            return "Output flow";
+        }
+
         public override string Render(IScadGraph context)
         {
             return RenderOutput(context, 0);

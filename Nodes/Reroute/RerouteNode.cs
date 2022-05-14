@@ -61,6 +61,36 @@ namespace OpenScadGraphEditor.Nodes.Reroute
                 .OfType(PortType.Reroute);
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (GetPortType(portId) == PortType.Flow)
+            {
+                if (portId.IsInput)
+                {
+                    return "Input flow";
+                }
+
+                if (portId.IsOutput)
+                {
+                    return "Output flow";
+                }
+            }
+            else
+            {
+                if (portId.IsInput)
+                {
+                    return "Input value";
+                }
+
+                if (portId.IsOutput)
+                {
+                    return "Output value";
+                }
+            }
+
+            return "";
+        }
+
         public override void SaveInto(SavedNode node)
         {
             node.SetData("reroute_type", (int) GetPortType(PortId.Input(0)));

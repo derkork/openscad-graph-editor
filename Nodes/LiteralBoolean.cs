@@ -19,6 +19,11 @@ namespace OpenScadGraphEditor.Nodes
                 .Boolean();
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            return "The boolean.";
+        }
+
         public override string Render(IScadGraph context)
         {
             return RenderOutput(context, 0);

@@ -26,6 +26,21 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts
                 .Vector2(allowLiteral:false);
         }
+        
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "The first vector.";
+                case 1 when portId.IsInput:
+                    return "The second vector.";
+                case 0 when portId.IsOutput:
+                    return "The result of the pairwise multiplication.";
+                default:
+                    return "";
+            }
+        }
 
         public override string Render(IScadGraph context)
         {

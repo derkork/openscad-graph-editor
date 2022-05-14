@@ -28,6 +28,23 @@ namespace OpenScadGraphEditor.Nodes
                 .Number(allowLiteral: false);
 
         }
+        
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "The Vector3 to split.";
+                case 0 when portId.IsOutput:
+                    return "The X component of the Vector3.";
+                case 1 when portId.IsOutput:
+                    return "The Y component of the Vector3.";
+                case 2 when portId.IsOutput:
+                    return "The Z component of the Vector3.";
+                default:
+                    return "";
+            }
+        }
 
         public override string Render(IScadGraph context)
         {

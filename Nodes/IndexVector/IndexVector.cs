@@ -21,7 +21,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             GdAssert.That(false, "Cannot render this node.");
             return "";
         }
-
+        
         public IndexVector()
         {
             RebuildPorts();
@@ -77,6 +77,25 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
                 OutputPorts
                     .Any($"Value {i + 1}");
             }
+        }
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "The vector from which a value should be extracted.";
+                }
+                return "The index of the value to extract.";
+            }
+
+            if (portId.IsOutput)
+            {
+                return "The value at the given index.";
+            }
+
+            return "";
         }
 
         public string RenderExpressionOutput(IScadGraph context, int port)

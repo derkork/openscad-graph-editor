@@ -19,6 +19,11 @@ namespace OpenScadGraphEditor.Nodes
                 .Number();
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            return "The number.";
+        }
+
         public override string Render(IScadGraph context)
         {
             var value = RenderOutput(context, 0);

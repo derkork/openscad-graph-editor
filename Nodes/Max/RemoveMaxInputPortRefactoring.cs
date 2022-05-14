@@ -7,13 +7,13 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes.Max
 {
     [UsedImplicitly]
-    public class RemoveMinInputPortRefactoring : UserSelectableNodeRefactoring
+    public class RemoveMaxInputPortRefactoring : UserSelectableNodeRefactoring
     {
         public override string Title => "Remove input port";
         public override int Order => 1;
         public override bool IsApplicableToNode => Node is Max echo && echo.InputPortCount > 1;
 
-        public RemoveMinInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public RemoveMaxInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

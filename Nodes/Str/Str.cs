@@ -40,6 +40,21 @@ namespace OpenScadGraphEditor.Nodes.Str
             }
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                return "An expression to add to the string.";
+            }
+
+            if (portId.IsOutput)
+            {
+                return "The concatenated string.";
+            }
+
+            return "";
+        }
+
         /// <summary>
         /// Adds a new input. The caller is responsible for fixing up port connections.
         /// </summary>

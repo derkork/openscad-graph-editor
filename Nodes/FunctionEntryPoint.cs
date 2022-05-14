@@ -26,6 +26,20 @@ namespace OpenScadGraphEditor.Nodes
             );
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsOutput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "Output flow";
+                }
+                return _description.Parameters[portId.Port - 1].Description;
+            }
+
+            return "";
+        }
+
         public int GetParameterInputPort(int parameterIndex)
         {
             // entry point has no input ports that refer to parameters

@@ -41,6 +41,36 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
                 .Flow("After");
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (portId.Port == 0)
+                {
+                    return "Input flow";
+                }
+                return "An expression which is assigned to the variable.";
+            }
+
+            if (portId.IsOutput)
+            {
+                if (portId.Port == 0)
+                {
+                    return
+                        "Output flow. The variables declared by the let block will only be available to nodes inside of this block.";
+                }
+
+                if (portId.Port == VariableCount + 1)
+                {
+                    return "Output flow.";
+                }
+
+                return "The declared variable's value.";
+            }
+            
+            return "";
+        }
+
         /// <summary>
         /// Adds a slot for a variable.
         /// </summary>

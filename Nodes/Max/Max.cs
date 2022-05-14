@@ -32,12 +32,38 @@ namespace OpenScadGraphEditor.Nodes.Max
                 .Clear();
 
             OutputPorts
-                .Array();
+                .Any();
 
             for (var i = 0; i < InputCount; i++)
             {
-                InputPorts.Any($"Input {i + 1}");
+                if (InputCount == 1)
+                {
+                    InputPorts.Any($"Input {i + 1}");
+                }
+                else
+                {
+                    InputPorts.Number($"Input {i + 1}");
+                }
             }
+        }
+
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (InputCount == 1)
+                {
+                    return "A vector of numbers or a single number.";
+                }
+                return "A number";
+            }
+
+            if (portId.IsOutput)
+            {
+                return  "The maximum of the input values.";
+            }
+
+            return "";
         }
 
         /// <summary>
@@ -80,7 +106,7 @@ namespace OpenScadGraphEditor.Nodes.Max
                 .Select(it => RenderInput(context, it).OrUndef())
                 .JoinToString(", ");
 
-            return $"min({parameters})";
+            return $"max({parameters})";
         }
     }
 }

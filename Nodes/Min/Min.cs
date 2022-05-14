@@ -36,10 +36,38 @@ namespace OpenScadGraphEditor.Nodes.Min
 
             for (var i = 0; i < InputCount; i++)
             {
-                InputPorts.Any($"Input {i + 1}");
+                if (InputCount == 1)
+                {
+                    InputPorts.Any($"Input {i + 1}");
+                }
+                else
+                {
+                    InputPorts.Number($"Input {i + 1}");
+                }
             }
         }
 
+        
+        public override string GetPortDocumentation(PortId portId)
+        {
+            if (portId.IsInput)
+            {
+                if (InputCount == 1)
+                {
+                    return "A vector of numbers or a single number.";
+                }
+                return "A number";
+            }
+
+            if (portId.IsOutput)
+            {
+                return  "The minimum of the input values.";
+            }
+
+            return "";
+        }
+        
+        
         /// <summary>
         /// Adds a new input. The caller is responsible for fixing up port connections.
         /// </summary>

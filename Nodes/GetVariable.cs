@@ -20,6 +20,11 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            return "The value of the variable.";
+        }
+
         public void SetupPorts(VariableDescription description)
         {
             VariableDescription = description;

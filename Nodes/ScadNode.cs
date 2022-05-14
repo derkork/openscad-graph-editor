@@ -21,10 +21,7 @@ namespace OpenScadGraphEditor.Nodes
         /// </summary>
         /// <param name="portId"></param>
         /// <returns></returns>
-        public virtual string GetPortDocumentation(PortId portId)
-        {
-            return "No documentation available.";
-        }
+        public abstract string GetPortDocumentation(PortId portId);
 
         public Vector2 Offset { get; set; }
 

@@ -24,6 +24,21 @@ namespace OpenScadGraphEditor.Nodes
                 .Array();
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "The first vector. If the vectors are of different length, the shorter vector is padded with zeros.";
+                case 1 when portId.IsInput:
+                    return "The second vector. If the vectors are of different length, the shorter vector is padded with zeros.";
+                case 0 when portId.IsOutput:
+                    return "The result of the pairwise multiplication. Contains as many elements as the longer of the both input vectors.";
+                default:
+                    return "";
+            }
+        }
+
         public override string Render(IScadGraph context)
         {
             var first = RenderInput(context, 0);

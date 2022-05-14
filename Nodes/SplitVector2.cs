@@ -28,6 +28,21 @@ namespace OpenScadGraphEditor.Nodes
 
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "The Vector2 to split.";
+                case 0 when portId.IsOutput:
+                    return "The X component of the Vector2.";
+                case 1 when portId.IsOutput:
+                    return "The Y component of the Vector2.";
+                default:
+                    return "";
+            }
+        }
+
         public override string Render(IScadGraph context)
         {
             GdAssert.That(false, "This node cannot render.");

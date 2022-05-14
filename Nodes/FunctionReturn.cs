@@ -20,6 +20,19 @@ namespace OpenScadGraphEditor.Nodes
             base.SaveInto(node);
         }
 
+        public override string GetPortDocumentation(PortId portId)
+        {
+            switch (portId.Port)
+            {
+                case 0 when portId.IsInput:
+                    return "Input flow";
+                case 1 when portId.IsInput:
+                    return _description.ReturnValueDescription;
+                default:
+                    return "";
+            }
+        }
+
         public int GetParameterInputPort(int parameterIndex)
         {
             // no ports refer to parameters.
