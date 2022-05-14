@@ -70,6 +70,22 @@ namespace OpenScadGraphEditor.Library
                     .WithParameter("cut", PortType.Boolean, label: "Cut", optional: true, description: "If cut=true, only points with z=0 are considered (effectively cutting the object), with cut=false(the default), points above and below the plane are considered as well (creating a proper projection)")
                     .WithChildren()
                     .Build(),
+                
+                // text
+                ModuleBuilder.NewBuiltInModule("text", "Text")
+                    .WithDescription("Creates text as a 2D geometric object, using fonts installed on the local system or provided as separate font file")
+                    .WithParameter("text", PortType.String, label: "Text", description: "The text to generate.")
+                    .WithParameter("size", PortType.Number, label: "Size", optional: true, description: " The generated text has an ascent (height above the baseline) of approximately the given value. Different fonts can vary somewhat and may not fill the size specified exactly, typically they render slightly smaller.")
+                    .WithParameter("font", PortType.String, label: "Font", optional: true, description: "The name of the font that should be used. This is not the name of the font file, but the logical font name (internally handled by the fontconfig library).")
+                    .WithParameter("halign", PortType.String, label: "Horizontal Alignment", optional: true, description: "The horizontal alignment of the text. Can be 'left', 'center' or 'right'.")
+                    .WithParameter("valign", PortType.String, label: "Vertical Alignment", optional: true, description: "The vertical alignment of the text. Can be 'top', 'center', 'baseline' or 'bottom'.")
+                    .WithParameter("spacing", PortType.Number, label: "Spacing", optional: true, description: "The spacing between characters.  The default value of 1 results in the normal spacing for the font, giving a value greater than 1 causes the letters to be spaced further apart.")
+                    .WithParameter("direction", PortType.String, label: "Direction", optional: true, description: "Direction of the text flow. Possible values are 'ltr' (left-to-right), 'rtl' (right-to-left), 'ttb' (top-to-bottom) and 'btt' (bottom-to-top).")
+                    .WithParameter("language", PortType.String, label: "Language", optional: true, description: "The language of the text. Default is 'en' (English).")
+                    .WithParameter("script", PortType.String, label: "Script", optional: true, description: "The script of the text. Default is 'latin'.")
+                    .WithParameter(name: "$fn", PortType.Number, label:"Smoothness", optional:true, description: "Used for subdividing the curved path segments. Higher values result in smoother curves.")
+                    .Build(),
+                
                 // 3D Modules
                 // cube
                 ModuleBuilder.NewBuiltInModule("cube", "Cube")
