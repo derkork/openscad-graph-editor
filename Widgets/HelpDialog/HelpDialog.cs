@@ -4,7 +4,6 @@ using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Nodes.Echo;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.HelpDialog
@@ -79,6 +78,8 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             }
 
             Visible = true;
+            FocusMode = FocusModeEnum.All;
+            GrabFocus();
             CallDeferred("update");
         }
 
@@ -123,8 +124,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             }
         }
 
-
-        public override void _Input(InputEvent evt)
+        public override void _GuiInput(InputEvent evt)
         {
             if (Visible && evt.IsEscape())
             {

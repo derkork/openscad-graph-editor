@@ -44,7 +44,7 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
             
         }
 
-        public async void Open(RequestContext requestContext, string title = "", string description = "", bool showDescription = true)
+        public void Open(RequestContext requestContext, string title = "", string description = "", bool showDescription = true)
         {
             _requestContext = requestContext;
             _titleEdit.Text = title;
