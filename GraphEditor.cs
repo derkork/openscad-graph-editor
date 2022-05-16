@@ -15,6 +15,7 @@ using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.CommentEditingDialog;
+using OpenScadGraphEditor.Widgets.DocumentationDialog;
 using OpenScadGraphEditor.Widgets.HelpDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.ImportDialog;
@@ -56,6 +57,7 @@ namespace OpenScadGraphEditor
         private CommentEditingDialog _commentEditingDialog;
         private HelpDialog _helpDialog;
         private UsageDialog _usageDialog;
+        private DocumentationDialog _documentationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private LightWeightGraph _copyBuffer;
 
@@ -101,6 +103,9 @@ namespace OpenScadGraphEditor
                 // create the invokable, then open it's graph in a new tab.
                 (description, refactorings) => PerformRefactorings($"Create {description.Name}", refactorings,
                     () => Open(_currentProject.FindDefiningGraph(description)));
+            
+            _documentationDialog = this.WithName<DocumentationDialog>("DocumentationDialog");
+            _documentationDialog.RefactoringRequested += (refactoring) => PerformRefactorings("Edit documentation", refactoring);
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested +=
@@ -233,6 +238,11 @@ namespace OpenScadGraphEditor
                     {
                         actions.Add(new QuickAction($"Refactor {invokableDescription.Name}",
                                 () => _invokableRefactorDialog.Open(invokableDescription)
+                            )
+                        );
+                        
+                        actions.Add(new QuickAction($"Edit documentation of {invokableDescription.Name}",
+                                () => _documentationDialog.Open(invokableDescription)
                             )
                         );
 
@@ -901,6 +911,12 @@ namespace OpenScadGraphEditor
                     actions = actions.Append(
                         new QuickAction($"Refactor {name}",
                             () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)
+                        )
+                    );
+
+                    actions = actions.Append(
+                        new QuickAction($"Edit documentation of {name}",
+                            () => _documentationDialog.Open(iReferToAnInvokable.InvokableDescription)
                         )
                     );
                 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -21,6 +21,7 @@
 [ext_resource path="res://Widgets/UsageDialog/UsageDialog.tscn" type="PackedScene" id=19]
 [ext_resource path="res://Widgets/OpenButton.cs" type="Script" id=20]
 [ext_resource path="res://Widgets/HelpDialog/HelpDialog.tscn" type="PackedScene" id=21]
+[ext_resource path="res://Widgets/DocumentationDialog/DocumentationDialog.tscn" type="PackedScene" id=22]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -36,6 +37,8 @@ margin_right = 400.0
 margin_bottom = 140.0
 rect_min_size = Vector2( 400, 140 )
 script = ExtResource( 7 )
+
+[node name="DocumentationDialog" parent="." instance=ExtResource( 22 )]
 
 [node name="ImportDialog" parent="." instance=ExtResource( 8 )]
 

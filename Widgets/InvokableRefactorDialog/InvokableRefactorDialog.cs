@@ -57,32 +57,32 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeOptionButton.Clear();
             _templateParameterTypeHint.Clear();
 
-            _templateParameterTypeHint.AddItem("Any", (int) PortType.Any);
-            _returnTypeOptionButton.AddItem("Any", (int) PortType.Any);
+            _templateParameterTypeHint.AddItem(PortType.Any.HumanReadableName(), (int) PortType.Any);
+            _returnTypeOptionButton.AddItem(PortType.Any.HumanReadableName(), (int) PortType.Any);
             _indexByPortTypes[PortType.Any] = index++;
 
-            _templateParameterTypeHint.AddItem("Number", (int) PortType.Number);
-            _returnTypeOptionButton.AddItem("Number", (int) PortType.Number);
+            _templateParameterTypeHint.AddItem(PortType.Number.HumanReadableName(), (int) PortType.Number);
+            _returnTypeOptionButton.AddItem(PortType.Number.HumanReadableName(), (int) PortType.Number);
             _indexByPortTypes[PortType.Number] = index++;
 
-            _templateParameterTypeHint.AddItem("Boolean", (int) PortType.Boolean);
-            _returnTypeOptionButton.AddItem("Boolean", (int) PortType.Boolean);
+            _templateParameterTypeHint.AddItem(PortType.Boolean.HumanReadableName(), (int) PortType.Boolean);
+            _returnTypeOptionButton.AddItem(PortType.Boolean.HumanReadableName(), (int) PortType.Boolean);
             _indexByPortTypes[PortType.Boolean] = index++;
 
-            _templateParameterTypeHint.AddItem("Vector3", (int) PortType.Vector3);
-            _returnTypeOptionButton.AddItem("Vector3", (int) PortType.Vector3);
+            _templateParameterTypeHint.AddItem(PortType.Vector3.HumanReadableName(), (int) PortType.Vector3);
+            _returnTypeOptionButton.AddItem(PortType.Vector3.HumanReadableName(), (int) PortType.Vector3);
             _indexByPortTypes[PortType.Vector3] = index++;
             
-            _templateParameterTypeHint.AddItem("Vector2", (int) PortType.Vector2);
-            _returnTypeOptionButton.AddItem("Vector2", (int) PortType.Vector2);
+            _templateParameterTypeHint.AddItem(PortType.Vector2.HumanReadableName(), (int) PortType.Vector2);
+            _returnTypeOptionButton.AddItem(PortType.Vector2.HumanReadableName(), (int) PortType.Vector2);
             _indexByPortTypes[PortType.Vector2] = index++;
 
-            _templateParameterTypeHint.AddItem("String", (int) PortType.String);
-            _returnTypeOptionButton.AddItem("String", (int) PortType.String);
+            _templateParameterTypeHint.AddItem(PortType.String.HumanReadableName(), (int) PortType.String);
+            _returnTypeOptionButton.AddItem(PortType.String.HumanReadableName(), (int) PortType.String);
             _indexByPortTypes[PortType.String] = index++;
 
-            _templateParameterTypeHint.AddItem("Array", (int) PortType.Array);
-            _returnTypeOptionButton.AddItem("Array", (int) PortType.Array);
+            _templateParameterTypeHint.AddItem(PortType.Array.HumanReadableName(), (int) PortType.Array);
+            _returnTypeOptionButton.AddItem(PortType.Array.HumanReadableName(), (int) PortType.Array);
             _indexByPortTypes[PortType.Array] = index; // no ++ here since it is the last
 
             _templateParameterUpButton = this.WithName<Button>("TemplateParameterUpButton");

@@ -50,14 +50,14 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             _widget.HintTooltip = "";
 
             _titleLabel.Text = node.NodeTitle;
-            _descriptionLabel.Text = node.NodeDescription;
+            _descriptionLabel.Text = node.NodeDescription.OrDefault("<no documentation available>");
 
             _leftContainer.GetChildNodes<Label>().ForAll(it => it.RemoveAndFree());
             _rightContainer.GetChildNodes<Label>().ForAll(it => it.RemoveAndFree());
 
             for (var i = 0; i < node.InputPortCount; i++)
             {
-                var helpText = node.GetPortDocumentation(PortId.Input(i));
+                var helpText = node.GetPortDocumentation(PortId.Input(i)).OrDefault("<no documentation available>");
                 
                 var label = new Label();
                 label.Text = helpText;
@@ -68,7 +68,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
 
             for (var i = 0; i < node.OutputPortCount; i++)
             {
-                var helpText = node.GetPortDocumentation(PortId.Output(i));
+                var helpText = node.GetPortDocumentation(PortId.Output(i)).OrDefault("<no documentation available>");
                 
                 var label = new Label();
                 label.Text = helpText;
