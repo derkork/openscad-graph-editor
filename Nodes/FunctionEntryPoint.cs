@@ -95,7 +95,8 @@ namespace OpenScadGraphEditor.Nodes
                 .Select(it =>
                     _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
 
-            return $"function {_description.Name}({string.Join(", ", arguments)}) = {RenderOutput(context, 0)};";
+            var comment = RenderDocumentationComment(_description);
+            return $"{comment}\nfunction {_description.Name}({string.Join(", ", arguments)}) = {RenderOutput(context, 0)};";
         }
 
         public string RenderExpressionOutput(IScadGraph context, int port)

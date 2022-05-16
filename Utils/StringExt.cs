@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Godot;
 
@@ -55,6 +56,49 @@ namespace OpenScadGraphEditor.Utils
         public static string OrDefault(this string input, string defaultValue)
         {
             return input.Length == 0 ? defaultValue : input;
+        }
+        
+        public static string WordWrap(this string input, int maxCharactersPerLine)
+        {            
+            var lines = input.Split('\n');
+            var output = "";
+            foreach (var line in lines)
+            {
+                var words = line.Split(' ');
+                var currentLine = "";
+                foreach (var word in words)
+                {
+                    if (currentLine.Length + word.Length > maxCharactersPerLine)
+                    {
+                        output += currentLine + "\n";
+                        currentLine = word;
+                    }
+                    else
+                    {
+                        if (currentLine.Empty())
+                        {
+                            currentLine = word;
+                        }
+                        else
+                        {
+                            currentLine += " " + word;
+                        }
+                    }
+                }
+
+                output += currentLine + "\n";
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Prefixes all lines in the given string with the given prefix.
+        /// </summary>
+        public static string PrefixLines(this string input, string prefix)
+        {
+            return input.Split('\n')
+                .Select(line => prefix + line)
+                .JoinToString("\n");
         }
 
     }
