@@ -111,6 +111,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         public void OpenForNewFunction()
         {
             Clear();
+            WindowTitle = "New Function";
             _mode = DialogMode.CreateFunction;
             _returnTypeLabel.Visible = true;
             _returnTypeOptionButton.Visible = true;
@@ -123,6 +124,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         public void OpenForNewModule()
         {
             Clear();
+            WindowTitle = "New Module";
             _mode = DialogMode.CreateModule;
             _returnTypeLabel.Visible = false;
             _returnTypeOptionButton.Visible = false;
@@ -134,6 +136,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         public void Open(InvokableDescription description)
         {
             Clear();
+            WindowTitle = $"Refactor {description.Name}";
             _baseDescription = description;
             _mode = DialogMode.Edit;
 
