@@ -42,6 +42,22 @@ namespace OpenScadGraphEditor.Utils
             return input.Length == 0 ? ";" : $" {{\n{input.Indent()}\n}}\n";
         }
 
+        public static string Trimmed(this string input, int maxLength)
+        {
+            if (input.Length <= maxLength)
+            {
+                return input;
+            }
+            
+            if (maxLength < 3)
+            {
+                // maxLenght is super short, return maxLength dots
+                return new string('.', maxLength);
+            }
+            
+            return input.Substring(0, maxLength - 3) + "...";
+        }
+        
         public static string UniqueStableVariableName(this string id, int index)
         {
             

@@ -4,6 +4,8 @@ namespace OpenScadGraphEditor.Nodes
 {
     public enum PortType
     {
+        // indicates the absence of a port type.
+        None = 0,
         // do not change the numbers, otherwise saved graphs will break!
         Flow = 1,
         Boolean = 2,

@@ -3,7 +3,6 @@
 [ext_resource path="res://Widgets/DocumentationDialog/DocumentationDialog.cs" type="Script" id=1]
 
 [node name="DocumentationDialog" type="WindowDialog"]
-visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5

@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Library.External
             var parser = new OpenScadParser(tokenStream);
 
             var root = parser.scadFile();
-            var visitor = new OpenScadVisitor(externalReference);
+            var visitor = new OpenScadVisitor(tokenStream, externalReference);
             visitor.Visit(root);
 
             externalReference.IsLoaded = true;

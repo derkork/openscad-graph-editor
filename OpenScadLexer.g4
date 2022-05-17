@@ -74,11 +74,11 @@ NUMBER
     
    
 BLOCK_COMMENT
-    :   '/*' .*? '*/' -> skip
+    :   '/*' .*? '*/' -> channel(2)
     ;
 
 LINE_COMMENT
-    :   '//' ~[\r\n]* -> skip
+    :   '//' ~[\r\n]* -> channel(2)
     ;
     
 mode FILE_IMPORT_MODE;
