@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Library
     {
         InvokableDescription Description { get; }
 
-        void LoadFrom(SavedGraph graph, IReferenceResolver resolver);
+        void LoadFrom(SavedGraph graph, InvokableDescription description, IReferenceResolver resolver);
         
         void SaveInto(SavedGraph graph);
 

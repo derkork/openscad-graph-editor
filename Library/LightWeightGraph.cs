@@ -82,11 +82,11 @@ namespace OpenScadGraphEditor.Library
             return _nodes.First(it => it.Id == id);
         }
 
-        public void LoadFrom(SavedGraph graph, IReferenceResolver resolver)
+        public void LoadFrom(SavedGraph graph, InvokableDescription description, IReferenceResolver resolver)
         {
             Clear();
 
-            Description = IoExt.FromSavedState(graph.Description);
+            Description = description;
 
             foreach (var savedNode in graph.Nodes)
             {

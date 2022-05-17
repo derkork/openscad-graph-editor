@@ -151,19 +151,19 @@ namespace OpenScadGraphEditor.Library
             foreach (var function in project.Functions)
             {
                 var functionContext = new LightWeightGraph();
-                functionContext.LoadFrom(function, this);
+                functionContext.LoadFrom(function, _projectFunctionDescriptions[function.Description.Id], this);
                 _functions.Add(functionContext);
             }
 
             foreach (var module in project.Modules)
             {
                 var moduleContext = new LightWeightGraph();
-                moduleContext.LoadFrom(module, this);
+                moduleContext.LoadFrom(module, _projectModuleDescriptions[module.Description.Id], this);
                 _modules.Add(moduleContext);
             }
 
             MainModule = new LightWeightGraph();
-            MainModule.LoadFrom(project.MainModule, this);
+            MainModule.LoadFrom(project.MainModule, project.MainModule.Description.FromSavedState(), this);
         }
 
         public SavedProject Save()
