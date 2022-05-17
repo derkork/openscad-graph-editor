@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Widgets
         protected override LineEdit CreateControl()
         {
             var lineEdit = Prefabs.New<SelectOnFocusLineEdit>();
+            lineEdit.ExpandToTextLength = true;
             lineEdit.Connect("focus_exited")
                 .To(this, nameof(OnFocusExited));
             return lineEdit;
