@@ -117,7 +117,12 @@ namespace OpenScadGraphEditor.Widgets
             {
                 SetSlotEnabledLeft(i, false);
                 SetSlotEnabledRight(i, false);
+                // this will kill the widgets as well
                 existingContainers[i].RemoveAndFree();
+
+                // remove the references to the widgets (if any)
+                _literalWidgets.Remove(PortId.Input(i));
+                _literalWidgets.Remove(PortId.Output(i));
             }
 
             // set to minimum size. Needs to be called
