@@ -6,13 +6,13 @@ using OpenScadGraphEditor.Library.IO;
 namespace OpenScadGraphEditor.Nodes.IndexVector
 {
     /// <summary>
-    /// Node which allows to access vector indices.
+    /// Node which allows to access vector/string indices.
     /// </summary>
     [UsedImplicitly]
     public class IndexVector : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs
     {
-        public override string NodeTitle => "Index Vector";
-        public override string NodeDescription => "Returns the value of the vector at the given index";
+        public override string NodeTitle => "Index Vector/String";
+        public override string NodeDescription => "Returns the value of the vector/string at the given index";
 
         public int IndexPortCount { get; private set; } = 1;
 
@@ -68,7 +68,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             OutputPorts.Clear();
 
             InputPorts
-                .Array("Vector");
+                .Any("Vector/String");
             
             for (var i = 0; i < IndexPortCount; i++)
             {
