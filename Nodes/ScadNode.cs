@@ -204,7 +204,17 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _inputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
-                    _inputLiterals[i].SerializedValue = node.GetData($"input_literal_value.{i}");
+                    var serializedValue = node.GetData($"input_literal_value.{i}");
+                    // broken literals still seem to happen quite often so we want additional debug output here.
+                    try
+                    {
+                        _inputLiterals[i].SerializedValue = serializedValue;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new BrokenFileException(
+                            $"Broken literal value for INPUT port {i} in node {Id} ({serializedValue})", e);
+                    }
                     _inputLiterals[i].IsSet = node.GetDataBool($"input_literal_set.{i}", true);
                 });
             OutputPorts
@@ -212,7 +222,17 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _outputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
-                    _outputLiterals[i].SerializedValue = node.GetData($"output_literal_value.{i}");
+                    var serializedValue = node.GetData($"output_literal_value.{i}");
+                    // broken literals still seem to happen quite often so we want additional debug output here.
+                    try
+                    {
+                        _outputLiterals[i].SerializedValue = serializedValue;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new BrokenFileException(
+                            $"Broken literal value for OUTPUT port {i} in node {Id}({serializedValue})", e);
+                    }
                     _outputLiterals[i].IsSet = node.GetDataBool($"output_literal_set.{i}", true);
                 });
         }

@@ -18,6 +18,7 @@ namespace OpenScadGraphEditor.Widgets
         
         public static void ShowNotification(string message)
         {
+            GD.Print(message);
             var bubble = NotificationBubble.NotificationBubble.Create(message);
             bubble.MoveToNewParent(_instance);
         }

@@ -1004,9 +1004,13 @@ namespace OpenScadGraphEditor
             var savedProject = ResourceLoader.Load<SavedProject>(filename, "", noCache: true);
             if (savedProject == null)
             {
-                GD.Print("Cannot load file!");
+                NotificationService.ShowNotification("Cannot load file " + filename);
                 return;
             }
+            
+            // workaround for https://github.com/godotengine/godot/issues/59686
+            // as the "noCache" flag currently isn't working properly
+            savedProject.ResourcePath = "";
 
             Clear();
 
@@ -1015,7 +1019,18 @@ namespace OpenScadGraphEditor
             _fileNameLabel.Text = filename;
 
             _currentProject = new ScadProject(_rootResolver);
-            _currentProject.Load(savedProject, _currentFile);
+            try
+            {
+                _currentProject.Load(savedProject, _currentFile);
+            }
+            catch (Exception e)
+            {
+                NotificationService.ShowNotification("Error when loading file. See log for details.");
+                GD.PrintErr(e.ToString());
+                // don't load a half-broken file
+                OnNewButtonPressed();
+                return;
+            }
 
             Open(_currentProject.MainModule);
             // again, important, must be done after the main module is opened
