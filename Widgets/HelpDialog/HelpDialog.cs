@@ -18,6 +18,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
         private Container _nodeContainer;
         private ScadNodeWidget _widget;
         private Button _closeButton;
+        private bool _updatePending;
 
         public override void _Ready()
         {
@@ -31,6 +32,15 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             
             _closeButton.Connect("pressed")
                 .To(this, nameof(OnCloseButtonPressed));
+            
+            // we need updates when the left, right or node container is resized
+            // so we can refresh the lines
+            _leftContainer.Connect("sort_children")
+                .To(this, nameof(Redraw));
+            _rightContainer.Connect("sort_children")
+                .To(this, nameof(Redraw));
+            _nodeContainer.Connect("sort_children")
+                .To(this, nameof(Redraw));
         }
 
 
@@ -85,11 +95,23 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             Visible = true;
             FocusMode = FocusModeEnum.All;
             GrabFocus();
-            CallDeferred("update");
         }
 
+        private void Redraw()
+        {
+            // avoid re-drawing a lot of times when all containers change size
+            if (_updatePending)
+            {
+                return;
+            }
+
+            _updatePending = true;
+            CallDeferred("update");
+        }
+        
         public override void _Draw()
         {
+            _updatePending = false;
             if (!Visible)
             {
                 return;
@@ -99,6 +121,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             DrawRect(GetRect(), new Color(0.1f,0.1f,0.1f,0.9f));
             var leftLabels = _leftContainer.GetChildNodes<Control>().ToList();
             var rightLabels = _rightContainer.GetChildNodes<Control>().ToList();
+            
                 
             // walk over left labels, and draw a line from the right side of the label to the
             // corresponding input port of the node widget.
@@ -120,14 +143,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
             }
         }
 
-        public override void _Notification(int what)
-        {
-            base._Notification(what);
-            if (what == NotificationResized)
-            {
-                Update();
-            }
-        }
+
 
         public override void _GuiInput(InputEvent evt)
         {
