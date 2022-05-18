@@ -2,6 +2,7 @@
 /.mono/
 /.import/
 /gen/
+/builds/
 
 mono_crash*
 *graph.tres*

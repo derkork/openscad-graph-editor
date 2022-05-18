@@ -1,0 +1,30 @@
+# Whenever a push is made to the master branch then run the job
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  # job id, can be anything
+  export_editor:
+    # Always use ubuntu-latest for this action
+    runs-on: ubuntu-latest
+    # Job name, can be anything
+    name: Export Game Job
+    steps:
+      # Always include the checkout step so that 
+      # your project is available for Godot to export
+      - name: checkout
+        uses: actions/checkout@v2.3.1
+        # Ensure that you get the entire project history
+        with:
+          fetch-depth: 0
+      - name: export
+        # Use latest version (see releases for all versions)
+        uses: firebelley/godot-export@v3.0.0
+        with:
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.4.4/mono/Godot_v3.4.4-stable_mono_linux_headless_64.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.4.4/mono/Godot_v3.4.4-stable_mono_export_templates.tpz
+          relative_project_path: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
