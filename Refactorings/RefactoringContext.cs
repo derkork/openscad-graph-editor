@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using OpenScadGraphEditor.Library;
+using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -50,7 +51,7 @@ namespace OpenScadGraphEditor.Refactorings
 
             foreach (var refactoring in defaultPhaseRefactorings)
             {
-                GD.Print("Performing refactoring: " + refactoring.GetType().Name);
+                Log.Information("Performing refactoring {Refactoring}", refactoring.GetType().Name);
                 refactoring.PerformRefactoring(this);
             }
 
@@ -61,7 +62,7 @@ namespace OpenScadGraphEditor.Refactorings
                 .ToList();
             foreach (var refactoring in latePhaseRefactorings)
             {
-                GD.Print("Performing late-stage refactoring: " + refactoring.GetType().Name);
+                Log.Information("Performing late-stage refactoring {Refactoring}", refactoring.GetType().Name);
                 refactoring.PerformRefactoring(this);
             }
 
@@ -82,7 +83,7 @@ namespace OpenScadGraphEditor.Refactorings
                 return;
             } 
             
-            GD.Print("Performing refactoring: " + refactoring.GetType().Name);
+            Log.Information("Performing refactoring {Refactoring}", refactoring.GetType().Name);
             refactoring.PerformRefactoring(this);
         }
 

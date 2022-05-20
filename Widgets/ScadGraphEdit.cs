@@ -10,6 +10,7 @@ using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
+using Serilog;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -268,7 +269,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
             {
-                GD.Print("Resolving pending disconnect.");
+                Log.Debug("Resolving pending disconnect");
                 PerformRefactorings("Remove connection", new DeleteConnectionRefactoring(_pendingDisconnect));
                 _pendingDisconnect = null;
                 return;
@@ -428,7 +429,7 @@ namespace OpenScadGraphEditor.Widgets
             }
             else
             {
-                GD.Print("All is already straightened.");
+                NotificationService.ShowNotification("Everything is already straightened");
             }
         }
 
@@ -439,7 +440,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
         {
-            GD.Print("Disconnect request.");
+            Log.Debug("Disconnect request");
             var connection = new ScadConnection(Graph,ScadNodeForWidgetName(fromWidgetName), fromSlot,
                 ScadNodeForWidgetName(toWidgetName), toSlot);
             
@@ -518,7 +519,7 @@ namespace OpenScadGraphEditor.Widgets
             {
                 if (_pendingDisconnect.RepresentsSameAs(connection))
                 {
-                    GD.Print("Re-connected pending node.");
+                    Log.Debug("Re-connected pending node");
                     ConnectNode(fromWidgetName, fromPort, toWidgetName, toPort);
                     _pendingDisconnect = null;
                     return;

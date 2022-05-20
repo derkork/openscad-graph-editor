@@ -5,6 +5,7 @@ using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Utils;
+using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -26,13 +27,13 @@ namespace OpenScadGraphEditor.Refactorings
             var referenceCopy = ExternalReferenceBuilder.BuildEmptyCopy(_reference);
             if (!_reference.TryResolveFullPath(context.Project, out var fullPath))
             {
-                GD.PrintErr("Could not resolve full path for external reference.");
+                Log.Warning("Could not resolve full path for external reference");
                 return;
             }
 
             if (!referenceCopy.ParseFile(fullPath))
             {
-                GD.PrintErr($"Could not parse file at path: {fullPath}");
+                Log.Warning("Could not parse file at path {Path}", fullPath);
                 return;
             }
 

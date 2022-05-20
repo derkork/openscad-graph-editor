@@ -6,6 +6,7 @@ using System.Text;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using Serilog;
 using Directory = System.IO.Directory;
 using Environment = System.Environment;
 using File = System.IO.File;
@@ -187,7 +188,7 @@ namespace OpenScadGraphEditor.Library.External
                 }
                 catch (Exception)
                 {
-                    GD.Print("Could not read library files from " + path);
+                    Log.Warning("Could not read library files from {Path}", path);
                 }
 
                 return Array.Empty<string>();

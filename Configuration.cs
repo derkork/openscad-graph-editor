@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using Serilog;
 
 namespace OpenScadGraphEditor
 {
@@ -14,7 +15,7 @@ namespace OpenScadGraphEditor
         {
             if (_configFile.Load(ConfigPath) != Error.Ok)
             {
-                GD.Print("Cannot read config file, starting with clean slate.");
+                Log.Information("Cannot read config file, starting with clean slate");
                 _configFile.Clear();
             }
         }
@@ -23,10 +24,11 @@ namespace OpenScadGraphEditor
         {
             var directory = new Directory();
             directory.MakeDirRecursive(ConfigFolder);
-            
-            if (_configFile.Save(ConfigPath) != Error.Ok)
+
+            var error = _configFile.Save(ConfigPath);
+            if (error != Error.Ok)
             {
-                GD.Print("Couldn't save config file.");
+                Log.Warning("Couldn't save config file to {Path} -> Error {Error}", ConfigPath, error);
             }
         }
 

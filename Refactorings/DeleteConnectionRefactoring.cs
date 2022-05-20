@@ -2,6 +2,7 @@ using System.Linq;
 using Godot;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
+using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -25,7 +26,7 @@ namespace OpenScadGraphEditor.Refactorings
             var result = ConnectionRules.CanDisconnect(_connection);
             if (result.Decision == ConnectionRules.OperationRuleDecision.Veto)
             {
-                GD.Print("Disconnect was vetoed.");
+                Log.Information("Disconnect vetoed");
                 return; // nothing to do.
             }
             

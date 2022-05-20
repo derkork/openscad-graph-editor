@@ -88,16 +88,18 @@ margin_bottom = 40.0
 mouse_filter = 2
 size_flags_horizontal = 8
 script = ExtResource( 1 )
+Color = Color( 0.0588235, 0.164706, 0.309804, 0.717647 )
+ErrorColor = Color( 0.858824, 0.054902, 0.25098, 0.717647 )
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_right = 40.0
-margin_bottom = 1812.0
+margin_right = 620.0
+margin_bottom = 76.0
 mouse_filter = 2
 color = Color( 0.0588235, 0.164706, 0.309804, 0.717647 )
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
-margin_right = 40.0
-margin_bottom = 1812.0
+margin_right = 620.0
+margin_bottom = 76.0
 mouse_filter = 2
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
@@ -107,8 +109,8 @@ custom_constants/margin_bottom = 10
 [node name="Label" type="Label" parent="MarginContainer"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 30.0
-margin_bottom = 1802.0
+margin_right = 610.0
+margin_bottom = 66.0
 rect_min_size = Vector2( 600, 0 )
 text = "Lorem Ipsum Dolor haste nicht gesehen und noch viel mehr krasser scheiss..... "
 align = 3

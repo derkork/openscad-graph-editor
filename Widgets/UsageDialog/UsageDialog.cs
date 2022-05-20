@@ -23,10 +23,6 @@ namespace OpenScadGraphEditor.Widgets.UsageDialog
                 .Connect("item_activated")
                 .To(this, nameof(OnItemActivated));
             
-            this.WithName<Button>("CloseButton")
-                .Connect("pressed")
-                .To(this, nameof(OnCloseButtonPressed));
-
         }
 
 
@@ -35,13 +31,7 @@ namespace OpenScadGraphEditor.Widgets.UsageDialog
             var usage = _usages[index];
             NodeHighlightRequested?.Invoke(usage);
         }
-        
-        
-        private void OnCloseButtonPressed()
-        {
-            Visible = false;
-        }
-        
+
         public void Open(string title, List<UsagePointInformation> usages)
         {
             _usages = usages;

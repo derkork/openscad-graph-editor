@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Serilog;
 
 namespace OpenScadGraphEditor.Utils
 {
@@ -20,7 +21,7 @@ namespace OpenScadGraphEditor.Utils
             Beers[beerId] = beer;
             var reference = new BeerReference();
             reference.Key = beerId;
-            GD.Print($"Holding your beer {beerId}.");
+            Log.Debug("Holding your beer {Beer}", beerId);
             return reference;
         }
 
@@ -41,7 +42,7 @@ namespace OpenScadGraphEditor.Utils
             if (Beers.ContainsKey(key))
             {
                 Beers.Remove(key);
-                GD.Print($"Beer {key} is no more.");
+                Log.Debug("Beer {Beer} is no more", key);
             }
         }
 

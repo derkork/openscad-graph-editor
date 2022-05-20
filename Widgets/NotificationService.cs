@@ -1,5 +1,6 @@
 using Godot;
 using GodotExt;
+using Serilog;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -18,8 +19,15 @@ namespace OpenScadGraphEditor.Widgets
         
         public static void ShowNotification(string message)
         {
-            GD.Print(message);
-            var bubble = NotificationBubble.NotificationBubble.Create(message);
+            Log.Information("Notification: {Message}", message);
+            var bubble = NotificationBubble.NotificationBubble.Create(message, false);
+            bubble.MoveToNewParent(_instance);
+        }
+
+        public static void ShowError(string message)
+        {
+            Log.Information("Error notification: {Message}", message);
+            var bubble = NotificationBubble.NotificationBubble.Create(message, true);
             bubble.MoveToNewParent(_instance);
         }
     }

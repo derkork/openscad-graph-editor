@@ -1,5 +1,6 @@
 using Godot;
 using OpenScadGraphEditor.Nodes;
+using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -23,7 +24,7 @@ namespace OpenScadGraphEditor.Refactorings
 
             if (operationResult.Decision == ConnectionRules.OperationRuleDecision.Veto)
             {
-                GD.Print("Connection vetoed");
+                Log.Information("Connection vetoed");
                 return;
             }
             

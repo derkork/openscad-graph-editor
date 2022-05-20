@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Utils;
+using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -35,7 +36,7 @@ namespace OpenScadGraphEditor.Refactorings
             if (project.ExternalReferences.Any(it => project.TryGetFullPathTo(it, out var fullPath2) && PathResolver.IsSamePath(fullPath2, fullPath)))
             {
                 // if so, we can skip this one.
-                GD.Print($"Reference to '{fullPath}' already exists in project.");
+                Log.Information("Reference to {FullPath} already exists in project", fullPath);
                 return;
             }
             // build an external reference to parse into
@@ -92,21 +93,19 @@ namespace OpenScadGraphEditor.Refactorings
             }
             catch (Exception e)
             {
-                GD.PrintErr("Cannot read file. " + e.Message);
-                // TODO better error handling
+                Log.Warning(e,"Cannot read file {Path}", fullPath);
                 return false;
             }
 
             try
             {
-                GD.Print("Parsing SCAD file: " + fullPath);
+                Log.Information("Parsing SCAD file {Path} ", fullPath);
                 // parse contents and fill the reference with data
                 ExternalFileParser.Parse(text, externalReference);
             }
             catch (Exception e)
             {
-                GD.PrintErr("Cannot parse file. " + e.Message);
-                // TODO better error handling
+                Log.Warning(e,"Cannot parse file {Path}", fullPath);
                 return false;
             }
 

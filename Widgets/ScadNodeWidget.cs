@@ -6,6 +6,7 @@ using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
+using Serilog;
 using Color = Godot.Color;
 
 namespace OpenScadGraphEditor.Widgets
@@ -257,7 +258,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (existingWidget != null && existingWidget != literalWidget)
             {
-                GD.Print("Widget type changed");
+                Log.Debug("Widget type changed");
                 // we replaced the widget with something else, so delete the existing widget
                 ((Node) existingWidget).RemoveAndFree();
                 existingWidget = null;

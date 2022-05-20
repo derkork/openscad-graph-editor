@@ -7,6 +7,7 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes.ForLoop;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
+using Serilog;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -91,7 +92,7 @@ namespace OpenScadGraphEditor.Nodes
 
                 if (current.To == connection.From)
                 {
-                    GD.Print("Found circle!");
+                    Log.Warning("Inserting node would create a circle");
                     return true;
                 }
                 

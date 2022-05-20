@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -22,6 +22,7 @@
 [ext_resource path="res://Widgets/OpenButton.cs" type="Script" id=20]
 [ext_resource path="res://Widgets/HelpDialog/HelpDialog.tscn" type="PackedScene" id=21]
 [ext_resource path="res://Widgets/DocumentationDialog/DocumentationDialog.tscn" type="PackedScene" id=22]
+[ext_resource path="res://Widgets/LogConsole/LogConsole.tscn" type="PackedScene" id=23]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -181,7 +182,7 @@ text = "Preview"
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
 margin_top = 73.0
 margin_right = 1920.0
-margin_bottom = 1080.0
+margin_bottom = 1031.0
 size_flags_vertical = 3
 custom_constants/margin_right = 0
 custom_constants/margin_top = 0
@@ -191,7 +192,7 @@ custom_constants/margin_bottom = 0
 [node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer/MarginContainer"]
 visible = false
 margin_right = 1920.0
-margin_bottom = 1007.0
+margin_bottom = 958.0
 rect_min_size = Vector2( 0, 200 )
 readonly = true
 syntax_highlighting = true
@@ -203,20 +204,20 @@ __meta__ = {
 
 [node name="EditingInterface" type="HSplitContainer" parent="MarginContainer/VBoxContainer/MarginContainer"]
 margin_right = 1920.0
-margin_bottom = 1007.0
+margin_bottom = 958.0
 custom_constants/autohide = 0
 split_offset = 100
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
 margin_right = 350.0
-margin_bottom = 1007.0
+margin_bottom = 958.0
 rect_min_size = Vector2( 250, 0 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer"]
 margin_left = 14.0
 margin_top = 14.0
 margin_right = 336.0
-margin_bottom = 993.0
+margin_bottom = 944.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_right = 322.0
@@ -268,7 +269,7 @@ Padding = Vector2( 8, 8 )
 [node name="ProjectTree" type="Tree" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_top = 53.0
 margin_right = 322.0
-margin_bottom = 979.0
+margin_bottom = 930.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 allow_rmb_select = true
@@ -277,15 +278,45 @@ script = ExtResource( 11 )
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
 margin_left = 374.0
 margin_right = 1920.0
-margin_bottom = 1007.0
+margin_bottom = 958.0
 tab_align = 0
 
-[node name="UsageDialog" parent="MarginContainer/VBoxContainer" instance=ExtResource( 19 )]
-visible = false
-anchor_right = 0.0
-margin_top = 780.0
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+margin_top = 1031.0
 margin_right = 1920.0
 margin_bottom = 1080.0
+
+[node name="LowerFoldout" type="MarginContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+margin_right = 1920.0
+
+[node name="UsageDialog" parent="MarginContainer/VBoxContainer/VBoxContainer/LowerFoldout" instance=ExtResource( 19 )]
+visible = false
+anchor_right = 0.0
+margin_right = 1920.0
+margin_bottom = 300.0
+
+[node name="LogConsole" parent="MarginContainer/VBoxContainer/VBoxContainer/LowerFoldout" instance=ExtResource( 23 )]
+visible = false
+anchor_right = 0.0
+margin_right = 1920.0
+margin_bottom = 355.0
+
+[node name="FoldoutButtonBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+margin_top = 8.0
+margin_right = 1920.0
+margin_bottom = 49.0
+
+[node name="ConsoleButton" type="ToolButton" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldoutButtonBar"]
+margin_right = 110.0
+margin_bottom = 41.0
+text = "Console"
+
+[node name="UsageButton" type="ToolButton" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldoutButtonBar"]
+visible = false
+margin_left = 118.0
+margin_right = 209.0
+margin_bottom = 41.0
+text = "Usage"
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer"]
 margin_right = 1920.0

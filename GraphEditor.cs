@@ -20,10 +20,12 @@ using OpenScadGraphEditor.Widgets.HelpDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
+using OpenScadGraphEditor.Widgets.LogConsole;
 using OpenScadGraphEditor.Widgets.NodeColorDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
 using OpenScadGraphEditor.Widgets.UsageDialog;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
+using Serilog;
 
 namespace OpenScadGraphEditor
 {
@@ -60,15 +62,27 @@ namespace OpenScadGraphEditor
         private DocumentationDialog _documentationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private LightWeightGraph _copyBuffer;
+        private Button _consoleButton;
+        private Button _usageButton;
+        private LogConsole _logConsole;
 
         private bool _codeChanged;
         private bool _refactoringInProgress;
-        private Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
+        private readonly Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
 
-        private Configuration _configuration = new Configuration();
+        private readonly Configuration _configuration = new Configuration();
 
         public override void _Ready()
         {
+            _logConsole = this.WithName<LogConsole>("LogConsole");
+            
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console()
+                .WriteTo.Sink(_logConsole)
+                .CreateLogger();
+            Log.Information("Initializing OpenScad Graph Editor");
+            
             OS.LowProcessorUsageMode = true;
             _rootResolver = new GlobalLibrary();
 
@@ -80,6 +94,16 @@ namespace OpenScadGraphEditor
             _importDialog.OnNewImportRequested += OnNewImportRequested;
             _usageDialog = this.WithName<UsageDialog>("UsageDialog");
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
+
+            _consoleButton = this.WithName<Button>("ConsoleButton");
+            _consoleButton
+                .Connect("pressed")
+                .To(this, nameof(OnConsoleButtonToggled));
+            
+            _usageButton = this.WithName<Button>("UsageButton");
+            _usageButton
+                .Connect("pressed")
+                .To(this, nameof(OnUsageButtonToggled));
             
             _helpDialog = this.WithName<HelpDialog>("HelpDialog");
 
@@ -172,6 +196,34 @@ namespace OpenScadGraphEditor
             NotificationService.ShowNotification("Welcome to OpenScad Graph Editor");
         }
 
+
+        private void OnConsoleButtonToggled()
+        {
+            if (!_logConsole.Visible)
+            {
+                _logConsole.Open();
+                _usageDialog.Hide();
+            }
+            else
+            {
+                _logConsole.Hide();
+            }
+        }
+        
+        private void OnUsageButtonToggled()
+        {
+            if (!_usageDialog.Visible)
+            {
+                _usageDialog.Show();
+                _logConsole.Hide();
+            }
+            else
+            {
+                _usageDialog.Hide();
+            }
+        }
+        
+        
         private void OnNodeHighlightRequested(UsagePointInformation information)
         {
             var graph = _currentProject.AllDeclaredInvokables.FirstOrDefault(it =>
@@ -187,7 +239,7 @@ namespace OpenScadGraphEditor
                 }
             }
 
-            NotificationService.ShowNotification("This usage no longer exists.");
+            NotificationService.ShowNotification("This usage no longer exists");
         }
 
         private void OnCommentAndTitleChanged(RequestContext context, string title, string text)
@@ -685,7 +737,7 @@ namespace OpenScadGraphEditor
                 "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
 
             _refactoringInProgress = true;
-            GD.Print(">> Refactorings start ");
+            Log.Debug(">> Refactorings start");
             var context = new RefactoringContext(_currentProject);
             context.PerformRefactorings(refactorings);
 
@@ -708,7 +760,7 @@ namespace OpenScadGraphEditor
             RefreshControls();
             MarkDirty(true);
             _refactoringInProgress = false;
-            GD.Print("<< Refactorings end");
+            Log.Debug("<< Refactorings end");
 
             after.ForAll(it => it());
         }
@@ -1004,7 +1056,7 @@ namespace OpenScadGraphEditor
             var savedProject = ResourceLoader.Load<SavedProject>(filename, "", noCache: true);
             if (savedProject == null)
             {
-                NotificationService.ShowNotification("Cannot load file " + filename);
+                NotificationService.ShowError("Cannot load file " + filename);
                 return;
             }
             
@@ -1025,8 +1077,8 @@ namespace OpenScadGraphEditor
             }
             catch (Exception e)
             {
-                NotificationService.ShowNotification("Error when loading file. See log for details.");
-                GD.PrintErr(e.ToString());
+                NotificationService.ShowError("Error when loading file. See log for details.");
+                Log.Error(e, "Exception when loading file {File}", _currentFile);
                 // don't load a half-broken file
                 OnNewButtonPressed();
                 return;
@@ -1094,13 +1146,15 @@ namespace OpenScadGraphEditor
             {
                 // save resource
                 var savedProject = _currentProject.Save();
-                if (ResourceSaver.Save(_currentFile, savedProject) != Error.Ok)
+                var error = ResourceSaver.Save(_currentFile, savedProject);
+                if (error != Error.Ok)
                 {
-                    GD.Print("Cannot save project!");
+                    NotificationService.ShowNotification("Cannot save project, see log for details");
+                    Log.Warning("Unable to save project to {File} -> Error {Error}", _currentFile, error);
                 }
                 else
                 {
-                    GD.Print("Saved project!");
+                    Log.Information("Saved project");
                 }
             }
 
@@ -1117,14 +1171,17 @@ namespace OpenScadGraphEditor
             {
                 // save rendered output
                 var file = new File();
-                if (file.Open(_currentFile + ".scad", File.ModeFlags.Write) == Error.Ok)
+                var outputPath = _currentFile + ".scad";
+                var error = file.Open(outputPath, File.ModeFlags.Write);
+                if (error == Error.Ok)
                 {
                     file.StoreString(rendered);
                     file.Close();
                 }
                 else
                 {
-                    GD.Print("Cannot save SCAD!");
+                    NotificationService.ShowError("Cannot save SCAD file, see log for details");
+                    Log.Warning("Unable to save SCAD output file to {File} -> Error {Error}", outputPath, error);
                 }
             }
         }
@@ -1156,6 +1213,7 @@ namespace OpenScadGraphEditor
             }
 
             _usageDialog.Open($"Usages of variable {variableDescription.Name}", usagePoints);
+            _usageButton.Show();
         }
 
         private void FindAndShowUsages(InvokableDescription invokableDescription)
@@ -1173,6 +1231,7 @@ namespace OpenScadGraphEditor
 
             var type = invokableDescription is FunctionDescription ? "function" : "module";
             _usageDialog.Open($"Usages of {type} {invokableDescription.Name}", usagePoints);
+            _usageButton.Show();
         }
     }
 

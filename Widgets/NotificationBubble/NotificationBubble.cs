@@ -6,6 +6,12 @@ namespace OpenScadGraphEditor.Widgets.NotificationBubble
 {
     public class NotificationBubble : Node
     {
+
+        [Export]
+        public Color Color;
+        [Export]
+        public Color ErrorColor;
+        
         private string _text;
         
         public override async void _Ready()
@@ -34,10 +40,21 @@ namespace OpenScadGraphEditor.Widgets.NotificationBubble
         }
 
 
-        public static NotificationBubble Create(string text)
+        public static NotificationBubble Create(string text, bool isError)
         {
             var result = Prefabs.InstantiateFromScene<NotificationBubble>();
             result._text = text;
+
+            var colorRect = result.WithName<ColorRect>("ColorRect");
+            if (isError)
+            {
+                colorRect.Color = result.ErrorColor;
+            }
+            else
+            {
+                colorRect.Color = result.Color;
+            }
+            
             return result;
         }
     }
