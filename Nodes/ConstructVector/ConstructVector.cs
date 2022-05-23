@@ -77,12 +77,10 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         private void RebuildInputs()
         {
             InputPorts.Clear();
-            // add an Any port for each vector component
-            // since "Any" ports don't have literals, we don't need to rebuild literal values.
             for (var i = 0; i < VectorSize; i++)
             {
                 InputPorts
-                    .OfType(_portType, $"Component {i + 1}");
+                    .OfType(_portType, $"Component {i + 1}", _portType.GetMatchingLiteralType());
             }
         }
 
