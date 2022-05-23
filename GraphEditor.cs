@@ -84,6 +84,7 @@ namespace OpenScadGraphEditor
             Log.Information("Initializing OpenScad Graph Editor");
             
             OS.LowProcessorUsageMode = true;
+            
             _rootResolver = new GlobalLibrary();
 
             _tabContainer = this.WithName<TabContainer>("TabContainer");
@@ -733,36 +734,45 @@ namespace OpenScadGraphEditor
         private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
             params Action[] after)
         {
-            GdAssert.That(!_refactoringInProgress,
-                "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
-
-            _refactoringInProgress = true;
-            Log.Debug(">> Refactorings start");
-            var context = new RefactoringContext(_currentProject);
-            context.PerformRefactorings(refactorings);
-
-            // close all tabs referring to graphs which are no longer in the project
-            _tabContainer.GetChildNodes<ScadGraphEdit>()
-                .Where(it => !_currentProject.IsDefinedInThisProject(it.Graph.Description))
-                .ToList()
-                .ForAll(Close);
-
-            // update the graph renderings.
-            foreach (var editor in _tabContainer.GetChildNodes<ScadGraphEdit>())
+            try
             {
-                editor.Render(editor.Graph);
+                GdAssert.That(!_refactoringInProgress,
+                    "Cannot run a refactoring while a refactoring is running. Probably some UI throws events when internal state is updated.");
+
+                _refactoringInProgress = true;
+                Log.Debug(">> Refactorings start");
+                var context = new RefactoringContext(_currentProject);
+                context.PerformRefactorings(refactorings);
+
+                // close all tabs referring to graphs which are no longer in the project
+                _tabContainer.GetChildNodes<ScadGraphEdit>()
+                    .Where(it => !_currentProject.IsDefinedInThisProject(it.Graph.Description))
+                    .ToList()
+                    .ForAll(Close);
+
+                // update the graph renderings.
+                foreach (var editor in _tabContainer.GetChildNodes<ScadGraphEdit>())
+                {
+                    editor.Render(editor.Graph);
+                }
+
+                // important, the snapshot must be made _after_ the changes.
+                _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
+
+
+                RefreshControls();
+                MarkDirty(true);
+                _refactoringInProgress = false;
+                Log.Debug("<< Refactorings end");
+
+                after.ForAll(it => it());
             }
-
-            // important, the snapshot must be made _after_ the changes.
-            _currentHistoryStack.AddSnapshot(description, _currentProject, GetEditorState());
-
-
-            RefreshControls();
-            MarkDirty(true);
-            _refactoringInProgress = false;
-            Log.Debug("<< Refactorings end");
-
-            after.ForAll(it => it());
+            catch (Exception e)
+            {
+                NotificationService.ShowError("Unexpected exception occurred. Running undo to restore a known working state. See console for details.");
+                Log.Error(e, "Unexpected exception");
+                Undo();
+            }
         }
 
         private void OnNewButtonPressed()

@@ -25,9 +25,13 @@ namespace OpenScadGraphEditor.Refactorings
                 return; // nothing to do
             }
 
-            // changing a parameter name is actually quite trivial, we just need to change it
-            // in the description. 
+            //  change it in the description. 
             _description.Parameters.First(it => it.Name == _oldParameterName).Name = _newParameterName;
+            
+            // now find all nodes which refer to it and set up their ports again so they pick up the updated name
+            context.Project.FindAllReferencingNodes(_description)
+                .ForAll(it => it.NodeAsReference.SetupPorts(_description));
+            // we can leave the literals alone as they haven't changed.
         }
     }
 }
