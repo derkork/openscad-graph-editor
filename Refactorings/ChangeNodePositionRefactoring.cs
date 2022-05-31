@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Refactorings
     {
         private readonly Vector2 _newPosition;
         
-        public ChangeNodePositionRefactoring(IScadGraph graph, ScadNode node, Vector2 newPosition) : base(graph, node)
+        public ChangeNodePositionRefactoring(ScadGraph graph, ScadNode node, Vector2 newPosition) : base(graph, node)
         {
             _newPosition = newPosition;
         }

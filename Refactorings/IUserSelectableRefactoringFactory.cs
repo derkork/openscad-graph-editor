@@ -9,6 +9,6 @@ namespace OpenScadGraphEditor.Refactorings
     /// </summary>
     public interface IUserSelectableRefactoringFactory
     {
-        IEnumerable<UserSelectableNodeRefactoring> GetRefactorings(IScadGraph graph, ScadNode node);
+        IEnumerable<UserSelectableNodeRefactoring> GetRefactorings(ScadGraph graph, ScadNode node);
     }
 }

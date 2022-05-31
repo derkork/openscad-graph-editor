@@ -9,7 +9,7 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Nodes.Reroute
 {
     [UsedImplicitly]
-    public class RerouteNode : ScadNode, IHaveMultipleExpressionOutputs, IHaveCustomWidget, IHaveNodeBackground
+    public class RerouteNode : ScadNode, IHaveCustomWidget, IHaveNodeBackground
     {
         public override string NodeTitle => "Reroute";
         public override string NodeDescription => "Rerouting node which aids in making cleaner visual graphs.";
@@ -116,26 +116,9 @@ namespace OpenScadGraphEditor.Nodes.Reroute
                 .OfType(type);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
-            if (GetPortType(PortId.Output(0)) != PortType.Flow)
-            {
-                throw new InvalidOperationException("Cannot render non-flow type");
-            }
-
-            return RenderOutput(context, 0);
-        }
-
-
-        public string RenderExpressionOutput(IScadGraph context, int port)
-        {
-            var outputPortType = GetPortType(PortId.Output(0));
-            if (!outputPortType.IsExpressionType())
-            {
-                throw new InvalidOperationException("Cannot render non-expression type");
-            }
-
-            return RenderInput(context, 0);
+            return RenderInput(context, portIndex);
         }
 
         public ScadNodeWidget InstantiateCustomWidget()

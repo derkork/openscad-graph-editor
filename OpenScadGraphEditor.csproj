@@ -25,6 +25,12 @@
       <CustomToolNamespace>OpenScadGraphEditor.Library.External</CustomToolNamespace>
     </Antlr4>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Library\LightWeightGraph.cs" />
+    <Compile Remove="Library\ICanBeRendered.cs" />
+    <Compile Remove="Library\IScadGraph.cs" />
+    <Compile Remove="Nodes\MainEntryPoint.cs" />
+  </ItemGroup>
 
   <PropertyGroup>
     <Antlr4UseCSharpGenerator>True</Antlr4UseCSharpGenerator>

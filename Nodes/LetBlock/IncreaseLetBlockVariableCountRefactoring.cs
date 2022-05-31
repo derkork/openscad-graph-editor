@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
         public override int Order => 0;
         public override bool IsApplicableToNode => Node is LetBlock;
 
-        public IncreaseLetBlockVariableCountRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public IncreaseLetBlockVariableCountRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

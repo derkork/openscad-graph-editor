@@ -43,7 +43,7 @@ namespace OpenScadGraphEditor.Nodes
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             return $"{VariableDescription.Name}";
         }

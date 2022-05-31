@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Nodes.Echo
         public override int Order => 1;
         public override bool IsApplicableToNode => Node is Echo echo && echo.InputPortCount > 1;
 
-        public RemoveEchoInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public RemoveEchoInputPortRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

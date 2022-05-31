@@ -6,7 +6,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class ModuleEntryPoint : EntryPoint, IHaveMultipleExpressionOutputs, IReferToAnInvokable
+    public class ModuleEntryPoint : EntryPoint, IReferToAnInvokable
     {
         private ModuleDescription _description;
 
@@ -26,11 +26,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             if (portId.IsOutput)
             {
-                if (portId.Port == 0)
-                {
-                    return "Output flow";
-                }
-                return _description.Parameters[portId.Port - 1].Description;
+                return _description.Parameters[portId.Port].Description;
             }
 
             return "";
@@ -44,8 +40,8 @@ namespace OpenScadGraphEditor.Nodes
 
         public int GetParameterOutputPort(int parameterIndex)
         {
-            // the n-th parameter is at the n+1-th output port.
-            return parameterIndex + 1;
+            // the n-th parameter is at the n-th output port.
+            return parameterIndex;
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
@@ -62,8 +58,6 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts.Clear();
 
             _description = (ModuleDescription) description;
-            OutputPorts
-                .Flow();
 
             foreach (var parameter in description.Parameters)
             {
@@ -72,21 +66,27 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string RenderEntryPoint(string content)
         {
             var arguments = _description.Parameters.Indices()
                 .Select(it =>
-                    _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
-            var content = RenderOutput(context, 0);
+                    _description.Parameters[it].Name + RenderLiteral(PortId.Output(it)).PrefixUnlessEmpty(" = "));
 
             var comment = RenderDocumentationComment(_description);
             return $"{comment}\nmodule {_description.Name}({string.Join(", ", arguments)}){content.AsBlock()}";
         }
-
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        
+        public override string Render(ScadGraph context, int portIndex)
         {
+            if (portIndex < 0 || portIndex >= OutputPorts.Count)
+            {
+                return "";
+            }
+
             // return simply the parameter name.
-            return _description.Parameters[port - 1].Name;
+            return _description.Parameters[portIndex].Name;
+               
         }
+
     }
 }

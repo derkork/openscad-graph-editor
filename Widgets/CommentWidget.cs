@@ -66,7 +66,7 @@ namespace OpenScadGraphEditor.Widgets
 
         }
 
-        public override void BindTo(IScadGraph graph, ScadNode node)
+        public override void BindTo(ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
             var comment = (Comment) node;

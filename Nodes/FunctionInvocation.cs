@@ -86,7 +86,7 @@ namespace OpenScadGraphEditor.Nodes
                     .OfType( _description.ReturnTypeHint);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
            var parameters = _description.Parameters.Count.Range()
                 .Select(it =>

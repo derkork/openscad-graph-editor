@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         public override int Order => 1;
         public override bool IsApplicableToNode => Node is ForLoop forLoop && forLoop.NestLevel > 1;
 
-        public DecreaseLoopNestLevelRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public DecreaseLoopNestLevelRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

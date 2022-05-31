@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Nodes
         
         protected abstract string OperatorSign { get; }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var left = RenderInput(context, 0);
             var right = RenderInput(context, 1);

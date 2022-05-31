@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
     /// </summary>
     public class FixRerouteTypeRefactoring : NodeRefactoring
     {
-        public FixRerouteTypeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public FixRerouteTypeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
 

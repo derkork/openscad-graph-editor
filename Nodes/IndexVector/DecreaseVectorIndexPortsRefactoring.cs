@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
 
         public override int Order => 1;
         
-        public DecreaseVectorIndexPortsRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public DecreaseVectorIndexPortsRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

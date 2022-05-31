@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes.Concat
         public override int Order => 0;
         public override bool IsApplicableToNode => Node is Concat;
 
-        public AddConcatInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddConcatInputPortRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

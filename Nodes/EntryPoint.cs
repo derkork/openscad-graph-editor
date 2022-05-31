@@ -70,5 +70,7 @@ namespace OpenScadGraphEditor.Nodes
                     throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
             } 
         }
+
+        public abstract string RenderEntryPoint(string content);
     }
 }

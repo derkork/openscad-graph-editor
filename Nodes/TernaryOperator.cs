@@ -52,7 +52,7 @@ namespace OpenScadGraphEditor.Nodes
 
         }
         
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var condition = RenderInput(context, 0);
             var trueValue = RenderInput(context, 1);

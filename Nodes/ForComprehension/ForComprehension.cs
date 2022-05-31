@@ -118,13 +118,13 @@ namespace OpenScadGraphEditor.Nodes.ForComprehension
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             return "";
         }
         
 
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        public string RenderExpressionOutput(ScadGraph context, int port)
         {
 
             if (port == 0) // result port

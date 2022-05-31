@@ -102,7 +102,7 @@ namespace OpenScadGraphEditor.Nodes.Min
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var parameters = InputCount.Range()
                 .Select(it => RenderInput(context, it).OrUndef())

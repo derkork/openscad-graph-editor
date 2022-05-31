@@ -72,7 +72,7 @@ namespace OpenScadGraphEditor.Nodes
                 .OfType(_description.ReturnTypeHint, "Result");
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var input = RenderInput(context, 1);
             return input.Length == 0 ? "undef" : input;

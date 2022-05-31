@@ -43,13 +43,13 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             GdAssert.That(false, "This node cannot render.");
             return "";
         }
 
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        public string RenderExpressionOutput(ScadGraph context, int port)
         {
             var input = RenderInput(context, 0);
             GdAssert.That(port >= 0 && port < 3, "port out of range");

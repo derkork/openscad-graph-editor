@@ -24,9 +24,9 @@ namespace OpenScadGraphEditor.Nodes
             return "The boolean.";
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
-            return RenderOutput(context, 0);
+            return RenderLiteral(PortId.Output(portIndex));
         }
 
         public ScadNodeWidget InstantiateCustomWidget() => new SmallNodeWidget();

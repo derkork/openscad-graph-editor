@@ -44,7 +44,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
         }
 
 
-        public void Open(IScadGraph graph, ScadNode node)
+        public void Open(ScadGraph graph, ScadNode node)
         {
             if (IsInstanceValid(_widget))
             {

@@ -61,7 +61,7 @@ namespace OpenScadGraphEditor
         private UsageDialog _usageDialog;
         private DocumentationDialog _documentationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
-        private LightWeightGraph _copyBuffer;
+        private ScadGraph _copyBuffer;
         private Button _consoleButton;
         private Button _usageButton;
         private LogConsole _logConsole;
@@ -192,7 +192,7 @@ namespace OpenScadGraphEditor
                 .To(this, nameof(SaveChanges));
 
             _configuration.Load();
-            _copyBuffer = new LightWeightGraph();
+            _copyBuffer = new ScadGraph();
             OnNewButtonPressed();
             NotificationService.ShowNotification("Welcome to OpenScad Graph Editor");
         }
@@ -523,7 +523,7 @@ namespace OpenScadGraphEditor
                 new AddNodeRefactoring(context.Source, node, otherNode, otherPort));
         }
 
-        private ScadGraphEdit Open(IScadGraph toOpen)
+        private ScadGraphEdit Open(ScadGraph toOpen)
         {
             // check if it is already open
             if (_openEditors.TryGetValue(toOpen.Description.Id, out var existingEditor))
@@ -606,9 +606,9 @@ namespace OpenScadGraphEditor
         /// <summary>
         /// Copies the given nodes from the source graph into a copy buffer.
         /// </summary>
-        private LightWeightGraph MakeCopyBuffer(IScadGraph source, IEnumerable<ScadNode> selection)
+        private ScadGraph MakeCopyBuffer(ScadGraph source, IEnumerable<ScadNode> selection)
         {
-            var result = new LightWeightGraph();
+            var result = new ScadGraph();
             // remove all nodes which cannot be deleted (which are usually nodes that are built in so they cannot be copied either).
             // also make it a HashSet so we don't have duplicates and have quicker lookups
             var sanitizedSet = selection

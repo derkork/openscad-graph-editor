@@ -1,3 +1,4 @@
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 
@@ -48,11 +49,16 @@ namespace OpenScadGraphEditor.Nodes
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
+            if (portIndex != 0)
+            {
+                return "";
+            }
+            
             var value = RenderInput(context, 1);
-            var next = RenderOutput(context, 0);
-            return $"{VariableDescription.Name} = {value};\n{next}";
+            var before = RenderInput(context, 0);
+            return $"{before}\n{VariableDescription.Name} = {value};";
         }
 
         public void SetupPorts(VariableDescription description)

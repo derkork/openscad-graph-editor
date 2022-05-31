@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Refactorings
     /// </summary>
     internal class DeleteNodeRefactoring : NodeRefactoring
     {
-        public DeleteNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public DeleteNodeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
 

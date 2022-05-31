@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes.Str
         public override int Order => 0;
         public override bool IsApplicableToNode => Node is Str;
 
-        public AddStrInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddStrInputPortRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

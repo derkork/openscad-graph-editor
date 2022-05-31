@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly PortId _port;
         private readonly bool _enabled;
 
-        public ToggleLiteralRefactoring(IScadGraph graph, ScadNode node, PortId port, bool enabled) : base(graph, node)
+        public ToggleLiteralRefactoring(ScadGraph graph, ScadNode node, PortId port, bool enabled) : base(graph, node)
         {
             _port = port;
             _enabled = enabled;

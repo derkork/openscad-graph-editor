@@ -40,7 +40,7 @@ namespace OpenScadGraphEditor.Nodes
             base.RestorePortDefinitions(node, resolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             throw new InvalidOperationException("Comment node cannot be rendered.");
         }

@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.Max
         public override int Order => 0;
         public override bool IsApplicableToNode => Node is Max;
 
-        public AddMaxInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddMaxInputPortRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

@@ -8,7 +8,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes.LetBlock
 {
     [UsedImplicitly]
-    public class LetBlock : ScadNode, IHaveMultipleExpressionOutputs
+    public class LetBlock : ScadNode
     {
         public override string NodeTitle => "Let (Block)";
         public override string NodeDescription  => "Allows to define temporary variables";
@@ -109,7 +109,7 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var builder = new StringBuilder("let(");
             for (var i = 0; i < VariableCount; i++)
@@ -132,7 +132,7 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
             return $"{builder}{children.AsBlock()}\n{next}";
         }
 
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        public string RenderExpressionOutput(ScadGraph context, int port)
         {
             GdAssert.That(port > 0 && port <= VariableCount, "port out of range");
             return RenderOutput(context, port).OrDefault(Id.UniqueStableVariableName(port - 1));

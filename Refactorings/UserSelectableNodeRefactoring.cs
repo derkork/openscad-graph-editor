@@ -20,7 +20,7 @@ namespace OpenScadGraphEditor.Refactorings
 
         private static readonly List<IUserSelectableRefactoringFactory> Factories;
         
-        protected UserSelectableNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        protected UserSelectableNodeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         static UserSelectableNodeRefactoring()
@@ -33,7 +33,7 @@ namespace OpenScadGraphEditor.Refactorings
                 .ToList();
         }
         
-        public static IEnumerable<UserSelectableNodeRefactoring> GetApplicable(IScadGraph graph, ScadNode node)
+        public static IEnumerable<UserSelectableNodeRefactoring> GetApplicable(ScadGraph graph, ScadNode node)
         {
             return Factories
                 .SelectMany(it => it.GetRefactorings(graph, node))

@@ -7,31 +7,31 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     public class RequestContext
     {
 
-        public static RequestContext ForPosition(IScadGraph source, Vector2 position)
+        public static RequestContext ForPosition(ScadGraph source, Vector2 position)
         {
             return new RequestContext(source, position);
         }
 
-        public static RequestContext ForPort(IScadGraph source, Vector2 position, ScadNode node, PortId portId)
+        public static RequestContext ForPort(ScadGraph source, Vector2 position, ScadNode node, PortId portId)
         {
             return new RequestContext(source, position, node, portId);
         }
         
-        public static RequestContext FromPort(IScadGraph source, Vector2 position, ScadNode node, int port)
+        public static RequestContext FromPort(ScadGraph source, Vector2 position, ScadNode node, int port)
         {
             return ForPort(source, position, node, PortId.Output(port));
         }
-        public static RequestContext ToPort(IScadGraph source, Vector2 position, ScadNode node, int port)
+        public static RequestContext ToPort(ScadGraph source, Vector2 position, ScadNode node, int port)
         {
             return ForPort(source, position, node, PortId.Input(port));
         }
 
-        public static RequestContext ForNode(IScadGraph source, Vector2 position, ScadNode node)
+        public static RequestContext ForNode(ScadGraph source, Vector2 position, ScadNode node)
         {
             return new RequestContext(source, position, node);
         }
 
-        private RequestContext(IScadGraph source, Vector2 position, ScadNode node = null, PortId portId = default )
+        private RequestContext(ScadGraph source, Vector2 position, ScadNode node = null, PortId portId = default )
         {
             Source = source;
             Position = position;
@@ -39,7 +39,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             _port = portId;
         }
 
-        public IScadGraph Source { get; }
+        public ScadGraph Source { get; }
         public Vector2 Position { get; }
 
         private readonly ScadNode _node;

@@ -19,29 +19,17 @@ namespace OpenScadGraphEditor.Nodes
         {
             if (portId.IsInput)
             {
-                if (portId.Port == 0)
+                if (_description.SupportsChildren && portId.Port == _description.Parameters.Count)
                 {
-                    return "Input flow";
-                } 
+                    return "Input. Everything connected here will be affected by this module.";
+                }
+
                 return _description.Parameters[portId.Port - 1].Description;
             }
 
             if (portId.IsOutput)
             {
-                if (_description.SupportsChildren)
-                {
-                    switch (portId.Port)
-                    {
-                        case 0:
-                            return "Children. Everything connected here will be affected by this module.";
-                        case 1:
-                            return "Output flow.";
-                    }
-                }
-                else
-                {
-                    return "Output flow";
-                }
+                return "Output flow";
             }
 
             return "";
@@ -79,9 +67,6 @@ namespace OpenScadGraphEditor.Nodes
             InputPorts.Clear();
             OutputPorts.Clear();
 
-            InputPorts
-                .Flow();
-
             foreach (var parameter in description.Parameters)
             {
                 var type = parameter.TypeHint;
@@ -91,25 +76,22 @@ namespace OpenScadGraphEditor.Nodes
 
             if (_description.SupportsChildren)
             {
-                OutputPorts
-                    .Flow("Children")
-                    .Flow("After");
+                InputPorts
+                    .Flow("Children");
             }
-            else
-            {
-                OutputPorts
-                    .Flow();
-            }
+
+            OutputPorts
+                .Flow();
         }
 
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var parameters = _description.Parameters.Count.Range()
                 .Select(it =>
                 {
                     var parameterDescription = _description.Parameters[it];
-                    var value = RenderInput(context, it + 1);
+                    var value = RenderInput(context, it);
                     return value.Empty() && parameterDescription.IsOptional
                         ? ""
                         : $"{parameterDescription.Name} = {value.OrUndef()}";
@@ -118,14 +100,13 @@ namespace OpenScadGraphEditor.Nodes
                 .JoinToString(", ");
        
             var result = $"{_description.Name}({parameters})";
-            var childNodes = _description.SupportsChildren ? RenderOutput(context, 0) : "";
-            var nextNodes = RenderOutput(context, _description.SupportsChildren ? 1 : 0);
+            var childNodes = _description.SupportsChildren ? RenderInput(context, _description.Parameters.Count) : "";
             if (childNodes.Length > 0)
             {
-                return result + childNodes.AsBlock() + nextNodes;
+                return result + childNodes.AsBlock();
             }
 
-            return result + ";\n" + nextNodes;
+            return result + ";";
         }
     }
 }

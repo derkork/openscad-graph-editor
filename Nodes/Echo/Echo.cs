@@ -93,15 +93,20 @@ namespace OpenScadGraphEditor.Nodes.Echo
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
+            if (portIndex != 0)
+            {
+                return "";
+            }
+            
             var parameters = InputCount.Range()
                 .Select(it => RenderInput(context, it + 1).OrUndef())
                 .JoinToString(", ");
 
-            var next = RenderOutput(context, 0);
+            var before = RenderInput(context, 0);
 
-            return $"echo({parameters});\n{next}";
+            return $"{before}\necho({parameters});";
         }
     }
 }

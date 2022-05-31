@@ -16,7 +16,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
 
         public int IndexPortCount { get; private set; } = 1;
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             GdAssert.That(false, "Cannot render this node.");
             return "";
@@ -98,7 +98,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             return "";
         }
 
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        public string RenderExpressionOutput(ScadGraph context, int port)
         {
             GdAssert.That(port >= 0 && port < IndexPortCount, "Port index out of range.");
             var vector = RenderInput(context, 0);

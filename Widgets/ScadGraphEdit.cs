@@ -16,7 +16,7 @@ namespace OpenScadGraphEditor.Widgets
 {
     /// <summary>
     /// This is our main editing interface for editing graphs of invokable things (functions/modules). It is the
-    /// heavyweight alternative to <see cref="LightWeightGraph"/>. In contrast to <see cref="LightWeightGraph"/>,
+    /// heavyweight alternative to <see cref="ScadGraph"/>. In contrast to <see cref="ScadGraph"/>,
     /// this graph never really changes the actual graph data but just invokes refactoring events in response to
     /// user input that will do the proper refactoring actions.
     /// </summary>
@@ -71,7 +71,7 @@ namespace OpenScadGraphEditor.Widgets
         private readonly HashSet<string> _selection = new HashSet<string>();
         private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
         private ScadConnection _pendingDisconnect;
-        public IScadGraph Graph { get; private set; }
+        public ScadGraph Graph { get; private set; }
 
 
         public void SelectNodes(List<ScadNode> nodes)
@@ -168,9 +168,13 @@ namespace OpenScadGraphEditor.Widgets
         
         public void FocusEntryPoint()
         {
-            var widget = _widgets[Graph.GetAllNodes().First(it => it is EntryPoint).Id];
-            // move it somewhere top left
-            ScrollOffset = widget.Offset - new Vector2(100, 100);
+            var entryPoint = Graph.GetAllNodes().FirstOrDefault(it => it is EntryPoint);
+            if (entryPoint != null)
+            {
+                var widget = _widgets[entryPoint.Id];
+                // move it somewhere top left
+                ScrollOffset = widget.Offset - new Vector2(100, 100);
+            }
         }
         
         public void FocusNode(ScadNode node)
@@ -184,7 +188,7 @@ namespace OpenScadGraphEditor.Widgets
         }
         
 
-        public void Render(IScadGraph graph)
+        public void Render(ScadGraph graph)
         {
             Graph = graph;
             

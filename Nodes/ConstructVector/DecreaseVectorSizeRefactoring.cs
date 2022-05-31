@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
 
         public override int Order => 1;
         
-        public DecreaseVectorSizeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public DecreaseVectorSizeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

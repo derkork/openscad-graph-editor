@@ -85,7 +85,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         }
 
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var builder = new StringBuilder();
 

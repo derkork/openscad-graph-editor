@@ -36,7 +36,7 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var value = RenderInput(context, 0);
             return value.Empty() ? "" : $"(-{value})";

@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
         private readonly bool _isFirstOperand;
         private readonly PortType _targetPortType;
 
-        public SwitchBinaryOperatorPortTypeRefactoring(IScadGraph holder, ScadNode node, bool isFirstOperand, PortType targetPortType) : base(holder, node)
+        public SwitchBinaryOperatorPortTypeRefactoring(ScadGraph holder, ScadNode node, bool isFirstOperand, PortType targetPortType) : base(holder, node)
         {
             _isFirstOperand = isFirstOperand;
             _targetPortType = targetPortType;

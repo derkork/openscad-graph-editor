@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.Min
         public override int Order => 0;
         public override bool IsApplicableToNode => Node is Min;
 
-        public AddMinInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddMinInputPortRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

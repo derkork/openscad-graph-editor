@@ -56,7 +56,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             OutputPorts
                 .Clear();
             OutputPorts
-                .Flow("Children");
+                .Flow();
 
             for (var i = 0; i < NestLevel; i++)
             {
@@ -105,7 +105,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var builder = new StringBuilder("for(");
             for (var i = 0; i < NestLevel; i++)
@@ -129,7 +129,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
             return $"{builder}{children.AsBlock()}\n{next}";
         }
 
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        public string RenderExpressionOutput(ScadGraph context, int port)
         {
             GdAssert.That(port > 0 && port <= NestLevel, "port out of range");
             return RenderOutput(context, port).OrDefault(Id.UniqueStableVariableName(port - 1));

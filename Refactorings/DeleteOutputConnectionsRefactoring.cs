@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Refactorings
     {
         private readonly int _port;
 
-        public DeleteOutputConnectionsRefactoring(IScadGraph holder, ScadNode node, int port) : base(holder, node)
+        public DeleteOutputConnectionsRefactoring(ScadGraph holder, ScadNode node, int port) : base(holder, node)
         {
             _port = port;
         }

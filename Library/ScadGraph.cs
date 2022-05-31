@@ -13,9 +13,8 @@ namespace OpenScadGraphEditor.Library
     /// A lightweight graph representation, that can simply render to OpenScad but is not user-editable and has
     /// no visible UI.
     /// </summary>
-    public class LightWeightGraph : IScadGraph
+    public class ScadGraph
     {
-        private ScadNode _entryPoint;
         private readonly List<ScadConnection> _connections = new List<ScadConnection>();
         private readonly List<ScadNode> _nodes = new List<ScadNode>();
 
@@ -23,7 +22,39 @@ namespace OpenScadGraphEditor.Library
 
         public string Render()
         {
-            return _entryPoint.Render(this);
+            // we render all nodes which have either no output at all or a single disconnected flow output
+            var candidates = _nodes.Where(it =>
+            {
+                if (it.OutputPortCount == 0)
+                {
+                    return true;
+                }
+
+                var hasFlowOutput = false;
+                for (var i = 0; i < it.OutputPortCount; i++)
+                {
+                    var portId = PortId.Output(i);
+                    if (it.GetPortType(portId) == PortType.Flow)
+                    {
+                        hasFlowOutput = true;
+                        if (IsPortConnected(it, portId))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return hasFlowOutput;
+            });
+            
+            var content = candidates.Select(it =>it.Render(this, 0)).JoinToString("\n");
+            // now check if the graph has an entrypoint if, so render the entry point with the given content
+            if (_nodes.FirstOrDefault(it => it is EntryPoint) is EntryPoint entryPoint)
+            {
+                content = entryPoint.RenderEntryPoint( content);
+            }
+
+            return content;
         }
 
         public IEnumerable<ScadNode> GetAllNodes()
@@ -35,8 +66,6 @@ namespace OpenScadGraphEditor.Library
         {
             Clear();
             Description = new MainModuleDescription();
-            _entryPoint = NodeFactory.Build<MainEntryPoint>();
-            _nodes.Add(_entryPoint);
         }
 
         public ScadNode ById(string id)
@@ -52,18 +81,18 @@ namespace OpenScadGraphEditor.Library
             switch (description)
             {
                 case FunctionDescription functionDescription:
-                    _entryPoint = NodeFactory.Build<FunctionEntryPoint>(functionDescription);
+                    var entryPoint = NodeFactory.Build<FunctionEntryPoint>(functionDescription);
                     var returnNode = NodeFactory.Build<FunctionReturn>(functionDescription);
                     // don't let the nodes overlap
-                    returnNode.Offset = _entryPoint.Offset + new Vector2(800, 0);
+                    returnNode.Offset = entryPoint.Offset + new Vector2(800, 0);
 
-                    _nodes.Add(_entryPoint);
+                    _nodes.Add(entryPoint);
                     _nodes.Add(returnNode);
-                    _connections.Add(new ScadConnection(this, _entryPoint, 0, returnNode, 0));
+                    _connections.Add(new ScadConnection(this, entryPoint, 0, returnNode, 0));
                     break;
                 case ModuleDescription moduleDescription:
-                    _entryPoint = NodeFactory.Build<ModuleEntryPoint>(moduleDescription);
-                    _nodes.Add(_entryPoint);
+                    entryPoint = NodeFactory.Build<ModuleEntryPoint>(moduleDescription);
+                    _nodes.Add(entryPoint);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -72,7 +101,6 @@ namespace OpenScadGraphEditor.Library
 
         private void Clear()
         {
-            _entryPoint = null;
             _connections.Clear();
             _nodes.Clear();
         }
@@ -92,11 +120,6 @@ namespace OpenScadGraphEditor.Library
             {
                 var node = NodeFactory.FromSavedNode(savedNode, resolver);
                 _nodes.Add(node);
-
-                if (node is EntryPoint)
-                {
-                    _entryPoint = node;
-                }
             }
 
             foreach (var connection in graph.Connections)
@@ -158,6 +181,11 @@ namespace OpenScadGraphEditor.Library
         {
             GdAssert.That(_nodes.All(it => it.Id != node.Id), "Tried to add node which already exists.");
             _nodes.Add(node);
+        }
+
+        public bool IsPortConnected(ScadNode node, PortId port)
+        {
+            return GetAllConnections().Any(it => it.InvolvesPort(node, port));
         }
     }
 }

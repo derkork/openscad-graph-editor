@@ -15,11 +15,11 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly ScadNode _other;
         private readonly PortId _otherPort;
 
-        public AddNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddNodeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         
-        public AddNodeRefactoring(IScadGraph holder, ScadNode node, [CanBeNull] ScadNode other, PortId otherPort) : base(holder, node)
+        public AddNodeRefactoring(ScadGraph holder, ScadNode node, [CanBeNull] ScadNode other, PortId otherPort) : base(holder, node)
         {
             _otherPort = otherPort;
             GdAssert.That(other == null || otherPort.IsDefined, "otherPort must be defined when a node is given");

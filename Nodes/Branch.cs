@@ -10,18 +10,17 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "Branch";
 
         public override string NodeDescription =>
-            "Performs a test to determine if the actions in a sub scope should be performed or not.";
+            "Renders the true input if the condition is true, otherwise renders the false input.";
 
         public Branch()
         {
             InputPorts
-                .Flow()
-                .Boolean("Condition");
+                .Boolean("Condition")
+                .Flow("True")
+                .Flow("False");
 
             OutputPorts
-                .Flow("True")
-                .Flow("False")
-                .Flow("After");
+                .Flow();
         }
 
         public override string GetPortDocumentation(PortId portId)
@@ -29,44 +28,41 @@ namespace OpenScadGraphEditor.Nodes
             switch (portId.Port)
             {
                 case 0 when portId.IsInput:
-                    return "Input flow";
-                case 1 when portId.IsInput:
                     return "The condition that should be tested.";
-                case 0 when portId.IsOutput:
+                case 1 when portId.IsInput:
                     return "The flow that is executed if the condition is true.";
-                case 1 when portId.IsOutput:
+                case 2 when portId.IsInput:
                     return "The flow that is executed if the condition is false.";
-                case 2 when portId.IsOutput:
-                    return "The flow that is executed after the condition is tested.";
+                case 0 when portId.IsOutput:
+                    return "Output flow";
                 default:
                     return "";
             }
         }
 
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
-            var condition = RenderInput(context, 1).OrUndef();
-            var ifBranch = RenderOutput(context, 0);
-            var elseBranch = RenderOutput(context, 1);
-            var after = RenderOutput(context, 2);
+            var condition = RenderInput(context, 0).OrUndef();
+            var ifBranch = RenderInput(context, 1);
+            var elseBranch = RenderInput(context, 2);
 
             if (ifBranch.Length == 0)
             {
                 if (elseBranch.Length == 0)
                 {
-                    return after;
+                    return "";
                 }
 
-                return $@"if (!({condition})){elseBranch.AsBlock()}{after}";
+                return $@"if (!({condition})){elseBranch.AsBlock()}";
             }
 
             if (elseBranch.Length == 0)
             {
-                return $@"if ({condition}){ifBranch.AsBlock()}{after}";
+                return $@"if ({condition}){ifBranch.AsBlock()}";
             }
             
-            return $@"if ({condition}){ifBranch.AsBlock()}else{elseBranch.AsBlock()}{after}";
+            return $@"if ({condition}){ifBranch.AsBlock()}else{elseBranch.AsBlock()}";
         }
     }
 }

@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Nodes.ForComprehension
         public override int Order => 1;
         public override bool IsApplicableToNode => Node is ForComprehension forComprehension && forComprehension.NestLevel > 1;
 
-        public DecreaseForComprehensionDimension(IScadGraph holder, ScadNode node) : base(holder, node)
+        public DecreaseForComprehensionDimension(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

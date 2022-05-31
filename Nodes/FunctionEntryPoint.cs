@@ -7,7 +7,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
-    public class FunctionEntryPoint : EntryPoint, IHaveMultipleExpressionOutputs, IReferToAFunction
+    public class FunctionEntryPoint : EntryPoint,  IReferToAFunction
     {
         private FunctionDescription _description;
 
@@ -17,24 +17,12 @@ namespace OpenScadGraphEditor.Nodes
 
         public InvokableDescription InvokableDescription => _description;
 
-        static FunctionEntryPoint()
-        {
-            // a function entry point may not be disconnected from its return.
-            ConnectionRules.AddDisconnectRule(
-                it => it.From is FunctionEntryPoint && it.FromPort == 0,
-                ConnectionRules.OperationRuleDecision.Veto
-            );
-        }
 
         public override string GetPortDocumentation(PortId portId)
         {
             if (portId.IsOutput)
             {
-                if (portId.Port == 0)
-                {
-                    return "Output flow";
-                }
-                return _description.Parameters[portId.Port - 1].Description;
+                return _description.Parameters[portId.Port].Description;
             }
 
             return "";
@@ -48,8 +36,8 @@ namespace OpenScadGraphEditor.Nodes
 
         public int GetParameterOutputPort(int parameterIndex)
         {
-            // the n-th parameter is the n+1-th output port
-            return parameterIndex + 1;
+            // the n-th parameter is the n-th output port
+            return parameterIndex;
         }
 
         public IEnumerable<PortId> GetPortsReferringToReturnValue()
@@ -79,8 +67,6 @@ namespace OpenScadGraphEditor.Nodes
             OutputPorts.Clear();
 
             _description = (FunctionDescription) description;
-            OutputPorts
-                .Flow();
 
             foreach (var parameter in description.Parameters)
             {
@@ -89,20 +75,21 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string RenderEntryPoint(string content)
         {
             var arguments = _description.Parameters.Indices()
                 .Select(it =>
-                    _description.Parameters[it].Name + RenderOutput(context, it + 1).PrefixUnlessEmpty(" = "));
+                    _description.Parameters[it].Name + RenderLiteral(PortId.Output(it)).PrefixUnlessEmpty(" = "));
 
             var comment = RenderDocumentationComment(_description);
-            return $"{comment}\nfunction {_description.Name}({string.Join(", ", arguments)}) = {RenderOutput(context, 0)};";
+            return $"{comment}\nfunction {_description.Name}({string.Join(", ", arguments)}) = {content};";
         }
 
-        public string RenderExpressionOutput(IScadGraph context, int port)
+        public override string Render(ScadGraph context, int portIndex)
         {
             // return simply the parameter name.
-            return _description.Parameters[port - 1].Name;
+            return _description.Parameters[portIndex].Name;
         }
+
     }
 }

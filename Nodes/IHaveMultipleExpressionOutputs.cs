@@ -11,6 +11,6 @@ namespace OpenScadGraphEditor.Nodes
         /// <summary>
         /// Instructs the node to only render the expression output with the given index.
         /// </summary>
-        string RenderExpressionOutput(IScadGraph context, int port);
+        string RenderExpressionOutput(ScadGraph context, int port);
     }
 }

@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.Echo
         public override int Order => 0;
         public override bool IsApplicableToNode => Node is Echo;
 
-        public AddEchoInputPortRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddEchoInputPortRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         

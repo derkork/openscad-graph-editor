@@ -21,7 +21,7 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        public override void BindTo(IScadGraph graph, ScadNode node)
+        public override void BindTo(ScadGraph graph, ScadNode node)
         {
             base.BindTo(graph, node);
             Title = ""; // hide title

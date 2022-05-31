@@ -24,10 +24,9 @@ namespace OpenScadGraphEditor.Nodes
             return "The number.";
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
-            var value = RenderOutput(context, 0);
-            return $"{value}";
+            return RenderLiteral(PortId.Output(portIndex));
         }
 
         public ScadNodeWidget InstantiateCustomWidget() => new SmallNodeWidget();
