@@ -41,7 +41,7 @@ namespace OpenScadGraphEditor.Widgets
             RectMinSize = new Vector2(32, 64);
         }
 
-
+        
         public virtual void BindTo(ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
@@ -157,6 +157,7 @@ namespace OpenScadGraphEditor.Widgets
             _tween.RemoveAndFree();
             _tween = null;
         }
+        
 
         private void Minimize()
         {
@@ -285,7 +286,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             switch (portType)
             {
-                case PortType.Flow:
+                case PortType.Geometry:
                     return new Color(1, 1, 1);
                 case PortType.Boolean:
                     return new Color(1, 0.4f, 0.4f);

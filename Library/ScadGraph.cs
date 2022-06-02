@@ -5,6 +5,7 @@ using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
@@ -25,6 +26,12 @@ namespace OpenScadGraphEditor.Library
             // we render all nodes which have either no output at all or a single disconnected flow output
             var candidates = _nodes.Where(it =>
             {
+                // helper nodes will not be used as render target.
+                if (it is Comment || it is RerouteNode)
+                {
+                    return false;
+                }
+                
                 if (it.OutputPortCount == 0)
                 {
                     return true;
@@ -34,7 +41,7 @@ namespace OpenScadGraphEditor.Library
                 for (var i = 0; i < it.OutputPortCount; i++)
                 {
                     var portId = PortId.Output(i);
-                    if (it.GetPortType(portId) == PortType.Flow)
+                    if (it.GetPortType(portId) == PortType.Geometry)
                     {
                         hasFlowOutput = true;
                         if (IsPortConnected(it, portId))
@@ -73,6 +80,13 @@ namespace OpenScadGraphEditor.Library
             return _nodes.First(it => it.Id == id);
         }
 
+        public bool TryById(string id, out ScadNode node)
+        {
+            var result = _nodes.FirstOrDefault(it => it.Id == id);
+            node = result;
+            return result != null;
+        }
+
         public void NewFromDescription(InvokableDescription description)
         {
             Clear();
@@ -88,7 +102,6 @@ namespace OpenScadGraphEditor.Library
 
                     _nodes.Add(entryPoint);
                     _nodes.Add(returnNode);
-                    _connections.Add(new ScadConnection(this, entryPoint, 0, returnNode, 0));
                     break;
                 case ModuleDescription moduleDescription:
                     entryPoint = NodeFactory.Build<ModuleEntryPoint>(moduleDescription);

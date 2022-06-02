@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
     /// Node which allows to access vector/string indices.
     /// </summary>
     [UsedImplicitly]
-    public class IndexVector : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs
+    public class IndexVector : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Index Vector/String";
         public override string NodeDescription => "Returns the value of the vector/string at the given index";
@@ -18,8 +18,13 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
 
         public override string Render(ScadGraph context, int portIndex)
         {
-            GdAssert.That(false, "Cannot render this node.");
-            return "";
+            if (portIndex < 0 || portIndex >= IndexPortCount)
+            {
+                return "";
+            }
+            var vector = RenderInput(context, 0);
+            var index = RenderInput(context, portIndex+1);
+            return $"{vector}[{index}]";
         }
         
         public IndexVector()
@@ -98,12 +103,6 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             return "";
         }
 
-        public string RenderExpressionOutput(ScadGraph context, int port)
-        {
-            GdAssert.That(port >= 0 && port < IndexPortCount, "Port index out of range.");
-            var vector = RenderInput(context, 0);
-            var index = RenderInput(context, port+1);
-            return $"{vector}[{index}]";
-        }
+
     }
 }

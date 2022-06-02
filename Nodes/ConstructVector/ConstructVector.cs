@@ -5,7 +5,7 @@ using OpenScadGraphEditor.Library.IO;
 
 namespace OpenScadGraphEditor.Nodes.ConstructVector
 {
-    public abstract class ConstructVector : ScadNode, IAmAnExpression
+    public abstract class ConstructVector : ScadNode, IAmAnExpression, IAmAVectorConstruction
     {
         private readonly PortType _portType;
 

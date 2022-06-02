@@ -50,7 +50,7 @@ namespace OpenScadGraphEditor.Nodes
             switch (portType)
             {
                 case PortType.Reroute:
-                case PortType.Flow:
+                case PortType.Geometry:
                     return "";
                 case PortType.Boolean:
                     return "[boolean]";

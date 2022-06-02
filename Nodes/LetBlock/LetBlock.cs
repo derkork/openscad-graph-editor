@@ -24,12 +24,12 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
             InputPorts
                 .Clear();
             InputPorts
-                .Flow();
+                .Geometry();
 
             OutputPorts
                 .Clear();
             OutputPorts
-                .Flow("Children");
+                .Geometry("Children");
 
             for (var i = 0; i < VariableCount; i++)
             {
@@ -38,7 +38,7 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
             }
 
             OutputPorts
-                .Flow("After");
+                .Geometry("After");
         }
 
         public override string GetPortDocumentation(PortId portId)

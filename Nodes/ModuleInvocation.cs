@@ -55,7 +55,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            var moduleDescriptionId = node.GetData("module_description_id");
+            var moduleDescriptionId = node.GetDataString("module_description_id");
             SetupPorts(referenceResolver.ResolveModuleReference(moduleDescriptionId));
             base.RestorePortDefinitions(node, referenceResolver);
         }
@@ -77,11 +77,11 @@ namespace OpenScadGraphEditor.Nodes
             if (_description.SupportsChildren)
             {
                 InputPorts
-                    .Flow("Children");
+                    .Geometry("Children");
             }
 
             OutputPorts
-                .Flow();
+                .Geometry();
         }
 
 

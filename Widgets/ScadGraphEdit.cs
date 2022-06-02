@@ -214,6 +214,9 @@ namespace OpenScadGraphEditor.Widgets
                 ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
             }
             
+            // highlight any bound nodes
+            HighlightBoundNodes();
+            
             // finally destroy all the widgets that are not in the graph anymore
             // set of Ids of nodes that are in the graph
             var nodeIds = graph.GetAllNodes().Select(n => n.Id).ToHashSet();
@@ -485,9 +488,29 @@ namespace OpenScadGraphEditor.Widgets
                     ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
                 }
             }
-
+            HighlightBoundNodes();
         }
 
+        private void HighlightBoundNodes()
+        {
+            var boundNodes = Graph.GetAllNodes().OfType<IAmBoundToOtherNode>().ToList();
+            
+            foreach (var node in boundNodes)
+            {
+                var partnerNodeId = node.OtherNodeId;
+                var partnerNodeWidget = _widgets[partnerNodeId];
+                // if the node's partner node is not currently selected, but the node is selected then highlight the node's partner node, otherwise clear it.
+                if (!_selection.Contains(partnerNodeId) && _selection.Contains(((ScadNode)node).Id))
+                {
+                    partnerNodeWidget.Modulate = Colors.Yellow;
+                }
+                else
+                {
+                    partnerNodeWidget.Modulate = Colors.White;
+                }
+            }
+        }
+        
         private void OnNodeUnselected(ScadNodeWidget node)
         {
             _selection.Remove(node.BoundNode.Id);
@@ -502,6 +525,8 @@ namespace OpenScadGraphEditor.Widgets
                     DisconnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
                 }
             }
+            
+            HighlightBoundNodes();
         }
 
         private void OnDeleteSelection()

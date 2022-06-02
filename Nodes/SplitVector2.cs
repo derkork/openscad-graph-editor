@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes
     /// Node for splitting a Vector2 into its components.
     /// </summary>
     [UsedImplicitly]
-    public class SplitVector2 : ScadNode, IAmAnExpression, IHaveMultipleExpressionOutputs, IHaveCustomWidget, IHaveNodeBackground
+    public class SplitVector2 : ScadNode, IAmAnExpression, IHaveCustomWidget, IHaveNodeBackground
     {
         public override string NodeTitle => "Split Vector2";
         public override string NodeDescription => "Splits a Vector2 into its components.";
@@ -45,22 +45,15 @@ namespace OpenScadGraphEditor.Nodes
 
         public override string Render(ScadGraph context, int portIndex)
         {
-            GdAssert.That(false, "This node cannot render.");
-            return "";
-        }
-
-        public string RenderExpressionOutput(ScadGraph context, int port)
-        {
             var input = RenderInput(context, 0);
-            GdAssert.That(port >= 0 && port < 3, "port out of range");
-            switch (port)
+            switch (portIndex)
             {
                 case 0:
                     return $"{input}.x";
                 case 1:
                     return $"{input}.y";
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    return "";
             }
         }
 

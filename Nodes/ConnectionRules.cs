@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
 using JetBrains.Annotations;
-using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes.ForLoop;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using Serilog;
@@ -28,19 +25,17 @@ namespace OpenScadGraphEditor.Nodes
         /// </summary>
         static ConnectionRules()
         {
-            // there can only ever be one incoming connection to a port
-            AddConnectRule(it => true,
+            // there can only ever be one incoming connection to a port unless it is a geometry port
+            AddConnectRule(it => !it.IsToPortType(PortType.Geometry),
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
                 it => new DeleteInputConnectionsRefactoring(it.Owner, it.To, it.ToPort));
-
-            // anything that is from a "Flow" port type needs to disconnect the source port (only one flow is allowed)
-            AddConnectRule(it => it.IsFromPortType(PortType.Flow),
-                OperationRuleDecision.Undecided, // this is a side-effect-only rule
-                it => new DeleteOutputConnectionsRefactoring(it.Owner, it.From, it.FromPort));
-
-            // We can never connect nodes as a circle, unless the node is marked with ICanConnectToMyself, and then
-            // the node is responsible for allowing the connection.
-            AddConnectRule(it =>  !(it.To is ICanConnectToMyself) && WouldCreateCircle(it), OperationRuleDecision.Veto);
+            
+            // the same connection may not exist twice
+            AddConnectRule(it => it.Owner.GetAllConnections().Any(c => c.From == it.From && c.To == it.To && c.FromPort == it.FromPort && c.ToPort == it.ToPort),
+                OperationRuleDecision.Veto);
+            
+            // We can never connect nodes as a circle
+            AddConnectRule(WouldCreateCircle, OperationRuleDecision.Veto);
 
             // connections of the same type can always be made
             AddConnectRule(it =>

@@ -203,7 +203,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _inputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
-                    var serializedValue = node.GetData($"input_literal_value.{i}");
+                    var serializedValue = node.GetDataString($"input_literal_value.{i}");
                     // broken literals still seem to happen quite often so we want additional debug output here.
                     try
                     {
@@ -222,7 +222,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _outputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
-                    var serializedValue = node.GetData($"output_literal_value.{i}");
+                    var serializedValue = node.GetDataString($"output_literal_value.{i}");
                     // broken literals still seem to happen quite often so we want additional debug output here.
                     try
                     {
@@ -337,7 +337,7 @@ namespace OpenScadGraphEditor.Nodes
             return renderModifier;
         }
 
-        protected string RenderInput(ScadGraph context, int index)
+        protected internal string RenderInput(ScadGraph context, int index)
         {
             return RenderPort(context, PortId.Input(index));
         }

@@ -45,12 +45,12 @@ namespace OpenScadGraphEditor.Nodes.Echo
             InputPorts
                 .Clear();
             InputPorts
-                .Flow();
+                .Geometry();
 
             OutputPorts
                 .Clear();
             OutputPorts
-                .Flow();
+                .Geometry();
 
             for (var i = 0; i < InputCount; i++)
             {

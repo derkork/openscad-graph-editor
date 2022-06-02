@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -25,8 +26,6 @@ namespace OpenScadGraphEditor.Nodes
             switch (portId.Port)
             {
                 case 0 when portId.IsInput:
-                    return "Input flow";
-                case 1 when portId.IsInput:
                     return _description.ReturnValueDescription;
                 default:
                     return "";
@@ -48,13 +47,13 @@ namespace OpenScadGraphEditor.Nodes
 
         public IEnumerable<PortId> GetPortsReferringToReturnValue()
         {
-            return new[] {PortId.Input(1)};
+            return new[] {PortId.Input(0)};
         }
 
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            _description = referenceResolver.ResolveFunctionReference(node.GetData("function_description_id"));
+            _description = referenceResolver.ResolveFunctionReference(node.GetDataString("function_description_id"));
             SetupPorts(_description);
             base.RestorePortDefinitions(node, referenceResolver);
         }
@@ -68,14 +67,12 @@ namespace OpenScadGraphEditor.Nodes
             _description = (FunctionDescription) description;
 
             InputPorts
-                .Flow()
                 .OfType(_description.ReturnTypeHint, "Result");
         }
 
         public override string Render(ScadGraph context, int portIndex)
         {
-            var input = RenderInput(context, 1);
-            return input.Length == 0 ? "undef" : input;
+            return RenderInput(context, 0).OrUndef();
         }
     }
 }

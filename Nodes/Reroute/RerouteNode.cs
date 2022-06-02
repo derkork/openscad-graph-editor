@@ -63,7 +63,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public override string GetPortDocumentation(PortId portId)
         {
-            if (GetPortType(portId) == PortType.Flow)
+            if (GetPortType(portId) == PortType.Geometry)
             {
                 if (portId.IsInput)
                 {

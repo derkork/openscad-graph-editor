@@ -16,11 +16,11 @@ namespace OpenScadGraphEditor.Nodes
         {
             InputPorts
                 .Boolean("Condition")
-                .Flow("True")
-                .Flow("False");
+                .Geometry("True")
+                .Geometry("False");
 
             OutputPorts
-                .Flow();
+                .Geometry();
         }
 
         public override string GetPortDocumentation(PortId portId)

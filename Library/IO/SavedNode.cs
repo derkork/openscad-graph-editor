@@ -21,7 +21,7 @@ namespace OpenScadGraphEditor.Library.IO
         [Export]
         public Dictionary<string, string> StoredData = new Dictionary<string, string>();
 
-        public string GetData(string key, string defaultValue = "")
+        public string GetDataString(string key, string defaultValue = "")
         {
             return StoredData.TryGetValue(key, out var result) ? result : defaultValue;
         }

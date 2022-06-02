@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
     {
         public override string Title => "Increase Loop Nest Level";
         public override int Order => 0;
-        public override bool IsApplicableToNode => Node is ForLoop;
+        public override bool IsApplicableToNode => Node is ForLoopStart;
 
         public IncreaseLoopNestLevelRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
@@ -18,19 +18,8 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         
         public override void PerformRefactoring(RefactoringContext context)
         {
-            var node = (ForLoop) Node;
-            // when increasing nest level, we need to fix the connection to the "After" port, as it moves one port down.
-            var afterPort = node.NestLevel + 1;
-
+            var node = (ForLoopStart) Node;
             node.IncreaseNestLevel();
-            
-            var existingConnection = Holder.GetAllConnections().FirstOrDefault(it => it.IsFrom(node, afterPort));
-            if (existingConnection != null)
-            {
-                Holder.RemoveConnection(existingConnection);
-                Holder.AddConnection(existingConnection.From.Id, existingConnection.FromPort +1,
-                    existingConnection.To.Id, existingConnection.ToPort);
-            }
         }
     }
 }

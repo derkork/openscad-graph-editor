@@ -24,6 +24,13 @@ namespace OpenScadGraphEditor.Refactorings
                 return;
             }
 
+            if (!Holder.TryById(Node.Id, out _))
+            {
+                // already deleted, nothing to do
+                return;
+            }
+            
+            
             var connections = Holder.GetAllConnections()
                 .Where(it => it.InvolvesNode(Node))
                 .ToList();
@@ -49,6 +56,13 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     context.PerformRefactoring(new DisableChildrenRefactoring(moduleDescription));
                 }
+            }
+            
+            // if the node is bound to another node and the other node still exists, delete the other node as well.
+            if (Node is IAmBoundToOtherNode boundToOtherNode &&
+                Holder.TryById(boundToOtherNode.OtherNodeId, out var otherNode))
+            {
+                context.PerformRefactoring(new DeleteNodeRefactoring(Holder, otherNode));
             }
         }
     }

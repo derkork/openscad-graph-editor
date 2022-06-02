@@ -9,6 +9,9 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.ForComprehension;
+using OpenScadGraphEditor.Nodes.ForLoop;
+using OpenScadGraphEditor.Nodes.ListComprehension;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -479,7 +482,58 @@ namespace OpenScadGraphEditor
                     AddComment
                 )
             );
+            
+            // add an entry for creating a for loop
+            var loopDialogEntry = new ForLoopAddDialogEntry
+            {
+                Action = AddForLoop
+            };
+            _addDialogEntries.Add(loopDialogEntry);
+
+            // add an entry for creating a for comprehension
+            var comprehensionDialogEntry = new ForComprehensionAddDialogEntry()
+            {
+                Action = AddForComprehension
+            };
+            _addDialogEntries.Add(comprehensionDialogEntry);
         }
+
+        private void AddForLoop(RequestContext context)
+        {
+            var loopStart = NodeFactory.Build<ForLoopStart>();
+            var loopEnd = NodeFactory.Build<ForLoopEnd>();
+            loopStart.Offset = context.Position;
+            loopEnd.Offset = context.Position + new Vector2(400, 0);
+            loopStart.OtherNodeId = loopEnd.Id;
+            loopEnd.OtherNodeId = loopStart.Id;
+            context.TryGetNodeAndPort(out var otherNode, out var otherPort);
+
+            var refactorings = new List<Refactoring>
+            {
+                new AddNodeRefactoring(context.Source, loopStart, otherNode, otherPort),
+                new AddNodeRefactoring(context.Source, loopEnd, null, PortId.None)
+            };
+            PerformRefactorings("Add node", refactorings);
+        }
+
+        private void AddForComprehension(RequestContext context)
+        {
+            var comprehensionStart = NodeFactory.Build<ForComprehensionStart>();
+            var comprehensionEnd = NodeFactory.Build<ForComprehensionEnd>();
+            comprehensionStart.Offset = context.Position;
+            comprehensionEnd.Offset = context.Position + new Vector2(400, 0);
+            comprehensionStart.OtherNodeId = comprehensionEnd.Id;
+            comprehensionEnd.OtherNodeId = comprehensionStart.Id;
+            context.TryGetNodeAndPort(out var otherNode, out var otherPort);
+
+            var refactorings = new List<Refactoring>
+            {
+                new AddNodeRefactoring(context.Source, comprehensionStart, otherNode, otherPort),
+                new AddNodeRefactoring(context.Source, comprehensionEnd, null, PortId.None)
+            };
+            PerformRefactorings("Add node", refactorings);
+        }
+
 
         private void AddComment(RequestContext context, NodeBasedEntry entry)
         {

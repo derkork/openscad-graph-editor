@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Array("Selection");
 
             OutputPorts
-                .Flow();
+                .Geometry();
         }
 
         public override string GetPortDocumentation(PortId portId)
