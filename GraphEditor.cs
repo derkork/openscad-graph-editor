@@ -55,7 +55,7 @@ namespace OpenScadGraphEditor
         private TabContainer _tabContainer;
         private ScadProject _currentProject;
         private HistoryStack _currentHistoryStack;
-        private GlobalLibrary _rootResolver;
+        private BuiltInLibrary _rootResolver;
         private InvokableRefactorDialog _invokableRefactorDialog;
         private VariableRefactorDialog _variableRefactorDialog;
         private NodeColorDialog _nodeColorDialog;
@@ -88,7 +88,7 @@ namespace OpenScadGraphEditor
             
             OS.LowProcessorUsageMode = true;
             
-            _rootResolver = new GlobalLibrary();
+            _rootResolver = new BuiltInLibrary();
 
             _tabContainer = this.WithName<TabContainer>("TabContainer");
 
@@ -384,56 +384,11 @@ namespace OpenScadGraphEditor
 
             _addDialogEntries.Clear();
 
-            _addDialogEntries.AddRange(
-                BuiltIns.LanguageLevelNodes
-                    .Select(it => new NodeBasedEntry(
-                        Resources.ScadBuiltinIcon,
-                        () => NodeFactory.Build(it),
-                        AddNode
-                    ))
-            );
-
-            _addDialogEntries.AddRange(
-                BuiltIns.Functions
-                    .Select(it => new NodeBasedEntry(
-                        Resources.FunctionIcon,
-                        () => NodeFactory.Build<FunctionInvocation>(it),
-                        AddNode
-                    ))
-            );
-
-            _addDialogEntries.AddRange(
-                BuiltIns.Modules
-                    .Select(it => new NodeBasedEntry(
-                        Resources.ModuleIcon,
-                        () => NodeFactory.Build<ModuleInvocation>(it),
-                        AddNode
-                    )));
-
-
-            // also add entries for functions and modules defined in the project
-            _addDialogEntries.AddRange(
-                _currentProject.Functions
-                    .Select(it => new NodeBasedEntry(
-                        Resources.FunctionIcon,
-                        () => NodeFactory.Build<FunctionInvocation>(it.Description),
-                        AddNode
-                    ))
-            );
-
-            _addDialogEntries.AddRange(
-                _currentProject.Modules
-                    .Select(it => new NodeBasedEntry(
-                        Resources.ModuleIcon,
-                        () => NodeFactory.Build<ModuleInvocation>(it.Description),
-                        AddNode
-                    ))
-            );
 
             // add getter and setters for all variables
             _addDialogEntries.AddRange(
                 _currentProject.Variables
-                    .Select(it => new NodeBasedEntry(
+                    .Select(it => new SingleNodeBasedEntry(
                         Resources.VariableIcon,
                         () => NodeFactory.Build<SetVariable>(it),
                         AddNode
@@ -442,7 +397,7 @@ namespace OpenScadGraphEditor
 
             _addDialogEntries.AddRange(
                 _currentProject.Variables
-                    .Select(it => new NodeBasedEntry(
+                    .Select(it => new SingleNodeBasedEntry(
                         Resources.VariableIcon,
                         () => NodeFactory.Build<GetVariable>(it),
                         AddNode
@@ -450,33 +405,10 @@ namespace OpenScadGraphEditor
             );
 
 
-            // add call entries for all externally referenced functions and modules
-            foreach (var reference in _currentProject.ExternalReferences)
-            {
-                _addDialogEntries.AddRange(
-                    reference.Functions
-                        .Select(it => new NodeBasedEntry(
-                                Resources.FunctionIcon,
-                                () => NodeFactory.Build<FunctionInvocation>(it),
-                                AddNode
-                            )
-                        )
-                );
-
-                _addDialogEntries.AddRange(
-                    reference.Modules
-                        .Select(it => new NodeBasedEntry(
-                                Resources.ModuleIcon,
-                                () => NodeFactory.Build<ModuleInvocation>(it),
-                                AddNode
-                            )
-                        )
-                );
-            }
 
             // add an entry for creating a comment
             _addDialogEntries.Add(
-                new NodeBasedEntry(
+                new SingleNodeBasedEntry(
                     Resources.ScadBuiltinIcon,
                     NodeFactory.Build<Comment>,
                     AddComment
@@ -535,7 +467,7 @@ namespace OpenScadGraphEditor
         }
 
 
-        private void AddComment(RequestContext context, NodeBasedEntry entry)
+        private void AddComment(RequestContext context, SingleNodeBasedEntry entry)
         {
             _commentEditingDialog.Open(RequestContext.ForPosition(context.Source, context.Position));
         }
@@ -562,11 +494,6 @@ namespace OpenScadGraphEditor
             _importDialog.OpenForNewImport(_currentFile);
         }
 
-
-        private void AddNode(RequestContext context, NodeBasedEntry entry)
-        {
-            AddNode(context, entry.CreateNode());
-        }
 
         private void AddNode(RequestContext context, ScadNode node)
         {
@@ -1296,81 +1223,6 @@ namespace OpenScadGraphEditor
             var type = invokableDescription is FunctionDescription ? "function" : "module";
             _usageDialog.Open($"Usages of {type} {invokableDescription.Name}", usagePoints);
             _usageButton.Show();
-        }
-    }
-
-
-    class NodeBasedEntry : IAddDialogEntry
-    {
-        private readonly ScadNode _template;
-        private readonly Func<ScadNode> _factory;
-        private readonly Action<RequestContext, NodeBasedEntry> _action;
-
-        public string Title => _template.NodeTitle;
-        public string Keywords => _template.NodeDescription;
-        public Action<RequestContext> Action => Select;
-
-        private void Select(RequestContext obj)
-        {
-            _action(obj, this);
-        }
-
-        public Texture Icon { get; }
-
-        public ScadNode CreateNode() => _factory();
-
-        public NodeBasedEntry(Texture icon, Func<ScadNode> factory, Action<RequestContext, NodeBasedEntry> action)
-        {
-            _factory = factory;
-            _template = _factory();
-            _action = action;
-            Icon = icon;
-        }
-
-        public EntryFittingDecision CanAdd(RequestContext context)
-        {
-            if (!context.Source.Description.CanUse(_template))
-            {
-                // if the node is not allowed to be used here, we can't use it
-                return EntryFittingDecision.Veto;
-            }
-
-            // TODO: this can also be simplified if we use PortIds all the way same as in AddNodeRefactoring
-            if (context.TryGetNodeAndPort(out var contextNode, out var contextPort))
-            {
-                // if this came from a node left of us, check if we have a matching input port
-                if (contextPort.IsOutput)
-                {
-                    for (var i = 0; i < _template.InputPortCount; i++)
-                    {
-                        var connection = new ScadConnection(context.Source, contextNode, contextPort.Port, _template,
-                            i);
-                        if (ConnectionRules.CanConnect(connection).Decision ==
-                            ConnectionRules.OperationRuleDecision.Allow)
-                        {
-                            return EntryFittingDecision.Fits;
-                        }
-                    }
-                }
-                // if this came from a node right of us, check if we have a matching output port
-                else
-                {
-                    for (var i = 0; i < _template.OutputPortCount; i++)
-                    {
-                        var connection = new ScadConnection(context.Source, _template, i, contextNode,
-                            contextPort.Port);
-                        if (ConnectionRules.CanConnect(connection).Decision ==
-                            ConnectionRules.OperationRuleDecision.Allow)
-                        {
-                            return EntryFittingDecision.Fits;
-                        }
-                    }
-                }
-            }
-
-
-            // otherwise it doesn't match, but could still be added.
-            return EntryFittingDecision.DoesNotFit;
         }
     }
 }

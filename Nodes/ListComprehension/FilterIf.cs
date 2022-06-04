@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Nodes.ConstructVector;
 
 namespace OpenScadGraphEditor.Nodes.ListComprehension
 {
-    public class IfElse : ScadNode, IAmAListComprehensionExpression
+    public class FilterIf : ScadNode, IAmAListComprehensionExpression
     {
         public override string NodeTitle => "Filter If";
 
@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
             "When the evaluation of the condition returns true, the expression in the true 'port' is added to the result list else the expression in the 'false' port. Can only be used in list comprehension expressions.";
 
 
-        public IfElse()
+        public FilterIf()
         {
             InputPorts
                 .Boolean("Condition")
@@ -23,9 +23,9 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
                 .Any();
         }
         
-        static IfElse()
+        static FilterIf()
         {
-            // the output of "IfElse" can only be connected to another list comprehension or a vector construction
+            // the output of "FilterIf" can only be connected to another list comprehension or a vector construction
             ConnectionRules.AddConnectRule(
                 it => it.From is Each && !(it.To is IAmAListComprehensionExpression || it.To is IAmAVectorConstruction),
                 ConnectionRules.OperationRuleDecision.Veto

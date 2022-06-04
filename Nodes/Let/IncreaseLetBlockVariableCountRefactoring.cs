@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
 
-namespace OpenScadGraphEditor.Nodes.LetBlock
+namespace OpenScadGraphEditor.Nodes.Let
 {
     [UsedImplicitly]
     public class IncreaseLetBlockVariableCountRefactoring : UserSelectableNodeRefactoring

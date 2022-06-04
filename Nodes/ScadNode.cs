@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -45,6 +46,9 @@ namespace OpenScadGraphEditor.Nodes
             = new Dictionary<string, string>();
 
 
+        public IEnumerable<PortId> InputPortIds => InputPortCount.Range().Select(PortId.Input);
+        public IEnumerable<PortId> OutputPortIds => OutputPortCount.Range().Select(PortId.Output);
+        
         public bool TryGetLiteral(PortId port, out IScadLiteral result)
         {
             if (port.IsInput)

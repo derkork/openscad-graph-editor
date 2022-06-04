@@ -3,7 +3,7 @@ using OpenScadGraphEditor.Library.External;
 
 namespace OpenScadGraphEditor.Library
 {
-    public class GlobalLibrary : IReferenceResolver
+    public class BuiltInLibrary : IReferenceResolver
     {
         public ModuleDescription ResolveModuleReference(string id)
         {

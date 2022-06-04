@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes.LetBlock
+namespace OpenScadGraphEditor.Nodes.Let
 {
     [UsedImplicitly]
     public class DecreaseLetBlockVariableCountRefactoring : UserSelectableNodeRefactoring

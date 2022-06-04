@@ -5,66 +5,48 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes.LetBlock
+namespace OpenScadGraphEditor.Nodes.Let
 {
     [UsedImplicitly]
-    public class LetBlock : ScadNode
+    public class LetExpressionStart : ScadNode, IAmAnExpression, IAmBoundToOtherNode
     {
-        public override string NodeTitle => "Let (Block)";
-        public override string NodeDescription  => "Allows to define temporary variables";
-         public int VariableCount { get; private set; } = 1;
+        public override string NodeTitle => "Let";
+        public override string NodeDescription  => "Allows to define temporary variables inside of an expression";
+        public int VariableCount { get; private set; } = 1;
 
-        public LetBlock()
+        public string OtherNodeId { get; set; }
+
+        public LetExpressionStart()
         {
             RebuildPorts();
         }
 
+        
+        
         private void RebuildPorts()
         {
             InputPorts
                 .Clear();
-            InputPorts
-                .Geometry();
 
             OutputPorts
                 .Clear();
-            OutputPorts
-                .Geometry("Children");
 
             for (var i = 0; i < VariableCount; i++)
             {
                 InputPorts.Any();
                 OutputPorts.OfType(PortType.Any, literalType: LiteralType.Name, autoSetLiteralWhenPortIsDisconnected: true);
             }
-
-            OutputPorts
-                .Geometry("After");
         }
 
         public override string GetPortDocumentation(PortId portId)
         {
             if (portId.IsInput)
             {
-                if (portId.Port == 0)
-                {
-                    return "Input flow";
-                }
                 return "An expression which is assigned to the variable.";
             }
 
             if (portId.IsOutput)
             {
-                if (portId.Port == 0)
-                {
-                    return
-                        "Output flow. The variables declared by the let block will only be available to nodes inside of this block.";
-                }
-
-                if (portId.Port == VariableCount + 1)
-                {
-                    return "Output flow.";
-                }
-
                 return "The declared variable's value.";
             }
             
@@ -111,31 +93,12 @@ namespace OpenScadGraphEditor.Nodes.LetBlock
 
         public override string Render(ScadGraph context, int portIndex)
         {
-            var builder = new StringBuilder("let(");
-            for (var i = 0; i < VariableCount; i++)
+            if (portIndex < 0 || portIndex >= VariableCount)
             {
-                var variableName = RenderExpressionOutput(context, i + 1);
-                var expression = RenderInput(context,  i + 1).OrUndef();
-                builder.Append(variableName)
-                    .Append(" = ")
-                    .Append(expression);
-                if (i + 1 < VariableCount)
-                {
-                    builder.Append(", ");
-                }
+                return "";
             }
-            builder.Append(")");
-
-            var children = RenderOutput(context, 0);
-            var next = RenderOutput(context, 1+VariableCount);
-
-            return $"{builder}{children.AsBlock()}\n{next}";
-        }
-
-        public string RenderExpressionOutput(ScadGraph context, int port)
-        {
-            GdAssert.That(port > 0 && port <= VariableCount, "port out of range");
-            return RenderOutput(context, port).OrDefault(Id.UniqueStableVariableName(port - 1));
+            
+            return RenderOutput(context, portIndex).OrDefault(Id.UniqueStableVariableName(portIndex - 1));
         }
     }
 }
