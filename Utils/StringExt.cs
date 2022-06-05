@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Godot;
+using GodotExt;
 
 namespace OpenScadGraphEditor.Utils
 {
@@ -60,7 +61,7 @@ namespace OpenScadGraphEditor.Utils
         
         public static string UniqueStableVariableName(this string id, int index)
         {
-            
+            GdAssert.That(index >= 0, "index must be >= 0");
             return $"var{index}__{Regex.Replace(Convert.ToBase64String(Guid.Parse(id).ToByteArray()), "[/+=]", "")}";
         }
         

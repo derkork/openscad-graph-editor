@@ -49,7 +49,7 @@ namespace OpenScadGraphEditor.Widgets
             HintTooltip = node.NodeDescription;
             Offset = node.Offset;
 
-            if (node is IAmAnExpression && !(node is IHaveMultipleExpressionOutputs))
+            if (node is IAmAnExpression && node.OutputPortCount == 1)
             {
                 HintTooltip = node.Render(graph, 0);
             }

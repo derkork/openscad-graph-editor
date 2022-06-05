@@ -1,20 +1,25 @@
 using System.Linq;
-using System.Text;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes.Echo
+namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class Echo : ScadNode
+    public class Echo : ScadNode,  IHaveVariableInputSize
     {
         public override string NodeTitle => "Echo";
         public override string NodeDescription => "Writes one or more values to the console";
 
-        public int InputCount { get; private set; } = 1;
+        public int CurrentInputSize { get; private set; } = 1;
+        public int InputPortOffset => 0;
+        public int OutputPortOffset => 0;
+        public string AddRefactoringTitle => "Add input port";
+        public string RemoveRefactoringTitle => "Remove input port";
+        public bool OutputPortsMatchVariableInputs => false;
+
 
         public Echo()
         {
@@ -25,10 +30,6 @@ namespace OpenScadGraphEditor.Nodes.Echo
         {
             if (portId.IsInput)
             {
-                if (portId.Port == 0)
-                {
-                    return "Input flow";
-                }
                 return "A value that will be written to the console";
             }
 
@@ -44,15 +45,13 @@ namespace OpenScadGraphEditor.Nodes.Echo
         {
             InputPorts
                 .Clear();
-            InputPorts
-                .Geometry();
 
             OutputPorts
                 .Clear();
             OutputPorts
                 .Geometry();
 
-            for (var i = 0; i < InputCount; i++)
+            for (var i = 0; i < CurrentInputSize; i++)
             {
                 InputPorts.Any($"Input {i + 1}");
             }
@@ -62,9 +61,9 @@ namespace OpenScadGraphEditor.Nodes.Echo
         /// <summary>
         /// Adds a new input. The caller is responsible for fixing up port connections.
         /// </summary>
-        public void AddInput()
+        public void AddVariableInputPort()
         {
-            InputCount += 1;
+            CurrentInputSize += 1;
             RebuildPorts();
             // since we have no literals here, we can skip re-building port literals
         }
@@ -72,23 +71,23 @@ namespace OpenScadGraphEditor.Nodes.Echo
         /// <summary>
         /// Removes an input. The caller is responsible for fixing up port connections.
         /// </summary>
-        public void RemoveInput()
+        public void RemoveVariableInputPort()
         {
-            GdAssert.That(InputCount > 1, "Cannot decrease nest inputs any further.");
-            InputCount -= 1;
+            GdAssert.That(CurrentInputSize > 1, "Cannot decrease nest inputs any further.");
+            CurrentInputSize -= 1;
             RebuildPorts();
         }
 
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("input_count", InputCount);
+            node.SetData("input_count", CurrentInputSize);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            InputCount = node.GetDataInt("input_count", 1);
+            CurrentInputSize = node.GetDataInt("input_count", 1);
             RebuildPorts();
             base.RestorePortDefinitions(node, referenceResolver);
         }
@@ -100,13 +99,11 @@ namespace OpenScadGraphEditor.Nodes.Echo
                 return "";
             }
             
-            var parameters = InputCount.Range()
-                .Select(it => RenderInput(context, it + 1).OrUndef())
+            var parameters = CurrentInputSize.Range()
+                .Select(it => RenderInput(context, it ).OrUndef())
                 .JoinToString(", ");
 
-            var before = RenderInput(context, 0);
-
-            return $"{before}\necho({parameters});";
+            return $"echo({parameters});";
         }
     }
 }

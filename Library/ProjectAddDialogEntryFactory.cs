@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Library
     public class ProjectAddDialogEntryFactory : IAddDialogEntryFactory
     {
         public IEnumerable<IAddDialogEntry> BuildEntries(ScadProject currentProject,
-            IRefactoringFacility refactoringFacility)
+            ICanPerformRefactorings canPerformRefactorings)
         {
             var result = new List<IAddDialogEntry>();
 
@@ -24,7 +24,7 @@ namespace OpenScadGraphEditor.Library
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.FunctionIcon,
                         () => NodeFactory.Build<FunctionInvocation>(it.Description),
-                        refactoringFacility
+                        canPerformRefactorings
                     ))
             );
 
@@ -34,7 +34,7 @@ namespace OpenScadGraphEditor.Library
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.ModuleIcon,
                         () => NodeFactory.Build<ModuleInvocation>(it.Description),
-                        refactoringFacility
+                        canPerformRefactorings
                     ))
             );
             
@@ -45,7 +45,7 @@ namespace OpenScadGraphEditor.Library
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.FunctionIcon,
                         () => NodeFactory.Build<FunctionInvocation>(it),
-                        refactoringFacility
+                        canPerformRefactorings
                     ))
             );
 
@@ -56,7 +56,7 @@ namespace OpenScadGraphEditor.Library
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.FunctionIcon,
                         () => NodeFactory.Build<ModuleInvocation>(it),
-                        refactoringFacility
+                        canPerformRefactorings
                     ))
                 );
             

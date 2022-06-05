@@ -83,14 +83,14 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
             var startNode = (ForComprehensionStart) context.ById(OtherNodeId);
 
             var builder = new StringBuilder("for(");
-            for (var i = 0; i < startNode.NestLevel; i++)
+            for (var i = 0; i < startNode.CurrentInputSize; i++)
             {
                 var loopVarName = startNode.Render(context, i);
                 var array = startNode.RenderInput(context, i).OrDefault("[]");
                 builder.Append(loopVarName)
                     .Append(" = ")
                     .Append(array);
-                if (i + 1 < startNode.NestLevel)
+                if (i + 1 < startNode.CurrentInputSize)
                 {
                     builder.Append(", ");
                 }

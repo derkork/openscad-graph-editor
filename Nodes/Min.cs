@@ -5,18 +5,24 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Utils;
 
-namespace OpenScadGraphEditor.Nodes.Min
+namespace OpenScadGraphEditor.Nodes
 {
     /// <summary>
     /// Minimum node.
     /// </summary>
     [UsedImplicitly]
-    public class Min : ScadNode, IAmAnExpression
+    public class Min : ScadNode, IAmAnExpression, IHaveVariableInputSize
     {
         public override string NodeTitle => "Min";
         public override string NodeDescription => "Returns the minimum of the input values.";
 
-        public int InputCount { get; private set; } = 1;
+        public int CurrentInputSize { get; private set; } = 1;
+
+        public int InputPortOffset => 0;
+        public int OutputPortOffset => 0;
+        public string AddRefactoringTitle => "Add input value";
+        public string RemoveRefactoringTitle => "Remove input value";
+        public bool OutputPortsMatchVariableInputs => false;
 
         public Min()
         {
@@ -34,9 +40,9 @@ namespace OpenScadGraphEditor.Nodes.Min
             OutputPorts
                 .Array();
 
-            for (var i = 0; i < InputCount; i++)
+            for (var i = 0; i < CurrentInputSize; i++)
             {
-                if (InputCount == 1)
+                if (CurrentInputSize == 1)
                 {
                     InputPorts.Any($"Input {i + 1}");
                 }
@@ -52,7 +58,7 @@ namespace OpenScadGraphEditor.Nodes.Min
         {
             if (portId.IsInput)
             {
-                if (InputCount == 1)
+                if (CurrentInputSize == 1)
                 {
                     return "A vector of numbers or a single number.";
                 }
@@ -68,43 +74,37 @@ namespace OpenScadGraphEditor.Nodes.Min
         }
         
         
-        /// <summary>
-        /// Adds a new input. The caller is responsible for fixing up port connections.
-        /// </summary>
-        public void AddInput()
+        public void AddVariableInputPort()
         {
-            InputCount += 1;
+            CurrentInputSize += 1;
             RebuildPorts();
             // since we have no literals here, we can skip re-building port literals
         }
 
-        /// <summary>
-        /// Removes an input. The caller is responsible for fixing up port connections.
-        /// </summary>
-        public void RemoveInput()
+        public void RemoveVariableInputPort()
         {
-            GdAssert.That(InputCount > 1, "Cannot decrease nest inputs any further.");
-            InputCount -= 1;
+            GdAssert.That(CurrentInputSize > 1, "Cannot decrease nest inputs any further.");
+            CurrentInputSize -= 1;
             RebuildPorts();
         }
 
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("input_count", InputCount);
+            node.SetData("input_count", CurrentInputSize);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            InputCount = node.GetDataInt("input_count", 1);
+            CurrentInputSize = node.GetDataInt("input_count", 1);
             RebuildPorts();
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
         public override string Render(ScadGraph context, int portIndex)
         {
-            var parameters = InputCount.Range()
+            var parameters = CurrentInputSize.Range()
                 .Select(it => RenderInput(context, it).OrUndef())
                 .JoinToString(", ");
 

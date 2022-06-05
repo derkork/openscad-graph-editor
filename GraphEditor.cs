@@ -9,9 +9,6 @@ using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Nodes.ForComprehension;
-using OpenScadGraphEditor.Nodes.ForLoop;
-using OpenScadGraphEditor.Nodes.ListComprehension;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -33,7 +30,7 @@ using Serilog;
 namespace OpenScadGraphEditor
 {
     [UsedImplicitly]
-    public class GraphEditor : Control
+    public class GraphEditor : Control, ICanPerformRefactorings
     {
         // TODO: this class gets _really_ big.
 
@@ -64,6 +61,13 @@ namespace OpenScadGraphEditor
         private UsageDialog _usageDialog;
         private DocumentationDialog _documentationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
+
+        private readonly List<IAddDialogEntryFactory> _addDialogEntryFactories =
+            typeof(IAddDialogEntryFactory)
+                .GetImplementors()
+                .CreateInstances<IAddDialogEntryFactory>()
+                .ToList();
+
         private ScadGraph _copyBuffer;
         private Button _consoleButton;
         private Button _usageButton;
@@ -380,93 +384,28 @@ namespace OpenScadGraphEditor
             _projectTree.Setup(new List<ProjectTreeEntry>() {new RootProjectTreeEntry(_currentProject)});
 
 
-            // Fill the Add Dialog Entries.
+            // Re-Build the list of entries for the add dialog.
 
             _addDialogEntries.Clear();
-
-
-            // add getter and setters for all variables
             _addDialogEntries.AddRange(
-                _currentProject.Variables
-                    .Select(it => new SingleNodeBasedEntry(
-                        Resources.VariableIcon,
-                        () => NodeFactory.Build<SetVariable>(it),
-                        AddNode
-                    ))
-            );
-
-            _addDialogEntries.AddRange(
-                _currentProject.Variables
-                    .Select(it => new SingleNodeBasedEntry(
-                        Resources.VariableIcon,
-                        () => NodeFactory.Build<GetVariable>(it),
-                        AddNode
-                    ))
+                _addDialogEntryFactories.SelectMany(it => it.BuildEntries(_currentProject, this))
             );
 
 
 
             // add an entry for creating a comment
-            _addDialogEntries.Add(
+            // TODO: fix this
+        /*    _addDialogEntries.Add(
                 new SingleNodeBasedEntry(
                     Resources.ScadBuiltinIcon,
                     NodeFactory.Build<Comment>,
                     AddComment
                 )
-            );
-            
-            // add an entry for creating a for loop
-            var loopDialogEntry = new ForLoopAddDialogEntry
-            {
-                Action = AddForLoop
-            };
-            _addDialogEntries.Add(loopDialogEntry);
+            ); */
 
-            // add an entry for creating a for comprehension
-            var comprehensionDialogEntry = new ForComprehensionAddDialogEntry()
-            {
-                Action = AddForComprehension
-            };
-            _addDialogEntries.Add(comprehensionDialogEntry);
         }
-
-        private void AddForLoop(RequestContext context)
-        {
-            var loopStart = NodeFactory.Build<ForLoopStart>();
-            var loopEnd = NodeFactory.Build<ForLoopEnd>();
-            loopStart.Offset = context.Position;
-            loopEnd.Offset = context.Position + new Vector2(400, 0);
-            loopStart.OtherNodeId = loopEnd.Id;
-            loopEnd.OtherNodeId = loopStart.Id;
-            context.TryGetNodeAndPort(out var otherNode, out var otherPort);
-
-            var refactorings = new List<Refactoring>
-            {
-                new AddNodeRefactoring(context.Source, loopStart, otherNode, otherPort),
-                new AddNodeRefactoring(context.Source, loopEnd, null, PortId.None)
-            };
-            PerformRefactorings("Add node", refactorings);
-        }
-
-        private void AddForComprehension(RequestContext context)
-        {
-            var comprehensionStart = NodeFactory.Build<ForComprehensionStart>();
-            var comprehensionEnd = NodeFactory.Build<ForComprehensionEnd>();
-            comprehensionStart.Offset = context.Position;
-            comprehensionEnd.Offset = context.Position + new Vector2(400, 0);
-            comprehensionStart.OtherNodeId = comprehensionEnd.Id;
-            comprehensionEnd.OtherNodeId = comprehensionStart.Id;
-            context.TryGetNodeAndPort(out var otherNode, out var otherPort);
-
-            var refactorings = new List<Refactoring>
-            {
-                new AddNodeRefactoring(context.Source, comprehensionStart, otherNode, otherPort),
-                new AddNodeRefactoring(context.Source, comprehensionEnd, null, PortId.None)
-            };
-            PerformRefactorings("Add node", refactorings);
-        }
-
-
+        
+        
         private void AddComment(RequestContext context, SingleNodeBasedEntry entry)
         {
             _commentEditingDialog.Open(RequestContext.ForPosition(context.Source, context.Position));
@@ -602,11 +541,21 @@ namespace OpenScadGraphEditor
             {
                 var copy = NodeFactory.Duplicate(node, _currentProject);
                 // make note of the id mapping, because we need this to resolve connections
-                // later
+                // and bound nodes later.
                 idMapping[node.Id] = copy.Id;
                 result.AddNode(copy);
             }
 
+            // correct the id mappings of any bound nodes
+            foreach (var node in result.GetAllNodes().Where(it => it is IAmBoundToOtherNode))
+            {
+                var partnerId = ((IAmBoundToOtherNode) node).OtherNodeId;
+                // find out which id the partner has in the copy
+                var partnerCopyId = idMapping[partnerId];
+                // and set the partner id to the copy id
+                ((IAmBoundToOtherNode) node).OtherNodeId = partnerCopyId;
+            }
+            
             //  copy all connections which are between the selected nodes
             foreach (var connection in source.GetAllConnections())
             {
@@ -616,13 +565,35 @@ namespace OpenScadGraphEditor
                         idMapping[connection.To.Id], connection.ToPort);
                 }
             }
+            
+            
 
             return result;
         }
 
         private void OnCopyRequested(ScadGraphEdit source, List<ScadNode> selection)
         {
-            _copyBuffer = MakeCopyBuffer(source.Graph, selection);
+            // when we make a copy we need to take special care about bound nodes
+            // each bound node needs to have its partner within the copy even if it was not originally selected.
+            // so we look up all bound nodes in the selection and if its partner is not in the
+            // selection we silently add it.
+
+            var correctedSelection = new List<ScadNode>(selection); 
+
+            var boundNodes = selection.Where(it => it is IAmBoundToOtherNode).ToList();
+            foreach(var boundNode in boundNodes)
+            {
+                var boundTo = (IAmBoundToOtherNode)boundNode;
+                var partner = source.Graph.ById(boundTo.OtherNodeId);
+                
+                if (!selection.Contains(partner))
+                {
+                    correctedSelection.Add(partner);
+                }
+            }
+
+            // now we can be sure that we have no bound nodes without their partner in the corrected selection.
+            _copyBuffer = MakeCopyBuffer(source.Graph, correctedSelection);
         }
 
         private void OnPasteRequested(ScadGraphEdit target, Vector2 position)
@@ -707,12 +678,12 @@ namespace OpenScadGraphEditor
             PerformRefactorings(humanReadableDescription, refactoring);
         }
 
-        private void PerformRefactorings(string description, params Refactoring[] refactorings)
+        public void PerformRefactorings(string description, params Refactoring[] refactorings)
         {
             PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
         }
 
-        private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
+        public void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
             params Action[] after)
         {
             try

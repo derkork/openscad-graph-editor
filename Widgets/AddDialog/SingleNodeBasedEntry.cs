@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     {
         private readonly ScadNode _template;
         private readonly Func<ScadNode> _factory;
-        private readonly IRefactoringFacility _refactoringFacility;
+        private readonly ICanPerformRefactorings _canPerformRefactorings;
 
         public string Title => _template.NodeTitle;
         public string Keywords => _template.NodeDescription;
@@ -20,10 +20,10 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         public Texture Icon { get; }
 
-        public SingleNodeBasedEntry(Texture icon, Func<ScadNode> factory, IRefactoringFacility refactoringFacility)
+        public SingleNodeBasedEntry(Texture icon, Func<ScadNode> factory, ICanPerformRefactorings canPerformRefactorings)
         {
             _factory = factory;
-            _refactoringFacility = refactoringFacility;
+            _canPerformRefactorings = canPerformRefactorings;
             _template = _factory();
             Icon = icon;
         }
@@ -71,7 +71,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             node.Offset = context.Position;
             context.TryGetNodeAndPort(out var otherNode, out var otherPort);
 
-            _refactoringFacility.PerformRefactorings("Add node",
+            _canPerformRefactorings.PerformRefactorings("Add node",
                 new AddNodeRefactoring(context.Source, node, otherNode, otherPort));
         }
     }

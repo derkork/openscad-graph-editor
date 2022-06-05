@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
 
@@ -9,6 +10,6 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     /// </summary>
     public interface IAddDialogEntryFactory
     {
-        IEnumerable<IAddDialogEntry> BuildEntries(ScadProject currentProject, IRefactoringFacility refactoringFacility);
+        IEnumerable<IAddDialogEntry> BuildEntries(ScadProject currentProject, ICanPerformRefactorings canPerformRefactorings);
     }
 }

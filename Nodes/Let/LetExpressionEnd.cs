@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Nodes.Let
     [UsedImplicitly]
     public class LetExpressionEnd : ScadNode, IAmAnExpression, IAmBoundToOtherNode
     {
-        public override string NodeTitle => "End Let Expression";
+        public override string NodeTitle => "End Let";
         public override string NodeDescription  => "Collects the value of the let expression and returns it.";
 
         public string OtherNodeId { get; set; }
@@ -41,13 +41,13 @@ namespace OpenScadGraphEditor.Nodes.Let
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("letExpressionStartId", OtherNodeId);
+            node.SetData("let_expression_start_id", OtherNodeId);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            OtherNodeId = node.GetDataString("letExpressionStartId");
+            OtherNodeId = node.GetDataString("let_expression_start_id");
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
@@ -61,21 +61,21 @@ namespace OpenScadGraphEditor.Nodes.Let
             var startNode = (LetExpressionStart) context.ById(OtherNodeId);
             
             var builder = new StringBuilder("let(");
-            for (var i = 0; i < startNode.VariableCount; i++)
+            for (var i = 0; i < startNode.CurrentInputSize; i++)
             {
                 var variableName = startNode.Render(context, i);
                 var expression = startNode.RenderInput(context,  i).OrUndef();
                 builder.Append(variableName)
                     .Append(" = ")
                     .Append(expression);
-                if (i + 1 < startNode.VariableCount)
+                if (i + 1 < startNode.CurrentInputSize)
                 {
                     builder.Append(", ");
                 }
             }
             builder.Append(")");
 
-            var resultExpression = RenderInput(context, 0);
+            var resultExpression = RenderInput(context, 0).OrUndef();
 
             return $"{builder} {resultExpression}";
         }

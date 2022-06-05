@@ -1,9 +1,11 @@
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes.ConstructVector;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes.ListComprehension
 {
+    [UsedImplicitly]
     public class Each : ScadNode, IAmAListComprehensionExpression
 
     {

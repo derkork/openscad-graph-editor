@@ -3,7 +3,6 @@ using System.Reflection;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {

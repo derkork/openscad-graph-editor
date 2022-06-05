@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -25,12 +24,8 @@ namespace OpenScadGraphEditor.Refactorings
         }
         static UserSelectableNodeRefactoring()
         {
-            Factories = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => typeof(IUserSelectableRefactoringFactory).IsAssignableFrom(t) && !t.IsAbstract)
-                .Select(Activator.CreateInstance)
-                .Cast<IUserSelectableRefactoringFactory>()
-                .ToList();
+            Factories = typeof(IUserSelectableRefactoringFactory).GetImplementors()
+                .CreateInstances<IUserSelectableRefactoringFactory>().ToList();
         }
         
         public static IEnumerable<UserSelectableNodeRefactoring> GetApplicable(ScadGraph graph, ScadNode node)

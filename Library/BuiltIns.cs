@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using GodotExt;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -20,15 +21,13 @@ namespace OpenScadGraphEditor.Library
 
         static BuiltIns()
         {
-            LanguageLevelNodes = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => typeof(ScadNode).IsAssignableFrom(t) && !t.IsAbstract)
+            LanguageLevelNodes = typeof(ScadNode).GetImplementors()
                 // only nodes which can be directly created
                 // TODO: make a proper marker interface for language level nodes. 
                 .Where(it => !typeof(ICannotBeCreated).IsAssignableFrom(it))
                 .ToList();
 
-
+            
             Modules = new List<ModuleDescription>()
             {
                 // 2D Modules

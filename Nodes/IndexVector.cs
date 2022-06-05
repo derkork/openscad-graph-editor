@@ -3,30 +3,27 @@ using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 
-namespace OpenScadGraphEditor.Nodes.IndexVector
+namespace OpenScadGraphEditor.Nodes
 {
     /// <summary>
     /// Node which allows to access vector/string indices.
     /// </summary>
     [UsedImplicitly]
-    public class IndexVector : ScadNode, IAmAnExpression
+    public class IndexVector : ScadNode, IAmAnExpression, IHaveVariableInputSize
     {
         public override string NodeTitle => "Index Vector/String";
         public override string NodeDescription => "Returns the value of the vector/string at the given index";
 
-        public int IndexPortCount { get; private set; } = 1;
+        public int CurrentInputSize { get; private set; } = 1;
 
-        public override string Render(ScadGraph context, int portIndex)
-        {
-            if (portIndex < 0 || portIndex >= IndexPortCount)
-            {
-                return "";
-            }
-            var vector = RenderInput(context, 0);
-            var index = RenderInput(context, portIndex+1);
-            return $"{vector}[{index}]";
-        }
-        
+        // TODO: make outputs and inputs line up
+        public int InputPortOffset => 1;
+        public int OutputPortOffset => 0;
+        public string AddRefactoringTitle => "Add index";
+        public string RemoveRefactoringTitle => "Remove index";
+        public bool OutputPortsMatchVariableInputs => true;
+
+
         public IndexVector()
         {
             RebuildPorts();
@@ -34,36 +31,36 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("ports", IndexPortCount);
+            node.SetData("ports", CurrentInputSize);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            IndexPortCount = node.GetDataInt("ports", 1);
+            CurrentInputSize = node.GetDataInt("ports", 1);
             RebuildPorts();
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public void IncreasePorts()
+        public void AddVariableInputPort()
         {
-            IndexPortCount++;
+            CurrentInputSize++;
             RebuildPorts();
             
             // build an input port literal
-            BuildPortLiteral(PortId.Input(IndexPortCount));
+            BuildPortLiteral(PortId.Input(CurrentInputSize));
             // build an output port literal
-            BuildPortLiteral(PortId.Output(IndexPortCount-1));
+            BuildPortLiteral(PortId.Output(CurrentInputSize-1));
         }
 
-        public void DecreasePorts()
+        public void RemoveVariableInputPort()
         {
-            GdAssert.That(IndexPortCount > 1, "Cannot decrease ports below 1.");
-            DropPortLiteral(PortId.Input(IndexPortCount));
-            var idx = IndexPortCount - 1;
+            GdAssert.That(CurrentInputSize > 1, "Cannot decrease ports below 1.");
+            DropPortLiteral(PortId.Input(CurrentInputSize));
+            var idx = CurrentInputSize - 1;
             DropPortLiteral(PortId.Output(idx));
 
-            IndexPortCount--;
+            CurrentInputSize--;
             RebuildPorts();
         }
 
@@ -75,7 +72,7 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
             InputPorts
                 .Any("Vector/String");
             
-            for (var i = 0; i < IndexPortCount; i++)
+            for (var i = 0; i < CurrentInputSize; i++)
             {
                 InputPorts
                     .Number($"Index {i + 1}");
@@ -102,7 +99,19 @@ namespace OpenScadGraphEditor.Nodes.IndexVector
 
             return "";
         }
+        
+        
+        public override string Render(ScadGraph context, int portIndex)
+        {
+            if (portIndex < 0 || portIndex >= CurrentInputSize)
+            {
+                return "";
+            }
+            var vector = RenderInput(context, 0);
+            var index = RenderInput(context, portIndex+1);
+            return $"{vector}[{index}]";
+        }
 
-
+        
     }
 }

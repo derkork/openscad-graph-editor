@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OpenScadGraphEditor.Refactorings
 {
-    public interface IRefactoringFacility
+    public interface ICanPerformRefactorings
     {
         /// <summary>
         /// Performs the given refactorings.
