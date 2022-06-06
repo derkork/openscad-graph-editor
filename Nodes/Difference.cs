@@ -15,11 +15,11 @@ namespace OpenScadGraphEditor.Nodes
         public Difference()
         {
             InputPorts
-                .Geometry()
+                .Geometry("Add")
                 .Geometry("Subtract");
 
             OutputPorts
-                .Geometry("Flow");
+                .Geometry();
         }
 
         public override string GetPortDocumentation(PortId portId)

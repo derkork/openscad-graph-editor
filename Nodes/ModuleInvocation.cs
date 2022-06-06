@@ -19,9 +19,9 @@ namespace OpenScadGraphEditor.Nodes
         {
             if (portId.IsInput)
             {
-                if (_description.SupportsChildren && portId.Port == _description.Parameters.Count)
+                if (_description.SupportsChildren && portId.Port == 0)
                 {
-                    return "Input. Everything connected here will be affected by this module.";
+                    return "Everything connected here will be affected by this module.";
                 }
 
                 return _description.Parameters[portId.Port - 1].Description;
@@ -67,6 +67,12 @@ namespace OpenScadGraphEditor.Nodes
             InputPorts.Clear();
             OutputPorts.Clear();
 
+            if (_description.SupportsChildren)
+            {
+                InputPorts
+                    .Geometry();
+            }
+
             foreach (var parameter in description.Parameters)
             {
                 var type = parameter.TypeHint;
@@ -74,11 +80,6 @@ namespace OpenScadGraphEditor.Nodes
                     .OfType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional);
             }
 
-            if (_description.SupportsChildren)
-            {
-                InputPorts
-                    .Geometry("Children");
-            }
 
             OutputPorts
                 .Geometry();
@@ -91,7 +92,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Select(it =>
                 {
                     var parameterDescription = _description.Parameters[it];
-                    var value = RenderInput(context, it);
+                    var value = RenderInput(context, it+1);
                     return value.Empty() && parameterDescription.IsOptional
                         ? ""
                         : $"{parameterDescription.Name} = {value.OrUndef()}";
@@ -100,8 +101,8 @@ namespace OpenScadGraphEditor.Nodes
                 .JoinToString(", ");
        
             var result = $"{_description.Name}({parameters})";
-            var childNodes = _description.SupportsChildren ? RenderInput(context, _description.Parameters.Count) : "";
-            if (childNodes.Length > 0)
+            var childNodes = _description.SupportsChildren ? RenderInput(context, 0) : "";
+            if (!childNodes.Empty())
             {
                 return result + childNodes.AsBlock();
             }

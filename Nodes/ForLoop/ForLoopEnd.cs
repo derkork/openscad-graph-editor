@@ -18,7 +18,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         public ForLoopEnd()
         {
             InputPorts
-                .Geometry("Loop geometry");
+                .Geometry();
 
             OutputPorts
                 .Geometry();

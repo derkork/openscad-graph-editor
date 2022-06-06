@@ -1,13 +1,14 @@
 using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Nodes.ConstructVector;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class ConstructVector3 : ScadNode, IAmAnExpression, IHaveCustomWidget, IHaveNodeBackground
+    public class ConstructVector3 : ScadNode, IAmAnExpression, IHaveCustomWidget, IHaveNodeBackground, IAmAVectorConstruction
     {
         public override string NodeTitle => "Construct Vector3";
         public override string NodeDescription => "Constructs a Vector3 from its components.";

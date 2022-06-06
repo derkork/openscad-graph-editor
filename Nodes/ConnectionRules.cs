@@ -173,7 +173,7 @@ namespace OpenScadGraphEditor.Nodes
             out ScadConnection connection)
         {
             var sourcePorts = filter.IsOutput ? new[] {filter} : from.OutputPortIds;
-            var destinationPorts = (filter.IsOutput ? new[] {filter} : to.InputPortIds).ToList();
+            var destinationPorts = (filter.IsInput ? new[] {filter} : to.InputPortIds).ToList();
             
             foreach (var sourcePort in sourcePorts)
             {

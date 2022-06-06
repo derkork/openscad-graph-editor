@@ -1,7 +1,7 @@
 using Godot;
 using GodotExt;
 
-namespace OpenScadGraphEditor.Nodes
+namespace OpenScadGraphEditor.Widgets
 {
     /// <summary>
     /// A line edit that selects all text when focused
