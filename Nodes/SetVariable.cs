@@ -1,6 +1,7 @@
 using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -56,7 +57,7 @@ namespace OpenScadGraphEditor.Nodes
                 return "";
             }
             
-            var value = RenderInput(context, 1);
+            var value = RenderInput(context, 1).OrUndef();
             var before = RenderInput(context, 0);
             return $"{before}\n{VariableDescription.Name} = {value};";
         }
