@@ -1,6 +1,7 @@
 <Project Sdk="Godot.NET.Sdk/3.3.0">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.6">
@@ -9,13 +10,32 @@
     </PackageReference>
     <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
     <PackageReference Include="GodotExt" Version="0.0.1" />
-    <PackageReference Include="JetBrains.Annotations" Version="2021.3.0" />
+    <PackageReference Include="GodotTestDriver" Version="0.0.1" />
+    <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="addons\GodotXUnit\.gitignore" />
+    <Content Include="addons\GodotXUnit\assets\check.png" />
+    <Content Include="addons\GodotXUnit\assets\check.png.import" />
+    <Content Include="addons\GodotXUnit\assets\error.png" />
+    <Content Include="addons\GodotXUnit\assets\error.png.import" />
+    <Content Include="addons\GodotXUnit\assets\running.png" />
+    <Content Include="addons\GodotXUnit\assets\running.png.import" />
+    <Content Include="addons\GodotXUnit\assets\warn.png" />
+    <Content Include="addons\GodotXUnit\assets\warn.png.import" />
+    <Content Include="addons\GodotXUnit\Directory.Build.props" />
+    <Content Include="addons\GodotXUnit\LICENSE" />
+    <Content Include="addons\GodotXUnit\plugin.cfg" />
+    <Content Include="addons\GodotXUnit\README" />
+    <Content Include="addons\GodotXUnit\XUnitDock.tscn" />
+    <Content Include="addons\GodotXUnit\_work\.gdignore" />
     <Content Include="LICENSE" />
     <Content Include="README.md" />
   </ItemGroup>
@@ -30,6 +50,9 @@
     <Compile Remove="Library\ICanBeRendered.cs" />
     <Compile Remove="Library\IScadGraph.cs" />
     <Compile Remove="Nodes\MainEntryPoint.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="addons" />
   </ItemGroup>
 
   <PropertyGroup>

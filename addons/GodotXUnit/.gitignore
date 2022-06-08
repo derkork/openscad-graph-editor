@@ -1,0 +1,4 @@
+GodotXUnitApi/bin/
+GodotXUnitApi/obj/
+_work
+!_work/.gdignore

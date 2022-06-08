@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!--See https://github.com/dotnet/msbuild/issues/2245-->
+    <BaseIntermediateOutputPath>../../../.mono/build/obj/$(Configuration)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>
