@@ -45,7 +45,7 @@ namespace GodotXUnitApi
             Assert.True(Engine.IsInPhysicsFrame());
         }
      */
-    [XunitTestCaseDiscoverer("GodotXUnitApi.Internal.GodotFactDiscoverer", "GodotXUnitApi")]
+    [XunitTestCaseDiscoverer("GodotXUnitApi.Internal.GodotFactDiscoverer", "OpenScadGraphEditor")]
     // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     public class GodotFactAttribute : FactAttribute
     {

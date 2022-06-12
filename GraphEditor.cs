@@ -78,6 +78,11 @@ namespace OpenScadGraphEditor
         private readonly Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
 
         private readonly Configuration _configuration = new Configuration();
+        
+        /// <summary>
+        /// We use this for testing to see if we get the intended results.
+        /// </summary>
+        public ScadProject CurrentProject => _currentProject;
 
         public override void _Ready()
         {
