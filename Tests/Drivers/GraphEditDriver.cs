@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Tests.Drivers
 {
     public class GraphEditDriver : ControlDriver<ScadGraphEdit>
     {
-        public GraphEditDriver(Func<ScadGraphEdit> producer) : base(producer)
+        public GraphEditDriver(Func<ScadGraphEdit> producer, string description = "") : base(producer, description)
         {
         }
 
@@ -41,29 +41,15 @@ namespace OpenScadGraphEditor.Tests.Drivers
 
             return graphEdit.GetConnectionList().Cast<Dictionary>()
                 .Any(connection =>
-                    (string) connection["from"] == fromRoot.Name 
-                    && (int) connection["from_port"] == fromPort.PortIndex 
-                    && (string) connection["to"] == toRoot.Name 
+                    (string) connection["from"] == fromRoot.Name
+                    && (int) connection["from_port"] == fromPort.PortIndex
+                    && (string) connection["to"] == toRoot.Name
                     && (int) connection["to_port"] == toPort.PortIndex);
         }
 
-        public IEnumerable<GraphNodeDriver> Nodes
-        {
-            get
-            {
-                var root = Root;
-                if (root == null)
-                {
-                    yield break;
-                }
-
-                var childNodes = root.GetChildNodes<GraphNode>().ToList();
-                foreach (var nodePath in childNodes.Select(childNode => childNode.GetPath()))
-                {
-                    yield return new GraphNodeDriver(() => Root?.GetNode(nodePath) as GraphNode);
-                }
-
-            }
-        }
+        public IEnumerable<GraphNodeDriver> Nodes =>
+            BuildDrivers(root => root.GetChildNodes<GraphNode>(),
+                producer => new GraphNodeDriver(producer, Description + " -> Graph Node ")
+            );
     }
 }

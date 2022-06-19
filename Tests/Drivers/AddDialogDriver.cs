@@ -8,10 +8,10 @@ namespace OpenScadGraphEditor.Tests.Drivers
 {
     public class AddDialogDriver : ControlDriver<AddDialog>
     {
-        public AddDialogDriver(Func<AddDialog> producer) : base(producer)
+        public AddDialogDriver(Func<AddDialog> producer, string description = "") : base(producer, description)
         {
-            SearchField = new LineEditDriver(() => Root?.WithName<LineEdit>("LineEdit"));
-            ItemList = new ItemListDriver(() => Root?.WithName<ItemList>("ItemList"));
+            SearchField = new LineEditDriver(() => Root?.WithNameOrNull<LineEdit>("LineEdit"), Description + " -> Search Field");
+            ItemList = new ItemListDriver(() => Root?.WithNameOrNull<ItemList>("ItemList"), Description + " -> Item List");
         }
 
         public LineEditDriver SearchField { get; }

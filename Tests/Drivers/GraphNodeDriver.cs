@@ -9,14 +9,16 @@ namespace OpenScadGraphEditor.Tests.Drivers
 {
     public class GraphNodeDriver : ControlDriver<GraphNode>
     {
-        public GraphNodeDriver(Func<GraphNode> producer) : base(producer)
+        public GraphNodeDriver(Func<GraphNode> producer, string description = "") : base(producer, description)
         {
         }
 
-        public string Title => Root?.Title;
-        public Vector2 Offset => Root?.Offset ?? Vector2.Inf;
-        
-        public bool Selected => Root?.Selected ?? false;
+        public string Title => PresentRoot.Title;
+        public Vector2 Offset => PresentRoot.Offset;
+        public bool Selected => PresentRoot.Selected;
+
+        public int InputPortCount => PresentRoot.GetConnectionInputCount();
+        public int OutputPortCount => PresentRoot.GetConnectionOutputCount();
 
         /// <summary>
         /// Drags the node by the given amount of pixels.

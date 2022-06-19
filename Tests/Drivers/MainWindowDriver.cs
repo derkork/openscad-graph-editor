@@ -3,38 +3,62 @@ using System.Threading.Tasks;
 using Godot;
 using GodotExt;
 using GodotTestDriver.Drivers;
-using GodotTestDriver.Util;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.IconButton;
+using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
+using Serilog;
 
 namespace OpenScadGraphEditor.Tests.Drivers
 {
     public class MainWindowDriver : ControlDriver<GraphEditor>
     {
-        public MainWindowDriver(Func<GraphEditor> producer) : base(producer)
+        public GraphEditDriver GraphEditor { get; }
+        public AddDialogDriver AddDialog { get; }
+        public ButtonDriver AddModuleButton { get; }
+        public InvokableRefactorDialogDriver InvokableRefactorDialog { get; }
+        
+        public TabContainerDriver TabContainer { get; }
+
+        public MainWindowDriver(Func<GraphEditor> producer) : base(producer, "Main Window")
         {
             GraphEditor = new GraphEditDriver(() =>
             {
                 // return the currently visible tab.
-                var tabContainer = Root?.WithName<TabContainer>("TabContainer");
+                var tabContainer = Root?.WithNameOrNull<TabContainer>("TabContainer");
                 if (tabContainer == null)
                 {
                     return null;
                 }
+
                 if (tabContainer.GetChildCount() <= tabContainer.CurrentTab)
                 {
                     return null;
                 }
-                return tabContainer.GetChild<ScadGraphEdit>(tabContainer.CurrentTab);
-            });
 
-            AddDialog = new AddDialogDriver(() => Root?.WithName<AddDialog>("AddDialog"));
+                return tabContainer.GetChild<ScadGraphEdit>(tabContainer.CurrentTab);
+            }, Description + " -> Graph Editor");
+
+            AddDialog = new AddDialogDriver(
+                () => Root?.WithNameOrNull<AddDialog>("AddDialog"),
+                Description + " -> Add Dialog"
+            );
+            AddModuleButton = new ButtonDriver(
+                () => Root?.WithNameOrNull<IconButton>("AddModuleButton")?.WithNameOrNull<Button>("Button"),
+                Description + " -> Add Module Button"
+            );
+            InvokableRefactorDialog = new InvokableRefactorDialogDriver(
+                () => Root?.WithNameOrNull<InvokableRefactorDialog>("InvokableRefactorDialog"),
+                Description + " -> Invokable Refactor Dialog"
+            );
+
+            TabContainer = new TabContainerDriver(
+                () => Root?.WithNameOrNull<TabContainer>("TabContainer"),
+                Description + " -> Tab Container"
+            );
         }
 
-        public GraphEditDriver GraphEditor { get; }
-        public AddDialogDriver AddDialog { get; }
 
-        
         public async Task RequestAddNode()
         {
             await GraphEditor.ClickCenter(ButtonList.Right);
@@ -48,7 +72,5 @@ namespace OpenScadGraphEditor.Tests.Drivers
             await Root.NextFrame();
             await Root.NextFrame();
         }
-
-
     }
 }

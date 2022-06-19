@@ -1,9 +1,9 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Widgets/InvokableRefactorDialog/InvokableRefactorDialog.cs" type="Script" id=1]
+[ext_resource path="res://Widgets/SelectOnFocusLineEdit.cs" type="Script" id=2]
 
 [node name="InvokableRefactorDialog" type="WindowDialog"]
-visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -49,6 +49,7 @@ margin_left = 141.0
 margin_right = 780.0
 margin_bottom = 45.0
 size_flags_horizontal = 3
+script = ExtResource( 2 )
 
 [node name="ReturnTypeLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 59.0
@@ -110,6 +111,7 @@ columns = 5
 margin_right = 510.0
 margin_bottom = 45.0
 size_flags_horizontal = 3
+script = ExtResource( 2 )
 
 [node name="TemplateParameterTypeHint" type="OptionButton" parent="MarginContainer/VBoxContainer/ScrollContainer/ParameterGrid"]
 margin_left = 518.0
