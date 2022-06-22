@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
     /// End part of the for-comprehension.
     /// </summary>
     [UsedImplicitly]
-    public class ForComprehensionEnd : ScadNode, IAmBoundToOtherNode, IAmAListComprehensionExpression, ICannotBeCreated
+    public class ForComprehensionEnd : ScadNode, IAmBoundToOtherNode, IAmAListComprehensionExpression
     {
         public override string NodeTitle => "End For Comprehension";
 
@@ -62,7 +62,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            OtherNodeId = node.GetDataString("comprehensionStartId", "");
+            OtherNodeId = node.GetDataString("comprehensionStartId");
             base.RestorePortDefinitions(node, referenceResolver);
         }
 

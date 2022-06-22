@@ -1,8 +1,6 @@
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using GodotExt;
 using GodotXUnitApi;
 using OpenScadGraphEditor.Tests.Drivers;
 using Xunit;
@@ -248,6 +246,50 @@ namespace OpenScadGraphEditor.Tests
             Assert.True(
                 MainWindow.GraphEditor.HasConnection(booleanAnd, Port.Output(0), moduleInvocation, Port.Input(0))
             );
+        }
+
+        [GodotFact(Frame = GodotFactFrame.Process)]
+        public async Task AddingAParameterWorks()
+        {
+            // when
+            // i add a module
+            await MainWindow.AddModuleButton.ClickCenter();
+            await MainWindow.InvokableRefactorDialog.NameEdit.Type("test_module");
+            // and i press OK
+            await MainWindow.InvokableRefactorDialog.OkButton.ClickCenter();
+            var moduleEntryPoint = MainWindow.GraphEditor.Nodes.First();
+            
+            // and i add an instance of this to the main module
+            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.AddNode("test_module");
+            var moduleInvocation = MainWindow.GraphEditor.Nodes.First();
+            
+            // and i go back to the module editor
+            await MainWindow.TabContainer.SelectTab("test_module");
+            // and i right-click the module entry point
+            await moduleEntryPoint.ClickAtSelectionSpot(ButtonList.Right);
+            // and i select the "Refactor test_module" menu item
+            await MainWindow.PopupMenu.SelectItemWithText("Refactor test_module");
+            
+            // and i add a parameter
+            await MainWindow.InvokableRefactorDialog.AddParameterButton.ClickCenter();
+            var line = MainWindow.InvokableRefactorDialog.ParameterLines.First();
+            await line.Type.SelectItemWithText("boolean");
+            // and i press OK
+            await MainWindow.InvokableRefactorDialog.OkButton.ClickCenter();
+            
+            // then
+            // the module entry point has a new parameter
+            Assert.Equal(1, moduleEntryPoint.OutputPortCount);
+            // and there is a toggle button at the new parameter
+            Assert.True(moduleEntryPoint.ToggleButton(Port.Output(0)).IsVisible);
+            
+            // and when i go back to the main module
+            await MainWindow.TabContainer.SelectTab("<main>");
+            // the module invocation has a new parameter
+            Assert.Equal(1, moduleInvocation.InputPortCount);
+            // and there is a checkbox where the new parameter value can be set
+            Assert.True(moduleInvocation.CheckBoxLiteral(Port.Input(0)).IsVisible);
         }
     }
 }

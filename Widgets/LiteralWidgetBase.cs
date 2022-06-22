@@ -17,7 +17,7 @@ namespace OpenScadGraphEditor.Widgets
 
         protected abstract TControl CreateControl();
 
-        private bool _silenceEvents = false;
+        private bool _silenceEvents;
 
         public void BindTo(TLiteral literal, bool isOutput, bool isAutoSet, bool isConnected)
         {

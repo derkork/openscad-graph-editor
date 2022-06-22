@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
 
 namespace OpenScadGraphEditor.Widgets
 {
+    [UsedImplicitly]
     public class OpenButton : MenuButton
     {
         public event Action<string> OpenFileRequested;
@@ -61,11 +63,6 @@ namespace OpenScadGraphEditor.Widgets
         private void RequestFileDialog()
         {
             OpenFileDialogRequested?.Invoke();
-        }
-        
-        private void RequestFileOpen(string filePath)
-        {
-            OpenFileRequested?.Invoke(filePath);
         }
     }
 }

@@ -7,7 +7,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes.ForLoop
 {
     [UsedImplicitly]
-    public class ForLoopStart : ScadNode, ICannotBeCreated, IAmBoundToOtherNode, IHaveVariableInputSize
+    public class ForLoopStart : ScadNode, IAmBoundToOtherNode, IHaveVariableInputSize
     {
         public override string NodeTitle => "Start Loop";
         public override string NodeDescription => "Begins a loop. The loop will be executed for each element in the given vector.";

@@ -1,4 +1,3 @@
-using System.Text;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
@@ -91,7 +90,7 @@ namespace OpenScadGraphEditor.Nodes.Let
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
             CurrentInputSize = node.GetDataInt("variable_count", 1);
-            OtherNodeId = node.GetDataString("let_expression_end_id", "");
+            OtherNodeId = node.GetDataString("let_expression_end_id");
             RebuildPorts();
             base.RestorePortDefinitions(node, referenceResolver);
         }

@@ -1,5 +1,4 @@
 using System.Text;
-using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
@@ -8,7 +7,7 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes.ForLoop
 {
     [UsedImplicitly]
-    public class ForLoopEnd : ScadNode, ICanHaveModifier, ICannotBeCreated, IAmBoundToOtherNode
+    public class ForLoopEnd : ScadNode, ICanHaveModifier, IAmBoundToOtherNode
     {
         public override string NodeTitle => "End Loop";
         public override string NodeDescription => "Collects the generated geometry from the loop.";

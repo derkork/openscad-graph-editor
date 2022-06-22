@@ -36,7 +36,7 @@ namespace OpenScadGraphEditor.Library.IO
         /// Whether the parameter is optional.
         /// </summary>
         [Export]
-        public bool IsOptional { get; set; } = false;
+        public bool IsOptional { get; set; }
         
  
     }

@@ -23,7 +23,6 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
 
         private string[] _allLibraryFiles;
         private Button _okButton;
-        private ExternalReference _baseReference;
 
 
         public event Action<string, IncludeMode> OnNewImportRequested;
@@ -158,8 +157,6 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
 
         private void OnOkButtonPressed()
         {
-            if (_baseReference == null)
-            {
                 // new import
                 var pathMode = (ExternalFilePathMode) _pathModeOptionButton.GetSelectedId();
                 var includeMode = (IncludeMode) _importModeOptionButton.GetSelectedId();
@@ -183,7 +180,6 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                         throw new ArgumentOutOfRangeException();
                 }
                 Hide();
-            }
         }
 
         private void OnPathModeSelected([UsedImplicitly] int _)

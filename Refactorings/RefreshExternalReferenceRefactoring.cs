@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
-using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Utils;

@@ -1,5 +1,4 @@
 using System.Linq;
-using Godot;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 using Serilog;

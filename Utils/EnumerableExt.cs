@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,7 +31,7 @@ namespace OpenScadGraphEditor.Utils
         public static IEnumerable<int> Indices<T>(this IEnumerable<T> self)
         {
             var index = 0;
-            foreach (var item in self)
+            foreach (var _ in self)
             {
                 yield return index;
                 index++;

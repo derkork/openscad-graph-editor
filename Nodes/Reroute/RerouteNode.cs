@@ -1,4 +1,3 @@
-using System;
 using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;

@@ -900,7 +900,7 @@ namespace OpenScadGraphEditor
                     actions = actions.Append(
                         new QuickAction("Remove comment",
                             () => OnRefactoringRequested("Remove comment",
-                                new ChangeCommentRefactoring(graph, node, "", "")))
+                                new ChangeCommentRefactoring(graph, node, "")))
                     );
                 }
             }

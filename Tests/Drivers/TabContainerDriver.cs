@@ -84,8 +84,6 @@ namespace OpenScadGraphEditor.Tests.Drivers
         /// </summary>
         public async Task SelectTab(string title)
         {
-            var tab = VisibleRoot;
-
             var index = TabTitles.ToList().IndexOf(title);
             if (index < 0)
             {

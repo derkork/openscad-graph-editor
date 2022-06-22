@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes.ListComprehension;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using OpenScadGraphEditor.Widgets.AddDialog;
