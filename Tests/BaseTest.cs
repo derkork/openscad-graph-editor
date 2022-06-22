@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Godot;
+using GodotExt;
 using GodotTestDriver;
 using GodotTestDriver.Util;
 using GodotXUnitApi;
@@ -45,8 +46,11 @@ namespace OpenScadGraphEditor.Tests
         {
             GD.Print("Thread " + Thread.CurrentThread.ManagedThreadId);
         }
-        
-        
+
+        public async Task SleepSeconds(float seconds)
+        {
+            await Fixture.Tree.Root.SleepSeconds(seconds);
+        }
         
         public async Task DisposeAsync()
         {

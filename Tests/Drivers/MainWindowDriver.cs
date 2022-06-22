@@ -7,22 +7,21 @@ using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
-using Serilog;
 
 namespace OpenScadGraphEditor.Tests.Drivers
 {
     public class MainWindowDriver : ControlDriver<GraphEditor>
     {
-        public GraphEditDriver GraphEditor { get; }
+        public GraphEditDriver<GraphEdit, ScadNodeWidgetDriver, ScadNodeWidget> GraphEditor { get; }
         public AddDialogDriver AddDialog { get; }
         public ButtonDriver AddModuleButton { get; }
         public InvokableRefactorDialogDriver InvokableRefactorDialog { get; }
-        
         public TabContainerDriver TabContainer { get; }
+        public PopupMenuDriver PopupMenu { get; }
 
         public MainWindowDriver(Func<GraphEditor> producer) : base(producer, "Main Window")
         {
-            GraphEditor = new GraphEditDriver(() =>
+            GraphEditor = new GraphEditDriver<GraphEdit, ScadNodeWidgetDriver, ScadNodeWidget>(() =>
             {
                 // return the currently visible tab.
                 var tabContainer = Root?.WithNameOrNull<TabContainer>("TabContainer");
@@ -37,7 +36,9 @@ namespace OpenScadGraphEditor.Tests.Drivers
                 }
 
                 return tabContainer.GetChild<ScadGraphEdit>(tabContainer.CurrentTab);
-            }, Description + " -> Graph Editor");
+            }, 
+                (node,description) => new ScadNodeWidgetDriver(node, description)
+                ,Description + " -> Graph Editor");
 
             AddDialog = new AddDialogDriver(
                 () => Root?.WithNameOrNull<AddDialog>("AddDialog"),
@@ -55,6 +56,10 @@ namespace OpenScadGraphEditor.Tests.Drivers
             TabContainer = new TabContainerDriver(
                 () => Root?.WithNameOrNull<TabContainer>("TabContainer"),
                 Description + " -> Tab Container"
+            );
+
+            PopupMenu = new PopupMenuDriver(
+                () => Root?.WithNameOrNull<PopupMenu>("QuickActionsPopup")
             );
         }
 

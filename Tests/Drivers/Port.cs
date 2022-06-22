@@ -35,5 +35,10 @@ namespace OpenScadGraphEditor.Tests.Drivers
         /// The default Port is undefined and represents no port.
         /// </summary>
         public static readonly Port None = default;
+
+        public override string ToString()
+        {
+            return IsInput ? $"Input Port {PortIndex}" : $"Output Port {PortIndex}";
+        }
     }
 }

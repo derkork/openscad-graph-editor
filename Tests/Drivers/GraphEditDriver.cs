@@ -5,21 +5,37 @@ using Godot;
 using Godot.Collections;
 using GodotExt;
 using GodotTestDriver.Drivers;
-using OpenScadGraphEditor.Widgets;
+using JetBrains.Annotations;
 
 namespace OpenScadGraphEditor.Tests.Drivers
 {
-    public class GraphEditDriver : ControlDriver<ScadGraphEdit>
+    /// <summary>
+    /// Driver for a <see cref="GraphEdit"/>.  
+    /// </summary>
+    [PublicAPI]
+    public class GraphEditDriver<TGraphEdit,TGraphNodeDriver, TGraphNode> : ControlDriver<TGraphEdit> 
+        where TGraphEdit:GraphEdit where TGraphNode:GraphNode where TGraphNodeDriver:GraphNodeDriver<TGraphNode>
     {
-        public GraphEditDriver(Func<ScadGraphEdit> producer, string description = "") : base(producer, description)
+        private readonly Func<Func<TGraphNode>, string, TGraphNodeDriver> _nodeDriverProducer;
+
+        /// <summary>
+        /// Constructs a new driver.
+        /// </summary>
+        /// <param name="producer">a producer that produces the <see cref="GraphEdit"/> that this driver works on.</param>
+        /// <param name="nodeDriverProducer">a producer that produces a driver for a <see cref="GraphNode"/> child of the <see cref="GraphEdit"/></param>
+        /// <param name="description">a description for the node</param>
+        public GraphEditDriver(Func<TGraphEdit> producer, 
+            Func<Func<TGraphNode>,string,TGraphNodeDriver> nodeDriverProducer,
+            string description = "") : base(producer, description)
         {
+            _nodeDriverProducer = nodeDriverProducer;
         }
 
         /// <summary>
         /// Checks if the graph edit has a connection from the given node to the given target node on the
         /// given ports.
         /// </summary>
-        public bool HasConnection(GraphNodeDriver from, Port fromPort, GraphNodeDriver to, Port toPort)
+        public bool HasConnection(TGraphNodeDriver from, Port fromPort, TGraphNodeDriver to, Port toPort)
         {
             if (!fromPort.IsOutput)
             {
@@ -47,9 +63,22 @@ namespace OpenScadGraphEditor.Tests.Drivers
                     && (int) connection["to_port"] == toPort.PortIndex);
         }
 
-        public IEnumerable<GraphNodeDriver> Nodes =>
-            BuildDrivers(root => root.GetChildNodes<GraphNode>(),
-                producer => new GraphNodeDriver(producer, Description + " -> Graph Node ")
+        public IEnumerable<TGraphNodeDriver> Nodes =>
+            BuildDrivers(root => root.GetChildNodes<TGraphNode>(),
+                node => _nodeDriverProducer(node, "-> GraphNode")
             );
+    }
+    
+    /// <summary>
+    /// Driver for a <see cref="GraphEdit"/>.
+    /// </summary>
+    [PublicAPI]
+    public class GraphEditDriver : GraphEditDriver<GraphEdit, GraphNodeDriver, GraphNode>
+    {
+        public GraphEditDriver(Func<GraphEdit> producer, string description = "") : base(producer,
+            (node, nodeDescription) => new GraphNodeDriver(node,$"{description}-> {nodeDescription}"),
+            description)
+        {
+        }
     }
 }

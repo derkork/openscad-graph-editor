@@ -43,8 +43,8 @@ namespace OpenScadGraphEditor.Nodes
 
         public int GetParameterInputPort(int parameterIndex)
         {
-            // the n-th parameter corresponds to the n+1-th input port
-            return parameterIndex + 1;
+            // the n-th parameter corresponds to the n-th input port
+            return parameterIndex;
         }
 
         public int GetParameterOutputPort(int parameterIndex)

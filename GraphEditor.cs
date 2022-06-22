@@ -470,11 +470,12 @@ namespace OpenScadGraphEditor
             editor.EditCommentRequested += OnEditCommentRequested;
             editor.HelpRequested += OnHelpRequested;
 
-            editor.Name = toOpen.Description.NodeNameOrFallback;
+            editor.Name = toOpen.Description.Id;
             editor.MoveToNewParent(_tabContainer);
             editor.Render(toOpen);
             _openEditors[toOpen.Description.Id] = editor;
             _tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
+            _tabContainer.SetTabTitle(_tabContainer.CurrentTab, editor.Graph.Description.NodeNameOrFallback);
             editor.FocusEntryPoint();
             return editor;
         }
@@ -707,10 +708,14 @@ namespace OpenScadGraphEditor
                     .ToList()
                     .ForAll(Close);
 
-                // update the graph renderings.
-                foreach (var editor in _tabContainer.GetChildNodes<ScadGraphEdit>())
+                for (var i = 0; i < _tabContainer.GetTabCount();i++)
                 {
-                    editor.Render(editor.Graph);
+                    var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
+                    // update the graph renderings.
+                    graphEdit.Render(graphEdit.Graph);
+                    // and update the tab title as it might have changed.
+                    _tabContainer.SetTabTitle(i, graphEdit.Graph.Description.NodeNameOrFallback);
+                    
                 }
 
                 // important, the snapshot must be made _after_ the changes.
