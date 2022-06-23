@@ -35,7 +35,7 @@ namespace OpenScadGraphEditor.Nodes
 
             if (portId.IsOutput)
             {
-                return "Output flow";
+                return "Output 'geometry'. Echo will not actually output geometry, but this can be used to link echo to a specific scope.";
             }
 
             return "";

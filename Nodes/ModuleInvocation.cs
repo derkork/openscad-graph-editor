@@ -21,15 +21,15 @@ namespace OpenScadGraphEditor.Nodes
             {
                 if (_description.SupportsChildren && portId.Port == 0)
                 {
-                    return "Everything connected here will be affected by this module.";
+                    return "Input geometry for the module";
                 }
-
-                return _description.Parameters[portId.Port - 1].Description;
+                
+                return _description.Parameters[portId.Port - (_description.SupportsChildren ? 1 : 0)].Description;
             }
 
             if (portId.IsOutput)
             {
-                return "Output flow";
+                return "Output geometry";
             }
 
             return "";

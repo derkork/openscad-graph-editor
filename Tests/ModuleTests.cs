@@ -78,11 +78,11 @@ namespace OpenScadGraphEditor.Tests
             await MainWindow.InvokableRefactorDialog.OkButton.ClickCenter();
 
             // and i create a call to this module in main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             await MainWindow.AddNode("test_module");
 
             // and i then go back to the module editor
-            await MainWindow.TabContainer.SelectTab("test_module");
+            await MainWindow.TabContainer.SelectTabWithTitle("test_module");
 
             // and i right-click the module entrypoint
             await MainWindow.GraphEditor.Nodes.First().ClickAtSelectionSpot(ButtonList.Right);
@@ -99,7 +99,7 @@ namespace OpenScadGraphEditor.Tests
             // the tab title is also renamed
             Assert.Equal("renamed_module", MainWindow.TabContainer.SelectedTabTitle);
             // and when i get back to the main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             // and the call to the module is renamed as well
             Assert.Equal("renamed_module", MainWindow.GraphEditor.Nodes.First().Title);
         }
@@ -123,7 +123,7 @@ namespace OpenScadGraphEditor.Tests
 
 
             // and i create a call to this module in main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             await MainWindow.AddNode("test_module");
             var moduleInvocation = MainWindow.GraphEditor.Nodes.First();
 
@@ -133,7 +133,7 @@ namespace OpenScadGraphEditor.Tests
 
 
             // and i then go back to the module editor
-            await MainWindow.TabContainer.SelectTab("test_module");
+            await MainWindow.TabContainer.SelectTabWithTitle("test_module");
             // and i click the toggle button on the entrypoint parameter
             // so it is now optional
             var entrypointNode = MainWindow.GraphEditor.Nodes.First();
@@ -144,7 +144,7 @@ namespace OpenScadGraphEditor.Tests
             Assert.True(entrypointNode.CheckBoxLiteral(Port.Output(0)).IsVisible);
 
             // and when i get back to the main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             // the module invocation now has a toggle button for setting the parameter value
             Assert.True(moduleInvocation.ToggleButton(Port.Input(0)).IsVisible);
         }
@@ -185,7 +185,7 @@ namespace OpenScadGraphEditor.Tests
             await moduleEntryPoint.DragConnection(Port.Output(1), cubeNode, Port.Input(1));
 
             // and i create a call to this module in main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             await MainWindow.AddNode("test_module");
             var moduleInvocation = MainWindow.GraphEditor.Nodes.First();
 
@@ -210,7 +210,7 @@ namespace OpenScadGraphEditor.Tests
             await booleanAnd.DragConnection(Port.Output(0), moduleInvocation, Port.Input(1));
 
             // and i go back to the module editor
-            await MainWindow.TabContainer.SelectTab("test_module");
+            await MainWindow.TabContainer.SelectTabWithTitle("test_module");
             // and i right-click the module entry point
             await moduleEntryPoint.ClickAtSelectionSpot(ButtonList.Right);
             // and i select the "Refactor test_module" menu item
@@ -236,7 +236,7 @@ namespace OpenScadGraphEditor.Tests
             );
             
             // and when i go back to the main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             
             // the output of the "construct vector3" is now connected to the second input of the module invocation
             Assert.True(
@@ -260,12 +260,12 @@ namespace OpenScadGraphEditor.Tests
             var moduleEntryPoint = MainWindow.GraphEditor.Nodes.First();
             
             // and i add an instance of this to the main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             await MainWindow.AddNode("test_module");
             var moduleInvocation = MainWindow.GraphEditor.Nodes.First();
             
             // and i go back to the module editor
-            await MainWindow.TabContainer.SelectTab("test_module");
+            await MainWindow.TabContainer.SelectTabWithTitle("test_module");
             // and i right-click the module entry point
             await moduleEntryPoint.ClickAtSelectionSpot(ButtonList.Right);
             // and i select the "Refactor test_module" menu item
@@ -285,7 +285,7 @@ namespace OpenScadGraphEditor.Tests
             Assert.True(moduleEntryPoint.ToggleButton(Port.Output(0)).IsVisible);
             
             // and when i go back to the main module
-            await MainWindow.TabContainer.SelectTab("<main>");
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             // the module invocation has a new parameter
             Assert.Equal(1, moduleInvocation.InputPortCount);
             // and there is a checkbox where the new parameter value can be set

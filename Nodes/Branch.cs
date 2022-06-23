@@ -30,11 +30,11 @@ namespace OpenScadGraphEditor.Nodes
                 case 0 when portId.IsInput:
                     return "The condition that should be tested.";
                 case 1 when portId.IsInput:
-                    return "The flow that is executed if the condition is true.";
+                    return "The geometry that will output if the condition is true.";
                 case 2 when portId.IsInput:
-                    return "The flow that is executed if the condition is false.";
+                    return "The geometry that will output if the condition is false.";
                 case 0 when portId.IsOutput:
-                    return "Output flow";
+                    return "Output geometry";
                 default:
                     return "";
             }

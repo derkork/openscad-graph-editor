@@ -66,12 +66,12 @@ namespace OpenScadGraphEditor.Nodes.Reroute
             {
                 if (portId.IsInput)
                 {
-                    return "Input flow";
+                    return "Input geometry";
                 }
 
                 if (portId.IsOutput)
                 {
-                    return "Output flow";
+                    return "Output geometry";
                 }
             }
             else

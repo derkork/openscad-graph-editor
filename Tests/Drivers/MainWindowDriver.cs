@@ -5,6 +5,7 @@ using GodotExt;
 using GodotTestDriver.Drivers;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Widgets.DocumentationDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 
@@ -19,26 +20,28 @@ namespace OpenScadGraphEditor.Tests.Drivers
         public TabContainerDriver TabContainer { get; }
         public PopupMenuDriver PopupMenu { get; }
 
+        public DocumentationDialogDriver DocumentationDialog { get; }
+
         public MainWindowDriver(Func<GraphEditor> producer) : base(producer, "Main Window")
         {
             GraphEditor = new GraphEditDriver<GraphEdit, ScadNodeWidgetDriver, ScadNodeWidget>(() =>
-            {
-                // return the currently visible tab.
-                var tabContainer = Root?.WithNameOrNull<TabContainer>("TabContainer");
-                if (tabContainer == null)
                 {
-                    return null;
-                }
+                    // return the currently visible tab.
+                    var tabContainer = Root?.WithNameOrNull<TabContainer>("TabContainer");
+                    if (tabContainer == null)
+                    {
+                        return null;
+                    }
 
-                if (tabContainer.GetChildCount() <= tabContainer.CurrentTab)
-                {
-                    return null;
-                }
+                    if (tabContainer.GetChildCount() <= tabContainer.CurrentTab)
+                    {
+                        return null;
+                    }
 
-                return tabContainer.GetChild<ScadGraphEdit>(tabContainer.CurrentTab);
-            }, 
-                (node,description) => new ScadNodeWidgetDriver(node, description)
-                ,Description + " -> Graph Editor");
+                    return tabContainer.GetChild<ScadGraphEdit>(tabContainer.CurrentTab);
+                },
+                (node, description) => new ScadNodeWidgetDriver(node, description)
+                , Description + " -> Graph Editor");
 
             AddDialog = new AddDialogDriver(
                 () => Root?.WithNameOrNull<AddDialog>("AddDialog"),
@@ -60,6 +63,11 @@ namespace OpenScadGraphEditor.Tests.Drivers
 
             PopupMenu = new PopupMenuDriver(
                 () => Root?.WithNameOrNull<PopupMenu>("QuickActionsPopup")
+            );
+
+            DocumentationDialog = new DocumentationDialogDriver(
+                () => Root?.WithNameOrNull<DocumentationDialog>("DocumentationDialog"),
+                Description + " -> Documentation Dialog"
             );
         }
 

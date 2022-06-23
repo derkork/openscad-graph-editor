@@ -25,7 +25,7 @@ namespace OpenScadGraphEditor.Nodes
                 case 0 when portId.IsInput:
                     return "A vector with indices of the children to render. If not given, all children will be rendered.";
                 case 0 when portId.IsOutput:
-                    return "Output flow";
+                    return "The geometry of the selected children.";
                 default:
                     return "";
             }

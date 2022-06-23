@@ -31,7 +31,7 @@ namespace OpenScadGraphEditor.Nodes
                 case 1 when portId.IsInput:
                     return "The geometry that should be subtracted from the first geometry.";
                 case 0 when portId.IsOutput:
-                    return "Output flow";
+                    return "The result geometry.";
                 default:
                     return "";
             }

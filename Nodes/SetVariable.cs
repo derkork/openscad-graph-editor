@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public VariableDescription VariableDescription { get; private set; }
         public override string NodeTitle => $"Set {VariableDescription?.Name ?? "Variable"}";
-        public override string NodeDescription => "Sets a variable.";
+        public override string NodeDescription => "Sets a variable. Note, that in OpenSCAD variables are global and the last assignment to a variable will be used. This can be counter-intuitive. If you need a temporary variable use a 'let' block.";
 
         
         public SetVariable()
@@ -29,9 +29,9 @@ namespace OpenScadGraphEditor.Nodes
                 case 0 when portId.IsInput:
                     return "Input flow";
                 case 1 when portId.IsInput:
-                    return "The value to which the variable should be set.";
+                    return "The value to which the variable should be set";
                 case 0 when portId.IsOutput:
-                    return "Output flow";
+                    return "Output 'geometry'. Variable assignments will not actually output geometry, but this can be used to link the assignment to a specific scope.";
                 default:
                     return "";
             }

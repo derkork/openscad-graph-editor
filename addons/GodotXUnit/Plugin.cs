@@ -1,3 +1,4 @@
+#if TOOLS
 using System;
 using Godot;
 using Godot.Collections;
@@ -55,3 +56,4 @@ namespace GodotXUnit
         }
     }
 }
+#endif
