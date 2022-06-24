@@ -6,6 +6,7 @@ using GodotTestDriver.Drivers;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.DocumentationDialog;
+using OpenScadGraphEditor.Widgets.HelpDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 
@@ -19,8 +20,9 @@ namespace OpenScadGraphEditor.Tests.Drivers
         public InvokableRefactorDialogDriver InvokableRefactorDialog { get; }
         public TabContainerDriver TabContainer { get; }
         public PopupMenuDriver PopupMenu { get; }
-
         public DocumentationDialogDriver DocumentationDialog { get; }
+        
+        public HelpDialogDriver HelpDialog { get; }
 
         public MainWindowDriver(Func<GraphEditor> producer) : base(producer, "Main Window")
         {
@@ -68,6 +70,11 @@ namespace OpenScadGraphEditor.Tests.Drivers
             DocumentationDialog = new DocumentationDialogDriver(
                 () => Root?.WithNameOrNull<DocumentationDialog>("DocumentationDialog"),
                 Description + " -> Documentation Dialog"
+            );
+            
+            HelpDialog = new HelpDialogDriver(
+                () => Root?.WithNameOrNull<HelpDialog>("HelpDialog"),
+                Description + " -> Help Dialog"
             );
         }
 

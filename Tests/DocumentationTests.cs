@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using GodotExt;
 using GodotTestDriver.Input;
 using GodotXUnitApi;
+using OpenScadGraphEditor.Tests.Drivers;
 using Xunit;
 
 namespace OpenScadGraphEditor.Tests
@@ -50,13 +50,19 @@ namespace OpenScadGraphEditor.Tests
             
             // and i press F1
             await MainWindow.Root.TypeKey(KeyList.F1);
-
             
-            await MainWindow.Root.SleepSeconds(3);
             
-            await MainWindow.Root.TypeKey(KeyList.Escape);
-
-            await MainWindow.Root.SleepSeconds(3);
+            // then
+            // the help dialog is shown
+            Assert.True(MainWindow.HelpDialog.IsVisible);
+            // and the title of the help dialog is "test_module"
+            Assert.Equal("test_module", MainWindow.HelpDialog.TitleLabel.Text);
+            // and the description of the help dialog is "This is a test module"
+            Assert.Equal("This is a test module", MainWindow.HelpDialog.DescriptionLabel.Text);
+            // and on the right side of the node we have the three parameters and their descriptions
+            Assert.Equal("This is the first parameter", MainWindow.HelpDialog.GetDescriptionLabel(Port.Output(0)).Text);
+            Assert.Equal("This is the second parameter", MainWindow.HelpDialog.GetDescriptionLabel(Port.Output(1)).Text);
+            Assert.Equal("This is the third parameter", MainWindow.HelpDialog.GetDescriptionLabel(Port.Output(2)).Text);
         }
         
     }
