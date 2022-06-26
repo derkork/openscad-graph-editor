@@ -1,4 +1,3 @@
-using Godot;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 

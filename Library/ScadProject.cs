@@ -8,7 +8,7 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {
-    public class ScadProject : ICanBeRendered, IReferenceResolver
+    public class ScadProject : IReferenceResolver
     {
         private readonly IReferenceResolver _parentResolver;
 
@@ -23,25 +23,25 @@ namespace OpenScadGraphEditor.Library
 
         private readonly Dictionary<string, ExternalReference> _externalReferences = new Dictionary<string, ExternalReference>();
 
-        private readonly HashSet<IScadGraph> _modules = new HashSet<IScadGraph>();
-        private readonly HashSet<IScadGraph> _functions = new HashSet<IScadGraph>();
+        private readonly HashSet<ScadGraph> _modules = new HashSet<ScadGraph>();
+        private readonly HashSet<ScadGraph> _functions = new HashSet<ScadGraph>();
 
-        public IEnumerable<IScadGraph> Modules => _modules.OrderBy(x => x.Description.Name);
-        public IEnumerable<IScadGraph> Functions => _functions.OrderBy(x => x.Description.Name);
+        public IEnumerable<ScadGraph> Modules => _modules.OrderBy(x => x.Description.Name);
+        public IEnumerable<ScadGraph> Functions => _functions.OrderBy(x => x.Description.Name);
 
-        public IEnumerable<IScadGraph> AllDeclaredInvokables => Functions.Concat(Modules).Append(MainModule);
+        public IEnumerable<ScadGraph> AllDeclaredInvokables => Functions.Concat(Modules).Append(MainModule);
 
         public IEnumerable<VariableDescription> Variables => _projectVariables.Values.OrderBy(x => x.Name);
         public IEnumerable<ExternalReference> ExternalReferences => _externalReferences.Values.OrderBy(x => x.IncludePath);
 
-        public IScadGraph MainModule { get; private set; }
+        public ScadGraph MainModule { get; private set; }
 
         public string ProjectPath { get; private set; }
 
         public ScadProject(IReferenceResolver parentResolver)
         {
             _parentResolver = parentResolver;
-            var mainModuleGraph = new LightWeightGraph();
+            var mainModuleGraph = new ScadGraph();
             mainModuleGraph.Main();
             MainModule = mainModuleGraph;
         }
@@ -150,19 +150,19 @@ namespace OpenScadGraphEditor.Library
             // Step 4: load the actual graphs, which can now resolve references to other functions.
             foreach (var function in project.Functions)
             {
-                var functionContext = new LightWeightGraph();
+                var functionContext = new ScadGraph();
                 functionContext.LoadFrom(function, _projectFunctionDescriptions[function.Description.Id], this);
                 _functions.Add(functionContext);
             }
 
             foreach (var module in project.Modules)
             {
-                var moduleContext = new LightWeightGraph();
+                var moduleContext = new ScadGraph();
                 moduleContext.LoadFrom(module, _projectModuleDescriptions[module.Description.Id], this);
                 _modules.Add(moduleContext);
             }
 
-            MainModule = new LightWeightGraph();
+            MainModule = new ScadGraph();
             MainModule.LoadFrom(project.MainModule, project.MainModule.Description.FromSavedState(), this);
         }
 
@@ -212,9 +212,9 @@ namespace OpenScadGraphEditor.Library
             MainModule?.Discard();
         }
 
-        public IScadGraph AddInvokable(InvokableDescription invokableDescription)
+        public ScadGraph AddInvokable(InvokableDescription invokableDescription)
         {
-            var graph = new LightWeightGraph();
+            var graph = new ScadGraph();
             graph.NewFromDescription(invokableDescription);
             switch (invokableDescription)
             {
@@ -263,7 +263,7 @@ namespace OpenScadGraphEditor.Library
             _projectVariables.Remove(variableDescription.Id);
         }
 
-        public IScadGraph FindDefiningGraph(InvokableDescription invokableDescription)
+        public ScadGraph FindDefiningGraph(InvokableDescription invokableDescription)
         {
             return AllDeclaredInvokables.First(it => it.Description.Id == invokableDescription.Id);
         }

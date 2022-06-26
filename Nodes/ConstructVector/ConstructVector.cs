@@ -5,12 +5,16 @@ using OpenScadGraphEditor.Library.IO;
 
 namespace OpenScadGraphEditor.Nodes.ConstructVector
 {
-    public abstract class ConstructVector : ScadNode, IAmAnExpression
+    public abstract class ConstructVector : ScadNode, IAmAnExpression, IAmAVectorConstruction, IHaveVariableInputSize
     {
         private readonly PortType _portType;
 
-        public int VectorSize { get; private set; } = 1;
-
+        public int CurrentInputSize { get; private set; } = 1;
+        public int InputPortOffset => 0;
+        public int OutputPortOffset => 0;
+        public string AddRefactoringTitle => "Add item";
+        public string RemoveRefactoringTitle => "Remove item";
+        public bool OutputPortsMatchVariableInputs => false;
 
         public ConstructVector(PortType portType)
         {
@@ -38,46 +42,46 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
 
         public override void SaveInto(SavedNode node)
         {
-            node.SetData("vector_size", VectorSize);
+            node.SetData("vector_size", CurrentInputSize);
             base.SaveInto(node);
         }
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            VectorSize = node.GetDataInt("vector_size", 1);
+            CurrentInputSize = node.GetDataInt("vector_size", 1);
             RebuildInputs();
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public void IncreaseVectorSize()
+        public void AddVariableInputPort()
         {
-            VectorSize++;
+            CurrentInputSize++;
             RebuildInputs();
-            BuildPortLiteral(PortId.Input(VectorSize-1));
+            BuildPortLiteral(PortId.Input(CurrentInputSize-1));
             
             // as a convenience copy the literal set style of the existing one, this makes it easier for the user.
-            if (TryGetLiteral(PortId.Input(VectorSize - 2), out var previousLiteral) && TryGetLiteral(PortId.Input(VectorSize-1), out var newLiteral))
+            if (TryGetLiteral(PortId.Input(CurrentInputSize - 2), out var previousLiteral) && TryGetLiteral(PortId.Input(CurrentInputSize-1), out var newLiteral))
             {
                 newLiteral.IsSet = previousLiteral.IsSet;
             }
             
         }
 
-        public void DecreaseVectorSize()
+        public void RemoveVariableInputPort()
         {
-            GdAssert.That(VectorSize > 1, "Cannot decrease vector size below 1.");
-            var idx = VectorSize-1;
+            GdAssert.That(CurrentInputSize > 1, "Cannot decrease vector size below 1.");
+            var idx = CurrentInputSize-1;
 
             DropPortLiteral(PortId.Input(idx));
 
-            VectorSize--;
+            CurrentInputSize--;
             RebuildInputs();
         }
 
         private void RebuildInputs()
         {
             InputPorts.Clear();
-            for (var i = 0; i < VectorSize; i++)
+            for (var i = 0; i < CurrentInputSize; i++)
             {
                 InputPorts
                     .OfType(_portType, $"Component {i + 1}", _portType.GetMatchingLiteralType());
@@ -85,16 +89,16 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
         }
 
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var builder = new StringBuilder();
 
             // render all input ports and combine their results into a vector
-            for (var i = 0; i < VectorSize; i++)
+            for (var i = 0; i < CurrentInputSize; i++)
             {
                 var part = RenderInput(context, i);
                 builder.Append(part);
-                if (i + 1 < VectorSize)
+                if (i + 1 < CurrentInputSize)
                 {
                     builder.Append(", ");
                 }

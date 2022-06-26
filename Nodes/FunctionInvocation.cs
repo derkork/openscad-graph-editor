@@ -62,7 +62,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            var functionDescriptionId = node.GetData("function_description_id");
+            var functionDescriptionId = node.GetDataString("function_description_id");
             SetupPorts(referenceResolver.ResolveFunctionReference(functionDescriptionId));
             base.RestorePortDefinitions(node, referenceResolver);
         }
@@ -86,7 +86,7 @@ namespace OpenScadGraphEditor.Nodes
                     .OfType( _description.ReturnTypeHint);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
            var parameters = _description.Parameters.Count.Range()
                 .Select(it =>

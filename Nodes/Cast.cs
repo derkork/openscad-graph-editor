@@ -34,7 +34,7 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             // openscad doesn't really have casts, so we simply output the input, the casting is just for the editor.
             return RenderInput(context, 0);

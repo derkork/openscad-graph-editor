@@ -1,0 +1,254 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/GodotXUnit/XUnitDock.cs" type="Script" id=1]
+
+[node name="Control" type="MarginContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 0
+custom_constants/margin_top = 0
+custom_constants/margin_left = 0
+custom_constants/margin_bottom = 0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Rows" type="VBoxContainer" parent="."]
+margin_right = 1024.0
+margin_bottom = 600.0
+
+[node name="Buttons" type="MarginContainer" parent="Rows"]
+margin_right = 1024.0
+margin_bottom = 44.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Panel" type="Panel" parent="Rows/Buttons"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1019.0
+margin_bottom = 39.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Margin" type="MarginContainer" parent="Rows/Buttons"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1019.0
+margin_bottom = 39.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Buttons" type="HBoxContainer" parent="Rows/Buttons/Margin"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1009.0
+margin_bottom = 29.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="StopButton" type="Button" parent="Rows/Buttons/Margin/Buttons"]
+margin_right = 40.0
+margin_bottom = 24.0
+text = "Stop"
+
+[node name="RunAllTestsButton" type="Button" parent="Rows/Buttons/Margin/Buttons"]
+margin_left = 44.0
+margin_right = 139.0
+margin_bottom = 24.0
+text = "Run All Tests"
+
+[node name="ReRunButton" type="Button" parent="Rows/Buttons/Margin/Buttons"]
+margin_left = 143.0
+margin_right = 195.0
+margin_bottom = 24.0
+text = "ReRun"
+
+[node name="TargetClassLabel" type="LineEdit" parent="Rows/Buttons/Margin/Buttons"]
+margin_left = 199.0
+margin_right = 389.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+placeholder_text = "Target Class"
+
+[node name="TargetMethodLabel" type="LineEdit" parent="Rows/Buttons/Margin/Buttons"]
+margin_left = 393.0
+margin_right = 583.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+placeholder_text = "Target Method"
+
+[node name="TargetAssemblyOption" type="OptionButton" parent="Rows/Buttons/Margin/Buttons"]
+margin_left = 587.0
+margin_right = 808.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+text = "SubProjectForIntegrationTests"
+items = [ "GodotXUnit (main)", null, false, 0, null, "SubProjectForUnitTests", null, false, 1, null, "SubProjectForIntegrationTests", null, false, 2, null, "Custom Location ", null, false, 1000, null ]
+selected = 2
+
+[node name="TargetAssemblyLabel" type="LineEdit" parent="Rows/Buttons/Margin/Buttons"]
+margin_left = 812.0
+margin_right = 1004.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+text = "not found"
+placeholder_text = "Custom Assembly Path (dll)"
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="Summary" type="MarginContainer" parent="Rows"]
+margin_top = 48.0
+margin_right = 1024.0
+margin_bottom = 92.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Panel" type="Panel" parent="Rows/Summary"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1019.0
+margin_bottom = 39.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Margin" type="MarginContainer" parent="Rows/Summary"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1019.0
+margin_bottom = 39.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="Results" type="HBoxContainer" parent="Rows/Summary/Margin"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1009.0
+margin_bottom = 29.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TotalRanLabel" type="Label" parent="Rows/Summary/Margin/Results"]
+margin_top = 5.0
+margin_right = 227.0
+margin_bottom = 19.0
+size_flags_horizontal = 3
+text = "TotalRan: 0"
+
+[node name="PassedLabel" type="Label" parent="Rows/Summary/Margin/Results"]
+margin_left = 231.0
+margin_top = 5.0
+margin_right = 458.0
+margin_bottom = 19.0
+size_flags_horizontal = 3
+text = "Passed: 0"
+
+[node name="FailedLabel" type="Label" parent="Rows/Summary/Margin/Results"]
+margin_left = 462.0
+margin_right = 689.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Failed: 0"
+
+[node name="TimeLabel" type="Label" parent="Rows/Summary/Margin/Results"]
+margin_left = 693.0
+margin_top = 5.0
+margin_right = 920.0
+margin_bottom = 19.0
+size_flags_horizontal = 3
+text = "Time: 0 ms"
+
+[node name="VerboseCheckBox" type="CheckBox" parent="Rows/Summary/Margin/Results"]
+margin_left = 924.0
+margin_right = 1004.0
+margin_bottom = 24.0
+text = "Verbose"
+
+[node name="Details" type="MarginContainer" parent="Rows"]
+margin_top = 96.0
+margin_right = 1024.0
+margin_bottom = 600.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Rows/Details"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 1019.0
+margin_bottom = 499.0
+
+[node name="ResultsTree" type="Tree" parent="Rows/Details/HBoxContainer"]
+margin_right = 505.0
+margin_bottom = 494.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+hide_root = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Rows/Details/HBoxContainer"]
+margin_left = 509.0
+margin_right = 1014.0
+margin_bottom = 494.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Rows/Details/HBoxContainer/VBoxContainer"]
+margin_right = 505.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="RunSelectedButton" type="Button" parent="Rows/Details/HBoxContainer/VBoxContainer/HBoxContainer"]
+margin_right = 95.0
+margin_bottom = 20.0
+disabled = true
+text = "Run Selected"
+
+[node name="RunTabContainer" type="TabContainer" parent="Rows/Details/HBoxContainer/VBoxContainer"]
+margin_top = 24.0
+margin_right = 505.0
+margin_bottom = 494.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResultDetails" type="RichTextLabel" parent="Rows/Details/HBoxContainer/VBoxContainer/RunTabContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+focus_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+selection_enabled = true
+
+[node name="Diagnostics" type="RichTextLabel" parent="Rows/Details/HBoxContainer/VBoxContainer/RunTabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+focus_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+selection_enabled = true

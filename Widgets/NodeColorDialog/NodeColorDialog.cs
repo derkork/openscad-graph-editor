@@ -13,14 +13,14 @@ namespace OpenScadGraphEditor.Widgets.NodeColorDialog
         /// <summary>
         /// Called when a color was selected.
         /// </summary>
-        public event Action<IScadGraph, ScadNode, Color> ColorSelected;
+        public event Action<ScadGraph, ScadNode, Color> ColorSelected;
         
         /// <summary>
         /// Called when the color was removed.
         /// </summary>
-        public event Action<IScadGraph, ScadNode> ColorCleared;
+        public event Action<ScadGraph, ScadNode> ColorCleared;
 
-        private IScadGraph _contextGraph;
+        private ScadGraph _contextGraph;
         private ScadNode _contextNode;
 
         public override void _Ready()
@@ -48,7 +48,7 @@ namespace OpenScadGraphEditor.Widgets.NodeColorDialog
             Hide();
         }
 
-        public void Open(IScadGraph contextGraph, ScadNode contextNode)
+        public void Open(ScadGraph contextGraph, ScadNode contextNode)
         {
             _contextNode = contextNode;
             _contextGraph = contextGraph;

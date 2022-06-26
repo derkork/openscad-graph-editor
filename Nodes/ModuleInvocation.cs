@@ -19,29 +19,17 @@ namespace OpenScadGraphEditor.Nodes
         {
             if (portId.IsInput)
             {
-                if (portId.Port == 0)
+                if (_description.SupportsChildren && portId.Port == 0)
                 {
-                    return "Input flow";
-                } 
-                return _description.Parameters[portId.Port - 1].Description;
+                    return "Input geometry for the module";
+                }
+                
+                return _description.Parameters[portId.Port - (_description.SupportsChildren ? 1 : 0)].Description;
             }
 
             if (portId.IsOutput)
             {
-                if (_description.SupportsChildren)
-                {
-                    switch (portId.Port)
-                    {
-                        case 0:
-                            return "Children. Everything connected here will be affected by this module.";
-                        case 1:
-                            return "Output flow.";
-                    }
-                }
-                else
-                {
-                    return "Output flow";
-                }
+                return "Output geometry";
             }
 
             return "";
@@ -55,8 +43,8 @@ namespace OpenScadGraphEditor.Nodes
 
         public int GetParameterInputPort(int parameterIndex)
         {
-            // the n-th parameter corresponds to the n+1-th input port
-            return parameterIndex + 1;
+            // the n-th parameter corresponds to the n-th input port
+            return parameterIndex;
         }
 
         public int GetParameterOutputPort(int parameterIndex)
@@ -67,7 +55,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            var moduleDescriptionId = node.GetData("module_description_id");
+            var moduleDescriptionId = node.GetDataString("module_description_id");
             SetupPorts(referenceResolver.ResolveModuleReference(moduleDescriptionId));
             base.RestorePortDefinitions(node, referenceResolver);
         }
@@ -79,8 +67,11 @@ namespace OpenScadGraphEditor.Nodes
             InputPorts.Clear();
             OutputPorts.Clear();
 
-            InputPorts
-                .Flow();
+            if (_description.SupportsChildren)
+            {
+                InputPorts
+                    .Geometry();
+            }
 
             foreach (var parameter in description.Parameters)
             {
@@ -89,27 +80,19 @@ namespace OpenScadGraphEditor.Nodes
                     .OfType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional);
             }
 
-            if (_description.SupportsChildren)
-            {
-                OutputPorts
-                    .Flow("Children")
-                    .Flow("After");
-            }
-            else
-            {
-                OutputPorts
-                    .Flow();
-            }
+
+            OutputPorts
+                .Geometry();
         }
 
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var parameters = _description.Parameters.Count.Range()
                 .Select(it =>
                 {
                     var parameterDescription = _description.Parameters[it];
-                    var value = RenderInput(context, it + 1);
+                    var value = RenderInput(context, it+ ( _description.SupportsChildren ?  1 : 0));
                     return value.Empty() && parameterDescription.IsOptional
                         ? ""
                         : $"{parameterDescription.Name} = {value.OrUndef()}";
@@ -118,14 +101,13 @@ namespace OpenScadGraphEditor.Nodes
                 .JoinToString(", ");
        
             var result = $"{_description.Name}({parameters})";
-            var childNodes = _description.SupportsChildren ? RenderOutput(context, 0) : "";
-            var nextNodes = RenderOutput(context, _description.SupportsChildren ? 1 : 0);
-            if (childNodes.Length > 0)
+            var childNodes = _description.SupportsChildren ? RenderInput(context, 0) : "";
+            if (!childNodes.Empty())
             {
-                return result + childNodes.AsBlock() + nextNodes;
+                return result + childNodes.AsBlock();
             }
 
-            return result + ";\n" + nextNodes;
+            return result + ";";
         }
     }
 }

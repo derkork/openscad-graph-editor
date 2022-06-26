@@ -8,10 +8,10 @@ namespace OpenScadGraphEditor.Refactorings
     /// </summary>
     public abstract class NodeRefactoring : Refactoring
     {
-        protected IScadGraph Holder { get; }
+        protected ScadGraph Holder { get; }
         protected ScadNode Node { get; }
 
-        protected NodeRefactoring(IScadGraph holder, ScadNode node)
+        protected NodeRefactoring(ScadGraph holder, ScadNode node)
         {
             Holder = holder;
             Node = node;

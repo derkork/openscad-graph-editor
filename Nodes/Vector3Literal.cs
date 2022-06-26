@@ -16,7 +16,7 @@ namespace OpenScadGraphEditor.Nodes
                 var parts = value.Split('|');
                 X = double.Parse(parts[0]);
                 Y = double.Parse(parts[1]);
-                Z = double.Parse(parts[2]);;
+                Z = double.Parse(parts[2]);
             }
         }
         

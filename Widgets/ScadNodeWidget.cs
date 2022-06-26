@@ -41,17 +41,17 @@ namespace OpenScadGraphEditor.Widgets
             RectMinSize = new Vector2(32, 64);
         }
 
-
-        public virtual void BindTo(IScadGraph graph, ScadNode node)
+        
+        public virtual void BindTo(ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
             Title = node.NodeTitle;
             HintTooltip = node.NodeDescription;
             Offset = node.Offset;
 
-            if (node is IAmAnExpression && !(node is IHaveMultipleExpressionOutputs))
+            if (node is IAmAnExpression && node.OutputPortCount == 1)
             {
-                HintTooltip = node.Render(graph);
+                HintTooltip = node.Render(graph, 0);
             }
             
             var modifiers = BoundNode.GetModifiers();
@@ -157,6 +157,7 @@ namespace OpenScadGraphEditor.Widgets
             _tween.RemoveAndFree();
             _tween = null;
         }
+        
 
         private void Minimize()
         {
@@ -164,7 +165,7 @@ namespace OpenScadGraphEditor.Widgets
             QueueSort();
         }
 
-        private void BuildPort(PortContainer.PortContainer container, IScadGraph graph, ScadNode node, PortId port)
+        private void BuildPort(PortContainer.PortContainer container, ScadGraph graph, ScadNode node, PortId port)
         {
             var portDefinition = node.GetPortDefinition(port);
             var idx = port.Port;
@@ -285,7 +286,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             switch (portType)
             {
-                case PortType.Flow:
+                case PortType.Geometry:
                     return new Color(1, 1, 1);
                 case PortType.Boolean:
                     return new Color(1, 0.4f, 0.4f);

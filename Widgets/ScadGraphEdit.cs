@@ -16,7 +16,7 @@ namespace OpenScadGraphEditor.Widgets
 {
     /// <summary>
     /// This is our main editing interface for editing graphs of invokable things (functions/modules). It is the
-    /// heavyweight alternative to <see cref="LightWeightGraph"/>. In contrast to <see cref="LightWeightGraph"/>,
+    /// heavyweight alternative to <see cref="ScadGraph"/>. In contrast to <see cref="ScadGraph"/>,
     /// this graph never really changes the actual graph data but just invokes refactoring events in response to
     /// user input that will do the proper refactoring actions.
     /// </summary>
@@ -71,7 +71,7 @@ namespace OpenScadGraphEditor.Widgets
         private readonly HashSet<string> _selection = new HashSet<string>();
         private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
         private ScadConnection _pendingDisconnect;
-        public IScadGraph Graph { get; private set; }
+        public ScadGraph Graph { get; private set; }
 
 
         public void SelectNodes(List<ScadNode> nodes)
@@ -168,9 +168,13 @@ namespace OpenScadGraphEditor.Widgets
         
         public void FocusEntryPoint()
         {
-            var widget = _widgets[Graph.GetAllNodes().First(it => it is EntryPoint).Id];
-            // move it somewhere top left
-            ScrollOffset = widget.Offset - new Vector2(100, 100);
+            var entryPoint = Graph.GetAllNodes().FirstOrDefault(it => it is EntryPoint);
+            if (entryPoint != null)
+            {
+                var widget = _widgets[entryPoint.Id];
+                // move it somewhere top left
+                ScrollOffset = widget.Offset - new Vector2(100, 100);
+            }
         }
         
         public void FocusNode(ScadNode node)
@@ -184,7 +188,7 @@ namespace OpenScadGraphEditor.Widgets
         }
         
 
-        public void Render(IScadGraph graph)
+        public void Render(ScadGraph graph)
         {
             Graph = graph;
             
@@ -209,6 +213,9 @@ namespace OpenScadGraphEditor.Widgets
                 // the widget and then connect these widgets.
                 ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
             }
+            
+            // highlight any bound nodes
+            HighlightBoundNodes();
             
             // finally destroy all the widgets that are not in the graph anymore
             // set of Ids of nodes that are in the graph
@@ -481,9 +488,29 @@ namespace OpenScadGraphEditor.Widgets
                     ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
                 }
             }
-
+            HighlightBoundNodes();
         }
 
+        private void HighlightBoundNodes()
+        {
+            var boundNodes = Graph.GetAllNodes().OfType<IAmBoundToOtherNode>().ToList();
+            
+            foreach (var node in boundNodes)
+            {
+                var partnerNodeId = node.OtherNodeId;
+                var partnerNodeWidget = _widgets[partnerNodeId];
+                // if the node's partner node is not currently selected, but the node is selected then highlight the node's partner node, otherwise clear it.
+                if (!_selection.Contains(partnerNodeId) && _selection.Contains(((ScadNode)node).Id))
+                {
+                    partnerNodeWidget.Modulate = Colors.Yellow;
+                }
+                else
+                {
+                    partnerNodeWidget.Modulate = Colors.White;
+                }
+            }
+        }
+        
         private void OnNodeUnselected(ScadNodeWidget node)
         {
             _selection.Remove(node.BoundNode.Id);
@@ -498,6 +525,8 @@ namespace OpenScadGraphEditor.Widgets
                     DisconnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
                 }
             }
+            
+            HighlightBoundNodes();
         }
 
         private void OnDeleteSelection()

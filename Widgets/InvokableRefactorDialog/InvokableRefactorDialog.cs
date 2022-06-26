@@ -358,11 +358,19 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void AddParameter(string name, PortType typeHint, string originalName = null, int originalPortType = -1,
             int originalIndex = -1)
         {
+            var parameterUuid = Guid.NewGuid().ToString();
+            // while we technically don't need it, we give every new item a unique name using the uuid and a string
+            // this makes it easier for the test driver to attach to it.
             var nameEdit = _templateParameterName.Clone();
+            nameEdit.Name = "name-" + parameterUuid;
             var optionButton = _templateParameterTypeHint.Clone();
+            optionButton.Name = "type-" + parameterUuid;
             var deleteButton = _templateParameterDeleteButton.Clone();
+            deleteButton.Name = "delete-" + parameterUuid;
             var upButton = _templateParameterUpButton.Clone();
+            upButton.Name = "up-" + parameterUuid;
             var downButton = _templateParameterDownButton.Clone();
+            downButton.Name = "down-" + parameterUuid;
 
             nameEdit.Visible = true;
             optionButton.Visible = true;
@@ -405,6 +413,9 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             Repaint();
             ValidateAll();
             SetAsMinsize();
+            
+            // give the new  name edit the focus
+            nameEdit.GrabFocus();
         }
 
         private void Repaint()

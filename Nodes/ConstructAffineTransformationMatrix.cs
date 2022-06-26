@@ -47,7 +47,7 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             var scale = RenderInput(context, 0).OrDefault("[1,1,1]");
             var translate = RenderInput(context, 1).OrDefault("[0,0,0]");

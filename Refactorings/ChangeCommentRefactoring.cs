@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly string _title;
         private readonly string _description;
 
-        public ChangeCommentRefactoring(IScadGraph holder, ScadNode node, string title, string description = "") : base(holder, node)
+        public ChangeCommentRefactoring(ScadGraph holder, ScadNode node, string title, string description = "") : base(holder, node)
         {
             _title = title;
             _description = description;

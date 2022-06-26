@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Library.External
     /// <summary>
     /// A reference to an external OpenSCAD file.
     /// </summary>
-    public class ExternalReference : ICanBeRendered
+    public class ExternalReference 
     {
         /// <summary>
         /// Flag indicating whether the file has actually been loaded and the functions and modules and variables

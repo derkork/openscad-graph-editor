@@ -92,7 +92,7 @@ namespace OpenScadGraphEditor.Library.IO
             return result;
         }
         
-        public static SavedGraph ToSavedState(this IScadGraph graph)
+        public static SavedGraph ToSavedState(this ScadGraph graph)
         {
             var result = Prefabs.New<SavedGraph>();
             graph.SaveInto(result);

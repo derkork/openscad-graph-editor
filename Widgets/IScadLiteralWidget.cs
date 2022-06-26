@@ -1,5 +1,4 @@
 using System;
-using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {

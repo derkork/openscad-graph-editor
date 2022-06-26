@@ -7,7 +7,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
     {
         private readonly PortType _newConnectionType;
 
-        public ChangeRerouteTypeRefactoring(IScadGraph holder, ScadNode node, PortType newConnectionType) : base(holder, node)
+        public ChangeRerouteTypeRefactoring(ScadGraph holder, ScadNode node, PortType newConnectionType) : base(holder, node)
         {
             _newConnectionType = newConnectionType;
         }

@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Refactorings
     {
         private readonly Vector2 _newSize;
 
-        public ChangeNodeSizeRefactoring(IScadGraph holder, ScadNode node, Vector2 newSize) : base(holder, node)
+        public ChangeNodeSizeRefactoring(ScadGraph holder, ScadNode node, Vector2 newSize) : base(holder, node)
         {
             _newSize = newSize;
         }

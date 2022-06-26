@@ -27,6 +27,7 @@ namespace OpenScadGraphEditor.Widgets.PortContainer
             _label.Align = left ? Label.AlignEnum.Left : Label.AlignEnum.Right;
             _label.Text = text;
             widget?.MoveToNewParent(_innerContainer);
+            Visible = true;
         }
 
         public void Clear()

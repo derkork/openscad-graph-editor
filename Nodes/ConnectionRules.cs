@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes.ForLoop;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 using Serilog;
@@ -28,19 +26,19 @@ namespace OpenScadGraphEditor.Nodes
         /// </summary>
         static ConnectionRules()
         {
-            // there can only ever be one incoming connection to a port
-            AddConnectRule(it => true,
+            // there can only ever be one incoming connection to a port unless it is a geometry port
+            AddConnectRule(it => !it.IsToPortType(PortType.Geometry),
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
                 it => new DeleteInputConnectionsRefactoring(it.Owner, it.To, it.ToPort));
 
-            // anything that is from a "Flow" port type needs to disconnect the source port (only one flow is allowed)
-            AddConnectRule(it => it.IsFromPortType(PortType.Flow),
-                OperationRuleDecision.Undecided, // this is a side-effect-only rule
-                it => new DeleteOutputConnectionsRefactoring(it.Owner, it.From, it.FromPort));
+            // the same connection may not exist twice
+            AddConnectRule(
+                it => it.Owner.GetAllConnections().Any(c =>
+                    c.From == it.From && c.To == it.To && c.FromPort == it.FromPort && c.ToPort == it.ToPort),
+                OperationRuleDecision.Veto);
 
-            // We can never connect nodes as a circle, unless the node is marked with ICanConnectToMyself, and then
-            // the node is responsible for allowing the connection.
-            AddConnectRule(it =>  !(it.To is ICanConnectToMyself) && WouldCreateCircle(it), OperationRuleDecision.Veto);
+            // We can never connect nodes as a circle
+            AddConnectRule(WouldCreateCircle, OperationRuleDecision.Veto);
 
             // connections of the same type can always be made
             AddConnectRule(it =>
@@ -55,33 +53,31 @@ namespace OpenScadGraphEditor.Nodes
                     it.TryGetToPortType(out var toType) && toType.IsExpressionType(),
                 OperationRuleDecision.Allow
             );
-            
+
             // a connection to "Any" can be made from all expression types
             AddConnectRule(it =>
                     it.TryGetToPortType(out var toType) && toType == PortType.Any &&
                     it.TryGetFromPortType(out var fromType) && fromType.IsExpressionType(),
                 OperationRuleDecision.Allow
             );
-            
+
             // a connection to "Array" can also be made from "Vector3" types (but not the other way around)
             AddConnectRule(it =>
                     it.TryGetToPortType(out var toType) && toType == PortType.Array &&
                     it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector3,
                 OperationRuleDecision.Allow
             );
-            
+
             // same for Vector2
             AddConnectRule(it =>
                     it.TryGetToPortType(out var toType) && toType == PortType.Array &&
                     it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector2,
                 OperationRuleDecision.Allow
             );
-            
         }
 
         public static bool WouldCreateCircle(ScadConnection connection)
         {
-         
             // starting at the given connection, walk the graph and check if we would create a circle
             var openSet = new HashSet<ScadConnection> {connection};
 
@@ -95,7 +91,7 @@ namespace OpenScadGraphEditor.Nodes
                     Log.Warning("Inserting node would create a circle");
                     return true;
                 }
-                
+
                 // now check all outgoing connections of the current node.
                 connection.Owner.GetAllConnections()
                     .Where(it => it.From == current.To)
@@ -104,7 +100,7 @@ namespace OpenScadGraphEditor.Nodes
 
             return false;
         }
-        
+
         public static void AddConnectRule(Predicate<ScadConnection> predicate, OperationRuleDecision decision,
             params Func<ScadConnection, Refactoring>[] refactorings)
         {
@@ -166,6 +162,35 @@ namespace OpenScadGraphEditor.Nodes
                 .Aggregate(OperationResult.Undecided(), CalculateEffectiveResult);
 
             return result.Decision == OperationRuleDecision.Undecided ? OperationResult.Allow() : result;
+        }
+
+        /// <summary>
+        /// Checks if any port of the <see cref="from"/> node can connect to any port of the <see cref="to"/> node.
+        /// Returns the <see cref="ScadConnection"/> object if a connection is possible.
+        /// </summary>
+        public static bool TryGetPossibleConnection(ScadGraph owner, ScadNode from, ScadNode to, PortId filter,
+            out ScadConnection connection)
+        {
+            var sourcePorts = filter.IsOutput ? new[] {filter} : from.OutputPortIds;
+            var destinationPorts = (filter.IsInput ? new[] {filter} : to.InputPortIds).ToList();
+            
+            foreach (var sourcePort in sourcePorts)
+            {
+                foreach (var destinationPort in destinationPorts)
+                {
+                    // build a connection and check if we can use it. If we can, return it.
+                    var scadConnection = new ScadConnection(owner, from, sourcePort.Port, to, destinationPort.Port);
+                    if (CanConnect(scadConnection).Decision != OperationRuleDecision.Allow)
+                    {
+                        continue;
+                    }
+                    connection = scadConnection;
+                    return true;
+                }
+            }
+            
+            connection = default;
+            return false;
         }
 
         private static OperationResult CalculateEffectiveResult(OperationResult first, OperationResult second)
@@ -244,6 +269,5 @@ namespace OpenScadGraphEditor.Nodes
                 return new OperationResult(OperationRuleDecision.Undecided, refactorings);
             }
         }
-        
     }
 }

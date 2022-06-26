@@ -25,14 +25,14 @@ namespace OpenScadGraphEditor.Widgets
             QueueSort();
         }
 
-        public override void BindTo(IScadGraph graph, ScadNode node)
+        public override void BindTo(ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
             Offset = node.Offset;
             RefreshType();
             if (_portType.IsExpressionType())
             {
-                HintTooltip = ((RerouteNode) node).RenderExpressionOutput(graph, 0);
+                HintTooltip = ((RerouteNode) node).Render(graph, 0);
             }
         }
 

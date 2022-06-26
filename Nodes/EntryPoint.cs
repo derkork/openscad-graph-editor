@@ -50,7 +50,7 @@ namespace OpenScadGraphEditor.Nodes
             switch (portType)
             {
                 case PortType.Reroute:
-                case PortType.Flow:
+                case PortType.Geometry:
                     return "";
                 case PortType.Boolean:
                     return "[boolean]";
@@ -70,5 +70,7 @@ namespace OpenScadGraphEditor.Nodes
                     throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
             } 
         }
+
+        public abstract string RenderEntryPoint(string content);
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library.External
 {

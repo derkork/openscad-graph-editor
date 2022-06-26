@@ -1,6 +1,5 @@
 using System;
 using OpenScadGraphEditor.Nodes;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {

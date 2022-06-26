@@ -7,7 +7,7 @@ namespace OpenScadGraphEditor.Nodes
         // indicates the absence of a port type.
         None = 0,
         // do not change the numbers, otherwise saved graphs will break!
-        Flow = 1,
+        Geometry = 1,
         Boolean = 2,
         Number = 3,
         Vector3 = 4,
@@ -24,8 +24,8 @@ namespace OpenScadGraphEditor.Nodes
         {
             switch (self)
             {
-                case PortType.Flow:
-                    return "flow";
+                case PortType.Geometry:
+                    return "geometry";
                 case PortType.Boolean:
                     return "boolean";   
                 case PortType.Number:
@@ -59,7 +59,7 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.String:
                 case PortType.Any:
                     return true;
-                case PortType.Flow:
+                case PortType.Geometry:
                 case PortType.Reroute:
                     return false;
                 default:

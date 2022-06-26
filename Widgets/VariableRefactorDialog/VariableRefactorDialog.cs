@@ -13,7 +13,6 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         public event Action<Refactoring[]> RefactoringsRequested;
 
         private LineEdit _nameEdit;
-        private VariableDescription _baseDescription;
 
         private DialogMode _mode = DialogMode.Edit;
         private Button _okButton;
@@ -52,7 +51,6 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         public void Open(VariableDescription description)
         {
             Clear();
-            _baseDescription = description;
             _mode = DialogMode.Edit;
 
             _nameEdit.Text = description.Name;
@@ -63,7 +61,6 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private void Clear()
         {
-            _baseDescription = null;
             _nameEdit.Text = "";
         }
 
@@ -89,7 +86,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             Hide();
         }
 
-        private void OnIdentifierChanged(string _)
+        private void OnIdentifierChanged([UsedImplicitly] string _)
         {
             ValidateAll();
             SetAsMinsize();

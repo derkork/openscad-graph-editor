@@ -35,12 +35,12 @@ namespace OpenScadGraphEditor.Nodes
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver resolver)
         {
             Size = new Vector2((float) node.GetDataDouble("node_size.x", 100), (float) node.GetDataDouble("node_size.y", 100));
-            CommentTitle = node.GetData("comment_title");
-            CommentDescription = node.GetData("comment_description");
+            CommentTitle = node.GetDataString("comment_title");
+            CommentDescription = node.GetDataString("comment_description");
             base.RestorePortDefinitions(node, resolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
             throw new InvalidOperationException("Comment node cannot be rendered.");
         }

@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Refactorings
     /// </summary>
     public class ToggleWirelessRefactoring : NodeRefactoring
     {
-        public ToggleWirelessRefactoring(IScadGraph holder, RerouteNode node) : base(holder, node)
+        public ToggleWirelessRefactoring(ScadGraph holder, RerouteNode node) : base(holder, node)
         {
         }
 

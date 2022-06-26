@@ -34,7 +34,7 @@ namespace OpenScadGraphEditor.Nodes
                     return LiteralType.String;
                 case PortType.Array:
                 case PortType.Any:
-                case PortType.Flow:
+                case PortType.Geometry:
                 case PortType.Reroute:
                     return LiteralType.None;
                 default:

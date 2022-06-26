@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly bool _enable;
         private readonly Color _newColor;
 
-        public ToggleModifierRefactoring(IScadGraph holder, ScadNode node, ScadNodeModifier modifier, bool enable, Color newColor = default) : base(holder, node)
+        public ToggleModifierRefactoring(ScadGraph holder, ScadNode node, ScadNodeModifier modifier, bool enable, Color newColor = default) : base(holder, node)
         {
             _modifier = modifier;
             _enable = enable;

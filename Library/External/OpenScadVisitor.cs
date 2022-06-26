@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Godot;
-using GodotExt;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library.External

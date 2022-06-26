@@ -1,5 +1,6 @@
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -7,17 +8,17 @@ namespace OpenScadGraphEditor.Nodes
     {
         public VariableDescription VariableDescription { get; private set; }
         public override string NodeTitle => $"Set {VariableDescription?.Name ?? "Variable"}";
-        public override string NodeDescription => "Sets a variable.";
+        public override string NodeDescription => "Sets a variable. Note, that in OpenSCAD variables are global and the last assignment to a variable will be used. This can be counter-intuitive. If you need a temporary variable use a 'let' block.";
 
         
         public SetVariable()
         {
             InputPorts
-                .Flow()
+                .Geometry()
                 .Any("Value");
 
             OutputPorts
-                .Flow();
+                .Geometry();
         }
 
 
@@ -28,9 +29,9 @@ namespace OpenScadGraphEditor.Nodes
                 case 0 when portId.IsInput:
                     return "Input flow";
                 case 1 when portId.IsInput:
-                    return "The value to which the variable should be set.";
+                    return "The value to which the variable should be set";
                 case 0 when portId.IsOutput:
-                    return "Output flow";
+                    return "Output 'geometry'. Variable assignments will not actually output geometry, but this can be used to link the assignment to a specific scope.";
                 default:
                     return "";
             }
@@ -44,15 +45,20 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            VariableDescription = referenceResolver.ResolveVariableReference(node.GetData("variable_description_id")); 
+            VariableDescription = referenceResolver.ResolveVariableReference(node.GetDataString("variable_description_id")); 
             base.RestorePortDefinitions(node, referenceResolver);
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
-            var value = RenderInput(context, 1);
-            var next = RenderOutput(context, 0);
-            return $"{VariableDescription.Name} = {value};\n{next}";
+            if (portIndex != 0)
+            {
+                return "";
+            }
+            
+            var value = RenderInput(context, 1).OrUndef();
+            var before = RenderInput(context, 0);
+            return $"{before}\n{VariableDescription.Name} = {value};";
         }
 
         public void SetupPorts(VariableDescription description)

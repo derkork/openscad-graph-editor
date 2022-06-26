@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Nodes
         public abstract string NodeTitle { get; }
 
         public abstract string NodeDescription { get; }
-        
+
         public string Id { get; private set; } = Guid.NewGuid().ToString();
 
         /// <summary>
@@ -36,7 +36,6 @@ namespace OpenScadGraphEditor.Nodes
 
         private readonly Dictionary<int, IScadLiteral> _outputLiterals =
             new Dictionary<int, IScadLiteral>();
-        
 
 
         /// <summary>
@@ -46,6 +45,9 @@ namespace OpenScadGraphEditor.Nodes
             = new Dictionary<string, string>();
 
 
+        public IEnumerable<PortId> InputPortIds => InputPortCount.Range().Select(PortId.Input);
+        public IEnumerable<PortId> OutputPortIds => OutputPortCount.Range().Select(PortId.Output);
+        
         public bool TryGetLiteral(PortId port, out IScadLiteral result)
         {
             if (port.IsInput)
@@ -204,7 +206,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _inputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
-                    var serializedValue = node.GetData($"input_literal_value.{i}");
+                    var serializedValue = node.GetDataString($"input_literal_value.{i}");
                     // broken literals still seem to happen quite often so we want additional debug output here.
                     try
                     {
@@ -215,6 +217,7 @@ namespace OpenScadGraphEditor.Nodes
                         throw new BrokenFileException(
                             $"Broken literal value for INPUT port {i} in node {Id} ({serializedValue})", e);
                     }
+
                     _inputLiterals[i].IsSet = node.GetDataBool($"input_literal_set.{i}", true);
                 });
             OutputPorts
@@ -222,7 +225,7 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _outputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
-                    var serializedValue = node.GetData($"output_literal_value.{i}");
+                    var serializedValue = node.GetDataString($"output_literal_value.{i}");
                     // broken literals still seem to happen quite often so we want additional debug output here.
                     try
                     {
@@ -233,6 +236,7 @@ namespace OpenScadGraphEditor.Nodes
                         throw new BrokenFileException(
                             $"Broken literal value for OUTPUT port {i} in node {Id}({serializedValue})", e);
                     }
+
                     _outputLiterals[i].IsSet = node.GetDataBool($"output_literal_set.{i}", true);
                 });
         }
@@ -243,55 +247,52 @@ namespace OpenScadGraphEditor.Nodes
             return port.IsInput ? InputPorts[port.Port].PortType : OutputPorts[port.Port].PortType;
         }
 
-        public abstract string Render(IScadGraph context);
+        public abstract string Render(ScadGraph context, int portIndex);
 
-        private string RenderPort(IScadGraph context, PortId port)
+
+        private string RenderPort(ScadGraph context, PortId port)
         {
             if (port.IsInput)
             {
-                // if we have a node connected, render the node
-                if (context.TryGetConnectedNode(this, port, out var node, out var otherPort))
-                {
-                    // there is a specialty for input ports, they may be connected to a multi expression output
-                    // node, so we need to instruct the other node to render the correct output port
-                    if (node is IHaveMultipleExpressionOutputs multiNode)
-                    {
-                        return multiNode.RenderExpressionOutput(context, otherPort.Port);
-                    }
+                // render all output ports of all connected nodes and join them to a single string.
+                var connectedNodes = context.GetAllConnections()
+                    .Where(it => it.IsTo(this, port.Port))
+                    .ToList();
 
-                    return node.Render(context);
-                }
-            }
-            else
-            {
-                // for output nodes we only render connected ports if the port type is "Flow".
-                if (GetPortType(port) == PortType.Flow)
+                if (connectedNodes.Count > 0)
                 {
-                    if (context.TryGetConnectedNode(this, port, out var node, out _))
-                    {
-                        var rendered = node.Render(context);
-                        if (rendered.Empty())
+                    return connectedNodes
+                        .Select(it =>
                         {
-                            return rendered; // if the node is empty, no point adding any modifiers to it.
-                        }
-                        var renderModifier = node.BuildRenderModifier();
-                        if (!renderModifier.Empty())
-                        {
-                            return string.Format(renderModifier, rendered);
-                        }
+                            var rendered = it.From.Render(context, it.FromPort);
+                            if (rendered.Empty())
+                            {
+                                return rendered; // if the node is empty, no point adding any modifiers to it.
+                            }
 
-                        return rendered;
-                    }
+                            var renderModifier = it.From.BuildRenderModifier();
+                            if (!renderModifier.Empty())
+                            {
+                                return string.Format(renderModifier, rendered);
+                            }
+
+                            return rendered;
+                        })
+                        .JoinToString("\n");
                 }
             }
 
-            // try rendering the literal
+            // otherwise try rendering the literal
+            return RenderLiteral(port);
+        }
+        
+        protected string RenderLiteral(PortId port)
+        {
             if (TryGetLiteral(port, out var literal) && (literal.IsSet || GetPortDefinition(port).LiteralIsAutoSet))
             {
                 return literal.RenderedValue;
             }
 
-            // otherwise return nothing
             return "";
         }
 
@@ -339,12 +340,12 @@ namespace OpenScadGraphEditor.Nodes
             return renderModifier;
         }
 
-        protected string RenderInput(IScadGraph context, int index)
+        protected internal string RenderInput(ScadGraph context, int index)
         {
             return RenderPort(context, PortId.Input(index));
         }
 
-        protected string RenderOutput(IScadGraph context, int index)
+        protected string RenderOutput(ScadGraph context, int index)
         {
             return RenderPort(context, PortId.Output(index));
         }
@@ -356,7 +357,6 @@ namespace OpenScadGraphEditor.Nodes
             IScadLiteral literal;
             switch (portDefinition.LiteralType)
             {
-                
                 case LiteralType.Boolean:
                     literal = new BooleanLiteral(portDefinition.DefaultValueAsBoolean);
                     break;

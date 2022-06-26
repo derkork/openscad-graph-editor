@@ -94,9 +94,9 @@ namespace OpenScadGraphEditor.Nodes
         }
 
 
-        public static PortDefinition Flow(string name = "")
+        public static PortDefinition Geometry(string name = "")
         {
-            return new PortDefinition(PortType.Flow, LiteralType.None, name);
+            return new PortDefinition(PortType.Geometry, LiteralType.None, name);
         }
 
         public static PortDefinition Array(string name = "")
@@ -157,9 +157,9 @@ namespace OpenScadGraphEditor.Nodes
             return self;
         }
 
-        public static List<PortDefinition> Flow(this List<PortDefinition> self, string name = "")
+        public static List<PortDefinition> Geometry(this List<PortDefinition> self, string name = "")
         {
-            self.Add(PortDefinition.Flow(name));
+            self.Add(PortDefinition.Geometry(name));
             return self;
         }
 

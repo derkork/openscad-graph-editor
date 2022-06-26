@@ -15,12 +15,11 @@ namespace OpenScadGraphEditor.Nodes
         public Difference()
         {
             InputPorts
-                .Flow();
+                .Geometry("Add")
+                .Geometry("Subtract");
 
             OutputPorts
-                .Flow("Input")
-                .Flow("Subtract")
-                .Flow("After");
+                .Geometry();
         }
 
         public override string GetPortDocumentation(PortId portId)
@@ -28,24 +27,26 @@ namespace OpenScadGraphEditor.Nodes
             switch (portId.Port)
             {
                 case 0 when portId.IsInput:
-                    return "Input flow";
-                case 0 when portId.IsOutput:
                     return "The geometry from which the other geometry should be subtracted.";
-                case 1 when portId.IsOutput:
+                case 1 when portId.IsInput:
                     return "The geometry that should be subtracted from the first geometry.";
-                case 2 when portId.IsOutput:
-                    return "Output flow";
+                case 0 when portId.IsOutput:
+                    return "The result geometry.";
                 default:
                     return "";
             }
         }
 
-        public override string Render(IScadGraph context)
+        public override string Render(ScadGraph context, int portIndex)
         {
-            var first = $"union(){RenderOutput(context, 0).AsBlock()}";
-            var subtract = RenderOutput(context, 1);
-            var after = RenderOutput(context, 2);
-            return $"difference(){(first + "\n" + subtract).AsBlock()}\n{after}";
+            if (portIndex != 0)
+            {
+                return "";
+            }
+            
+            var first = $"union(){RenderInput(context, 0).AsBlock()}";
+            var subtract = RenderInput(context, 1);
+            return $"difference(){(first + "\n" + subtract).AsBlock()}";
         }
     }
 }

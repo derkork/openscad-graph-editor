@@ -15,11 +15,11 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly ScadNode _other;
         private readonly PortId _otherPort;
 
-        public AddNodeRefactoring(IScadGraph holder, ScadNode node) : base(holder, node)
+        public AddNodeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
         
-        public AddNodeRefactoring(IScadGraph holder, ScadNode node, [CanBeNull] ScadNode other, PortId otherPort) : base(holder, node)
+        public AddNodeRefactoring(ScadGraph holder, ScadNode node, [CanBeNull] ScadNode other, PortId otherPort) : base(holder, node)
         {
             _otherPort = otherPort;
             GdAssert.That(other == null || otherPort.IsDefined, "otherPort must be defined when a node is given");
@@ -32,30 +32,20 @@ namespace OpenScadGraphEditor.Refactorings
             
             if (_other != null)
             {
-                // TODO: we could simplify this if we use PortIds all the way.
+                // check if we can make a connection between the two nodes
+                
                 if (_otherPort.IsOutput)
                 {
-                    // try build a connection from the other node to an input port of the new node.
-                    for (var i = 0; i < Node.InputPortCount; i++)
+                    if (ConnectionRules.TryGetPossibleConnection(Holder, _other, Node, _otherPort, out var connection))
                     {
-                        var connection = new ScadConnection(Holder, _other, _otherPort.Port, Node,  i);
-                        if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
-                        {
-                            context.PerformRefactoring(new AddConnectionRefactoring(connection));
-                            break; // only create the first connection
-                        }
+                        context.PerformRefactoring(new AddConnectionRefactoring(connection));
                     }
                 }
-                else
+                else if (_otherPort.IsInput)
                 {
-                    for (var i = 0; i < Node.OutputPortCount; i++)
+                    if (ConnectionRules.TryGetPossibleConnection(Holder,  Node, _other, _otherPort, out var connection))
                     {
-                        var connection = new ScadConnection(Holder, Node, i, _other, _otherPort.Port);
-                        if (ConnectionRules.CanConnect(connection).Decision == ConnectionRules.OperationRuleDecision.Allow)
-                        {
-                            context.PerformRefactoring(new AddConnectionRefactoring(connection));
-                            break; // only create the first connection
-                        }
+                        context.PerformRefactoring(new AddConnectionRefactoring(connection));
                     }
                 }
             }

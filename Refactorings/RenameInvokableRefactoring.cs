@@ -1,6 +1,4 @@
-using System.Linq;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Refactorings
 {

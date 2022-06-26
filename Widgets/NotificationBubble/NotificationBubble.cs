@@ -28,7 +28,7 @@ namespace OpenScadGraphEditor.Widgets.NotificationBubble
             await animationPlayer.FiresSignal("animation_finished");
 
             // 25 letters per second reading speed plus 1 second 
-            await this.Sleep(1 + _text.Length / 25f);
+            await this.SleepSeconds(1 + _text.Length / 25f);
             
             // play fade out animation
             animationPlayer.PlayBackwards("FadeIn");

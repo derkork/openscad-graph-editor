@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Refactorings
         private readonly PortId _port;
         private readonly object _value;
 
-        public SetLiteralValueRefactoring(IScadGraph graph, ScadNode node, PortId port, object value) : base(graph, node)
+        public SetLiteralValueRefactoring(ScadGraph graph, ScadNode node, PortId port, object value) : base(graph, node)
         {
             _port = port;
             _value = value;

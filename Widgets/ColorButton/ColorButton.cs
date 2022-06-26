@@ -7,7 +7,7 @@ namespace OpenScadGraphEditor.Widgets.ColorButton
     [Tool]
     public class ColorButton : Node
     {
-        private Color _color = new Color(1,1,1,1);
+        private Color _color = new Color(1,1,1);
         private ColorRect _colorRect;
 
         public event Action<ColorButton> Pressed;
