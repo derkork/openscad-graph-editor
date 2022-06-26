@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
 using GodotTestDriver.Drivers;
-using OpenScadGraphEditor.Widgets.DocumentationDialog;
 using OpenScadGraphEditor.Widgets.HelpDialog;
 
 namespace OpenScadGraphEditor.Tests.Drivers
