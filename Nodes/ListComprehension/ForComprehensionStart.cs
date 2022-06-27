@@ -13,6 +13,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
     public class ForComprehensionStart : ScadNode, IAmBoundToOtherNode, IAmAListComprehensionExpression, IHaveVariableInputSize
     {
         public override string NodeTitle => "For Comprehension";
+        public override string NodeQuickLookup => "Foco";
         public override string NodeDescription => "Maps a list or range into a new list. Also known as a 'for' list comprehension.";
 
         public int CurrentInputSize { get; private set; } = 1;

@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
     public class LiteralNumber  :ScadNode, IAmAnExpression, IHaveCustomWidget
     {
         public override string NodeTitle => "Number";
+        public override string NodeQuickLookup => "Nbr";
         public override string NodeDescription => "A number.";
 
         public LiteralNumber()

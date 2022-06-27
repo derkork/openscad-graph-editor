@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class OrOperator : BooleanOperator
     {
         public override string NodeTitle => "Or";
+        public override string NodeQuickLookup => "|";
         public override string NodeDescription => "Boolean OR (||)";
         protected override string OperatorSign => "||";
         public override Texture NodeBackground => Resources.OrIcon;

@@ -15,6 +15,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "Split Vector2";
         public override string NodeDescription => "Splits a Vector2 into its components.";
 
+        public override string NodeQuickLookup => "SV2";
+
         public SplitVector2()
         {
             InputPorts

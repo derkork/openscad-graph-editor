@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Comment";
         public override string NodeDescription => "Allows writing comments.";
+        public override string NodeQuickLookup => "Cmmt";
 
         public Vector2 Size { get; set; } = new Vector2(100, 100);
 

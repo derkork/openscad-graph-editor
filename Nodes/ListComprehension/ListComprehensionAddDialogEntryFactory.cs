@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
             ICanPerformRefactorings canPerformRefactorings)
         {
             // add an entry for the for-comprehension loop
-            yield return new BoundPairBasedEntry(Resources.ScadBuiltinIcon, "For-Comprehension",
+            yield return new BoundPairBasedEntry(Resources.ScadBuiltinIcon, "For-Comprehension [Foco]",
                 "for-comprehension, map",
                 NodeFactory.Build<ForComprehensionStart>,
                 NodeFactory.Build<ForComprehensionEnd>,

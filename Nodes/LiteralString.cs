@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
     public class LiteralString  :ScadNode, IAmAnExpression, IHaveCustomWidget
     {
         public override string NodeTitle => "String";
+        public override string NodeQuickLookup => "Stg";
         public override string NodeDescription => "A string.";
 
         public LiteralString()

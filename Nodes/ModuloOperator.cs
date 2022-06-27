@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class ModuloOperator : BinaryOperator
     {
         public override string NodeTitle => "%";
+        public override string NodeQuickLookup => "%";
         public override string NodeDescription => "Calculates the modulus the given inputs.";
         protected override string OperatorSign => "%";
 

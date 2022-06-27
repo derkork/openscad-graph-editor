@@ -10,7 +10,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => $"Set {VariableDescription?.Name ?? "Variable"}";
         public override string NodeDescription => "Sets a variable. Note, that in OpenSCAD variables are global and the last assignment to a variable will be used. This can be counter-intuitive. If you need a temporary variable use a 'let' block.";
 
-        
+        public override string NodeQuickLookup => "Setv";
+
         public SetVariable()
         {
             InputPorts

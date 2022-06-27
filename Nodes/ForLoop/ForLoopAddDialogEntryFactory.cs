@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
         public IEnumerable<IAddDialogEntry> BuildEntries(ScadProject currentProject, ICanPerformRefactorings canPerformRefactorings)
         {
             // add an entry for the for-comprehension loop
-            yield return new BoundPairBasedEntry(Resources.ScadBuiltinIcon, "For loop",
+            yield return new BoundPairBasedEntry(Resources.ScadBuiltinIcon, "For loop [Frlp]",
                 "for-loop, iterate, iteration",
                 NodeFactory.Build<ForLoopStart>,
                 NodeFactory.Build<ForLoopEnd>,

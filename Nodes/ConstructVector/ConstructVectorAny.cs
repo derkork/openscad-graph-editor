@@ -5,6 +5,8 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
     [UsedImplicitly]
     public class ConstructVectorAny : ConstructVector
     {
+        public override string NodeQuickLookup => "VCA";
+
         public ConstructVectorAny() : base(PortType.Any)
         {
         }

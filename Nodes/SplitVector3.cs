@@ -14,6 +14,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Split Vector3";
         public override string NodeDescription => "Splits a Vector3 into its components.";
+        public override string NodeQuickLookup => "SV3";
 
         public SplitVector3()
         {

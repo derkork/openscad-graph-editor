@@ -27,9 +27,11 @@ namespace OpenScadGraphEditor.Library
             return builder;
         }
 
-        public static ModuleBuilder NewBuiltInModule(string name, string nodeName = "", string idSuffix = "")
+        public static ModuleBuilder NewBuiltInModule(string name, string quickNodeLookup, string nodeName = "",
+            string idSuffix = "")
         {
             var builder = NewModule(name, "__builtin__module__" + name + idSuffix);
+            builder._currentModuleDescription.QuickNodeLookup = quickNodeLookup;
             builder._currentModuleDescription.IsBuiltin = true;
             builder._currentModuleDescription.NodeName = nodeName;
             return builder;

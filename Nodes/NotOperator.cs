@@ -13,6 +13,7 @@ namespace OpenScadGraphEditor.Nodes
     public class NotOperator : ScadNode, IAmAnExpression, IHaveCustomWidget,IHaveNodeBackground
     {
         public override string NodeTitle => "Not";
+        public override string NodeQuickLookup => "!!";
         public override string NodeDescription => "Negates a boolean value (boolean NOT, !).";
 
 

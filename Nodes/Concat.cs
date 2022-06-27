@@ -14,6 +14,7 @@ namespace OpenScadGraphEditor.Nodes
     public class Concat : ScadNode, IAmAnExpression, IHaveVariableInputSize
     {
         public override string NodeTitle => "Concat";
+        public override string NodeQuickLookup => "VCct";
         public override string NodeDescription => "Return a new vector that is the result of appending the supplied elements.";
 
         // variable size properties

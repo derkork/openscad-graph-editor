@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Library
         /// Whether or not this module supports children 
         /// </summary>
         public bool SupportsChildren { get; set; }
+        
 
         public override bool CanUse(ScadNode node)
         {

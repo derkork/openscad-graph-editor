@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Nodes.Let
     public class LetBlockEnd : ScadNode, IAmBoundToOtherNode
     {
         public override string NodeTitle => "End Let";
+        public override string NodeQuickLookup => "";
         public override string NodeDescription  => "Collects the geometry from the let block and returns it";
 
         public string OtherNodeId { get; set; }

@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class SubtractOperator : SwitchableBinaryOperator.SwitchableBinaryOperator
     {
         public override string NodeTitle => "-";
+        public override string NodeQuickLookup => "--";
         public override string NodeDescription => "Subtracts the given inputs.";
         protected override string OperatorSign => "-";
 

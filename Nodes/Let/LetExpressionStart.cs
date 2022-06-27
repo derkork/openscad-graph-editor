@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Nodes.Let
     public class LetExpressionStart : ScadNode, IAmAnExpression, IAmBoundToOtherNode, IHaveVariableInputSize
     {
         public override string NodeTitle => "Let";
+        public override string NodeQuickLookup => "Ltex";
         public override string NodeDescription  => "Allows to define temporary variables inside of an expression";
         public int CurrentInputSize { get; private set; } = 1;
         public int InputPortOffset => 0;

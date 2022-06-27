@@ -13,7 +13,8 @@ namespace OpenScadGraphEditor.Nodes
     public class PairwiseMultiplyVector3 : ScadNode, IAmAnExpression, IHaveCustomWidget, IHaveNodeBackground
     {
         public override string NodeTitle => "Pairwise multiply (Vector3)";
-        
+        public override string NodeQuickLookup => "V3Pm";
+
         public override string NodeDescription => "Multiplies the given two vectors pairwise (each element of the first vector is multiplied with the corresponding element of the second vector).";
 
         

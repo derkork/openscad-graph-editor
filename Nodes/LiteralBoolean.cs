@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
     public class LiteralBoolean  :ScadNode, IAmAnExpression, IHaveCustomWidget
     {
         public override string NodeTitle => "Boolean";
+        public override string NodeQuickLookup => "Bol";
         public override string NodeDescription => "A boolean.";
 
         public LiteralBoolean()

@@ -27,10 +27,11 @@ namespace OpenScadGraphEditor.Library
             return builder;
         }
 
-        public static FunctionBuilder NewBuiltInFunction(string name, string nodeName = "",
+        public static FunctionBuilder NewBuiltInFunction(string name, string quickNodeLookup, string nodeName = "",
             PortType returnType = PortType.Any, string idSuffix = "", string returnValueDescription = "")
         {
             var builder = NewFunction(name, "__builtin__function__" + name + idSuffix, returnType, returnValueDescription);
+            builder._currentFunctionDescription.QuickNodeLookup = quickNodeLookup;
             builder._currentFunctionDescription.IsBuiltin = true;
             builder._currentFunctionDescription.NodeName = nodeName;
             return builder;

@@ -14,6 +14,7 @@ namespace OpenScadGraphEditor.Nodes
     public class Min : ScadNode, IAmAnExpression, IHaveVariableInputSize
     {
         public override string NodeTitle => "Min";
+        public override string NodeQuickLookup => "Mn";
         public override string NodeDescription => "Returns the minimum of the input values.";
 
         public int CurrentInputSize { get; private set; } = 1;

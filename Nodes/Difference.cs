@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class Difference : ScadNode, ICanHaveModifier
     {
         public override string NodeTitle => "Difference";
+        public override string NodeQuickLookup => "Dfr";
 
         public override string NodeDescription =>
             "Subtracts the child nodes from the first one (logical and not).";

@@ -6,6 +6,7 @@ namespace OpenScadGraphEditor.Nodes
     public class GetVariable : ScadNode, IReferToAVariable, IAmAnExpression
     {
         public VariableDescription VariableDescription { get; private set; }
+        public override string NodeQuickLookup => "Getv";
         public override string NodeTitle => $"Get {VariableDescription?.Name ?? "Variable"}";
         public override string NodeDescription => "Gets a variable's value.";
 

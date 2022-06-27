@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
     public class ForLoopEnd : ScadNode, ICanHaveModifier, IAmBoundToOtherNode
     {
         public override string NodeTitle => "End Loop";
+        public override string NodeQuickLookup => "";
         public override string NodeDescription => "Collects the generated geometry from the loop.";
 
         public string OtherNodeId { get; set; }

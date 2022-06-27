@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Children";
         public override string NodeDescription => "Renders all children or a subset of all children of a module.";
+        public override string NodeQuickLookup => "MCld";
 
         public Children()
         {

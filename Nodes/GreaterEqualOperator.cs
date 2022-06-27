@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class GreaterEqualOperator : BinaryComparisonOperator
     {
         public override string NodeTitle => ">=";
+        public override string NodeQuickLookup => "gte";
         public override string NodeDescription => "Compares if the first operand is greater than or equal to the second operand.";
         protected override string OperatorSign => ">=";
 

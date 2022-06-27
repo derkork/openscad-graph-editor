@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         private readonly Func<ScadNode> _factory;
         private readonly ICanPerformRefactorings _canPerformRefactorings;
 
-        public string Title => _template.NodeTitle;
+        public string Title => _template.NodeTitle + (_template.NodeQuickLookup.Length > 0 ?  " [" + _template.NodeQuickLookup + "]" : "");
         public string Keywords => _template.NodeDescription;
         public Action<RequestContext> Action => OnEntrySelected;
 

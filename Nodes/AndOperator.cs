@@ -9,7 +9,9 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "And";
         public override string NodeDescription => "Boolean AND (&&)";
+        public override string NodeQuickLookup => "&";
         protected override string OperatorSign => "&&";
+        
         public override Texture NodeBackground => Resources.AndIcon;
     }
 }

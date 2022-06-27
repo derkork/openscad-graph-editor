@@ -31,31 +31,31 @@ namespace OpenScadGraphEditor.Library
             {
                 // 2D Modules
                 // circle (radius)
-                ModuleBuilder.NewBuiltInModule("circle", "Circle (Radius)", "radius")
+                ModuleBuilder.NewBuiltInModule("circle", "CirR", nodeName: "Circle (Radius)", idSuffix: "radius")
                     .WithDescription("Creates a circle at the origin.")
                     .WithParameter("r", PortType.Number, label: "Radius", optional: true, description: "The radius of the circle.")
                     .WithFragmentParameters()
                     .Build(),
                 // circle (diameter)
-                ModuleBuilder.NewBuiltInModule("circle", "Circle (Diameter)", "diameter")
+                ModuleBuilder.NewBuiltInModule("circle", "CirD", nodeName: "Circle (Diameter)", idSuffix: "diameter")
                     .WithDescription("Creates a circle at the origin.")
                     .WithParameter("d", PortType.Number, label: "Diameter", optional: true, description: "The diameter of the circle.")
                     .WithFragmentParameters()
                     .Build(),
                 // square
-                ModuleBuilder.NewBuiltInModule("square", "Square")
+                ModuleBuilder.NewBuiltInModule("square", "Sqa", nodeName: "Square")
                     .WithDescription("Creates a square at the origin.")
                     .WithParameter("size", PortType.Number, label: "Size", optional: true, description: "The length of the sides of the square.")
                     .WithParameter("center", PortType.Boolean, label: "Center", optional: true, description: "Whether to center the square at the origin.")
                     .Build(),
                 // rectangle
-                ModuleBuilder.NewBuiltInModule("square", "Rectangle", "rectangle")
+                ModuleBuilder.NewBuiltInModule("square", "Rtl", nodeName: "Rectangle", idSuffix: "rectangle")
                     .WithDescription("Creates a rectangle or square at the origin.")
                     .WithParameter("size", PortType.Vector2, label: "Size", optional: true, description: "The length of the sides of the rectangle.")
                     .WithParameter("center", PortType.Boolean, label: "Center", optional: true, description: "Whether to center the rectangle at the origin.")
                     .Build(),
                 // polygon
-                ModuleBuilder.NewBuiltInModule("polygon", "Polygon")
+                ModuleBuilder.NewBuiltInModule("polygon", "Plyg", nodeName: "Polygon")
                     .WithDescription("Creates a polygon.")
                     .WithParameter("points", PortType.Array, label: "Points", optional: true, description: "The points of the polygon. You can use a 'Construct Vector (Vector2)' node to build these.")
                     .WithParameter("paths", PortType.Array, label: "Paths", optional: true, description: "The paths. Can be empty, a single vector or a vector of vectors.")
@@ -63,14 +63,14 @@ namespace OpenScadGraphEditor.Library
                     .Build(),
 
                 // projection
-                ModuleBuilder.NewBuiltInModule("projection", "Projection")
+                ModuleBuilder.NewBuiltInModule("projection", "Pjn", nodeName: "Projection")
                     .WithDescription("Creates a 2D drawing from a 3D model. Projects a 3D model to the (x,y) plane, with z at 0.")
                     .WithParameter("cut", PortType.Boolean, label: "Cut", optional: true, description: "If cut=true, only points with z=0 are considered (effectively cutting the object), with cut=false(the default), points above and below the plane are considered as well (creating a proper projection)")
                     .WithChildren()
                     .Build(),
                 
                 // text
-                ModuleBuilder.NewBuiltInModule("text", "Text")
+                ModuleBuilder.NewBuiltInModule("text", "Txt", nodeName: "Text")
                     .WithDescription("Creates text as a 2D geometric object, using fonts installed on the local system or provided as separate font file")
                     .WithParameter("text", PortType.String, label: "Text", description: "The text to generate.")
                     .WithParameter("size", PortType.Number, label: "Size", optional: true, description: " The generated text has an ascent (height above the baseline) of approximately the given value. Different fonts can vary somewhat and may not fill the size specified exactly, typically they render slightly smaller.")
@@ -86,25 +86,25 @@ namespace OpenScadGraphEditor.Library
                 
                 // 3D Modules
                 // cube
-                ModuleBuilder.NewBuiltInModule("cube", "Cube")
+                ModuleBuilder.NewBuiltInModule("cube", "Cbe", nodeName: "Cube")
                     .WithDescription("Creates a cube in the first octant.When center is true, the cube is centered on the origin.")
                     .WithParameter("size", PortType.Vector3, label: "Size", optional: true, description: "Size of the cube.")
                     .WithParameter("center", PortType.Boolean, label: "Center", optional: true, description: "Whether to center the cube on the origin.")
                     .Build(),
                 // sphere
-                ModuleBuilder.NewBuiltInModule("sphere", "Sphere (Radius)", "radius")
+                ModuleBuilder.NewBuiltInModule("sphere", "SphR", nodeName: "Sphere (Radius)", idSuffix: "radius")
                     .WithDescription("Creates a sphere.")
                     .WithParameter("r", PortType.Number, label: "Radius", optional: true, description: "The radius of the sphere.")
                     .WithFragmentParameters()
                     .Build(),
                 // sphere (diameter)
-                ModuleBuilder.NewBuiltInModule("sphere", "Sphere (Diameter)", "diameter")
+                ModuleBuilder.NewBuiltInModule("sphere", "SphD", nodeName: "Sphere (Diameter)", idSuffix: "diameter")
                     .WithDescription("Creates a sphere.")
                     .WithParameter("d", PortType.Number, label: "Diameter", optional: true, description: "The diameter of the sphere.")
                     .WithFragmentParameters()
                     .Build(),
                 // cylinder (radius)
-                ModuleBuilder.NewBuiltInModule("cylinder", "Cylinder (Radius)", "radius")
+                ModuleBuilder.NewBuiltInModule("cylinder", "CylR", nodeName: "Cylinder (Radius)", idSuffix: "radius")
                     .WithDescription("Creates a cylinder.")
                     .WithParameter("h", PortType.Number, label: "Height", optional: true, description: "The height of the cylinder.")
                     .WithParameter("r", PortType.Number, label: "Radius", optional: true, description: "The radius of the cylinder.")
@@ -112,7 +112,7 @@ namespace OpenScadGraphEditor.Library
                     .WithFragmentParameters()
                     .Build(),
                 // cylinder diameter
-                ModuleBuilder.NewBuiltInModule("cylinder", "Cylinder (Diameter)", "diameter")
+                ModuleBuilder.NewBuiltInModule("cylinder", "CylD", nodeName: "Cylinder (Diameter)", idSuffix: "diameter")
                     .WithDescription("Creates a cylinder.")
                     .WithParameter("h", PortType.Number, label: "Height", optional: true, description: "The height of the cylinder.")
                     .WithParameter("d", PortType.Number, label: "Diameter", optional: true, description: "The diameter of the cylinder.")
@@ -120,7 +120,7 @@ namespace OpenScadGraphEditor.Library
                     .WithFragmentParameters()
                     .Build(),
                 // cone (radius)
-                ModuleBuilder.NewBuiltInModule("cylinder", "Cone (Radius)", "cone_radius")
+                ModuleBuilder.NewBuiltInModule("cylinder", "CnR", nodeName: "Cone (Radius)", idSuffix: "cone_radius")
                     .WithDescription("Creates a cone (or cylinder).")
                     .WithParameter("h", PortType.Number, label: "Height", optional: true, description: "The height of the cone.")
                     .WithParameter("r1", PortType.Number, label: "Radius 1", optional: true, description: "The radius of the base of the cone.")
@@ -129,7 +129,7 @@ namespace OpenScadGraphEditor.Library
                     .WithFragmentParameters()
                     .Build(),
                 // cone(diameter)
-                ModuleBuilder.NewBuiltInModule("cylinder", "Cone (Diameter)", "cone_diameter")
+                ModuleBuilder.NewBuiltInModule("cylinder", "CnD", nodeName: "Cone (Diameter)", idSuffix: "cone_diameter")
                     .WithDescription("Creates a cone (or cylinder).")
                     .WithParameter("h", PortType.Number, label: "Height", optional: true, description: "The height of the cone.")
                     .WithParameter("d1", PortType.Number, label: "Diameter 1", optional: true, description: "The diameter of the base of the cone.")
@@ -138,14 +138,14 @@ namespace OpenScadGraphEditor.Library
                     .WithFragmentParameters()
                     .Build(),
                 // polyhedron
-                ModuleBuilder.NewBuiltInModule("polyhedron", "Polyhedron")
+                ModuleBuilder.NewBuiltInModule("polyhedron", "Phed", nodeName: "Polyhedron")
                     .WithDescription("Creates a polyhedron.")
                     .WithParameter("points", PortType.Vector3, label: "Points", optional: true, description: "The points of the polyhedron. You can use a 'Construct Vector (Vector3) node to create the points.")
                     .WithParameter("faces", PortType.Vector3, label: "Faces", optional: true, description: "The faces of the polyhedron. Each face is a vector containing the indices (0 based) of 3 or more points from the points vector. Faces may be defined in any order. Define enough faces to fully enclose the solid, with no overlap. All faces must have points ordered in clockwise direction when looking at each face from outside inward.")
                     .WithParameter("convexity", PortType.Number, label: "Convexity", optional: true, description: "The convexity parameter specifies the maximum number of faces a ray intersecting the object might penetrate.  For display problems, setting it to 10 should work fine for most cases.")
                     .Build(),
                 // linear extrude
-                ModuleBuilder.NewBuiltInModule("linear_extrude", "Linear Extrude")
+                ModuleBuilder.NewBuiltInModule("linear_extrude", "LiEx", nodeName: "Linear Extrude")
                     .WithDescription(
                         "Linear Extrusion is an operation that takes a 2D object as input and generates a 3D object as a result.")
                     .WithParameter("height", PortType.Number, label: "Height", optional: true, description: "The height of the extrusion.")
@@ -158,7 +158,7 @@ namespace OpenScadGraphEditor.Library
                     .WithChildren()
                     .Build(),
                 // rotate_extrude
-                ModuleBuilder.NewBuiltInModule("rotate_extrude", "Rotate Extrude")
+                ModuleBuilder.NewBuiltInModule("rotate_extrude", "RoEx", nodeName: "Rotate Extrude")
                     .WithDescription("Rotational extrusion spins a 2D shape around the Z-axis to form a solid which has rotational symmetry.")
                     .WithParameter("angle", PortType.Number, label: "Angle", optional: true, description: "The angle of rotation in degrees.")
                     .WithParameter("convexity", PortType.Number, label: "Convexity", optional: true, description: "The convexity parameter specifies the maximum number of faces a ray intersecting the object might penetrate.  For display problems, setting it to 10 should work fine for most cases.")
@@ -167,69 +167,69 @@ namespace OpenScadGraphEditor.Library
                     .Build(),
                 // Transformations
                 // translate
-                ModuleBuilder.NewBuiltInModule("translate", "Translate")
+                ModuleBuilder.NewBuiltInModule("translate", "Tns", nodeName: "Translate")
                     .WithDescription("Translates (moves) its child elements along the specified offset.")
                     .WithParameter("v", PortType.Vector3, label: "Offset", description: "How much to translate the object in each direction.")
                     .WithChildren()
                     .Build(),
                 // rotate (axis/angle)
-                ModuleBuilder.NewBuiltInModule("rotate", "Rotate (Axis/Angle)", "axis_angle")
+                ModuleBuilder.NewBuiltInModule("rotate", "Raa", nodeName: "Rotate (Axis/Angle)", idSuffix: "axis_angle")
                     .WithDescription("Rotates the next elements along the given axis and angle.")
                     .WithParameter("v", PortType.Vector3, label: "Axis", description: "The axis around which to rotate.")
                     .WithParameter("a", PortType.Number, label: "Angle", description: "The angle of rotation in degrees.")
                     .WithChildren()
                     .Build(),
                 // rotate (euler angles)
-                ModuleBuilder.NewBuiltInModule("rotate", "Rotate (Euler Angles)", "euler_angles")
+                ModuleBuilder.NewBuiltInModule("rotate", "Reua", nodeName: "Rotate (Euler Angles)", idSuffix: "euler_angles")
                     .WithDescription("Rotates the next elements along the given Euler angles.")
                     .WithParameter("a", PortType.Vector3, label: "Euler Angles", description: "Rotation angles around the global X,Y and Z axis in degrees.")
                     .WithChildren()
                     .Build(),
                 // scale
-                ModuleBuilder.NewBuiltInModule("scale", "Scale")
+                ModuleBuilder.NewBuiltInModule("scale", "Scl", nodeName: "Scale")
                     .WithDescription("Scales its child elements using specified scale vector.")
                     .WithParameter("v", PortType.Vector3, label: "Scale", description: "How much to scale the object in each direction.")
                     .WithChildren()
                     .Build(),
                 // resize
-                ModuleBuilder.NewBuiltInModule("resize", "Resize")
+                ModuleBuilder.NewBuiltInModule("resize", "Rsz", nodeName: "Resize")
                     .WithDescription("Modifies the size of the child object to match the given x,y, and z size.")
                     .WithParameter("newsize", PortType.Vector3, label: "New size", description: "The new size of the object. If x,y, or z is 0 then that dimension is left as-is.")
                     .WithParameter("auto", PortType.Any, label: "Auto", optional: true, description: "If it is set to true, it auto-scales any 0-dimensions to match. This can also be a vector with 3 booleans which allows you to specify the auto behaviour per axis.")
                     .WithChildren()
                     .Build(),
                 // mirror
-                ModuleBuilder.NewBuiltInModule("mirror", "Mirror")
+                ModuleBuilder.NewBuiltInModule("mirror", "Mrr", nodeName: "Mirror")
                     .WithDescription("Mirrors the child element on a plane through the origin.")
                     .WithParameter("v", PortType.Vector3, label: "Normal", description: "The normal vector of the plane at which to mirror.")
                     .WithChildren()
                     .Build(),
                 // multmatrix
-                ModuleBuilder.NewBuiltInModule("multmatrix", "Multmatrix")
+                ModuleBuilder.NewBuiltInModule("multmatrix", "MuMa", nodeName: "Multmatrix")
                     .WithDescription("Multiplies the geometry of all child elements with the given affine transformation matrix.")
                     .WithParameter("m", PortType.Array, label: "Matrix", description: "The affine transformation matrix. You can use the 'Construct Matrix' module to create one.")
                     .WithChildren()
                     .Build(),
                 // offset (radius)
-                ModuleBuilder.NewBuiltInModule("offset", "Offset (Radius)", "radius")
+                ModuleBuilder.NewBuiltInModule("offset", "OffR", nodeName: "Offset (Radius)", idSuffix: "radius")
                     .WithDescription("Generates a new 2d interior or exterior outline from an existing outline. This mode produces round corners.")
                     .WithParameter("r", PortType.Number, label: "Radius", description: "The radius of the corners.")
                     .WithChildren()
                     .Build(),
                 // offset (delta)
-                ModuleBuilder.NewBuiltInModule("offset", "Offset (Delta)", "delta")
+                ModuleBuilder.NewBuiltInModule("offset", "OffD", nodeName: "Offset (Delta)", idSuffix: "delta")
                     .WithDescription("Generates a new 2d interior or exterior outline from an existing outline. This mode produces angled corners.")
                     .WithParameter("delta", PortType.Number, label: "Delta", description: "Delta specifies the distance of the new outline from the original outline.")
                     .WithParameter("chamfer", PortType.Boolean, label: "Chamfer", optional: true, description: "This flag defines if edges should be chamfered (cut off with a straight line) or not (extended to their intersection).")
                     .WithChildren()
                     .Build(),
                 // hull
-                ModuleBuilder.NewBuiltInModule("hull", "Hull")
+                ModuleBuilder.NewBuiltInModule("hull", "Hll", nodeName: "Hull")
                     .WithDescription("Displays the convex hull of child nodes.")
                     .WithChildren()
                     .Build(),
                 // minkowski
-                ModuleBuilder.NewBuiltInModule("minkowski", "Minkowski")
+                ModuleBuilder.NewBuiltInModule("minkowski", "Mkow", nodeName: "Minkowski")
                     .WithDescription("Displays the minkowski sum of child nodes.")
                     .WithChildren()
                     .Build(),
@@ -243,90 +243,90 @@ namespace OpenScadGraphEditor.Library
             Functions = new List<FunctionDescription>()
             {
                 // abs
-                FunctionBuilder.NewBuiltInFunction("abs", "Abs", PortType.Number, returnValueDescription: "The absolute value of the input.")
+                FunctionBuilder.NewBuiltInFunction("abs", "Abs", nodeName: "Abs", returnType: PortType.Number, returnValueDescription: "The absolute value of the input.")
                     .WithDescription("Returns the absolute value of a number.")
                     .WithParameter("number", PortType.Number, description: "The number to take the absolute value of.")
                     .Build(),
                 // sign
-                FunctionBuilder.NewBuiltInFunction("sign", "Sign", PortType.Number, returnValueDescription: "-1 if the input is negative, 0 if the input is zero, and 1 if the input is positive.")
+                FunctionBuilder.NewBuiltInFunction("sign", "Sgn", nodeName: "Sign", returnType: PortType.Number, returnValueDescription: "-1 if the input is negative, 0 if the input is zero, and 1 if the input is positive.")
                     .WithDescription("Returns the sign of a number.")
                     .WithParameter("number", PortType.Number, description: "The number to take the sign of.")
                     .Build(),
                 // sin
-                FunctionBuilder.NewBuiltInFunction("sin", "Sin", PortType.Number, returnValueDescription: "The sine of the input.")
+                FunctionBuilder.NewBuiltInFunction("sin", "Sni", nodeName: "Sin", returnType: PortType.Number, returnValueDescription: "The sine of the input.")
                     .WithDescription("Returns the sine of an angle given in degrees.")
                     .WithParameter("degrees", PortType.Number, description: "The angle in degrees.")
                     .Build(),
                 // cos
-                FunctionBuilder.NewBuiltInFunction("cos", "Cos", PortType.Number, returnValueDescription: "The cosine of the input.")
+                FunctionBuilder.NewBuiltInFunction("cos", "Cso", nodeName: "Cos", returnType: PortType.Number, returnValueDescription: "The cosine of the input.")
                     .WithDescription("Returns the cosine of an angle given in degrees.")
                     .WithParameter("degrees", PortType.Number, description: "The angle in degrees.")
                     .Build(),
                 // tan
-                FunctionBuilder.NewBuiltInFunction("tan", "Tan", PortType.Number, returnValueDescription: "The tangent of the input.")
+                FunctionBuilder.NewBuiltInFunction("tan", "Tna", nodeName: "Tan", returnType: PortType.Number, returnValueDescription: "The tangent of the input.")
                     .WithDescription("Returns the tangent of an angle given in degrees.")
                     .WithParameter("degrees", PortType.Number, description: "The angle in degrees.")
                     .Build(),
                 // acos
-                FunctionBuilder.NewBuiltInFunction("acos", "Acos", PortType.Number, returnValueDescription: "The arccosine of the input expressed in degrees.")
+                FunctionBuilder.NewBuiltInFunction("acos", "Acs", nodeName: "Acos", returnType: PortType.Number, returnValueDescription: "The arccosine of the input expressed in degrees.")
                     .WithDescription("Returns the arccosine of a number (this is the inverse of cosine).")
                     .WithParameter("number", PortType.Number, description: "The number to take the arccosine of.")
                     .Build(),
                 // asin
-                FunctionBuilder.NewBuiltInFunction("asin", "Asin", PortType.Number, returnValueDescription: "The arcsine of the input expressed in degrees." )
+                FunctionBuilder.NewBuiltInFunction("asin", "Asn", nodeName: "Asin", returnType: PortType.Number, returnValueDescription: "The arcsine of the input expressed in degrees." )
                     .WithDescription("Returns the arcsine of a number (this is the inverse of sine).")
                     .WithParameter("number", PortType.Number, description: "The number to take the arcsine of.")
                     .Build(),
                 // atan
-                FunctionBuilder.NewBuiltInFunction("atan", "Atan", PortType.Number, returnValueDescription: "The arctangent of the input expressed in degrees.")
+                FunctionBuilder.NewBuiltInFunction("atan", "Atn", nodeName: "Atan", returnType: PortType.Number, returnValueDescription: "The arctangent of the input expressed in degrees.")
                     .WithDescription("Returns the arctangent of a number (this is the inverse of tangent).")
                     .WithParameter("number", PortType.Number, description: "The number to take the arctangent of.")
                     .Build(),
                 // atan2
-                FunctionBuilder.NewBuiltInFunction("atan2", "Atan2", PortType.Number, returnValueDescription: "The full angle (0-360) made between the x axis and the vector(x,y) expressed in degrees")
+                FunctionBuilder.NewBuiltInFunction("atan2", "2Atan", nodeName: "Atan2", returnType: PortType.Number, returnValueDescription: "The full angle (0-360) made between the x axis and the vector(x,y) expressed in degrees")
                     .WithDescription(
                         "Returns the arctangent of number. Variant with two parameters that spans the whole 360 degrees.")
                     .WithParameter("x", PortType.Number, description: "The x component of the vector.")
                     .WithParameter("y", PortType.Number, description: "The y component of the vector." )
                     .Build(),
                 // floor
-                FunctionBuilder.NewBuiltInFunction("floor", "Floor", PortType.Number, returnValueDescription: "The largest integer less than or equal to the input.")
+                FunctionBuilder.NewBuiltInFunction("floor", "Flr", nodeName: "Floor", returnType: PortType.Number, returnValueDescription: "The largest integer less than or equal to the input.")
                     .WithDescription("Returns the largest integer less than or equal to a number.")
                     .WithParameter("number", PortType.Number, description: "The number to round down.")
                     .Build(),
                 // round
-                FunctionBuilder.NewBuiltInFunction("round", "Round", PortType.Number, returnValueDescription: "The nearest integer to the input.")
+                FunctionBuilder.NewBuiltInFunction("round", "Rnd", nodeName: "Round", returnType: PortType.Number, returnValueDescription: "The nearest integer to the input.")
                     .WithDescription("Returns the nearest integer to a number.")
                     .WithParameter("number", PortType.Number, description: "The number to round.")
                     .Build(),
                 // ceil
-                FunctionBuilder.NewBuiltInFunction("ceil", "Ceil", PortType.Number, returnValueDescription: "The smallest integer greater than or equal to the input.")
+                FunctionBuilder.NewBuiltInFunction("ceil", "Ceil", nodeName: "Ceil", returnType: PortType.Number, returnValueDescription: "The smallest integer greater than or equal to the input.")
                     .WithDescription("Returns the smallest integer greater than or equal to a number.")
                     .WithParameter("number", PortType.Number, description: "The number to round up.")
                     .Build(),
                 // ln
-                FunctionBuilder.NewBuiltInFunction("ln", "Ln", PortType.Number, returnValueDescription: "The natural logarithm of the input.")
+                FunctionBuilder.NewBuiltInFunction("ln", "nLn", nodeName: "Ln", returnType: PortType.Number, returnValueDescription: "The natural logarithm of the input.")
                     .WithDescription("Returns the natural logarithm of a number.")
                     .WithParameter("number", PortType.Number, description: "The number to take the natural logarithm of.")
                     .Build(),
                 // len
-                FunctionBuilder.NewBuiltInFunction("len", "Len", PortType.Number, returnValueDescription: "The length of the input.")
+                FunctionBuilder.NewBuiltInFunction("len", "Lnn", nodeName: "Len", returnType: PortType.Number, returnValueDescription: "The length of the input.")
                     .WithDescription("Returns the length of a string, vector or array.")
                     .WithParameter("value", PortType.Any, description: "The value to get the length of.")
                     .Build(),
                 // log
-                FunctionBuilder.NewBuiltInFunction("log", "Log", PortType.Number, returnValueDescription: "The base 10 logarithm of the input.")
+                FunctionBuilder.NewBuiltInFunction("log", "oLn", nodeName: "Log", returnType: PortType.Number, returnValueDescription: "The base 10 logarithm of the input.")
                     .WithDescription("Returns the base 10 logarithm of a number.")
                     .WithParameter("number", PortType.Number, description: "The number to take the logarithm of.")
                     .Build(),
                 // sqrt
-                FunctionBuilder.NewBuiltInFunction("sqrt", "Sqrt", PortType.Number, returnValueDescription: "The square root of the input.")
+                FunctionBuilder.NewBuiltInFunction("sqrt", "Sqrt", nodeName: "Sqrt", returnType: PortType.Number, returnValueDescription: "The square root of the input.")
                     .WithDescription("Returns the square root of a number.")
                     .WithParameter("number", PortType.Number, description: "The number to take the square root of.")
                     .Build(),
 
                 // rands
-                FunctionBuilder.NewBuiltInFunction("rands", "Rands", PortType.Array, returnValueDescription: "A vector of random numbers.")
+                FunctionBuilder.NewBuiltInFunction("rands", "Rds", nodeName: "Rands", returnType: PortType.Array, returnValueDescription: "A vector of random numbers.")
                     .WithDescription(
                         "Random number generator. Generates a constant vector of pseudo random numbers, much like an array. The numbers are doubles not integers.")
                     .WithParameter("min_value", PortType.Number, description: "The minimum value of the random numbers.")
@@ -335,13 +335,13 @@ namespace OpenScadGraphEditor.Library
                     .WithParameter("seed", PortType.Number, optional: true, description: "The seed to use for the random number generator.")
                     .Build(),
                 // norm
-                FunctionBuilder.NewBuiltInFunction("norm", "Norm", PortType.Number, returnValueDescription: "The norm of the input (e.g. the length of the vector).")
+                FunctionBuilder.NewBuiltInFunction("norm", "Norm", nodeName: "Norm", returnType: PortType.Number, returnValueDescription: "The norm of the input (e.g. the length of the vector).")
                     .WithDescription("Returns the norm of a vector. Note this returns the actual numeric length while len returns the number of elements in the vector or array.")
                     .WithParameter("vector", PortType.Array, description: "The vector to get the norm of.")
                     .Build(),
                 
                 // cross
-                FunctionBuilder.NewBuiltInFunction("cross", "Cross", PortType.Array, returnValueDescription: "The cross product of the two input vectors.")
+                FunctionBuilder.NewBuiltInFunction("cross", "Cros", nodeName: "Cross", returnType: PortType.Array, returnValueDescription: "The cross product of the two input vectors.")
                     .WithDescription("Returns the cross product of two vectors.")
                     .WithParameter("vector1", PortType.Array, description: "The first vector.")
                     .WithParameter("vector2", PortType.Array, description: "The second vector.")

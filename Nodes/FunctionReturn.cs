@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
         private FunctionDescription _description;
 
         public override string NodeTitle => "Return value";
+        public override string NodeQuickLookup => "";
         public override string NodeDescription => "Returns the given value.";
 
         public InvokableDescription InvokableDescription => _description;

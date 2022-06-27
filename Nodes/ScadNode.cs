@@ -13,6 +13,11 @@ namespace OpenScadGraphEditor.Nodes
         public abstract string NodeTitle { get; }
 
         public abstract string NodeDescription { get; }
+        
+        /// <summary>
+        /// The quick lookup code for the node.
+        /// </summary>
+        public abstract string NodeQuickLookup { get; }
 
         public string Id { get; private set; } = Guid.NewGuid().ToString();
 

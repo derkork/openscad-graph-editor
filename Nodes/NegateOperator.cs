@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
     public class NegateOperator : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Negate";
+        public override string NodeQuickLookup => "Negg";
         public override string NodeDescription => "Returns the negative of the input.";
 
 

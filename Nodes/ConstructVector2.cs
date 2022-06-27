@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Construct Vector2";
         public override string NodeDescription => "Constructs a Vector2 from its components.";
+        public override string NodeQuickLookup => "VC2";
 
         public ConstructVector2()
         {

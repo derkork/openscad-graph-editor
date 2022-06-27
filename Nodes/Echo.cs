@@ -11,6 +11,8 @@ namespace OpenScadGraphEditor.Nodes
     public class Echo : ScadNode,  IHaveVariableInputSize
     {
         public override string NodeTitle => "Echo";
+        public override string NodeQuickLookup => "Eccc";
+        
         public override string NodeDescription => "Writes one or more values to the console";
 
         public int CurrentInputSize { get; private set; } = 1;

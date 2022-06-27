@@ -14,6 +14,7 @@ namespace OpenScadGraphEditor.Nodes
     public class Max : ScadNode, IAmAnExpression, IHaveVariableInputSize
     {
         public override string NodeTitle => "Max";
+        public override string NodeQuickLookup => "Mx";
         public override string NodeDescription => "Returns the maximum of the input values.";
 
         public int CurrentInputSize { get; private set; } = 1;

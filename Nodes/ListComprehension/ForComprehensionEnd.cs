@@ -16,6 +16,8 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
     {
         public override string NodeTitle => "End For Comprehension";
 
+        public override string NodeQuickLookup => "";
+
         public override string NodeDescription =>
             "Collects the results of the comprehension and returns them as a list.";
 

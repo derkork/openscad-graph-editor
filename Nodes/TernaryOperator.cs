@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Conditional if/else (?:)";
         public override string NodeDescription => "Checks a condition to determine which of 2 values to return. Also known as the ternary operator.";
+        public override string NodeQuickLookup => "?:";
 
         public override string GetPortDocumentation(PortId portId)
         {

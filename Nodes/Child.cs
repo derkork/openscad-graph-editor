@@ -9,6 +9,8 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => "Child";
         public override string NodeDescription => "Renders a single child of a module.";
 
+        public override string NodeQuickLookup => "1Cld";
+
         public Child()
         {
             InputPorts

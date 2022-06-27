@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Nodes
         private FunctionDescription _description;
 
         public override string NodeTitle => _description.NodeNameOrFallback;
+        public override string NodeQuickLookup => "";
         public override string NodeDescription => _description.Description;
 
 

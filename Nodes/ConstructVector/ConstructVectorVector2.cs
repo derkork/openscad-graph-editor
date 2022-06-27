@@ -5,6 +5,8 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
     [UsedImplicitly]
     public class ConstructVectorVector2 : ConstructVector
     {
+        public override string NodeQuickLookup => "VCV2";
+
         public ConstructVectorVector2() : base(PortType.Vector2)
         {
         }

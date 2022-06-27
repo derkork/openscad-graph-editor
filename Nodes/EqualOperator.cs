@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class EqualOperator : BinaryComparisonOperator
     {
         public override string NodeTitle => "==";
+        public override string NodeQuickLookup => "==";
         public override string NodeDescription => "Compares if two values are equal";
         protected override string OperatorSign => "==";
 

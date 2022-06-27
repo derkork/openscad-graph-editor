@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class Branch : ScadNode, ICanHaveModifier
     {
         public override string NodeTitle => "Branch";
+        public override string NodeQuickLookup => "Brh";
 
         public override string NodeDescription =>
             "Renders the true input if the condition is true, otherwise renders the false input.";

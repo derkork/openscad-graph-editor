@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
 
     {
         public override string NodeTitle => "Each";
+        public override string NodeQuickLookup => "Uwrp";
         public override string NodeDescription => "Unwraps a list and inlines its elements into the current scope. Can only be used in a for comprehension or a vector construction.";
 
         public Each()

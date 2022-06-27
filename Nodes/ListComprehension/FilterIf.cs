@@ -8,6 +8,8 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
     {
         public override string NodeTitle => "Filter If";
 
+        public override string NodeQuickLookup => "Fiif";
+
         public override string NodeDescription =>
             "When the evaluation of the condition returns true, the expression in the true 'port' is added to the result list else the expression in the 'false' port. Can only be used in list comprehension expressions.";
 

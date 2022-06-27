@@ -27,6 +27,11 @@ namespace OpenScadGraphEditor.Library
         public string NodeName { get; set; } = "";
 
         /// <summary>
+        /// The quick node lookup code to use for this module.
+        /// </summary>
+        public string QuickNodeLookup { get; set; } = "";
+
+        /// <summary>
         /// A description of the invokable.
         /// </summary>
         public string Description { get; set; } = "";

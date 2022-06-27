@@ -9,6 +9,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "+";
         public override string NodeDescription => "Adds the given inputs.";
+        public override string NodeQuickLookup => "++";
         protected override string OperatorSign => "+";
 
         public override bool Supports(PortType portType)

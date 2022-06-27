@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Nodes.Let
     public class LetExpressionEnd : ScadNode, IAmAnExpression, IAmBoundToOtherNode
     {
         public override string NodeTitle => "End Let";
+        public override string NodeQuickLookup => "";
         public override string NodeDescription  => "Collects the value of the let expression and returns it.";
 
         public string OtherNodeId { get; set; }

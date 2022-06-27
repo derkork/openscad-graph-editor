@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class LessThanOperator : BinaryComparisonOperator
     {
         public override string NodeTitle => "<";
+        public override string NodeQuickLookup => "lss";
         public override string NodeDescription => "Compares if the first operand is\nless than the second operand.";
         protected override string OperatorSign => "<";
 

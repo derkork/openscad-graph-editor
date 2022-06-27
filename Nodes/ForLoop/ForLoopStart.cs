@@ -10,6 +10,7 @@ namespace OpenScadGraphEditor.Nodes.ForLoop
     public class ForLoopStart : ScadNode, IAmBoundToOtherNode, IHaveVariableInputSize
     {
         public override string NodeTitle => "Start Loop";
+        public override string NodeQuickLookup => "Frlp";
         public override string NodeDescription => "Begins a loop. The loop will be executed for each element in the given vector.";
         
         public int CurrentInputSize { get; private set; } = 1;

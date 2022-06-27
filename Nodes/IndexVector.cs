@@ -13,6 +13,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Index Vector/String";
         public override string NodeDescription => "Returns the value of the vector/string at the given index";
+        public override string NodeQuickLookup => "VIdx";
 
         public int CurrentInputSize { get; private set; } = 1;
 

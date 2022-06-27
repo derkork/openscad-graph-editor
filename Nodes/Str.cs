@@ -12,6 +12,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Str";
         public override string NodeDescription => "Convert all arguments to string and concatenate them.";
+        public override string NodeQuickLookup => "ToSt";
 
         public int CurrentInputSize { get; private set; } = 1;
         public int InputPortOffset => 0;

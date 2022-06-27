@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes.Reroute
     public class RerouteNode : ScadNode, IHaveCustomWidget, IHaveNodeBackground
     {
         public override string NodeTitle => "Reroute";
+        public override string NodeQuickLookup => "Rrt";
         public override string NodeDescription => "Rerouting node which aids in making cleaner visual graphs.";
 
         public bool IsWireless { get; set; }

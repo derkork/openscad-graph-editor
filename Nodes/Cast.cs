@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         public override string NodeTitle => "Cast";
         public override string NodeDescription => "Allows you to cast a value to another type.";
+        public override string NodeQuickLookup => "Cst";
 
         public Cast()
         {

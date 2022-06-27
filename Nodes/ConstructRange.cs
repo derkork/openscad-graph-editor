@@ -9,6 +9,7 @@ namespace OpenScadGraphEditor.Nodes
     public class ConstructRange : ScadNode, IAmAnExpression, IHaveCustomWidget
     {
         public override string NodeTitle => "Construct Range";
+        public override string NodeQuickLookup => "CRng";
         public override string NodeDescription => "Constructs a range of numbers. All input parameters can also be rational numbers.";
 
 

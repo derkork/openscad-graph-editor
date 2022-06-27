@@ -8,6 +8,7 @@ namespace OpenScadGraphEditor.Nodes
     public class ConstructAffineTransformationMatrix : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Construct Matrix";
+        public override string NodeQuickLookup => "CMtx";
 
         public override string NodeDescription =>
             "Constructs an affine transformation matrix for use with 'multmatrix'.";
