@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=26 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -23,10 +23,13 @@
 [ext_resource path="res://Widgets/HelpDialog/HelpDialog.tscn" type="PackedScene" id=21]
 [ext_resource path="res://Widgets/DocumentationDialog/DocumentationDialog.tscn" type="PackedScene" id=22]
 [ext_resource path="res://Widgets/LogConsole/LogConsole.tscn" type="PackedScene" id=23]
+[ext_resource path="res://ui_theme.tres" type="Theme" id=24]
+[ext_resource path="res://Widgets/SettingsDialog/SettingsDialog.tscn" type="PackedScene" id=25]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme = ExtResource( 24 )
 script = ExtResource( 1 )
 
 [node name="AddDialog" parent="." instance=ExtResource( 3 )]
@@ -52,6 +55,8 @@ script = ExtResource( 5 )
 margin_bottom = 250.0
 
 [node name="NodeColorDialog" parent="." instance=ExtResource( 16 )]
+
+[node name="SettingsDialog" parent="." instance=ExtResource( 25 )]
 
 [node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
 visible = false
@@ -93,20 +98,26 @@ margin_right = 1920.0
 margin_bottom = 1080.0
 custom_constants/separation = 0
 
+[node name="UpperPanel" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+margin_right = 1920.0
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/UpperPanel"]
+margin_right = 1920.0
+
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 margin_right = 1920.0
-margin_bottom = 73.0
+margin_bottom = 64.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer"]
 margin_left = 14.0
 margin_top = 14.0
 margin_right = 1906.0
-margin_bottom = 59.0
+margin_bottom = 50.0
 
 [node name="NewButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
 margin_right = 125.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 125, 45 )
+margin_bottom = 36.0
+rect_min_size = Vector2( 125, 0 )
 hint_tooltip = "Create a new project"
 shortcut_in_tooltip = false
 text = "New"
@@ -114,8 +125,8 @@ text = "New"
 [node name="OpenButton" type="MenuButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
 margin_left = 133.0
 margin_right = 258.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 125, 45 )
+margin_bottom = 36.0
+rect_min_size = Vector2( 125, 0 )
 text = "Open"
 flat = false
 script = ExtResource( 20 )
@@ -123,8 +134,8 @@ script = ExtResource( 20 )
 [node name="SaveAsButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
 margin_left = 266.0
 margin_right = 391.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 125, 45 )
+margin_bottom = 36.0
+rect_min_size = Vector2( 125, 0 )
 hint_tooltip = "Save the current project to a file."
 text = "Save as..."
 
@@ -132,56 +143,62 @@ text = "Save as..."
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 399.0
-margin_right = 444.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 45, 45 )
+margin_right = 435.0
+margin_bottom = 36.0
 Icon = ExtResource( 14 )
 Padding = Vector2( 8, 8 )
 
 [node name="RedoButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 452.0
-margin_right = 497.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 45, 45 )
+margin_left = 443.0
+margin_right = 479.0
+margin_bottom = 36.0
 Icon = ExtResource( 13 )
 HintTooltip = null
 Padding = Vector2( 8, 8 )
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 505.0
-margin_right = 1097.0
-margin_bottom = 45.0
+margin_left = 487.0
+margin_right = 1037.0
+margin_bottom = 36.0
 size_flags_horizontal = 3
 
 [node name="FileNameLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1105.0
-margin_top = 10.0
-margin_right = 1698.0
-margin_bottom = 35.0
+margin_left = 1045.0
+margin_top = 8.0
+margin_right = 1595.0
+margin_bottom = 28.0
 size_flags_horizontal = 3
 text = "<not yet saved to a file>"
 align = 2
 clip_text = true
 
 [node name="ForceSaveButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1706.0
-margin_right = 1774.0
-margin_bottom = 45.0
+margin_left = 1603.0
+margin_right = 1652.0
+margin_bottom = 36.0
 text = "[ ... ]"
 
+[node name="SettingsButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 1660.0
+margin_right = 1785.0
+margin_bottom = 36.0
+rect_min_size = Vector2( 125, 0 )
+hint_tooltip = "Save the current project to a file."
+text = "Settings"
+
 [node name="PreviewButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1782.0
+margin_left = 1793.0
 margin_right = 1892.0
-margin_bottom = 45.0
+margin_bottom = 36.0
 toggle_mode = true
-text = "Preview"
+text = "View Code"
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 73.0
+margin_top = 64.0
 margin_right = 1920.0
-margin_bottom = 1031.0
+margin_bottom = 1036.0
 size_flags_vertical = 3
 custom_constants/margin_right = 0
 custom_constants/margin_top = 0
@@ -191,7 +208,7 @@ custom_constants/margin_bottom = 0
 [node name="TextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer/MarginContainer"]
 visible = false
 margin_right = 1920.0
-margin_bottom = 958.0
+margin_bottom = 972.0
 rect_min_size = Vector2( 0, 200 )
 readonly = true
 syntax_highlighting = true
@@ -203,31 +220,30 @@ __meta__ = {
 
 [node name="EditingInterface" type="HSplitContainer" parent="MarginContainer/VBoxContainer/MarginContainer"]
 margin_right = 1920.0
-margin_bottom = 958.0
+margin_bottom = 972.0
 custom_constants/autohide = 0
 split_offset = 100
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
 margin_right = 350.0
-margin_bottom = 958.0
+margin_bottom = 972.0
 rect_min_size = Vector2( 250, 0 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer"]
 margin_left = 14.0
 margin_top = 14.0
 margin_right = 336.0
-margin_bottom = 944.0
+margin_bottom = 958.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
 margin_right = 322.0
-margin_bottom = 45.0
+margin_bottom = 36.0
 
 [node name="AddModuleButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 45.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 45, 45 )
+margin_right = 36.0
+margin_bottom = 36.0
 Icon = ExtResource( 2 )
 HintTooltip = "Add module"
 Padding = Vector2( 8, 8 )
@@ -235,10 +251,9 @@ Padding = Vector2( 8, 8 )
 [node name="AddFunctionButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 53.0
-margin_right = 98.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 45, 45 )
+margin_left = 44.0
+margin_right = 80.0
+margin_bottom = 36.0
 Icon = ExtResource( 10 )
 HintTooltip = "Add function"
 Padding = Vector2( 8, 8 )
@@ -246,10 +261,9 @@ Padding = Vector2( 8, 8 )
 [node name="AddVariableButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 106.0
-margin_right = 151.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 45, 45 )
+margin_left = 88.0
+margin_right = 124.0
+margin_bottom = 36.0
 Icon = ExtResource( 9 )
 HintTooltip = "Add variable"
 Padding = Vector2( 8, 8 )
@@ -257,18 +271,17 @@ Padding = Vector2( 8, 8 )
 [node name="AddExternalReferenceButton" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 15 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 159.0
-margin_right = 204.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 45, 45 )
+margin_left = 132.0
+margin_right = 168.0
+margin_bottom = 36.0
 Icon = ExtResource( 12 )
 HintTooltip = "Include/use .scad file"
 Padding = Vector2( 8, 8 )
 
 [node name="ProjectTree" type="Tree" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/PanelContainer/VBoxContainer"]
-margin_top = 53.0
+margin_top = 44.0
 margin_right = 322.0
-margin_bottom = 930.0
+margin_bottom = 944.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 allow_rmb_select = true
@@ -277,11 +290,11 @@ script = ExtResource( 11 )
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
 margin_left = 374.0
 margin_right = 1920.0
-margin_bottom = 958.0
+margin_bottom = 972.0
 tab_align = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 1031.0
+margin_top = 1036.0
 margin_right = 1920.0
 margin_bottom = 1080.0
 
@@ -298,16 +311,16 @@ margin_bottom = 300.0
 visible = false
 anchor_right = 0.0
 margin_right = 1920.0
-margin_bottom = 355.0
+margin_bottom = 350.0
 
 [node name="FoldoutButtonBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 margin_top = 8.0
 margin_right = 1920.0
-margin_bottom = 49.0
+margin_bottom = 44.0
 
 [node name="ConsoleButton" type="ToolButton" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldoutButtonBar"]
-margin_right = 110.0
-margin_bottom = 41.0
+margin_right = 81.0
+margin_bottom = 36.0
 text = "Console"
 
 [node name="UsageButton" type="ToolButton" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldoutButtonBar"]

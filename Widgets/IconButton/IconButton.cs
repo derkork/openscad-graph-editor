@@ -128,11 +128,23 @@ namespace OpenScadGraphEditor.Widgets.IconButton
             
             _textureRect = this.WithName<TextureRect>("TextureRect");
             _textureRect.Texture = _icon;
-        
+            
             _button.Connect("pressed")
                 .To( this, nameof(OnButtonPressed));
             _button.Connect("toggled")
                 .To( this, nameof(OnButtonToggled));
+            
+            UpdateSize();
+        }
+
+        private void UpdateSize()
+        {
+            var font = GetFont("font");
+            var fontHeight = font.GetHeight();
+            if (_textureRect != null)
+            {
+                _textureRect.RectMinSize = new Vector2(fontHeight, fontHeight);
+            }
         }
     
         private void OnButtonPressed()
@@ -143,6 +155,14 @@ namespace OpenScadGraphEditor.Widgets.IconButton
         private void OnButtonToggled(bool pressed)
         {
             ButtonToggled?.Invoke(pressed);
+        }
+
+        public override void _Notification(int what)
+        {
+            if (what == NotificationThemeChanged)
+            {
+                UpdateSize();
+            }
         }
     }
 }

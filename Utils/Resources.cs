@@ -48,6 +48,15 @@ namespace OpenScadGraphEditor.Utils
         
         public static readonly Theme SimpleNodeWidgetTheme = GD.Load<Theme>("res://Widgets/SimpleNodeWidgetTheme.tres");
         public static readonly Theme StandardNodeWidgetTheme = GD.Load<Theme>("res://Widgets/StandardNodeWidgetTheme.tres");
+        public static readonly Theme NodeInnerTheme = GD.Load<Theme>("res://Widgets/PortContainer/node_inner_theme.tres");
+        public static readonly Theme DefaultTheme = GD.Load<Theme>("res://ui_theme.tres");
+        
+        public static readonly Theme[] AllThemes = {
+            SimpleNodeWidgetTheme,
+            StandardNodeWidgetTheme,
+            NodeInnerTheme,
+            DefaultTheme
+        };
 
     }
 }

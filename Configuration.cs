@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor
     {
         private const string ConfigFolder = "user://openscad_graph_editor";
         private const string ConfigPath = ConfigFolder+"/openscad_graph_editor.cfg";
-        private ConfigFile _configFile = new ConfigFile();
+        private readonly ConfigFile _configFile = new ConfigFile();
 
 
         public void Load()
@@ -18,6 +18,17 @@ namespace OpenScadGraphEditor
                 Log.Information("Cannot read config file, starting with clean slate");
                 _configFile.Clear();
             }
+        }
+
+        public void SetEditorScalePercent(int editorScale)
+        {
+            _configFile.SetValue("editor", "scale", editorScale);
+            Save();
+        }
+        
+        public int GetEditorScalePercent()
+        {
+            return (int) _configFile.GetValue("editor", "scale", 100);
         }
 
         private void Save()
