@@ -35,6 +35,7 @@ script = ExtResource( 1 )
 [node name="AddDialog" parent="." instance=ExtResource( 3 )]
 
 [node name="CommentEditingDialog" parent="." instance=ExtResource( 17 )]
+visible = false
 
 [node name="ConfirmationDialog" type="ConfirmationDialog" parent="."]
 margin_right = 400.0
@@ -45,6 +46,7 @@ script = ExtResource( 7 )
 [node name="DocumentationDialog" parent="." instance=ExtResource( 22 )]
 
 [node name="ImportDialog" parent="." instance=ExtResource( 8 )]
+visible = false
 
 [node name="QuickActionsPopup" type="PopupMenu" parent="."]
 margin_right = 144.0
@@ -52,6 +54,7 @@ margin_bottom = 131.0
 script = ExtResource( 5 )
 
 [node name="InvokableRefactorDialog" parent="." instance=ExtResource( 4 )]
+visible = false
 margin_bottom = 250.0
 
 [node name="NodeColorDialog" parent="." instance=ExtResource( 16 )]
@@ -59,7 +62,6 @@ margin_bottom = 250.0
 [node name="SettingsDialog" parent="." instance=ExtResource( 25 )]
 
 [node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
-visible = false
 
 [node name="FileDialog" type="FileDialog" parent="."]
 anchor_left = 0.5

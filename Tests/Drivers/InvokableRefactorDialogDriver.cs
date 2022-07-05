@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using GodotTestDriver.Drivers;
+using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 
 namespace OpenScadGraphEditor.Tests.Drivers
@@ -14,7 +15,7 @@ namespace OpenScadGraphEditor.Tests.Drivers
         public ButtonDriver OkButton { get; }
         public ButtonDriver CancelButton { get; }
         
-        public ButtonDriver AddParameterButton { get; }
+        public IconButtonDriver AddParameterButton { get; }
         
 
         public InvokableRefactorDialogDriver(Func<InvokableRefactorDialog> producer, string description = "") : base(producer, description)
@@ -22,7 +23,7 @@ namespace OpenScadGraphEditor.Tests.Drivers
             NameEdit = new LineEditDriver(() => Root?.WithNameOrNull<LineEdit>("NameEdit"), Description + "-> NameEdit");
             OkButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("OkButton"), Description + "-> OkButton");
             CancelButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("CancelButton"), Description + "-> CancelButton");
-            AddParameterButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("AddParameterButton"), Description + "-> AddParameterButton");
+            AddParameterButton = new IconButtonDriver(() => Root?.WithNameOrNull<IconButton>("AddParameterButton"), Description + "-> AddParameterButton");
             
         }
         

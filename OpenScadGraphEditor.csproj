@@ -38,6 +38,7 @@
     <Content Include="addons\GodotXUnit\_work\.gdignore" />
     <Content Include="LICENSE" />
     <Content Include="README.md" />
+    <Content Include="Tests\Data\import_test.scad" />
   </ItemGroup>
   <ItemGroup>
     <Antlr4 Update="OpenScadParser.g4">

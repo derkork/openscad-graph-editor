@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Widgets/NodeColorDialog/NodeColorDialog.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/ColorButton/ColorButton.tscn" type="PackedScene" id=2]
+[ext_resource path="res://ui_theme.tres" type="Theme" id=3]
 
-[node name="Control" type="WindowDialog"]
+[node name="NodeColorDialog" type="WindowDialog"]
 margin_right = 413.0
-margin_bottom = 145.0
+margin_bottom = 137.0
+theme = ExtResource( 3 )
 window_title = "Choose Color"
 script = ExtResource( 1 )
 
@@ -21,7 +23,7 @@ custom_constants/margin_bottom = 20
 margin_left = 20.0
 margin_top = 20.0
 margin_right = 393.0
-margin_bottom = 130.0
+margin_bottom = 117.0
 custom_constants/separation = 20
 
 [node name="ButtonRow" type="HBoxContainer" parent="Root/VBoxContainer"]
@@ -87,19 +89,19 @@ Color = Color( 0.137255, 0.384314, 0.0745098, 1 )
 [node name="HBoxContainer2" type="HBoxContainer" parent="Root/VBoxContainer"]
 margin_top = 65.0
 margin_right = 373.0
-margin_bottom = 110.0
+margin_bottom = 97.0
 alignment = 1
 
 [node name="ClearButton" type="Button" parent="Root/VBoxContainer/HBoxContainer2"]
 margin_left = 72.0
 margin_right = 182.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Clear"
 
 [node name="CancelButton" type="Button" parent="Root/VBoxContainer/HBoxContainer2"]
 margin_left = 190.0
 margin_right = 300.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Cancel"

@@ -8,8 +8,23 @@ namespace OpenScadGraphEditor.Widgets
         /// <summary>
         /// Scales all items in the given theme to the given scale factor.
         /// </summary>
-        public static void Scale(this Theme theme, float scale)
+        public static void Scale(this Theme theme, int percent)
         {
+            var currentScale = 100; // we check if the theme is already scaled, so we don't scale it twice if this is called multiple times.
+            if (theme.HasConstant("ui_scale_percent", "UIScaling"))
+            {
+                currentScale = theme.GetConstant("ui_scale_percent", "UIScaling");
+            }
+            
+            if (currentScale == percent)
+            {
+                // nothing to do.
+                return; 
+            }
+            
+            theme.SetConstant("ui_scale_percent", "UIScaling", percent);
+            var scale =  percent / 100f;
+
             theme.ScaleConstant("arrow_margin", "OptionButton", scale);
             theme.ScaleConstant("hseparation", "OptionButton", scale);
 

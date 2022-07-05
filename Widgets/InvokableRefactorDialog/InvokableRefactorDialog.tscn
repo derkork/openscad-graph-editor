@@ -1,18 +1,26 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Widgets/InvokableRefactorDialog/InvokableRefactorDialog.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/SelectOnFocusLineEdit.cs" type="Script" id=2]
+[ext_resource path="res://ui_theme.tres" type="Theme" id=3]
+[ext_resource path="res://Icons/up0000.png" type="Texture" id=4]
+[ext_resource path="res://Widgets/IconButton/IconButton.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Icons/close0000.png" type="Texture" id=6]
+[ext_resource path="res://Icons/down0000.png" type="Texture" id=7]
+[ext_resource path="res://Icons/plus0000.png" type="Texture" id=8]
 
 [node name="InvokableRefactorDialog" type="WindowDialog"]
+visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 margin_left = -300.0
 margin_top = -150.0
-margin_right = 500.0
-margin_bottom = 352.0
+margin_right = 518.0
+margin_bottom = 304.0
 rect_min_size = Vector2( 800, 400 )
+theme = ExtResource( 3 )
 window_title = "Setup"
 resizable = true
 script = ExtResource( 1 )
@@ -28,142 +36,172 @@ custom_constants/margin_bottom = 10
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 790.0
-margin_bottom = 492.0
+margin_right = 808.0
+margin_bottom = 444.0
 custom_constants/separation = 10
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
-margin_right = 780.0
-margin_bottom = 90.0
+margin_right = 798.0
+margin_bottom = 84.0
+size_flags_horizontal = 3
 custom_constants/hseparation = 15
 columns = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 10.0
-margin_right = 126.0
-margin_bottom = 35.0
+margin_right = 82.0
+margin_bottom = 30.0
 text = "Name"
 
 [node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 141.0
-margin_right = 780.0
-margin_bottom = 45.0
+margin_left = 97.0
+margin_right = 798.0
+margin_bottom = 40.0
 size_flags_horizontal = 3
 script = ExtResource( 2 )
 
 [node name="ReturnTypeLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_top = 59.0
-margin_right = 126.0
-margin_bottom = 84.0
+margin_top = 56.0
+margin_right = 82.0
+margin_bottom = 76.0
 text = "Return type"
 
 [node name="ReturnTypeSelector" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 141.0
-margin_top = 53.0
-margin_right = 780.0
-margin_bottom = 90.0
+margin_left = 97.0
+margin_top = 48.0
+margin_right = 798.0
+margin_bottom = 84.0
 text = "Item 0"
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 100.0
-margin_right = 780.0
-margin_bottom = 157.0
-custom_constants/margin_top = 20
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+margin_top = 94.0
+margin_right = 798.0
+margin_bottom = 126.0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/MarginContainer"]
-margin_top = 20.0
-margin_right = 780.0
-margin_bottom = 57.0
-
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
 margin_top = 6.0
-margin_right = 127.0
-margin_bottom = 31.0
+margin_right = 80.0
+margin_bottom = 26.0
 text = "Parameters"
 
-[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
-margin_left = 135.0
-margin_right = 735.0
-margin_bottom = 37.0
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+margin_left = 88.0
+margin_right = 760.0
+margin_bottom = 32.0
 size_flags_horizontal = 3
 
-[node name="AddParameterButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
-margin_left = 743.0
-margin_right = 780.0
-margin_bottom = 37.0
-text = "+"
+[node name="AddParameterButton" parent="MarginContainer/VBoxContainer/HBoxContainer2" instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 768.0
+margin_right = 798.0
+margin_bottom = 32.0
+Icon = ExtResource( 8 )
+Padding = Vector2( 5, 0 )
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 167.0
-margin_right = 780.0
-margin_bottom = 392.0
+margin_top = 136.0
+margin_right = 798.0
+margin_bottom = 362.0
+rect_min_size = Vector2( 0, 220 )
 size_flags_vertical = 3
 scroll_horizontal_enabled = false
 
-[node name="ParameterGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
-margin_right = 780.0
-margin_bottom = 225.0
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ScrollContainer"]
+margin_right = 798.0
+margin_bottom = 226.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+margin_right = 798.0
+margin_bottom = 226.0
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer"]
+margin_right = 798.0
+margin_bottom = 226.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="ParameterGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 793.0
+margin_bottom = 221.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 5
 
-[node name="TemplateParameterName" type="LineEdit" parent="MarginContainer/VBoxContainer/ScrollContainer/ParameterGrid"]
-margin_right = 510.0
-margin_bottom = 45.0
+[node name="TemplateParameterName" type="LineEdit" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer/ParameterGrid"]
+margin_right = 564.0
+margin_bottom = 40.0
 size_flags_horizontal = 3
 script = ExtResource( 2 )
 
-[node name="TemplateParameterTypeHint" type="OptionButton" parent="MarginContainer/VBoxContainer/ScrollContainer/ParameterGrid"]
-margin_left = 518.0
-margin_right = 647.0
-margin_bottom = 45.0
+[node name="TemplateParameterTypeHint" type="OptionButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer/ParameterGrid"]
+margin_left = 572.0
+margin_right = 674.0
+margin_bottom = 40.0
 text = "Item 0"
 items = [ "Item 0", null, false, 0, null ]
 selected = 0
 
-[node name="TemplateParameterUpButton" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ParameterGrid"]
-margin_left = 655.0
-margin_right = 692.0
-margin_bottom = 45.0
-text = "^"
+[node name="TemplateParameterUpButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer/ParameterGrid" instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 682.0
+margin_right = 712.0
+margin_bottom = 40.0
+Icon = ExtResource( 4 )
+Padding = Vector2( 5, 0 )
 
-[node name="TemplateParameterDownButton" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ParameterGrid"]
-margin_left = 700.0
-margin_right = 736.0
-margin_bottom = 45.0
-text = "v"
+[node name="TemplateParameterDownButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer/ParameterGrid" instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 720.0
+margin_right = 750.0
+margin_bottom = 40.0
+Icon = ExtResource( 7 )
+Padding = Vector2( 5, 0 )
 
-[node name="TemplateParameterDeleteButton" type="Button" parent="MarginContainer/VBoxContainer/ScrollContainer/ParameterGrid"]
-margin_left = 744.0
-margin_right = 780.0
-margin_bottom = 45.0
-text = "x"
+[node name="TemplateParameterDeleteButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer/ParameterGrid" instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 758.0
+margin_right = 788.0
+margin_bottom = 40.0
+Icon = ExtResource( 6 )
+Padding = Vector2( 5, 0 )
 
 [node name="ErrorLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_top = 402.0
-margin_right = 780.0
-margin_bottom = 427.0
+margin_top = 372.0
+margin_right = 798.0
+margin_bottom = 392.0
 custom_colors/font_color = Color( 1, 1, 0, 1 )
 text = "Error Message!"
 align = 2
 autowrap = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 437.0
-margin_right = 780.0
-margin_bottom = 482.0
+margin_top = 402.0
+margin_right = 798.0
+margin_bottom = 434.0
 alignment = 2
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 552.0
-margin_right = 662.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_left = 570.0
+margin_right = 680.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Cancel"
 
 [node name="OkButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 670.0
-margin_right = 780.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_left = 688.0
+margin_right = 798.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Ok"

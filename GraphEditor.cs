@@ -103,10 +103,10 @@ namespace OpenScadGraphEditor
             _configuration.Load();
             
             // scale all themes to editor scale
-            var scale = _configuration.GetEditorScalePercent() / 100f;
+            var percent = _configuration.GetEditorScalePercent();
             foreach (var theme in Resources.AllThemes)
             {
-                theme.Scale(scale);
+                theme.Scale(percent);
             }
             
             _rootResolver = new BuiltInLibrary();
