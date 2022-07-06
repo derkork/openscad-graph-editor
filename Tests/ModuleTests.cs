@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
+using GodotTestDriver.Drivers;
 using GodotXUnitApi;
-using OpenScadGraphEditor.Tests.Drivers;
 using Xunit;
 
 namespace OpenScadGraphEditor.Tests

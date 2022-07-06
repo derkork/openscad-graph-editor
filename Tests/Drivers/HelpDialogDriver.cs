@@ -10,8 +10,8 @@ namespace OpenScadGraphEditor.Tests.Drivers
     public class HelpDialogDriver : ControlDriver<HelpDialog>
     {
         
-        public LabelDriver TitleLabel { get; }
-        public LabelDriver DescriptionLabel { get; }
+        private LabelDriver TitleLabel { get; }
+        private LabelDriver DescriptionLabel { get; }
         public ButtonDriver CloseButton { get; }
         
         
@@ -22,22 +22,24 @@ namespace OpenScadGraphEditor.Tests.Drivers
             CloseButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("CloseButton"), Description + "-> CloseButton");
         }
 
-        public LabelDriver GetDescriptionLabel(Port port)
+        public string Title => TitleLabel.Text;
+        public string NodeDescription => DescriptionLabel.Text;
+        
+        public string GetPortDescription(Port port)
         {
             if (port.IsInput)
             {
                 return new LabelDriver(() =>
                     Root?.WithNameOrNull<Control>("LeftContainer")?.GetChildNodes<Label>()?.Skip(port.PortIndex)
-                        .FirstOrDefault(), Description + "-> Label " + port);
+                        .FirstOrDefault(), Description + "-> Label " + port).Text;
             }
             else
             {
                 return new LabelDriver(() =>
                     Root?.WithNameOrNull<Control>("RightContainer")?.GetChildNodes<Label>()?.Skip(port.PortIndex)
-                        .FirstOrDefault(), Description + "-> Label " + port);
+                        .FirstOrDefault(), Description + "-> Label " + port).Text;
             }
+            
         }
-        
-        
     }
 }

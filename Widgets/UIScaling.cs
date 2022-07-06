@@ -3,7 +3,7 @@ using Serilog;
 
 namespace OpenScadGraphEditor.Widgets
 {
-    public static class UIScaling
+    public static class UiScaling
     {
         /// <summary>
         /// Scales all items in the given theme to the given scale factor.
