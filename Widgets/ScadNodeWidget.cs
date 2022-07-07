@@ -34,6 +34,11 @@ namespace OpenScadGraphEditor.Widgets
 
         private Font _commentFont;
 
+        /// <summary>
+        /// Whether or not the title should be rendered.
+        /// </summary>
+        public virtual bool RenderTitle => true;
+
         public override void _Ready()
         {
             Theme = UseTheme;
@@ -45,7 +50,7 @@ namespace OpenScadGraphEditor.Widgets
         public virtual void BindTo(ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
-            Title = node.NodeTitle;
+            Title = ""; // we render the title ourselves, see below
             HintTooltip = node.NodeDescription;
             Offset = node.Offset;
 
@@ -65,6 +70,32 @@ namespace OpenScadGraphEditor.Widgets
             }
 
             var maxPorts = Mathf.Max(node.InputPortCount, node.OutputPortCount);
+
+            var titleOffset = 0;
+            var titleLabel = this.GetChildNodes<Label>().FirstOrDefault();
+
+            if (RenderTitle)
+            {
+                titleOffset = 1; // we move everything one slot down
+
+                if (titleLabel == null)
+                {
+                    titleLabel = new Label();
+                    titleLabel.SizeFlagsHorizontal = (int) SizeFlags.ExpandFill;
+                    titleLabel.Align = Label.AlignEnum.Center;
+                    titleLabel.MoveToNewParent(this);
+                    // ensure it is at the top of the node
+                    MoveChild(titleLabel, 0);
+                }
+                titleLabel.Text = node.NodeTitle;
+                SetSlotEnabledLeft(0, false);
+                SetSlotEnabledRight(0, false);
+                
+            }
+            else
+            {
+                titleLabel?.RemoveAndFree();
+            }
 
             var existingContainers = this.GetChildNodes<HBoxContainer>().ToList();
 
@@ -92,22 +123,22 @@ namespace OpenScadGraphEditor.Widgets
 
                 if (node.InputPortCount > idx)
                 {
-                    BuildPort(left, graph, node, PortId.Input(idx));
+                    BuildPort(left, graph, node, PortId.Input(idx), titleOffset);
                 }
                 else
                 {
                     left.Clear();
-                    SetSlotEnabledLeft(idx, false);
+                    SetSlotEnabledLeft(idx + titleOffset, false);
                 }
 
                 if (node.OutputPortCount > idx)
                 {
-                    BuildPort(right, graph, node, PortId.Output(idx));
+                    BuildPort(right, graph, node, PortId.Output(idx), titleOffset);
                 }
                 else
                 {
                     right.Clear();
-                    SetSlotEnabledRight(idx, false);
+                    SetSlotEnabledRight(idx + titleOffset, false);
                 }
 
                 idx++;
@@ -116,8 +147,8 @@ namespace OpenScadGraphEditor.Widgets
             // remove any remaining containers
             for (var i = idx; i < existingContainers.Count; i++)
             {
-                SetSlotEnabledLeft(i, false);
-                SetSlotEnabledRight(i, false);
+                SetSlotEnabledLeft(i + titleOffset, false);
+                SetSlotEnabledRight(i + titleOffset, false);
                 // this will kill the widgets as well
                 existingContainers[i].RemoveAndFree();
 
@@ -165,7 +196,7 @@ namespace OpenScadGraphEditor.Widgets
             QueueSort();
         }
 
-        private void BuildPort(PortContainer.PortContainer container, ScadGraph graph, ScadNode node, PortId port)
+        private void BuildPort(PortContainer.PortContainer container, ScadGraph graph, ScadNode node, PortId port, int titleOffset)
         {
             var portDefinition = node.GetPortDefinition(port);
             var idx = port.Port;
@@ -173,15 +204,15 @@ namespace OpenScadGraphEditor.Widgets
             var connectorPortType = portDefinition.PortType;
             if (port.IsInput)
             {
-                SetSlotEnabledLeft(idx, true);
-                SetSlotColorLeft(idx, ColorFor(connectorPortType));
-                SetSlotTypeLeft(idx, (int) connectorPortType);
+                SetSlotEnabledLeft(idx + titleOffset, true);
+                SetSlotColorLeft(idx + titleOffset, ColorFor(connectorPortType));
+                SetSlotTypeLeft(idx + titleOffset, (int) connectorPortType);
             }
             else
             {
-                SetSlotEnabledRight(idx, true);
-                SetSlotColorRight(idx, ColorFor(connectorPortType));
-                SetSlotTypeRight(idx, (int) connectorPortType);
+                SetSlotEnabledRight(idx + titleOffset, true);
+                SetSlotColorRight(idx + titleOffset, ColorFor(connectorPortType));
+                SetSlotTypeRight(idx + titleOffset, (int) connectorPortType);
             }
 
 

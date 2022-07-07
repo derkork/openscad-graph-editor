@@ -10,8 +10,9 @@ namespace OpenScadGraphEditor.Widgets
     {
         private Vector2 _portSize;
         protected override Theme UseTheme => Resources.SimpleNodeWidgetTheme;
+        public override bool RenderTitle => false;
 
-        
+
         public override void _Ready()
         {
             base._Ready();
@@ -24,7 +25,6 @@ namespace OpenScadGraphEditor.Widgets
         public override void BindTo(ScadGraph graph, ScadNode node)
         {
             base.BindTo(graph, node);
-            Title = ""; // hide title
             
             // make the background shine through a bit.
             this.GetChildNodes<Control>().ForAll(it => it.Modulate = new Color(1,1,1,0.9f));

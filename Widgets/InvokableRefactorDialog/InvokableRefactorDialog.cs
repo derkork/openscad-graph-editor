@@ -26,6 +26,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private IconButton.IconButton _templateParameterUpButton;
         private IconButton.IconButton _templateParameterDownButton;
         private IconButton.IconButton _templateParameterDeleteButton;
+        private MarginContainer _rootContainer;
         private Label _errorLabel;
         private GridContainer _parameterGrid;
         private readonly List<ParameterLine> _parameterLines = new List<ParameterLine>();
@@ -37,7 +38,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         public override void _Ready()
         {
             GetCloseButton().Visible = false;
-
+            _rootContainer = this.WithName<MarginContainer>("RootContainer");
             _nameEdit = this.WithName<LineEdit>("NameEdit");
             _nameEdit
                 .Connect("text_changed")
@@ -127,7 +128,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeLabel.Visible = false;
             _returnTypeOptionButton.Visible = false;
             ValidateAll();
-            SetAsMinsize();
             PopupCentered();
         }
 
@@ -325,7 +325,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void OnIdentifierChanged([UsedImplicitly] string _)
         {
             ValidateAll();
-            SetAsMinsize();
         }
 
         private void ValidateAll()
@@ -333,21 +332,28 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             ValidityChecker.For(_errorLabel, _okButton)
                 .Check(
                     _nameEdit.Text.IsValidIdentifier(),
-                    $"Name must not be blank and must be only letters, numbers, and underscores and must not start with a letter."
+                    $"Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .CheckAll(
                     _parameterLines,
                     it => it.Name.IsValidIdentifier(),
                     it =>
-                        $"Parameter name '{it.Name}' must be only letters, numbers, and underscores and must not start with a letter."
+                        $"Parameter name '{it.Name}' must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .Check(
                     _parameterLines.Select(it => it.Name).Distinct().Count() == _parameterLines.Count,
                     "Parameter names must be unique."
                 )
                 .UpdateUserInterface();
+            CallDeferred(nameof(FixSize));
         }
 
+        private void FixSize()
+        {
+            // this is a crappy hack to get the dialog to fit the content.
+            SetSize(_rootContainer.RectSize);
+        }
+        
         private void OnAddParameterPressed()
         {
             AddParameter("parameter" + _parameterLines.Count, PortType.Any);

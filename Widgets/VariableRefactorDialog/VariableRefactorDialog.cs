@@ -96,7 +96,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         {
             ValidityChecker.For(_errorLabel, _okButton)
                 .Check(_nameEdit.Text.IsValidIdentifier(),
-                    "Name must not be blank and must be only letters, numbers, and underscores and must not start with a letter."
+                    "Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .UpdateUserInterface();
         }

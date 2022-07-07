@@ -9,7 +9,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
-    <PackageReference Include="GodotExt" Version="0.1.0" />
+    <PackageReference Include="GodotExt" Version="0.2.0-pre2" />
     <PackageReference Include="GodotTestDriver" Version="0.1.0-pre1" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />

@@ -211,7 +211,14 @@ namespace OpenScadGraphEditor.Nodes
                 .Where(i => _inputLiterals.ContainsKey(i))
                 .ForAll(i =>
                 {
+                    if (!node.HasKey($"input_literal_value.{i}"))
+                    {
+                        // not saved, so keep as is.
+                        return;
+                    }
+                    
                     var serializedValue = node.GetDataString($"input_literal_value.{i}");
+                    
                     // broken literals still seem to happen quite often so we want additional debug output here.
                     try
                     {

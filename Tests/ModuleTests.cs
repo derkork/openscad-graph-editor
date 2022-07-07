@@ -29,7 +29,7 @@ namespace OpenScadGraphEditor.Tests
             var node = MainWindow.GraphEditor.Nodes.First();
 
             // and the node has the correct title
-            Assert.Equal("test_module", node.Title);
+            Assert.Equal("test_module", node.NodeTitle);
             // and the node has no output ports
             Assert.Equal(0, node.OutputPortCount);
             // and the node has no input ports
@@ -59,7 +59,7 @@ namespace OpenScadGraphEditor.Tests
             Assert.Single(MainWindow.GraphEditor.Nodes);
             var node = MainWindow.GraphEditor.Nodes.First();
             // and the node has the correct title
-            Assert.Equal("test_module", node.Title);
+            Assert.Equal("test_module", node.NodeTitle);
             // and the node has no input ports
             Assert.Equal(0, node.InputPortCount);
             // and the node has one output port
@@ -95,13 +95,13 @@ namespace OpenScadGraphEditor.Tests
 
             // then
             // the module is renamed
-            Assert.Equal("renamed_module", MainWindow.GraphEditor.Nodes.First().Title);
+            Assert.Equal("renamed_module", MainWindow.GraphEditor.Nodes.First().NodeTitle);
             // the tab title is also renamed
             Assert.Equal("renamed_module", MainWindow.TabContainer.SelectedTabTitle);
             // and when i get back to the main module
             await MainWindow.TabContainer.SelectTabWithTitle("<main>");
             // and the call to the module is renamed as well
-            Assert.Equal("renamed_module", MainWindow.GraphEditor.Nodes.First().Title);
+            Assert.Equal("renamed_module", MainWindow.GraphEditor.Nodes.First().NodeTitle);
         }
 
         [GodotFact(Frame = GodotFactFrame.Process)]
