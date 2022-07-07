@@ -12,9 +12,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         private OptionButton _importModeOptionButton;
         private OptionButton _pathModeOptionButton;
         private OptionButton _libraryFileOptionButton;
-        private LineEdit _pathLineEdit;
-        private FileDialog _fileDialog;
-        private Control _fileSelectBox;
+        private FileSelectBox.FileSelectBox _fileSelectBox;
         private Control _fileLabel;
         private Control _libraryFileLabel;
         private Control _libraryFileBox;
@@ -30,13 +28,10 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
 
         public override void _Ready()
         {
-            _fileDialog = this.WithName<FileDialog>("ImportFileDialog");
-
-            _fileDialog
-                .Connect("file_selected")
-                .To(this, nameof(OnFileSelected));
-
-            _fileSelectBox = this.WithName<Control>("FileSelectBox");
+            _fileSelectBox = this.WithName<FileSelectBox.FileSelectBox>("FileSelectBox");
+            _fileSelectBox.OnFileSelected += OnFileSelected;
+            _fileSelectBox.OnSelectPressed += OnSelectButtonPressed;
+            
             _fileLabel = this.WithName<Control>("FileLabel");
             _libraryFileLabel = this.WithName<Control>("LibraryFileLabel");
             _libraryFileBox = this.WithName<Control>("LibraryFileBox");
@@ -73,11 +68,6 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             this.WithName<Button>("SelectButton")
                 .Connect("pressed")
                 .To(this, nameof(OnSelectButtonPressed));
-
-            _pathLineEdit = this.WithName<LineEdit>("PathLineEdit");
-            _pathLineEdit
-                .Connect("text_changed")
-                .To(this, nameof(OnPathLineEditTextChanged));
         }
 
 
@@ -106,12 +96,6 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         }
 
 
-        private void OnPathLineEditTextChanged([UsedImplicitly] string _)
-        {
-            RefreshUi();
-        }
-
-
         private void RefreshUi()
         {
             var pathMode = (ExternalFilePathMode) _pathModeOptionButton.GetSelectedId();
@@ -130,7 +114,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             else
             {
                 // if we are file mode, we need to have a file selected
-                var file = _pathLineEdit.Text;
+                var file = _fileSelectBox.CurrentPath;
                 if (string.IsNullOrEmpty(file))
                 {
                     _okButton.Disabled = true;
@@ -144,7 +128,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                     if (pathMode == ExternalFilePathMode.Relative)
                     {
                         var canResolve =
-                            PathResolver.TryAbsoluteToRelative(_pathLineEdit.Text, Path.GetDirectoryName(_currentProjectPath), out _);
+                            PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath, Path.GetDirectoryName(_currentProjectPath), out _);
                         _okButton.Disabled = !canResolve;
                     }
                     else
@@ -169,12 +153,12 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                         break;
                     case ExternalFilePathMode.Relative:
                         var canResolve =
-                            PathResolver.TryAbsoluteToRelative(_pathLineEdit.Text, Path.GetDirectoryName(_currentProjectPath), out var path);
+                            PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath, Path.GetDirectoryName(_currentProjectPath), out var path);
                         GdAssert.That(canResolve, "Could not resolve path");
                         OnNewImportRequested?.Invoke(path, includeMode);
                         break;
                     case ExternalFilePathMode.Absolute:
-                        OnNewImportRequested?.Invoke(_pathLineEdit.Text, includeMode);
+                        OnNewImportRequested?.Invoke(_fileSelectBox.CurrentPath, includeMode);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -190,31 +174,29 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         private void OnSelectButtonPressed()
         {
             // if we already have a file selected, use the file's directory as the initial directory
-            var file = _pathLineEdit.Text;
+            string presetDir;
+            var file = _fileSelectBox.CurrentPath;
             if (!string.IsNullOrEmpty(file))
             {
-                var dir = Path.GetDirectoryName(file);
-                _fileDialog.CurrentDir = dir;
+                presetDir = Path.GetDirectoryName(file);
             }
-
             // if not, try to run with the current project's path
             else if (!string.IsNullOrEmpty(_currentProjectPath))
             {
-                _fileDialog.CurrentDir = _currentProjectPath;
+                presetDir = _currentProjectPath;
             }
             else
             {
                 // run with the user's documents folder
-                _fileDialog.CurrentDir = PathResolver.GetUsersDocumentsFolder();
+                presetDir = PathResolver.GetUsersDocumentsFolder();
             }
 
-            _fileDialog.PopupCentered();
+            _fileSelectBox.OpenSelectionDialog(presetDir);
         }
 
 
         private void OnFileSelected(string path)
         {
-            _pathLineEdit.Text = path;
             RefreshUi();
         }
 

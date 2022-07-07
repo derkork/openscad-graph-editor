@@ -5,7 +5,7 @@
 
 [node name="SettingsDialog" type="WindowDialog"]
 margin_right = 786.0
-margin_bottom = 147.0
+margin_bottom = 181.0
 theme = ExtResource( 2 )
 window_title = "Settings"
 script = ExtResource( 1 )
@@ -22,23 +22,23 @@ custom_constants/margin_bottom = 10
 margin_left = 10.0
 margin_top = 10.0
 margin_right = 776.0
-margin_bottom = 137.0
+margin_bottom = 171.0
 custom_constants/separation = 10
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
 margin_right = 766.0
-margin_bottom = 64.0
+margin_bottom = 92.0
 columns = 2
 
-[node name="Label1" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+[node name="UiScalingLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 8.0
-margin_right = 68.0
+margin_right = 151.0
 margin_bottom = 28.0
 theme = ExtResource( 2 )
 text = "UI Scaling"
 
 [node name="EditorScale" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 76.0
+margin_left = 159.0
 margin_right = 766.0
 margin_bottom = 36.0
 size_flags_horizontal = 3
@@ -48,27 +48,34 @@ selected = 0
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 44.0
-margin_right = 68.0
+margin_right = 151.0
 margin_bottom = 64.0
 
 [node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 76.0
+margin_left = 159.0
 margin_top = 44.0
 margin_right = 766.0
 margin_bottom = 64.0
 text = "This setting requires a restart of the editor."
 
+[node name="OpenScadLocationLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 72.0
+margin_right = 151.0
+margin_bottom = 92.0
+theme = ExtResource( 2 )
+text = "Location of OpenScad"
+
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
-margin_top = 74.0
+margin_top = 102.0
 margin_right = 766.0
-margin_bottom = 85.0
+margin_bottom = 119.0
 rect_min_size = Vector2( 0, 10 )
 size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 95.0
+margin_top = 129.0
 margin_right = 766.0
-margin_bottom = 127.0
+margin_bottom = 161.0
 alignment = 2
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
