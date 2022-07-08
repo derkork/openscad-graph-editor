@@ -80,7 +80,8 @@ namespace OpenScadGraphEditor
         private readonly Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
 
         private readonly Configuration _configuration = new Configuration();
-        
+        private IconButton _openOpenScadButton;
+
         /// <summary>
         /// We use this for testing to see if we get the intended results.
         /// </summary>
@@ -197,6 +198,10 @@ namespace OpenScadGraphEditor
                 .Connect("pressed")
                 .To(this, nameof(OnSettingsButtonPressed));
 
+            _openOpenScadButton = this.WithName<IconButton>("OpenOpenScadButton");
+            _openOpenScadButton
+                .ButtonPressed += OnOpenOpenScadButtonPressed;
+
             var openButton = this.WithName<OpenButton>("OpenButton");
             openButton.OpenFileRequested += OnOpenFile;
             openButton.OpenFileDialogRequested += OnOpenFileDialogRequested;
@@ -224,6 +229,19 @@ namespace OpenScadGraphEditor
             _copyBuffer = new ScadGraph();
             OnNewButtonPressed();
             NotificationService.ShowNotification("Welcome to OpenScad Graph Editor");
+        }
+
+        private void OnOpenOpenScadButtonPressed()
+        {
+            var path = _configuration.GetOpenScadPath();
+            if (path.Empty())
+            {
+                NotificationService.ShowNotification("OpenSCAD path not set. Please set it in the settings dialog.");
+                return;
+            }
+
+            NotificationService.ShowNotification("Opening OpenSCAD. Please wait a few seconds for it to open.");
+            OS.Execute(path, new[] {"--viewall", _currentFile + ".scad"}, blocking: false);
         }
 
 
@@ -397,6 +415,8 @@ namespace OpenScadGraphEditor
             _tabContainer.GetChildNodes<ScadGraphEdit>().ForAll(it => it.RemoveAndFree());
             _openEditors.Clear();
             _projectTree.Clear();
+            _openOpenScadButton.Disabled = true;
+            _openOpenScadButton.HintTooltip = "(disabled) save project to enable";
         }
 
 
@@ -1063,6 +1083,8 @@ namespace OpenScadGraphEditor
             _currentFile = filename;
             _configuration.AddRecentFile(filename);
             _fileNameLabel.Text = filename;
+            _openOpenScadButton.Disabled = false;
+            _openOpenScadButton.HintTooltip = "";
 
             _currentProject = new ScadProject(_rootResolver);
             try
@@ -1099,6 +1121,8 @@ namespace OpenScadGraphEditor
             _currentFile = filename;
             _configuration.AddRecentFile(filename);
             _fileNameLabel.Text = filename;
+            _openOpenScadButton.Disabled = false;
+            _openOpenScadButton.HintTooltip = "";
             MarkDirty(true);
         }
 

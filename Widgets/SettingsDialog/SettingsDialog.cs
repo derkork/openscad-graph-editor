@@ -1,5 +1,6 @@
 using Godot;
 using GodotExt;
+using OpenScadGraphEditor.Library.External;
 
 namespace OpenScadGraphEditor.Widgets.SettingsDialog
 {
@@ -7,10 +8,15 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
     {
         private OptionButton _editorScaleOptionButton;
         private Configuration _configuration;
+        private FileSelectBox.FileSelectBox _fileSelectBox;
 
         public override void _Ready()
         {
             _editorScaleOptionButton = this.WithName<OptionButton>("EditorScale");
+            
+            _fileSelectBox = this.WithName<FileSelectBox.FileSelectBox>("FileSelectBox");
+            _fileSelectBox.Filters = new[] {$"{PathResolver.GetOpenScadExecutableName()};OpenSCAD"};
+            _fileSelectBox.OnSelectPressed += () => _fileSelectBox.OpenSelectionDialog();
             
             this.WithName<Button>("OKButton")
                 .Connect("pressed")
@@ -31,7 +37,8 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
                 200 => 2,
                 _ => 0
             };
-            
+
+            _fileSelectBox.CurrentPath = _configuration.GetOpenScadPath();
             SetAsMinsize();
             PopupCentered();
         }
@@ -46,6 +53,7 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
                 _ => 100
             };
             _configuration.SetEditorScalePercent(editorScale);
+            _configuration.SetOpenScadPath(_fileSelectBox.CurrentPath);
             Hide();
         }
         

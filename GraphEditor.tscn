@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -25,6 +25,7 @@
 [ext_resource path="res://Widgets/LogConsole/LogConsole.tscn" type="PackedScene" id=23]
 [ext_resource path="res://ui_theme.tres" type="Theme" id=24]
 [ext_resource path="res://Widgets/SettingsDialog/SettingsDialog.tscn" type="PackedScene" id=25]
+[ext_resource path="res://Icons/openscad_logo.png" type="Texture" id=26]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -46,7 +47,6 @@ script = ExtResource( 7 )
 [node name="DocumentationDialog" parent="." instance=ExtResource( 22 )]
 
 [node name="ImportDialog" parent="." instance=ExtResource( 8 )]
-visible = false
 
 [node name="QuickActionsPopup" type="PopupMenu" parent="."]
 margin_right = 144.0
@@ -162,14 +162,14 @@ Padding = Vector2( 8, 8 )
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
 margin_left = 487.0
-margin_right = 1037.0
+margin_right = 1015.0
 margin_bottom = 36.0
 size_flags_horizontal = 3
 
 [node name="FileNameLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1045.0
+margin_left = 1023.0
 margin_top = 8.0
-margin_right = 1595.0
+margin_right = 1551.0
 margin_bottom = 28.0
 size_flags_horizontal = 3
 text = "<not yet saved to a file>"
@@ -177,25 +177,34 @@ align = 2
 clip_text = true
 
 [node name="ForceSaveButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1603.0
-margin_right = 1652.0
+margin_left = 1559.0
+margin_right = 1608.0
 margin_bottom = 36.0
 text = "[ ... ]"
 
 [node name="SettingsButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1660.0
-margin_right = 1785.0
+margin_left = 1616.0
+margin_right = 1741.0
 margin_bottom = 36.0
 rect_min_size = Vector2( 125, 0 )
 hint_tooltip = "Save the current project to a file."
 text = "Settings"
 
 [node name="PreviewButton" type="Button" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 1793.0
-margin_right = 1892.0
+margin_left = 1749.0
+margin_right = 1848.0
 margin_bottom = 36.0
 toggle_mode = true
 text = "View Code"
+
+[node name="OpenOpenScadButton" parent="MarginContainer/VBoxContainer/PanelContainer/HBoxContainer" instance=ExtResource( 15 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 1856.0
+margin_right = 1892.0
+margin_bottom = 36.0
+Icon = ExtResource( 26 )
+Padding = Vector2( 8, 8 )
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
 margin_top = 64.0

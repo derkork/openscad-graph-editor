@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Godot;
+using OpenScadGraphEditor.Widgets;
+using OpenScadGraphEditor.Widgets.NotificationBubble;
 using Serilog;
 
 namespace OpenScadGraphEditor
@@ -31,6 +33,19 @@ namespace OpenScadGraphEditor
             return (int) _configFile.GetValue("editor", "scale", 100);
         }
 
+        
+        public void SetOpenScadPath(string openScadPath)
+        {
+            _configFile.SetValue("editor", "open_scad_path", openScadPath);
+            Save();
+        }
+        
+        public string GetOpenScadPath()
+        {
+            return (string) _configFile.GetValue("editor", "open_scad_path", "");
+        }
+        
+        
         private void Save()
         {
             var directory = new Directory();
@@ -39,6 +54,7 @@ namespace OpenScadGraphEditor
             var error = _configFile.Save(ConfigPath);
             if (error != Error.Ok)
             {
+                NotificationService.ShowError("Could not save config file. Check log for details.");
                 Log.Warning("Couldn't save config file to {Path} -> Error {Error}", ConfigPath, error);
             }
         }

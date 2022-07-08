@@ -28,9 +28,22 @@ namespace OpenScadGraphEditor.Widgets.FileSelectBox
         /// <summary>
         /// The path that is currently selected.
         /// </summary>
-        public string CurrentPath => _pathLineEdit.Text;
-        
-        
+        public string CurrentPath
+        {
+            get => _pathLineEdit.Text;
+            set => _pathLineEdit.Text = value;
+        }
+
+
+        /// <summary>
+        /// The filters to set.
+        /// </summary>
+        public string[] Filters
+        {
+            get => _fileDialog.Filters;
+            set => _fileDialog.Filters = value;
+        }
+
         public override void _Ready()
         {
             _pathLineEdit = this.WithName<LineEdit>("PathLineEdit");

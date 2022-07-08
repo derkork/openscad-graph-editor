@@ -31,6 +31,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             _fileSelectBox = this.WithName<FileSelectBox.FileSelectBox>("FileSelectBox");
             _fileSelectBox.OnFileSelected += OnFileSelected;
             _fileSelectBox.OnSelectPressed += OnSelectButtonPressed;
+            _fileSelectBox.Filters = new[] {"*.scad;OpenSCAD files"};
             
             _fileLabel = this.WithName<Control>("FileLabel");
             _libraryFileLabel = this.WithName<Control>("LibraryFileLabel");

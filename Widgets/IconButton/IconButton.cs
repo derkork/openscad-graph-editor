@@ -120,6 +120,9 @@ namespace OpenScadGraphEditor.Widgets.IconButton
             _button = this.WithName<Button>("Button");
             _button.ToggleMode = _toggleMode;
             _button.Pressed = _pressed;
+            _button.HintTooltip = _hintTooltip;
+            _button.Disabled = _disabled;
+            
             _marginContainer = this.WithName<MarginContainer>("MarginContainer");
             _marginContainer.AddConstantOverride("margin_top", Mathf.RoundToInt(_padding.y));
             _marginContainer.AddConstantOverride("margin_bottom", Mathf.RoundToInt(_padding.y));

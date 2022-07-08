@@ -35,8 +35,28 @@ namespace OpenScadGraphEditor.Library.External
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
 
+
+        /// <summary>
+        /// Returns the name of the OpenScad executable for the current operating system.
+        /// </summary>
+        public static string GetOpenScadExecutableName()
+        {
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                case PlatformID.Win32NT:
+                    return "openscad.exe";
+                case PlatformID.Unix:
+                    return "openscad";
+                case PlatformID.MacOSX:
+                    return "OpenScad.app";
+                default:
+                    throw new ArgumentOutOfRangeException();
+            } 
+        }
+        
 
         /// <summary>
         /// Checks whether two paths refer to the same file. Both paths must be absolute.
