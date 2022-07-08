@@ -11,6 +11,7 @@ namespace OpenScadGraphEditor.Widgets
     {
         private PortType _portType;
         protected override Theme UseTheme => Resources.SimpleNodeWidgetTheme;
+        public override bool RenderTitle => false;
 
         public override void _Ready()
         {

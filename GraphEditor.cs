@@ -23,6 +23,7 @@ using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 using OpenScadGraphEditor.Widgets.LogConsole;
 using OpenScadGraphEditor.Widgets.NodeColorDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
+using OpenScadGraphEditor.Widgets.SettingsDialog;
 using OpenScadGraphEditor.Widgets.UsageDialog;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 using Serilog;
@@ -57,6 +58,7 @@ namespace OpenScadGraphEditor
         private VariableRefactorDialog _variableRefactorDialog;
         private NodeColorDialog _nodeColorDialog;
         private CommentEditingDialog _commentEditingDialog;
+        private SettingsDialog _settingsDialog;
         private HelpDialog _helpDialog;
         private UsageDialog _usageDialog;
         private DocumentationDialog _documentationDialog;
@@ -78,12 +80,14 @@ namespace OpenScadGraphEditor
         private readonly Dictionary<string, ScadGraphEdit> _openEditors = new Dictionary<string, ScadGraphEdit>();
 
         private readonly Configuration _configuration = new Configuration();
-        
+        private IconButton _openOpenScadButton;
+
         /// <summary>
         /// We use this for testing to see if we get the intended results.
         /// </summary>
         public ScadProject CurrentProject => _currentProject;
 
+        
         public override void _Ready()
         {
             _logConsole = this.WithName<LogConsole>("LogConsole");
@@ -97,6 +101,15 @@ namespace OpenScadGraphEditor
             
             OS.LowProcessorUsageMode = true;
             
+            _configuration.Load();
+            
+            // scale all themes to editor scale
+            var percent = _configuration.GetEditorScalePercent();
+            foreach (var theme in Resources.AllThemes)
+            {
+                theme.Scale(percent);
+            }
+            
             _rootResolver = new BuiltInLibrary();
 
             _tabContainer = this.WithName<TabContainer>("TabContainer");
@@ -107,7 +120,9 @@ namespace OpenScadGraphEditor
             _importDialog.OnNewImportRequested += OnNewImportRequested;
             _usageDialog = this.WithName<UsageDialog>("UsageDialog");
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
-
+            
+            _settingsDialog = this.WithName<SettingsDialog>("SettingsDialog");
+            
             _consoleButton = this.WithName<Button>("ConsoleButton");
             _consoleButton
                 .Connect("pressed")
@@ -179,6 +194,14 @@ namespace OpenScadGraphEditor
                 .Connect("toggled")
                 .To(this, nameof(OnPreviewToggled));
 
+            this.WithName<Button>("SettingsButton")
+                .Connect("pressed")
+                .To(this, nameof(OnSettingsButtonPressed));
+
+            _openOpenScadButton = this.WithName<IconButton>("OpenOpenScadButton");
+            _openOpenScadButton
+                .ButtonPressed += OnOpenOpenScadButtonPressed;
+
             var openButton = this.WithName<OpenButton>("OpenButton");
             openButton.OpenFileRequested += OnOpenFile;
             openButton.OpenFileDialogRequested += OnOpenFileDialogRequested;
@@ -203,13 +226,30 @@ namespace OpenScadGraphEditor
                 .Connect("timeout")
                 .To(this, nameof(SaveChanges));
 
-            _configuration.Load();
             _copyBuffer = new ScadGraph();
             OnNewButtonPressed();
             NotificationService.ShowNotification("Welcome to OpenScad Graph Editor");
         }
 
+        private void OnOpenOpenScadButtonPressed()
+        {
+            var path = _configuration.GetOpenScadPath();
+            if (path.Empty())
+            {
+                NotificationService.ShowNotification("OpenSCAD path not set. Please set it in the settings dialog.");
+                return;
+            }
 
+            NotificationService.ShowNotification("Opening OpenSCAD. Please wait a few seconds for it to open.");
+            OS.Execute(path, new[] {"--viewall", _currentFile + ".scad"}, blocking: false);
+        }
+
+
+        private void OnSettingsButtonPressed()
+        {
+            _settingsDialog.Open(_configuration);
+        }
+        
         private void OnConsoleButtonToggled()
         {
             if (!_logConsole.Visible)
@@ -375,6 +415,8 @@ namespace OpenScadGraphEditor
             _tabContainer.GetChildNodes<ScadGraphEdit>().ForAll(it => it.RemoveAndFree());
             _openEditors.Clear();
             _projectTree.Clear();
+            _openOpenScadButton.Disabled = true;
+            _openOpenScadButton.HintTooltip = "(disabled) save project to enable";
         }
 
 
@@ -1041,6 +1083,8 @@ namespace OpenScadGraphEditor
             _currentFile = filename;
             _configuration.AddRecentFile(filename);
             _fileNameLabel.Text = filename;
+            _openOpenScadButton.Disabled = false;
+            _openOpenScadButton.HintTooltip = "";
 
             _currentProject = new ScadProject(_rootResolver);
             try
@@ -1077,6 +1121,8 @@ namespace OpenScadGraphEditor
             _currentFile = filename;
             _configuration.AddRecentFile(filename);
             _fileNameLabel.Text = filename;
+            _openOpenScadButton.Disabled = false;
+            _openOpenScadButton.HintTooltip = "";
             MarkDirty(true);
         }
 

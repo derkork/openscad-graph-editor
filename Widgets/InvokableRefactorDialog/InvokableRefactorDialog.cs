@@ -23,9 +23,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private InvokableDescription _baseDescription;
         private LineEdit _templateParameterName;
         private OptionButton _templateParameterTypeHint;
-        private Button _templateParameterUpButton;
-        private Button _templateParameterDownButton;
-        private Button _templateParameterDeleteButton;
+        private IconButton.IconButton _templateParameterUpButton;
+        private IconButton.IconButton _templateParameterDownButton;
+        private IconButton.IconButton _templateParameterDeleteButton;
+        private MarginContainer _rootContainer;
         private Label _errorLabel;
         private GridContainer _parameterGrid;
         private readonly List<ParameterLine> _parameterLines = new List<ParameterLine>();
@@ -37,7 +38,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         public override void _Ready()
         {
             GetCloseButton().Visible = false;
-
+            _rootContainer = this.WithName<MarginContainer>("RootContainer");
             _nameEdit = this.WithName<LineEdit>("NameEdit");
             _nameEdit
                 .Connect("text_changed")
@@ -85,11 +86,11 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeOptionButton.AddItem(PortType.Array.HumanReadableName(), (int) PortType.Array);
             _indexByPortTypes[PortType.Array] = index; // no ++ here since it is the last
 
-            _templateParameterUpButton = this.WithName<Button>("TemplateParameterUpButton");
+            _templateParameterUpButton = this.WithName<IconButton.IconButton>("TemplateParameterUpButton");
             _templateParameterUpButton.Visible = false;
-            _templateParameterDownButton = this.WithName<Button>("TemplateParameterDownButton");
+            _templateParameterDownButton = this.WithName<IconButton.IconButton>("TemplateParameterDownButton");
             _templateParameterDownButton.Visible = false;
-            _templateParameterDeleteButton = this.WithName<Button>("TemplateParameterDeleteButton");
+            _templateParameterDeleteButton = this.WithName<IconButton.IconButton>("TemplateParameterDeleteButton");
             _templateParameterDeleteButton.Visible = false;
             _parameterGrid = this.WithName<GridContainer>("ParameterGrid");
 
@@ -102,9 +103,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 .Connect("pressed")
                 .To(this, nameof(OnCancelPressed));
 
-            this.WithName<Button>("AddParameterButton")
-                .Connect("pressed")
-                .To(this, nameof(OnAddParameterPressed));
+            this.WithName<IconButton.IconButton>("AddParameterButton").ButtonPressed += OnAddParameterPressed;
         }
 
 
@@ -129,7 +128,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeLabel.Visible = false;
             _returnTypeOptionButton.Visible = false;
             ValidateAll();
-            SetAsMinsize();
             PopupCentered();
         }
 
@@ -327,7 +325,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void OnIdentifierChanged([UsedImplicitly] string _)
         {
             ValidateAll();
-            SetAsMinsize();
         }
 
         private void ValidateAll()
@@ -335,21 +332,28 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             ValidityChecker.For(_errorLabel, _okButton)
                 .Check(
                     _nameEdit.Text.IsValidIdentifier(),
-                    $"Name must not be blank and must be only letters, numbers, and underscores and must not start with a letter."
+                    $"Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .CheckAll(
                     _parameterLines,
                     it => it.Name.IsValidIdentifier(),
                     it =>
-                        $"Parameter name '{it.Name}' must be only letters, numbers, and underscores and must not start with a letter."
+                        $"Parameter name '{it.Name}' must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .Check(
                     _parameterLines.Select(it => it.Name).Distinct().Count() == _parameterLines.Count,
                     "Parameter names must be unique."
                 )
                 .UpdateUserInterface();
+            CallDeferred(nameof(FixSize));
         }
 
+        private void FixSize()
+        {
+            // this is a crappy hack to get the dialog to fit the content.
+            SetSize(_rootContainer.RectSize);
+        }
+        
         private void OnAddParameterPressed()
         {
             AddParameter("parameter" + _parameterLines.Count, PortType.Any);
@@ -396,17 +400,11 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             nameEdit.Connect("text_changed")
                 .To(this, nameof(OnIdentifierChanged));
 
-            deleteButton.Connect("pressed")
-                .WithBinds(line.HoldMyBeer())
-                .To(this, nameof(OnRemoveParameterPressed));
+            deleteButton.ButtonPressed += () => OnRemoveParameterPressed(line);
 
-            upButton.Connect("pressed")
-                .WithBinds(line.HoldMyBeer())
-                .To(this, nameof(OnParameterUpPressed));
+            upButton.ButtonPressed += () => OnParameterUpPressed(line);
 
-            downButton.Connect("pressed")
-                .WithBinds(line.HoldMyBeer())
-                .To(this, nameof(OnParameterDownPressed));
+            downButton.ButtonPressed += () => OnParameterDownPressed(line);
 
             line.InsertInto(_parameterGrid);
 
@@ -426,26 +424,16 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _parameterLines.ForAll(it => it.InsertInto(_parameterGrid));
         }
 
-        private void OnRemoveParameterPressed(Reference lineReference)
+        private void OnRemoveParameterPressed(ParameterLine line)
         {
-            if (!lineReference.TryGetBeer<ParameterLine>(out var line))
-            {
-                return;
-            }
-
             _parameterLines.Remove(line);
             line.Discard();
 
             Repaint();
         }
 
-        private void OnParameterUpPressed(Reference lineReference)
+        private void OnParameterUpPressed(ParameterLine line)
         {
-            if (!lineReference.TryGetBeer<ParameterLine>(out var line))
-            {
-                return;
-            }
-
             var index = _parameterLines.IndexOf(line);
             if (index <= 0)
             {
@@ -461,13 +449,8 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             Repaint();
         }
 
-        private void OnParameterDownPressed(Reference lineReference)
+        private void OnParameterDownPressed(ParameterLine line)
         {
-            if (!lineReference.TryGetBeer<ParameterLine>(out var line))
-            {
-                return;
-            }
-
             var index = _parameterLines.IndexOf(line);
             if (index == -1 || index + 1 >= _parameterLines.Count)
             {
@@ -502,12 +485,12 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
             private readonly LineEdit _nameEdit;
             private readonly OptionButton _typeHint;
-            private readonly Button _upButton;
-            private readonly Button _downButton;
-            private readonly Button _deleteButton;
+            private readonly IconButton.IconButton _upButton;
+            private readonly IconButton.IconButton _downButton;
+            private readonly IconButton.IconButton _deleteButton;
 
-            public ParameterLine(LineEdit nameEdit, OptionButton typeHint, Button upButton, Button downButton,
-                Button deleteButton, string originalName = null, int originalPortType = -1, int originalIndex = -1)
+            public ParameterLine(LineEdit nameEdit, OptionButton typeHint, IconButton.IconButton upButton, IconButton.IconButton downButton,
+                IconButton.IconButton deleteButton, string originalName = null, int originalPortType = -1, int originalIndex = -1)
             {
                 OriginalName = originalName;
                 OriginalPortType = originalPortType;

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Widgets/DocumentationDialog/DocumentationDialog.cs" type="Script" id=1]
+[ext_resource path="res://ui_theme.tres" type="Theme" id=2]
 
 [node name="DocumentationDialog" type="WindowDialog"]
 anchor_left = 0.5
@@ -11,6 +12,7 @@ margin_left = -599.5
 margin_top = -387.5
 margin_right = 599.5
 margin_bottom = 387.5
+theme = ExtResource( 2 )
 window_title = "Documentation"
 resizable = true
 script = ExtResource( 1 )
@@ -32,39 +34,39 @@ margin_bottom = 765.0
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
 margin_right = 1179.0
-margin_bottom = 25.0
+margin_bottom = 20.0
 text = "Description"
 
 [node name="DescriptionEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
-margin_top = 33.0
+margin_top = 28.0
 margin_right = 1179.0
-margin_bottom = 608.0
+margin_bottom = 631.0
 rect_min_size = Vector2( 0, 90 )
 size_flags_vertical = 3
 wrap_enabled = true
 
 [node name="ReturnValueSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 616.0
+margin_top = 639.0
 margin_right = 1179.0
-margin_bottom = 694.0
+margin_bottom = 707.0
 
 [node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/ReturnValueSection"]
 margin_right = 1179.0
-margin_bottom = 25.0
+margin_bottom = 20.0
 text = "Return value"
 
 [node name="ReturnValueEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/ReturnValueSection"]
-margin_top = 33.0
+margin_top = 28.0
 margin_right = 1179.0
-margin_bottom = 78.0
+margin_bottom = 68.0
 
 [node name="ParametersSection" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 702.0
+margin_top = 715.0
 margin_right = 1179.0
-margin_bottom = 702.0
+margin_bottom = 715.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 710.0
+margin_top = 723.0
 margin_right = 1179.0
 margin_bottom = 755.0
 alignment = 2
@@ -72,13 +74,13 @@ alignment = 2
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 951.0
 margin_right = 1061.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Cancel"
 
 [node name="OKButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 1069.0
 margin_right = 1179.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "OK"

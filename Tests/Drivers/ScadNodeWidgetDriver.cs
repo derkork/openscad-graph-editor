@@ -14,9 +14,15 @@ namespace OpenScadGraphEditor.Tests.Drivers
     /// </summary>
     public class ScadNodeWidgetDriver : GraphNodeDriver<ScadNodeWidget>
     {
+    
         public ScadNodeWidgetDriver(Func<ScadNodeWidget> producer, string description = "") : base(producer, description)
         {
         }
+
+        /// <summary>
+        /// Because we do our custom title rendering we have a separate accessor for the title here.
+        /// </summary>
+        public string NodeTitle => PresentRoot.GetChildNodes<Label>().First().Text;
 
         private PortContainer GetPortContainer(Port port)
         {

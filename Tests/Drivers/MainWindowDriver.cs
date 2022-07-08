@@ -8,6 +8,7 @@ using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.DocumentationDialog;
 using OpenScadGraphEditor.Widgets.HelpDialog;
 using OpenScadGraphEditor.Widgets.IconButton;
+using OpenScadGraphEditor.Widgets.ImportDialog;
 using OpenScadGraphEditor.Widgets.InvokableRefactorDialog;
 
 namespace OpenScadGraphEditor.Tests.Drivers
@@ -16,11 +17,14 @@ namespace OpenScadGraphEditor.Tests.Drivers
     {
         public GraphEditDriver<GraphEdit, ScadNodeWidgetDriver, ScadNodeWidget> GraphEditor { get; }
         public AddDialogDriver AddDialog { get; }
-        public ButtonDriver AddModuleButton { get; }
+        public IconButtonDriver AddModuleButton { get; }
+        public IconButtonDriver AddExternalReferenceButton { get; }
         public InvokableRefactorDialogDriver InvokableRefactorDialog { get; }
         public TabContainerDriver TabContainer { get; }
         public PopupMenuDriver PopupMenu { get; }
         public DocumentationDialogDriver DocumentationDialog { get; }
+        
+        public ImportDialogDriver ImportDialog { get; }
         
         public HelpDialogDriver HelpDialog { get; }
 
@@ -49,9 +53,13 @@ namespace OpenScadGraphEditor.Tests.Drivers
                 () => Root?.WithNameOrNull<AddDialog>("AddDialog"),
                 Description + " -> Add Dialog"
             );
-            AddModuleButton = new ButtonDriver(
-                () => Root?.WithNameOrNull<IconButton>("AddModuleButton")?.WithNameOrNull<Button>("Button"),
+            AddModuleButton = new IconButtonDriver(
+                () => Root?.WithNameOrNull<IconButton>("AddModuleButton"),
                 Description + " -> Add Module Button"
+            );
+            AddExternalReferenceButton = new IconButtonDriver(
+                () => Root?.WithNameOrNull<IconButton>("AddExternalReferenceButton"),
+                Description + " -> Add External Reference Button"
             );
             InvokableRefactorDialog = new InvokableRefactorDialogDriver(
                 () => Root?.WithNameOrNull<InvokableRefactorDialog>("InvokableRefactorDialog"),
@@ -75,6 +83,11 @@ namespace OpenScadGraphEditor.Tests.Drivers
             HelpDialog = new HelpDialogDriver(
                 () => Root?.WithNameOrNull<HelpDialog>("HelpDialog"),
                 Description + " -> Help Dialog"
+            );
+            
+            ImportDialog = new ImportDialogDriver(
+                () => Root?.WithNameOrNull<ImportDialog>("ImportDialog"),
+                Description + " -> Import Dialog"
             );
         }
 

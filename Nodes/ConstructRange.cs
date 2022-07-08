@@ -6,7 +6,7 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class ConstructRange : ScadNode, IAmAnExpression, IHaveCustomWidget
+    public class ConstructRange : ScadNode, IAmAnExpression
     {
         public override string NodeTitle => "Construct Range";
         public override string NodeQuickLookup => "CRng";
@@ -49,11 +49,6 @@ namespace OpenScadGraphEditor.Nodes
             var end = RenderInput(context, 2).OrDefault("1");
 
             return $"[{start}:{step}:{end}]";
-        }
-
-        public ScadNodeWidget InstantiateCustomWidget()
-        {
-            return Prefabs.New<SmallNodeWidget>();
         }
 
     }

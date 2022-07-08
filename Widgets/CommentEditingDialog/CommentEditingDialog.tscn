@@ -1,10 +1,13 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Widgets/CommentEditingDialog/CommentEditingDialog.cs" type="Script" id=1]
+[ext_resource path="res://ui_theme.tres" type="Theme" id=2]
 
 [node name="CommentEditingDialog" type="WindowDialog"]
+visible = true
 margin_right = 786.0
 margin_bottom = 440.0
+theme = ExtResource( 2 )
 window_title = "Edit Comment"
 resizable = true
 script = ExtResource( 1 )
@@ -26,26 +29,26 @@ custom_constants/separation = 10
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 margin_right = 766.0
-margin_bottom = 25.0
+margin_bottom = 20.0
 text = "Title"
 
 [node name="TitleEdit" type="LineEdit" parent="MarginContainer/VBoxContainer"]
-margin_top = 35.0
+margin_top = 30.0
 margin_right = 766.0
-margin_bottom = 80.0
+margin_bottom = 70.0
 size_flags_horizontal = 3
 
 [node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_top = 90.0
+margin_top = 80.0
 margin_right = 766.0
-margin_bottom = 115.0
+margin_bottom = 100.0
 text = "Description"
 valign = 1
 
 [node name="DescriptionEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
-margin_top = 125.0
+margin_top = 110.0
 margin_right = 766.0
-margin_bottom = 365.0
+margin_bottom = 378.0
 rect_min_size = Vector2( 766, 240 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -53,28 +56,28 @@ context_menu_enabled = false
 shortcut_keys_enabled = false
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 375.0
+margin_top = 388.0
 margin_right = 766.0
 margin_bottom = 420.0
 alignment = 2
 
 [node name="RemoveCommentButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 305.0
+margin_left = 378.0
 margin_right = 530.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Remove Comment"
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 538.0
 margin_right = 648.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "Cancel"
 
 [node name="OKButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
 margin_left = 656.0
 margin_right = 766.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 110, 45 )
+margin_bottom = 32.0
+rect_min_size = Vector2( 110, 0 )
 text = "OK"

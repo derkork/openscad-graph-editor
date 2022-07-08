@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
+using GodotTestDriver.Drivers;
 using GodotTestDriver.Input;
 using GodotXUnitApi;
-using OpenScadGraphEditor.Tests.Drivers;
 using Xunit;
 
 namespace OpenScadGraphEditor.Tests
@@ -56,13 +56,13 @@ namespace OpenScadGraphEditor.Tests
             // the help dialog is shown
             Assert.True(MainWindow.HelpDialog.IsVisible);
             // and the title of the help dialog is "test_module"
-            Assert.Equal("test_module", MainWindow.HelpDialog.TitleLabel.Text);
+            Assert.Equal("test_module", MainWindow.HelpDialog.Title);
             // and the description of the help dialog is "This is a test module"
-            Assert.Equal("This is a test module", MainWindow.HelpDialog.DescriptionLabel.Text);
+            Assert.Equal("This is a test module", MainWindow.HelpDialog.NodeDescription);
             // and on the right side of the node we have the three parameters and their descriptions
-            Assert.Equal("This is the first parameter", MainWindow.HelpDialog.GetDescriptionLabel(Port.Output(0)).Text);
-            Assert.Equal("This is the second parameter", MainWindow.HelpDialog.GetDescriptionLabel(Port.Output(1)).Text);
-            Assert.Equal("This is the third parameter", MainWindow.HelpDialog.GetDescriptionLabel(Port.Output(2)).Text);
+            Assert.Equal("This is the first parameter", MainWindow.HelpDialog.GetPortDescription(Port.Output(0)));
+            Assert.Equal("This is the second parameter", MainWindow.HelpDialog.GetPortDescription(Port.Output(1)));
+            Assert.Equal("This is the third parameter", MainWindow.HelpDialog.GetPortDescription(Port.Output(2)));
         }
         
     }

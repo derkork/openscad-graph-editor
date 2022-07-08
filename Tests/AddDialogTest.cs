@@ -54,7 +54,7 @@ namespace OpenScadGraphEditor.Tests
             // i can see the cube node
             var cube = MainWindow.GraphEditor.Nodes.FirstOrDefault();
             Assert.NotNull(cube);
-            Assert.Equal("Cube", cube.Title);
+            Assert.Equal("Cube", cube.NodeTitle);
         }
 
         [GodotFact(Frame = GodotFactFrame.Process)]
