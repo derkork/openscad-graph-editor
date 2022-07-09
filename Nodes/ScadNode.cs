@@ -308,7 +308,7 @@ namespace OpenScadGraphEditor.Nodes
             return "";
         }
 
-        private string BuildRenderModifier()
+        internal string BuildRenderModifier()
         {
             var effectiveModifiers = this.GetModifiers();
             this.TryGetColorModifier(out var effectiveColor);

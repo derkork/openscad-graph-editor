@@ -54,7 +54,13 @@ namespace OpenScadGraphEditor.Library
                 return hasFlowOutput;
             });
             
-            var content = candidates.Select(it =>it.Render(this, 0)).JoinToString("\n");
+            var content = candidates.Select(it =>
+            {
+                var nodeContent = it.Render(this, 0);
+                
+                var renderModifier = it.BuildRenderModifier();
+                return !renderModifier.Empty() ? string.Format(renderModifier, nodeContent) : nodeContent;
+            }).JoinToString("\n");
             // now check if the graph has an entrypoint if, so render the entry point with the given content
             if (_nodes.FirstOrDefault(it => it is EntryPoint) is EntryPoint entryPoint)
             {
