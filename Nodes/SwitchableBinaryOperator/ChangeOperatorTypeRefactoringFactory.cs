@@ -3,11 +3,12 @@ using System.Linq;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 {
     [UsedImplicitly]
-    public class SwitchBinaryOperatorPortTypeRefactoringFactory : IUserSelectableRefactoringFactory
+    public class ChangeOperatorTypeRefactoringFactory : IUserSelectableRefactoringFactory
     {
         public IEnumerable<UserSelectableNodeRefactoring> GetRefactorings(ScadGraph graph, ScadNode node)
         {
@@ -15,10 +16,9 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             {
                 return Enumerable.Empty<UserSelectableNodeRefactoring>();
             }
-            
-            return new[] {true, false}.SelectMany(
-                i => new[] {PortType.Array, PortType.Any, PortType.Number, PortType.Vector3, PortType.Vector2, PortType.Boolean, PortType.String},
-                (i, j) => new SwitchBinaryOperatorPortTypeRefactoring(graph, node, i, j));
+
+            return typeof(SwitchableBinaryOperator).GetImplementors()
+                .Select(it => new ChangeOperatorTypeRefactoring(graph, node, it));
         }
     }
 }

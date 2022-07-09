@@ -1,7 +1,6 @@
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
-using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Nodes
 {

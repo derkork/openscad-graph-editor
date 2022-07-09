@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Godot;
 using OpenScadGraphEditor.Widgets;
-using OpenScadGraphEditor.Widgets.NotificationBubble;
 using Serilog;
 
 namespace OpenScadGraphEditor

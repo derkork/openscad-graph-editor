@@ -905,18 +905,19 @@ namespace OpenScadGraphEditor
                 .GetApplicable(graph, node)
                 .OrderBy(it => it.Order)
                 .GroupBy(it => it.Group)
-                .SelectMany(it =>
+                .Select(it =>
                 {
-                    // add a separator item if we have more than one refactoring in the group
-                    var results = Enumerable.Empty<QuickAction>();
-                    if (it.Count() > 1 && !it.Key.Empty())
+                    if (it.Count() > 1)
                     {
-                        results = results.Append(new QuickAction(it.Key));
+                        // group into submenu
+                        return new QuickAction(it.Key, it.Select(refactoring =>
+                            new QuickAction(refactoring.Title,
+                                () => OnRefactoringRequested(refactoring.Title, refactoring))).ToList());
                     }
 
-
-                    return results.Concat(it.Select(refa =>
-                        new QuickAction(refa.Title, () => OnRefactoringRequested(refa.Title, refa))));
+                    // just return the item
+                    var refactoring = it.First();
+                    return new QuickAction(refactoring.Title, () => OnRefactoringRequested(refactoring.Title, refactoring));
                 });
 
             if (node is Comment comment)

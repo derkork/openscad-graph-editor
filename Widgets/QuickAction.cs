@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -14,7 +15,11 @@ namespace OpenScadGraphEditor.Widgets
         
         public bool IsChecked { get; }
 
-        public bool IsSeparator { get; set; }
+        public bool IsSubGroup { get; }
+        
+        public bool IsSeparator { get; }
+
+        public List<QuickAction> Children { get; }
 
         public QuickAction(string title, Action onSelect, bool isCheckbox = false, bool isChecked = false)
         {
@@ -22,10 +27,20 @@ namespace OpenScadGraphEditor.Widgets
             OnSelect = onSelect;
             IsCheckbox = isCheckbox;
             IsChecked = isChecked;
+            Children = new List<QuickAction>();
+        }
+
+        public QuickAction(string title, List<QuickAction> children)
+        {
+            Children = children;
+            Title = title;
+            OnSelect = () => { };
+            IsSubGroup = true;
         }
 
         public QuickAction(string title)
         {
+            Children = new List<QuickAction>();
             Title = title;
             OnSelect = () => { };
             IsSeparator = true;

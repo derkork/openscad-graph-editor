@@ -229,6 +229,8 @@ namespace OpenScadGraphEditor.Widgets
             {
                 _widgets[id].RemoveAndFree();
                 _widgets.Remove(id);
+                // also remove them from the selection if they were in 
+                _selection.Remove(id);
             }
         }
         

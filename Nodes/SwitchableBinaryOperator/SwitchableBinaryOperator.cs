@@ -9,9 +9,11 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 
         protected SwitchableBinaryOperator()
         {
-            // number is going to be the most common case, so we start with this by default
             InputPorts
-                .Number()
+                // we start with `Any` for the first input port as usually you will connect another node there
+                // and therefore this is the most suitable setting.
+                .Any() 
+                // number is going to be the most common case for the second operator, so we start with this by default
                 .Number();
 
             OutputPorts
@@ -47,7 +49,12 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 return; // nothing to do.
             }
             
-            InputPorts[port.Port] = PortDefinition.OfType(newPortType);
+            var existingDefinition = InputPorts[port.Port];
+            InputPorts[port.Port] = PortDefinition.OfType(
+                newPortType, 
+                existingDefinition.Name, 
+                newPortType.GetMatchingLiteralType(),
+                existingDefinition.LiteralIsAutoSet);
 
             var wasSet = false;
             if (TryGetLiteral(port, out var literal))
