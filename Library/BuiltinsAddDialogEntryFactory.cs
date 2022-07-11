@@ -17,6 +17,7 @@ namespace OpenScadGraphEditor.Library
 
             var result = new List<IAddDialogEntry>();
             
+            // built-in language level nodes (operators, etc.)
             result.AddRange(
                 BuiltIns.LanguageLevelNodes
                     .Select(it => new SingleNodeBasedEntry(
@@ -26,6 +27,7 @@ namespace OpenScadGraphEditor.Library
                     ))
             );
 
+            // built-in functions
             result.AddRange(
                 BuiltIns.Functions
                     .Select(it => new SingleNodeBasedEntry(
@@ -35,6 +37,7 @@ namespace OpenScadGraphEditor.Library
                     ))
             );
 
+            // built-in modules
             result.AddRange(
                 BuiltIns.Modules
                     .Select(it => new SingleNodeBasedEntry(
@@ -42,6 +45,26 @@ namespace OpenScadGraphEditor.Library
                         () => NodeFactory.Build<ModuleInvocation>(it),
                         canPerformRefactorings
                     )));
+            
+            // setters + getters for built-in variables
+            // for the variables directly in the project
+            result.AddRange(
+                BuiltIns.Variables
+                    .Select(it => new SingleNodeBasedEntry(
+                        Resources.VariableIcon,
+                        () => NodeFactory.Build<SetVariable>(it),
+                        canPerformRefactorings
+                    ))
+            );
+
+            result.AddRange(
+                BuiltIns.Variables
+                    .Select(it => new SingleNodeBasedEntry(
+                        Resources.VariableIcon,
+                        () => NodeFactory.Build<GetVariable>(it),
+                        canPerformRefactorings
+                    ))
+            );
 
             return result;
         }
