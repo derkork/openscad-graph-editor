@@ -47,25 +47,31 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_top = 456.0
+margin_top = 423.0
 margin_right = 560.0
-margin_bottom = 490.0
+margin_bottom = 457.0
 custom_fonts/font = SubResource( 1 )
 text = "The Magic Node"
 align = 1
 
 [node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_top = 498.0
+margin_top = 465.0
 margin_right = 560.0
-margin_bottom = 523.0
+margin_bottom = 490.0
 text = "The Magic Node"
 align = 1
 autowrap = true
 
-[node name="NodeContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_top = 531.0
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
+margin_top = 498.0
 margin_right = 560.0
-margin_bottom = 531.0
+margin_bottom = 563.0
+custom_constants/margin_top = 65
+
+[node name="NodeContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/MarginContainer"]
+margin_top = 65.0
+margin_right = 560.0
+margin_bottom = 65.0
 size_flags_horizontal = 3
 
 [node name="RightContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
