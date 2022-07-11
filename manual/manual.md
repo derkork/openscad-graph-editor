@@ -45,9 +45,15 @@ The following colors are used:
 - _White_ - geometry (a 2D or 3D object)
 
 ## Adding nodes
-There are multiple ways to add nodes to the graph. You can right-click on a free space in the graph to open the _Add Node_ dialog. This contains a list of all available nodes. You can then type the name of the node you want to add and press `Enter` or double-click the node in the list to add it to the graph.
+There are multiple ways to add nodes to the graph. You can right-click on a free space in the graph to open the _Add Node_ dialog. This contains a list of all available nodes. You can then type the name of the node you want to add and press `Enter` or double-click the node in the list to add it to the graph. All built-in nodes come with a unique short name which is indicated in square brackets behind the node's full name. For example the _Cube_ node has the short name _Cbe_. This feature allows you to quickly add nodes by typing their short name and pressing `Enter`.
 
-![](images/add_node.mp4)
+![](images/add_node.gif)
+
+If you already have a node in your graph, you can also drag from one of its ports to a free space in the graph. This will also open the _Add Node_ dialog. In addition it will filter the selection of nodes to only show the ones that can be connected to the port you dragged from. If for some reason you don't want the list filtered, you can uncheck the _Filter by current context_ checkbox in the _Add Node_ dialog.
+
+![](images/add_node_by_dragging.gif)
+
+After you have selected a node from the list the node will be added to the graph and will automatically be connected to the port you dragged from.
 
 ## Keyboard shortcuts
 
