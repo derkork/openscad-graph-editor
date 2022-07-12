@@ -55,9 +55,8 @@ namespace OpenScadGraphEditor.Nodes
                 return "";
             }
             
-            var value = RenderInput(context, 1).OrUndef();
-            var before = RenderInput(context, 0);
-            return $"{before}\n{VariableDescription.Name} = {value};";
+            var value = RenderInput(context, 0).OrUndef();
+            return $"{VariableDescription.Name} = {value};";
         }
 
         public void SetupPorts(VariableDescription description)
