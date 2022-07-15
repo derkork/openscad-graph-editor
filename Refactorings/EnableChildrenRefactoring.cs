@@ -31,37 +31,32 @@ namespace OpenScadGraphEditor.Refactorings
 
             _moduleDescription.SupportsChildren = true;
             
-            // we need to add a new "children" output port to the invocation
+            // We need to add an input port to each invocation which refers to this module.
+            // The children input port is added to the top spot, so we need to move all
+            // connections to other modules down one spot.
             foreach (var invocation in affectedInvocations)
             {
                 var invocationNode = (ModuleInvocation) invocation.Node;
                 var graph = invocation.Graph;
 
-                // the node should have exactly 1 output port right now
-                GdAssert.That(invocationNode.OutputPortCount == 1,
-                    "Module invocation should have exactly 1 output port");
-
-                // the connection from this output port needs to move one level down because we're adding a new output port
-                // so save these connections.
-                var connections = graph.GetAllConnections()
-                    .Where(it => it.InvolvesPort(invocationNode, PortId.Output(0)))
+                // first find all input connections to this invocation
+                var savedConnections = graph.GetAllConnections()
+                    .Where(it => it.To == invocationNode)
                     .ToList();
-
-                // re-setup the ports.
-                invocationNode.SetupPorts(_moduleDescription);
-
-
-                // kill all the connections
-                foreach (var connection in connections)
+                
+                // we need to re-move all these connections
+                foreach (var connection in savedConnections)
                 {
                     graph.RemoveConnection(connection);
                 }
-
-                // now re-insert all the connections using a modified port
-                foreach (var connection in connections)
+                
+                // re-setup the ports.
+                invocationNode.SetupPorts(_moduleDescription);
+                
+                // now re-add all the connections but moved one port down
+                foreach (var connection in savedConnections)
                 {
-                    graph.AddConnection(connection.From.Id, connection.FromPort + 1, connection.To.Id,
-                        connection.ToPort);
+                    graph.AddConnection(connection.From.Id, connection.FromPort, connection.To.Id, connection.ToPort + 1);
                 }
             }
         }

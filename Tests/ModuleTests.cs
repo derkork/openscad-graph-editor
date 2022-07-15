@@ -291,5 +291,95 @@ namespace OpenScadGraphEditor.Tests
             // and there is a checkbox where the new parameter value can be set
             Assert.True(moduleInvocation.CheckBoxLiteral(Port.Input(0)).IsVisible);
         }
+
+        [GodotFact(Frame = GodotFactFrame.Process)]
+        public async Task OperatorModulesWork()
+        {
+            // setup
+            // i add a module with two number parameters
+            await MainWindow.AddModuleButton.ClickCenter();
+            await MainWindow.InvokableRefactorDialog.NameEdit.Type("test_module");
+            await MainWindow.InvokableRefactorDialog.AddParameterButton.ClickCenter();
+            await MainWindow.InvokableRefactorDialog.AddParameterButton.ClickCenter();
+            var firstParameter = MainWindow.InvokableRefactorDialog.ParameterLines.First();
+            await firstParameter.NameEdit.Type("param1");
+            await firstParameter.Type.SelectItemWithText("number");
+            var secondParameter = MainWindow.InvokableRefactorDialog.ParameterLines.Last();
+            await secondParameter.NameEdit.Type("param2");
+            await secondParameter.Type.SelectItemWithText("number");
+            await MainWindow.InvokableRefactorDialog.OkButton.ClickCenter();
+            
+            // and i go back to the main module
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
+            // and i add an instance of this to the main module
+            await MainWindow.AddNode("test_module");
+            var moduleInvocation = MainWindow.GraphEditor.Nodes.First();
+            // and i move this a bit to the right
+            await moduleInvocation.DragByOwnSize(2, 0);
+            
+            // and I add a `+` operation
+            await MainWindow.AddNode("++");
+            var operatorModule1 = MainWindow.GraphEditor.Nodes.Last();
+            // and i move this a bit left and up
+            await operatorModule1.DragByOwnSize(-2, -2);
+            
+            // and I add a `-` operation
+            await MainWindow.AddNode("--");
+            var operatorModule2 = MainWindow.GraphEditor.Nodes.Last();
+            // and i move this a bit left and down
+            await operatorModule2.DragByOwnSize(-2, 2);
+            
+            // and i connect the output port of the first operator module into first input port of the module invocation
+            await operatorModule1.DragConnection(Port.Output(0), moduleInvocation, Port.Input(0));
+            // and i connect the output port of the second operator module into second input port of the module invocation
+            await operatorModule2.DragConnection(Port.Output(0), moduleInvocation, Port.Input(1));
+
+            // when
+            // i go back to the module editor
+            await MainWindow.TabContainer.SelectTabWithTitle("test_module");
+            // and i add a children node
+            await MainWindow.AddNode("[MCld]");
+            var childrenNode = MainWindow.GraphEditor.Nodes.Last();
+            
+            // then
+            // when i go back to the main module
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
+            // the module invocation has a new input
+            Assert.Equal(3, moduleInvocation.InputPortCount);
+            // there is no connection to the first input of the module invocation
+            Assert.False( MainWindow.GraphEditor.HasConnectionTo(moduleInvocation, Port.Input(0)));
+            
+            // and the operator1 module is now connected to the second input of the module invocation
+            Assert.True(MainWindow.GraphEditor.HasConnection(operatorModule1, Port.Output(0), moduleInvocation, Port.Input(1)));
+            // and the operator2 module is now connected to the third input of the module invocation
+            Assert.True(MainWindow.GraphEditor.HasConnection(operatorModule2, Port.Output(0), moduleInvocation, Port.Input(2)));
+            
+            
+            // now when i add cube node
+            await MainWindow.AddNode("[Cbe]");
+            var cube = MainWindow.GraphEditor.Nodes.Last();
+            // and i move this up and left
+            await cube.DragByOwnSize(-2, -4);
+            // and i connect the output port of the cube node into the first input port of the module invocation
+            await cube.DragConnection(Port.Output(0), moduleInvocation, Port.Input(0));
+            
+            // and if i now go back to the module editor
+            await MainWindow.TabContainer.SelectTabWithTitle("test_module");
+            // and i remove the children node
+            await childrenNode.Delete();
+            
+            // and if i now go back to the main module
+            await MainWindow.TabContainer.SelectTabWithTitle("<main>");
+            
+            // then
+            // them module invocation has only two inputs now
+            Assert.Equal(2, moduleInvocation.InputPortCount);
+            // there is no more connection coming from the cube node
+            Assert.False(MainWindow.GraphEditor.HasConnectionFrom(cube, Port.Output(0)));
+            // the operator 1 module is now connected to the first input of the module invocation
+            Assert.True(MainWindow.GraphEditor.HasConnection(operatorModule1, Port.Output(0), moduleInvocation, Port.Input(0)));
+            // the operator 2 module is now connected to the second input of the module invocation
+            Assert.True(MainWindow.GraphEditor.HasConnection(operatorModule2, Port.Output(0), moduleInvocation, Port.Input(1)));
+        }
     }
 }

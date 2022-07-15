@@ -1,5 +1,4 @@
 using System.Linq;
-using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 
@@ -31,25 +30,18 @@ namespace OpenScadGraphEditor.Refactorings
 
             _moduleDescription.SupportsChildren = false;
             
-            // we need to remove the "children" output port from the invocation
+            // we need to remove the "children" input port from all affected invocations
+            // all other input port connections need to move up one level
             foreach (var invocation in affectedInvocations)
             {
                 var invocationNode = (ModuleInvocation) invocation.Node;
                 var graph = invocation.Graph;
 
-                // the node should have exactly 2 output ports right now
-                GdAssert.That(invocationNode.OutputPortCount == 2,
-                    "Module invocation should have exactly 2 output ports");
+                // first up remove all connections that go to the "children" input port
 
-                // the connection from the second output port needs to move up one level because we're going to remove the
-                // children output port. so save these connections.
-                var connections = graph.GetAllConnections()
-                    .Where(it => it.InvolvesPort(invocationNode, PortId.Output(1)))
-                    .ToList();
-                
-                // also collect all connections that go to the children output port
+                // delete all connections that go to the children output port
                 var connectionsToChildren = graph.GetAllConnections()
-                    .Where(it => it.InvolvesPort(invocationNode, PortId.Output(0)))
+                    .Where(it => it.InvolvesPort(invocationNode, PortId.Input(0)))
                     .ToList();
                 
                 // we can delete those immediately
@@ -57,22 +49,25 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     graph.RemoveConnection(connection);
                 }
+                
+                // now make a copy of all connections that go to the other input ports
+                var otherInputConnections = graph.GetAllConnections()
+                    .Where(it => it.To == invocationNode && it.ToPort > 0)
+                    .ToList();
 
-                // re-setup the ports.
-                invocationNode.SetupPorts(_moduleDescription);
-
-
-                // kill all the connections that were saved
-                foreach (var connection in connections)
+                // we can delete these now
+                foreach (var connection in otherInputConnections)
                 {
                     graph.RemoveConnection(connection);
                 }
-
-                // now re-insert all the connections using a modified port
-                foreach (var connection in connections)
+                
+                // re-setup the ports.
+                invocationNode.SetupPorts(_moduleDescription);
+                
+                // and re-add the other connections, but moved one port up
+                foreach (var connection in otherInputConnections)
                 {
-                    graph.AddConnection(connection.From.Id, connection.FromPort -1, connection.To.Id,
-                        connection.ToPort);
+                    graph.AddConnection(connection.From.Id, connection.FromPort, connection.To.Id, connection.ToPort - 1);
                 }
             }
         }
