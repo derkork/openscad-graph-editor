@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Godot;
 using GodotExt;
 using GodotTestDriver.Drivers;
+using GodotTestDriver.Input;
 using OpenScadGraphEditor.Widgets;
 using OpenScadGraphEditor.Widgets.IconButton;
 using OpenScadGraphEditor.Widgets.PortContainer;
@@ -24,6 +26,15 @@ namespace OpenScadGraphEditor.Tests.Drivers
         /// </summary>
         public string NodeTitle => PresentRoot.GetChildNodes<Label>().First().Text;
 
+        /// <summary>
+        /// Deletes the node from the editor.
+        /// </summary>
+        public async Task Delete()
+        {
+            await ClickAtSelectionSpot();
+            await Viewport.PressKey(KeyList.Delete);
+        }
+        
         private PortContainer GetPortContainer(Port port)
         {
             var hBoxes = Root?.GetChildNodes<HBoxContainer>()?.ToList();
