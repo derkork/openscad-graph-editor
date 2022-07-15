@@ -115,14 +115,31 @@ Some input ports may not have a default value and are therefore required. This i
 
 ## Advanced use
 ### Modules
-
+#### Creating a new module
 OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the _M_ icon above the project tree. 
 
 ![](images/create_module.gif)
 
-A popup dialog will open. In this dialog you can specify the name of the module and any parameters and their types.  Once you are done press _OK_ to create the module. A new tab will open in which you can edit the graph of the module.
+A popup dialog will open. In this dialog you can specify the name of the module and any parameters and their types.  Once you are done press _OK_ to create the module. A new tab will open in which you can edit the graph of the module. It will already contain one node from which you can drag out the parameters given to your module.
 
 Editing a module graph works exactly the same as editing the main graph (the main graph is also a module in a sense). Also the rules about _implicit union_ behaviour apply, so every node that has an unconnected _geometry_ port will be implicitly added to the output geometry of the module. 
+
+#### Using a module
+
+To use a module in you main graph (or another module) you can either add it through the _Add Node_ dialog by just typing the module's name or you can drag it from the project tree into the graph like this:
+
+![](images/drag_module.gif)
+
+#### Building operator modules
+
+OpenSCAD allows you to build so-called operator modules. These are modules which modify input geometry. You can make any module an operator module by adding the _Child_ or _Children_ nodes. These nodes allow you to access the input geometry of the module. For example if you want to make a module that moves everything by 20 units on the x-axis, you could build it like this:
+
+![](images/operator_module_example.png)
+
+If you now use the module in another graph, you will notice that it has gotten an additional geometry input. This is where you will connect geometry that should be modified by the operator module:
+
+![](images/operator_module_usage_example.png)
+
 
 ## Reference
 ### Keyboard shortcuts
