@@ -101,7 +101,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public static PortDefinition Array(string name = "")
         {
-            return new PortDefinition(PortType.Array, LiteralType.None, name);
+            return new PortDefinition(PortType.Vector, LiteralType.None, name);
         }
 
         public static PortDefinition OfType(PortType type,

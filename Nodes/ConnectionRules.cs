@@ -63,14 +63,14 @@ namespace OpenScadGraphEditor.Nodes
 
             // a connection to "Array" can also be made from "Vector3" types (but not the other way around)
             AddConnectRule(it =>
-                    it.TryGetToPortType(out var toType) && toType == PortType.Array &&
+                    it.TryGetToPortType(out var toType) && toType == PortType.Vector &&
                     it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector3,
                 OperationRuleDecision.Allow
             );
 
             // same for Vector2
             AddConnectRule(it =>
-                    it.TryGetToPortType(out var toType) && toType == PortType.Array &&
+                    it.TryGetToPortType(out var toType) && toType == PortType.Vector &&
                     it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector2,
                 OperationRuleDecision.Allow
             );

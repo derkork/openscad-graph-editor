@@ -58,7 +58,7 @@ namespace OpenScadGraphEditor.Nodes
                     return "[number]";
                 case PortType.Vector3:
                     return "[vector3]";
-                case PortType.Array:
+                case PortType.Vector:
                     return "[array]";
                 case PortType.String:
                     return "[string]";

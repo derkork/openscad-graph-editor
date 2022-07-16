@@ -144,7 +144,7 @@ namespace OpenScadGraphEditor.Library.External
                 if (vectorContents.Count > 3)
                 {
                     // we don't care what is inside, this is an array
-                    return PortType.Array;
+                    return PortType.Vector;
                 }
                 
                 // now check that all vector contents are ultimately numbers.
@@ -161,8 +161,8 @@ namespace OpenScadGraphEditor.Library.External
                     var innermostExpression  = StripParentheses(innerExpression.expression());
                     if (innermostExpression.simpleExpression()?.NUMBER() == null)
                     {
-                        // if the expression is anything but a number, we infer as "Array"
-                        return PortType.Array;
+                        // if the expression is anything but a number, we infer as "Vector"
+                        return PortType.Vector;
                     }
                 }
                 
@@ -279,8 +279,8 @@ namespace OpenScadGraphEditor.Library.External
                             return PortType.Vector2;
                         case "[vector3]":
                             return PortType.Vector3;
-                        case "[array]":
-                            return PortType.Array;
+                        case "[vector]":
+                            return PortType.Vector;
                     }
 
                     // anything else or something we don't recognize

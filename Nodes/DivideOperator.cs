@@ -17,7 +17,7 @@ namespace OpenScadGraphEditor.Nodes
             return portType == PortType.Number
                    || portType == PortType.Vector2
                    || portType == PortType.Vector3 
-                   || portType == PortType.Array
+                   || portType == PortType.Vector
                    || portType == PortType.Any;
             
         }

@@ -48,7 +48,7 @@ The following colors are used:
 - _Red_ - a boolean value (true or false)
 - _Very Light Blue_ - a vector2 (a combination of 2 numbers), used for 2D coordinates
 - _Light Blue_ - a vector3 (a combination of 3 numbers), used for 3D coordinates
-- _Blue_ - an array (a list of arbitrary length with arbitrary contents)
+- _Blue_ - a vector (a list of arbitrary length with arbitrary contents)
 - _Yellow_ - a string (a text value)
 - _White_ - geometry (a 2D or 3D object)
 
@@ -90,8 +90,8 @@ Here we have two nodes which create cube(oid)s. The first creates a cube with a 
 In general you can only connect ports which have the same port type (e.g. the same color), e.g. it just doesn't make sense to connect a boolean value to a port expecting geometry. There are some exceptions to this rule though:
 
 - A port type of `any` (purple) can be connected to any other port type except `geometry` (white) and vice versa.
-- A port type of `vector3` (light blue) can be connected to a port type of `array` (blue) but not the other way around.
-- A port type of `vector2` (very light blue) can be connected to a port type of `array` (blue) but not the other way around.
+- A port type of `vector3` (light blue) can be connected to a port type of `vector` (blue) but not the other way around.
+- A port type of `vector2` (very light blue) can be connected to a port type of `vector` (blue) but not the other way around.
 
 Also every input port (except geometry, see the next section for details) can only accept a single connection.
 
@@ -122,6 +122,98 @@ When you connect something to an input port the port will use the value that was
 Here we have two cube nodes and a translate node. All nodes have nothing connected to their inputs, so their input ports now allow you to specify the value directly. You may notice that the cube node in the top left has two little buttons next to each of its input ports. These buttons are displayed when input port has a default value. Cube's have a default size of `[1,1,1]` and are not centered by default. When the button is not pressed, the built-in default value for that port will be used. If you press the button, you can override the default value with a custom value. This can be seen in the top right cube node where both the _Size_ and the _Center_ value are overridden. 
 
 Some input ports may not have a default value and are therefore required. This is the case for the _Translate_ node. It does not have a default value for the translation _Offset_ so the little button is not displayed. You can still specify the value directly in the node or connect another node to the input.
+
+## Overview of built-in nodes
+
+OpenSCAD graph editor contains nodes for all [functions and modules](https://openscad.org/cheatsheet/) built into OpenSCAD. So if you look for a certain function you can just type its name into the _Add node_ dialog. 
+
+There are some nodes which are not directly representing a function in OpenSCAD but are used to achieve the same effects as a built-in language construct in the original OpenSCAD language. These will be described in the following sections.
+
+### Flow control nodes
+
+#### Branch (if/else)
+
+The branch node allows you to render geometry depending on a condition. The condition is specified by a boolean expression.
+
+![](images/branch.png)
+
+The node will output the geometry connected to the _true_ port if the condition is `true`, and the geometry connected to the _false_ port if the condition is `false`. In the example it would output the geometry of the sphere as the condition is not connected and set to `false`.
+
+#### For-Loop
+
+The for-loop node allows you to repeatedly create geometry with different inputs. It actually consists of two nodes: _Start loop_ and _End loop_ but you will only need to add a _For loop_ node and the _Loop end_ node will be added automatically.
+
+Consider the following example of a for-loop:
+
+![](images/loop_example.png)
+
+This will create a circle of spheres offset by 30 degrees from each other. The _Start loop_ node has an input port for any vector-like construct (e.g. a `vector2`, `vector3` or `vector`). The loop will be repeated for each item in the given vector. In this example we use the _Construct Range_ node to build a vector that has the numbers `0` to `360` in it with steps of `30`. 
+
+We can give the loop variable a name (though it is not needed, if you don't give a name then OpenSCAD graph editor will internally generate a unique variable name for you). Now inside the loop we build a sphere, offset it by 10 units on the x-axis and rotate it by the current angle. The result of this will connected to the _End loop_ node. This will generate 12 spheres and because of the _implicit union_ behaviour they will be added to the output geometry one by one. The result is a circle of spheres.
+
+##### Nested loops
+
+You can nest loops inside of each other by creating multiple _For loop_ nodes. However this quickly can clutter your node graph. Instead, you can right-click on a _Start loop_ node and select the _Add loop nest level_ option:
+
+![](images/add_loop_nest_level.png)
+
+This will add a second input to the _Loop start_ node and the loop will now repeat for each combination of values in the two input vectors. Consider this example:
+
+![](images/nested_loop_example.png)
+
+
+We again use a _Construct range_ node, to build a range of the numbers `0` to `9`. Then we increase the loop nest level to 3 so we have three loops running running over all combinations of three vectors holding the numbers `0` to `9`. This will in total yield `1000` iterations (`10 * 10 * 10` numbers). We call the loop variables `x`, `y` and `z`.  Now we use a _Construct `vector3`_ to build a new `vector3` from the current loop variables. We multiply this vector by 2 so we will get `0,0,0`, `0,0,2`, etc.. Now we use these coordinates to translate a cube in three-dimensional space. The result is `1000` small cubes forming a bigger cube.
+
+### Vector nodes
+
+Vectors play a large role in OpenSCAD. They are used to represent positions and directions and are also a generic way of grouping data. The following nodes are used to create and manipulate vectors:
+
+#### Construct `vector2` / `vector3`
+
+These nodes allow you to build a `vector2` or `vector3` from numbers. 
+
+![](images/construct_vector23.png)
+
+You can either give the values directly or connect other nodes to the input ports.
+
+#### Split `vector2` / `vector3`
+
+These node do the opposite of _Construct `vector2`/`vector3`_ - they allow you to extract the values of a `vector2` or `vector3`:
+
+![](images/split_vector23.png)
+
+
+You connect a `vector2` or `vector3` to the input port and the output port will contain the values of the vector.
+
+#### Construct vector `any`/`number`/`string`/`boolean`/`vector2`/`vector3`
+
+These nodes allow you to construct a vector of arbitrary length that contains values of different types.
+
+![](images/construct_vectorxy.png)
+
+These nodes are useful if for example you want to create a list of points as input for the _Polygon_ or _Polyhedron_ nodes. You can add new items to the vector by right-clicking it and selecting _Add item_.
+
+![](images/add_item.png)
+
+Similarly you can remove items from the vector by right-clicking it and selecting _Remove item_.
+
+![](images/remove_item.png)
+
+#### Index `vector` / `string`
+
+This node allows you to extract a value from a `vector` or `string` value. 
+
+![](images/index_vector_string.png)
+
+In this example we have a `vector` with three values (`7`, `6`, `2`). The node is configured to extract the value at index 1. So the output port will contain `6` (indices are zero-based, so an index of `0` will return the first value, `1` will return the second value and so on). For strings this will return the character at the given index.
+
+#### Pairwise vector multiplication `vector2` / `vector3` / `vector`
+
+This special node takes two `vector2`, `vector3` or `vector` values. It multiply the values of the given vectors pairwise and returns a new `vector2`, `vector3` or `vector` with the result. 
+
+![](images/pairwise_multiply.png)
+
+This functionality is not actually built into OpenSCAD (e.g. using the normal multiplication operator `*` will return the dot product of the vectors). Under the hood this will build a loop that walks over the vectors and multiplies the values pairwise. This was added as this operation is quite useful and would otherwise require you to build a lot more nodes.
 
 ## Advanced use
 ### Modules
@@ -247,7 +339,7 @@ OpenSCAD graph editor uses a standardized format for documentation comments. If 
  * @param b Lorem ipsum dolor sit amet
  * @param c [vector3] Lorem ipsum dolor sit amet 
  */
-module foo(a = 10, b = [1,2,3], c) { ... }
+module foo(a = 10, b = [1,2,3], c) { /* ... */ }
 
 /**
  * Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
@@ -257,7 +349,7 @@ module foo(a = 10, b = [1,2,3], c) { ... }
  * @param b ipsum dolor sit amet
  * @return [number] diam nonumy eirmod tempor invidunt
  */
-function bar(a, b = "foo") = ... ;
+function bar(a, b = "foo") = (/* ... */) ;
 ```
 Parameters for both modules and functions are documented as:
 
@@ -276,7 +368,7 @@ where again the type is written in `[]` and is optional.
 #### Supported data types
 - `vector2` - a 2-dimensional vector of numbers
 - `vector3` - a 3-dimensional vector of numbers
-- `array` - an array of arbitrary length and/or arbitrary contents
+- `vector` - an vector of arbitrary length and/or arbitrary contents
 - `boolean` - a boolean value
 - `number` - a numeric value
 - `string` - a string value
@@ -295,9 +387,9 @@ In this order, first matching rule wins:
     - if the default value is a number literal: `number`
     - if the default value is a string literal: `string`
     - if the default value is a boolean literal: `boolean`
-    - if the default value is an array literal with 3 values in it and all values are number literals: `vector3`
-    - if the default value is an array literal with 2 values in it and all values are number literals: `vector2`
-    - if the default value is an array literal: `array`
+    - if the default value is an vector literal with 3 values in it and all values are number literals: `vector3`
+    - if the default value is an vector literal with 2 values in it and all values are number literals: `vector2`
+    - if the default value is an vector literal: `vector`
 - Otherwise: `any`
 
 ##### For return values

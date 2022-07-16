@@ -17,7 +17,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             }
             
             return new[] {true, false}.SelectMany(
-                i => new[] {PortType.Array, PortType.Any, PortType.Number, PortType.Vector3, PortType.Vector2, PortType.Boolean, PortType.String},
+                i => new[] {PortType.Vector, PortType.Any, PortType.Number, PortType.Vector3, PortType.Vector2, PortType.Boolean, PortType.String},
                 (i, j) => new SwitchBinaryOperatorPortTypeRefactoring(graph, node, i, j));
         }
     }

@@ -32,7 +32,7 @@ namespace OpenScadGraphEditor.Nodes
                     return LiteralType.Vector3;
                 case PortType.String:
                     return LiteralType.String;
-                case PortType.Array:
+                case PortType.Vector:
                 case PortType.Any:
                 case PortType.Geometry:
                 case PortType.Reroute:

@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Nodes
         Boolean = 2,
         Number = 3,
         Vector3 = 4,
-        Array = 5,
+        Vector = 5,
         String = 6,
         Any = 8,
         Reroute = 9,
@@ -34,7 +34,7 @@ namespace OpenScadGraphEditor.Nodes
                     return "vector3";
                 case PortType.Vector2:
                     return "vector2";
-                case PortType.Array:
+                case PortType.Vector:
                     return "vector";
                 case PortType.String:
                     return "string";
@@ -55,7 +55,7 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Number:
                 case PortType.Vector3:
                 case PortType.Vector2:
-                case PortType.Array:
+                case PortType.Vector:
                 case PortType.String:
                 case PortType.Any:
                     return true;
