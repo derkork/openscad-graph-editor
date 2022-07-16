@@ -327,7 +327,7 @@ namespace OpenScadGraphEditor.Widgets
                     return new Color(.8f, 0.8f, 1f);
                 case PortType.Vector2:
                     return new Color(.9f, 0.9f, 1f);
-                case PortType.Array:
+                case PortType.Vector:
                     return new Color(.5f, 0.5f, 1f);
                 case PortType.String:
                     return new Color(1f, 1f, 0f);

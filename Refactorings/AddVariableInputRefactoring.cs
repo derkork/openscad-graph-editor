@@ -13,6 +13,8 @@ namespace OpenScadGraphEditor.Refactorings
         public override string Title => ((IHaveVariableInputSize) Node).AddRefactoringTitle;
         public override bool IsApplicableToNode => Node is IHaveVariableInputSize;
 
+        public override string Group => "Input ports";
+
         public override int Order => 0;
 
         public AddVariableInputRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)

@@ -63,10 +63,10 @@ namespace OpenScadGraphEditor.Library
                 // polygon
                 ModuleBuilder.NewBuiltInModule("polygon", "Plyg", nodeName: "Polygon")
                     .WithDescription("Creates a polygon.")
-                    .WithParameter("points", PortType.Array, label: "Points", optional: true,
+                    .WithParameter("points", PortType.Vector, label: "Points", optional: true,
                         description:
                         "The points of the polygon. You can use a 'Construct Vector (Vector2)' node to build these.")
-                    .WithParameter("paths", PortType.Array, label: "Paths", optional: true,
+                    .WithParameter("paths", PortType.Vector, label: "Paths", optional: true,
                         description: "The paths. Can be empty, a single vector or a vector of vectors.")
                     .WithParameter("convexity", PortType.Number, label: "Convexity", optional: true,
                         description:
@@ -291,7 +291,7 @@ namespace OpenScadGraphEditor.Library
                 ModuleBuilder.NewBuiltInModule("multmatrix", "MuMa", nodeName: "Multmatrix")
                     .WithDescription(
                         "Multiplies the geometry of all child elements with the given affine transformation matrix.")
-                    .WithParameter("m", PortType.Array, label: "Matrix",
+                    .WithParameter("m", PortType.Vector, label: "Matrix",
                         description:
                         "The affine transformation matrix. You can use the 'Construct Matrix' module to create one.")
                     .WithChildren()
@@ -436,7 +436,7 @@ namespace OpenScadGraphEditor.Library
                     .Build(),
 
                 // rands
-                FunctionBuilder.NewBuiltInFunction("rands", "Rds", nodeName: "Rands", returnType: PortType.Array,
+                FunctionBuilder.NewBuiltInFunction("rands", "Rds", nodeName: "Rands", returnType: PortType.Vector,
                         returnValueDescription: "A vector of random numbers.")
                     .WithDescription(
                         "Random number generator. Generates a constant vector of pseudo random numbers, much like an array. The numbers are doubles not integers.")
@@ -454,15 +454,15 @@ namespace OpenScadGraphEditor.Library
                         returnValueDescription: "The norm of the input (e.g. the length of the vector).")
                     .WithDescription(
                         "Returns the norm of a vector. Note this returns the actual numeric length while len returns the number of elements in the vector or array.")
-                    .WithParameter("vector", PortType.Array, description: "The vector to get the norm of.")
+                    .WithParameter("vector", PortType.Vector, description: "The vector to get the norm of.")
                     .Build(),
 
                 // cross
-                FunctionBuilder.NewBuiltInFunction("cross", "Cros", nodeName: "Cross", returnType: PortType.Array,
+                FunctionBuilder.NewBuiltInFunction("cross", "Cros", nodeName: "Cross", returnType: PortType.Vector,
                         returnValueDescription: "The cross product of the two input vectors.")
                     .WithDescription("Returns the cross product of two vectors.")
-                    .WithParameter("vector1", PortType.Array, description: "The first vector.")
-                    .WithParameter("vector2", PortType.Array, description: "The second vector.")
+                    .WithParameter("vector1", PortType.Vector, description: "The first vector.")
+                    .WithParameter("vector2", PortType.Vector, description: "The second vector.")
                     .Build(),
 
                 // is_undef
@@ -514,7 +514,7 @@ namespace OpenScadGraphEditor.Library
                     .WithDescription("Look up value in table, and linearly interpolate if there's no exact match.")
                     .WithParameter("key", PortType.Number,
                         description: "The key in the table which should be looked up.")
-                    .WithParameter("index", PortType.Array,
+                    .WithParameter("index", PortType.Vector,
                         description:
                         "An array of Vector2. The first index is the key, the second index is the associated value.")
                     .Build(),
@@ -529,7 +529,7 @@ namespace OpenScadGraphEditor.Library
                     .Build(),
 
                 // search
-                FunctionBuilder.NewBuiltInFunction("search", "srch", nodeName: "Search", returnType: PortType.Array,
+                FunctionBuilder.NewBuiltInFunction("search", "srch", nodeName: "Search", returnType: PortType.Vector,
                         returnValueDescription: "An array containing the indices of the matching elements.")
                     .WithDescription(
                         "A general-purpose function to find one or more (or all) occurrences of a value or list of values in a vector, string or more complex list-of-list construct.")

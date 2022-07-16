@@ -30,7 +30,7 @@ namespace GodotXUnitApi.Internal
                 GodotGD.PrintErr("unable to find root of godot project");
                 throw new Exception("unable to find root dir");
                 
-                // TODO: if this becomes a problem, we can do OS.Execute('pwd'....), but i don't
+                // if this becomes a problem, we can do OS.Execute('pwd'....), but i don't
                 // want to do that if we don't need to.
             }
         }

@@ -82,9 +82,9 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _returnTypeOptionButton.AddItem(PortType.String.HumanReadableName(), (int) PortType.String);
             _indexByPortTypes[PortType.String] = index++;
 
-            _templateParameterTypeHint.AddItem(PortType.Array.HumanReadableName(), (int) PortType.Array);
-            _returnTypeOptionButton.AddItem(PortType.Array.HumanReadableName(), (int) PortType.Array);
-            _indexByPortTypes[PortType.Array] = index; // no ++ here since it is the last
+            _templateParameterTypeHint.AddItem(PortType.Vector.HumanReadableName(), (int) PortType.Vector);
+            _returnTypeOptionButton.AddItem(PortType.Vector.HumanReadableName(), (int) PortType.Vector);
+            _indexByPortTypes[PortType.Vector] = index; // no ++ here since it is the last
 
             _templateParameterUpButton = this.WithName<IconButton.IconButton>("TemplateParameterUpButton");
             _templateParameterUpButton.Visible = false;
