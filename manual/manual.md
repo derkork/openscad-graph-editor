@@ -23,7 +23,7 @@ After this, you can set up the location of OpenSCAD in the settings menu:
 
 You are now ready to use the OpenSCAD Graph Editor.
 
-## Getting Started
+## The basics
 ### Starting a new project
 
 When you start OpenSCAD Graph Editor, it will show a blank graph. You can already add nodes to the graph but live preview is not enabled until you actually save the project somewhere. This is because live preview requires that OpenSCAD code is generated and written to a file so that the OpenSCAD executable can read it and produce a live preview. So you should immediately save the project somewhere. You can save it by pressing the _Save as..._ button.  After the project is saved you can start live preview by pressing the OpenSCAD icon in the top right corner of the editor, provided that you have set it up correctly. If you haven't set this up yet, check the previous section.
@@ -48,7 +48,7 @@ The following colors are used:
 - _Red_ - a boolean value (true or false)
 - _Very Light Blue_ - a vector2 (a combination of 2 numbers), used for 2D coordinates
 - _Light Blue_ - a vector3 (a combination of 3 numbers), used for 3D coordinates
-- _Blue_ - a vector (a list of arbitrary length with arbitrary contents)
+- _Blue_ - an array (a list of arbitrary length with arbitrary contents)
 - _Yellow_ - a string (a text value)
 - _White_ - geometry (a 2D or 3D object)
 
@@ -85,6 +85,16 @@ Lets check another example which involves geometry:
 
 Here we have two nodes which create cube(oid)s. The first creates a cube with a size of 2x2x2 units. The second node creates a cuboid with a size of 1x3x1 units. We then add a _Difference_  node which subtracts the second cube from the first. As a result we get a 2x2x2 cube with a hole in the middle. In the example screenshot the second cube has been given a debug modifier so you can see it in translucent red in the 3D view. Without this modifier it would not be visible. Again you can see that **data always flows from left to right**. The two cubes on the left are the input for the _Difference_ node on the right and the _Difference_ node's output will contain new data produced from its inputs.
 
+#### Port types
+
+In general you can only connect ports which have the same port type (e.g. the same color), e.g. it just doesn't make sense to connect a boolean value to a port expecting geometry. There are some exceptions to this rule though:
+
+- A port type of `any` (purple) can be connected to any other port type except `geometry` (white) and vice versa.
+- A port type of `vector3` (light blue) can be connected to a port type of `array` (blue) but not the other way around.
+- A port type of `vector2` (very light blue) can be connected to a port type of `array` (blue) but not the other way around.
+
+Also every input port (except geometry, see the next section for details) can only accept a single connection.
+
 #### Connecting geometry ports
 
 Geometry (white) ports are somewhat different from the other ports. They follow a concept called _implicit union_. This means that when you connect two geometry output ports into a single geometry input port, the resulting geometry will be the union of the two input geometries.
@@ -95,7 +105,7 @@ We first have a 2x2x2 cube and a sphere with 1.2 units radius. Both of them are 
 
 The _implicit_ union behaviour simplifies the node graphs as you don't need to add extra nodes when you want to build the union of some geometry.  
 
-#### Unconnected geometry ports
+#### Unconnected geometry output ports
 
 You may have noticed that in the previous examples the geometry output of the _Difference_ node is not connected to anything. Yet it still renders in the output. This is another side effect of the _implicit union_ behaviour. All geometry ports which are not connected to anything else will be implicitly added to the output geometry. So let's check another example:
 
@@ -120,7 +130,7 @@ OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD 
 
 ![](images/create_module.gif)
 
-A popup dialog will open. In this dialog you can specify the name of the module and any parameters and their types.  Once you are done press _OK_ to create the module. A new tab will open in which you can edit the graph of the module. It will already contain one node from which you can drag out the parameters given to your module.
+A popup dialog will open. In this dialog you can specify the name of the module and any parameters and their types.  Once you are done press _OK_ to create the module. A new tab will open in which you can edit the graph of the module. It will already contain one node - the module's entry point - from which you can drag out the parameters given to your module.
 
 Editing a module graph works exactly the same as editing the main graph (the main graph is also a module in a sense). Also the rules about _implicit union_ behaviour apply, so every node that has an unconnected _geometry_ port will be implicitly added to the output geometry of the module. 
 
@@ -129,6 +139,13 @@ Editing a module graph works exactly the same as editing the main graph (the mai
 To use a module in you main graph (or another module) you can either add it through the _Add Node_ dialog by just typing the module's name or you can drag it from the project tree into the graph like this:
 
 ![](images/drag_module.gif)
+
+#### Default values for module parameters
+
+Module parameters can be given default values. To specify a default value for a module parameter click the pen icon next to the parameter's name in the module's entry point. This will then add a literal field to this parameter where you can enter the default value:
+
+![](images/default_parameters.gif)
+
 
 #### Building operator modules
 
@@ -141,6 +158,69 @@ If you now use the module in another graph, you will notice that it has gotten a
 ![](images/operator_module_usage_example.png)
 
 
+#### Changing the module's name and parameters
+
+It is possible to rename a module and add, reorder, rename and delete parameters. To do so, right-click either the module's entry point or any instance where you use the module. A popup menu will open. Select the _Refactor &lt;module&gt;_ entry.
+
+![](images/refactoring_popup.png)
+
+Now the refactoring dialog will open and you can change the module's name, the name and type of any of its parameters. You can also reorder parameters by pressing the up and down buttons next to each parameter. You can also delete parameters. Once you are done, press _OK_ to apply the changes.
+
+![](images/refactoring_dialog.png)
+
+This will automatically update the module's entry point and all places where the module is used. The following rules will apply:
+
+- All name changes will be reflected in the node view and the generated code.
+- If you reorder parameters, connections will be preserved and reordered accordingly.
+- If you rename a parameter this has no effect on the connections to this parameter, e.g. all connections to the parameter will remain as they were.
+- If you delete a parameter, all connections to that parameter will be deleted.
+- If you add a parameter it will be available as new port for the module's node but no connections will be created for it.
+- If you change parameter types, the connections to the parameter will be preserved as long as the types are compatible. If the types are no longer compatible, connections to that parameter's port will be deleted.
+
+#### Finding usages of modules
+
+After you have refactored a module, you may want to check places where this module is used e.g. to add new connections to an added parameter. To find all places where a module is used, right-click the module's entry point or any instance where you use the module. A popup menu will open. Select the _Find usages of &lt;module&gt;_ entry. A tool window will open with a list of all places where the module is used. You can double-click any entry in this list and the corresponding node will be shown on screen and briefly highlighted.
+
+![](images/usage_search.gif)
+
+
+#### Adding documentation to modules
+
+You can add documentation to your modules, so you and other users can understand what the module does. To add documentation to a module, right-click either the module's entry point or any instance where you use the module. A popup menu will open. Select the _Edit documentation of &lt;module&gt;_ entry:
+
+![](images/edit_documentation_popup.png)
+
+Now a dialog will open where you can add descriptions to the module and the parameters. 
+
+![](images/documentation_dialog.png)
+
+When you are done, press _OK_ to save the documentation. The documentation will now be shown if you request help for the module (by pressing `F1`). 
+
+![](images/port_colors.png)
+
+It will also be rendered out in the generated OpenSCAD code. 
+
+![](images/documentation_in_code.png)
+
+### Functions
+
+Functions work very much like modules, except that they have a return value and they cannot create or work with geometry. You can add a new function by pressing the _F_ icon above the project tree. A popup dialog will open. In this dialog you can specify the name of the function, its return type and any parameters and their types. Once you are done press _OK_ to create the function. A new tab will open in which you can edit the graph of the function. It will already contain two nodes:
+
+- the function's entry point, from which you can drag out the parameters given to your function
+- the function's return value node which has an input port for the function's return value
+
+![](images/create_function.gif)
+
+#### Making a function return a value
+
+Functions have an additional node where you can connect the return value of the function. For example, let's see a function that simply adds two numbers:
+
+![](images/add_two_numbers_example.png)
+
+The two numbers are given as parameters to the function. Then we use an _Add_ node to add the two numbers. The output of the _Add_ node is connected to the _Return_ node's input port, so now the function will return the sum of the two numbers.
+
+From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, find their usages and can edit their documentation in the same way as you do for modules. 
+
 ## Reference
 ### Keyboard shortcuts
 
@@ -152,3 +232,76 @@ If you now use the module in another graph, you will notice that it has gotten a
 - `Ctrl+X` / `Cmd+X` - Cut the selected nodes.
 - `Ctrl+Z` / `Cmd+Z` - Undo the last action.
 - `Ctrl+Shift+Z` / `Cmd+Shift+Z` - Redo the last action.
+
+### Documentation comment format
+OpenSCAD graph editor uses a standardized format for documentation comments. If you follow this format in text-based OpenSCAD libraries, OpenSCAD graph editor will be able to parse the format and show better documentation for the nodes when pressing `F1`. 
+
+#### An example
+```openscad
+
+/**
+ * Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+ * sed diam nonumy eirmod tempor invidunt ut labore et dolore
+ * magna aliquyam.
+ * @param a Lorem ipsum dolor sit amet
+ * @param b Lorem ipsum dolor sit amet
+ * @param c [vector3] Lorem ipsum dolor sit amet 
+ */
+module foo(a = 10, b = [1,2,3], c) { ... }
+
+/**
+ * Lorem ipsum dolor sit amet, consetetur sadipscing elitr,
+ * sed diam nonumy eirmod tempor invidunt ut labore et dolore
+ * magna aliquyam.
+ * @param a [number] Lorem ipsum dolor sit amet
+ * @param b ipsum dolor sit amet
+ * @return [number] diam nonumy eirmod tempor invidunt
+ */
+function bar(a, b = "foo") = ... ;
+```
+Parameters for both modules and functions are documented as:
+
+```
+@param <name> [<type>] <description>
+```
+
+where the type is written in `[]` and is optional. Return values of functions are documented as: 
+
+```
+@return [<type>] <description>
+``` 
+
+where again the type is written in `[]` and is optional.
+
+#### Supported data types
+- `vector2` - a 2-dimensional vector of numbers
+- `vector3` - a 3-dimensional vector of numbers
+- `array` - an array of arbitrary length and/or arbitrary contents
+- `boolean` - a boolean value
+- `number` - a numeric value
+- `string` - a string value
+- `any` - no specific type or mixed
+
+
+#### Parsing Rules
+
+When OpenSCAD parses parameters and return values it uses the following rules to infer the data type:
+
+##### For parameters
+In this order, first matching rule wins:
+
+- When a type is explicitly documented this type will be used. If the documented type is none of the supported types it is assumed to be `any`.
+- If no type is documented and the parameter has a default value, the type is inferred from the default value. The following rules apply for type inference (in this order, first match wins):
+    - if the default value is a number literal: `number`
+    - if the default value is a string literal: `string`
+    - if the default value is a boolean literal: `boolean`
+    - if the default value is an array literal with 3 values in it and all values are number literals: `vector3`
+    - if the default value is an array literal with 2 values in it and all values are number literals: `vector2`
+    - if the default value is an array literal: `array`
+- Otherwise: `any`
+
+##### For return values
+In this order, first matching rule wins:
+
+- When a type is explicitly documented this type will be used. If the documented type is none of the supported types it is assumed to be `any`.
+- Otherwise: `any`
