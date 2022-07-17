@@ -1,5 +1,8 @@
 # OpenSCAD Graph Editor
 
+<div style="text-align: center;"><img height="128" src="Icons/logo0000.png" width="128"/></div>
+
+
 _This is an early version. It works reasonably well but it has not seen a lot of use and testing so it is not yet recommended for productive use.  You are welcome to try it out and give feedback at this stage. Please also check the [FAQ](manual/faq.md) if you have problems._
 
 
