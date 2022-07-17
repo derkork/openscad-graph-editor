@@ -1,0 +1,756 @@
+Composition {
+	CurrentTime = 0,
+	RenderRange = { 0, 0 },
+	GlobalRange = { 0, 0 },
+	CurrentID = 34,
+	HiQ = true,
+	PlaybackUpdateMode = 0,
+	Version = "Fusion Studio 17.4.6 build 4",
+	SavedOutputs = 0,
+	HeldTools = 0,
+	DisabledTools = 0,
+	LockedTools = 0,
+	AudioOffset = 0,
+	Resumable = true,
+	OutputClips = {
+		"comp:/logo.png"
+	},
+	Tools = {
+		Ellipse1 = EllipseMask {
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				MaskWidth = Input { Value = 256, },
+				MaskHeight = Input { Value = 256, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Width = Input { Value = 0.9, },
+				Height = Input { Value = 0.9, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 875.333, 140.152 } },
+		},
+		Background2 = Background {
+			Inputs = {
+				GlobalOut = Input { Value = 0, },
+				Width = Input { Value = 256, },
+				Height = Input { Value = 256, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Type = Input { Value = FuID { "Gradient" }, },
+				GradientType = Input { Value = FuID { "Radial" }, },
+				Start = Input { Value = { 0.408839779005525, 0.577348066298343 }, },
+				End = Input { Value = { 0.834254143646409, 0.135359116022099 }, },
+				Gradient = Input {
+					Value = Gradient {
+						Colors = {
+							[0] = { 0, 0.666666666666667, 1, 1 },
+							[1] = { 0, 0.498039215686275, 0.749019607843137, 1 }
+						}
+					},
+				},
+				EffectMask = Input {
+					SourceOp = "Ellipse1",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 876, 173.152 } },
+		},
+		Merge3 = Merge {
+			Inputs = {
+				Background = Input {
+					SourceOp = "Background2",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 1074, 176.121 } },
+		},
+		sBoolean1 = sBoolean {
+			Inputs = {
+				Operation = Input { Value = FuID { "Subtract" }, },
+				Input1 = Input {
+					SourceOp = "Rectangle",
+					Source = "Output",
+				},
+				Input2 = Input {
+					SourceOp = "Sphere",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 378, 45.2121 } },
+		},
+		sMerge1 = sMerge {
+			Inputs = {
+				Input2 = Input {
+					SourceOp = "sBoolean1",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 496.667, 48.2424 } },
+		},
+		TheTransform = sTransform {
+			NameSet = true,
+			Inputs = {
+				XOffset = Input { Value = 0.168, },
+				XSize = Input { Value = 0.56, },
+				YSize = Input {
+					Value = 0.56,
+					Expression = "XSize",
+				},
+				Input = Input {
+					SourceOp = "sMerge1",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 617.333, 44.3333 } },
+		},
+		Sphere = sEllipse {
+			NameSet = true,
+			Inputs = {
+				Width = Input {
+					Value = 0.25,
+					Expression = "Rectangle.Width* 0.5",
+				},
+				Height = Input {
+					Value = 0.25,
+					Expression = "Width",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 235.333, 55.5151 } },
+		},
+		SphereTransform = sTransform {
+			NameSet = true,
+			Inputs = {
+				XOffset = Input {
+					Value = -0.168,
+					Expression = "-TheTransform.XOffset",
+				},
+				YOffset = Input {
+					Value = -0.168,
+					Expression = "-RectangleTransform.YOffset",
+				},
+				XSize = Input {
+					Value = 0.56,
+					Expression = "TheTransform.XSize",
+				},
+				YSize = Input {
+					Value = 0.56,
+					Expression = "TheTransform.YSize",
+				},
+				Input = Input {
+					SourceOp = "Sphere",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 415.333, 84.9394 } },
+		},
+		Rectangle = sEllipse {
+			NameSet = true,
+			Inputs = {
+				Height = Input { Expression = "Width", },
+			},
+			ViewInfo = OperatorInfo { Pos = { 236, 22.5152 } },
+		},
+		RectangleTransform = sTransform {
+			NameSet = true,
+			Inputs = {
+				XOffset = Input {
+					Value = -0.168,
+					Expression = "-TheTransform.XOffset",
+				},
+				YOffset = Input {
+					Value = 0.168,
+					Expression = "TheTransform.XOffset",
+				},
+				XSize = Input {
+					Value = 0.56,
+					Expression = "TheTransform.XSize",
+				},
+				YSize = Input {
+					Value = 0.56,
+					Expression = "TheTransform.YSize",
+				},
+				Input = Input {
+					SourceOp = "Rectangle",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 420, 0.696968 } },
+		},
+		sMerge2 = sMerge {
+			Inputs = {
+				Input1 = Input {
+					SourceOp = "TheTransform",
+					Source = "Output",
+				},
+				Input2 = Input {
+					SourceOp = "SphereTransform",
+					Source = "Output",
+				},
+				Input3 = Input {
+					SourceOp = "RectangleTransform",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 835.333, 44.3333 } },
+		},
+		sRender1 = sRender {
+			Inputs = {
+				GlobalOut = Input { Value = 0, },
+				Width = Input { Value = 256, },
+				Height = Input { Value = 256, },
+				UseFrameFormatSettings = Input { Value = 1, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "sMerge2",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 945.333, 32.8182 } },
+		},
+		Background1 = Background {
+			Inputs = {
+				GlobalOut = Input { Value = 0, },
+				Width = Input { Value = 256, },
+				Height = Input { Value = 256, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				TopLeftAlpha = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 733.333, 135.515 } },
+		},
+		Paint1 = Paint {
+			Inputs = {
+				Input = Input {
+					SourceOp = "Background1",
+					Source = "Output",
+				},
+				Paint = Input {
+					SourceOp = "PolylineStroke2",
+					Source = "Out",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 900, 106.152 } },
+		},
+		PolylineStroke2 = PolylineStroke {
+			Points = {
+			},
+			IsThreaded = true,
+			Brushes = {
+				"SoftBrush",
+				"CircleBrush"
+			},
+			ApplyModes = { "PaintApplyColor" },
+			Inputs = {
+				Paint = Input {
+					SourceOp = "PolylineStroke1",
+					Source = "Out",
+				},
+				BrushControls = Input { Value = 1, },
+				BrushShape = Input { Value = FuID { "CircleBrush" }, },
+				["SoftBrush.Size"] = Input { Value = 0.2, },
+				StrokeControls = Input { Value = 1, },
+				WriteOnStart = Input { Value = 0.3, },
+				WriteOnEnd = Input { Value = 0.7, },
+				Polyline = Input {
+					Value = Polyline {
+						Points = {
+							{ Linear = true, X = 0.168, Y = 0, RX = -0.112, RY = 0.056, PublishID = "Point1" },
+							{ Linear = true, X = -0.168, Y = 0.168, LX = 0.112, LY = -0.056, PublishID = "Point0" }
+						}
+					},
+				},
+				Point0 = Input {
+					Value = { 0.332, 0.668 },
+					Expression = "Point(0.5-TheTransform.XOffset, 0.5+TheTransform.XOffset)",
+				},
+				Point1 = Input {
+					Value = { 0.668, 0.5 },
+					Expression = "Point(0.5+TheTransform.XOffset,0.5)",
+				},
+			},
+		},
+		PolylineStroke1 = PolylineStroke {
+			Points = {
+			},
+			IsThreaded = true,
+			Brushes = {
+				"SoftBrush",
+				"CircleBrush",
+				"SinglePixelBrush"
+			},
+			ApplyModes = { "PaintApplyColor" },
+			Inputs = {
+				BrushControls = Input { Value = 1, },
+				BrushShape = Input { Value = FuID { "CircleBrush" }, },
+				["SoftBrush.Size"] = Input { Value = 0.2, },
+				StrokeControls = Input { Value = 1, },
+				WriteOnStart = Input { Value = 0.3, },
+				WriteOnEnd = Input { Value = 0.7, },
+				Polyline = Input {
+					Value = Polyline {
+						Points = {
+							{ Linear = true, X = 0.168, Y = 0, RX = -0.112, RY = -0.056, PublishID = "Point1" },
+							{ Linear = true, X = -0.168, Y = -0.168, LX = 0.112, LY = 0.056, PublishID = "Point0" }
+						}
+					},
+				},
+				Point0 = Input {
+					Value = { 0.332, 0.332 },
+					Expression = "Point(0.5-TheTransform.XOffset, 0.5-TheTransform.XOffset)",
+				},
+				Point1 = Input {
+					Value = { 0.668, 0.5 },
+					Expression = "Point(0.5+TheTransform.XOffset,0.5)",
+				},
+			},
+		},
+		Merge1 = Merge {
+			Inputs = {
+				Background = Input {
+					SourceOp = "sRender1",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "Paint1",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 1094, 35.2424 } },
+		},
+		Transform1 = Transform {
+			Inputs = {
+				Center = Input { Value = { 0.524861878453039, 0.475138121546961 }, },
+				Input = Input {
+					SourceOp = "Merge1",
+					Source = "Output",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 1270, 35.3286 } },
+		},
+		Merge2 = Merge {
+			Inputs = {
+				Background = Input {
+					SourceOp = "Merge3",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "Transform1",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 1286, 107.97 } },
+		},
+		Ellipse2 = EllipseMask {
+			Inputs = {
+				Filter = Input { Value = FuID { "Fast Gaussian" }, },
+				BorderWidth = Input { Value = 0.06, },
+				Solid = Input { Value = 0, },
+				MaskWidth = Input { Value = 256, },
+				MaskHeight = Input { Value = 256, },
+				PixelAspect = Input { Value = { 1, 1 }, },
+				ClippingMode = Input { Value = FuID { "None" }, },
+				Width = Input {
+					Value = 0.9,
+					Expression = "Ellipse1.Width",
+				},
+				Height = Input {
+					Value = 0.9,
+					Expression = "Ellipse1.Height",
+				},
+			},
+			ViewInfo = OperatorInfo { Pos = { 864, 235.242 } },
+		},
+		Background2_1 = Background {
+			Inputs = {
+				GlobalOut = Input { Value = 0, },
+				Width = Input { Value = 256, },
+				Height = Input { Value = 256, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Type = Input { Value = FuID { "Gradient" }, },
+				GradientType = Input { Value = FuID { "Radial" }, },
+				Start = Input { Value = { 0.408839779005525, 0.577348066298343 }, },
+				End = Input { Value = { 0.834254143646409, 0.135359116022099 }, },
+				Gradient = Input {
+					Value = Gradient {
+						Colors = {
+							[0] = { 0, 0.274509803921569, 0.392156862745098, 1 },
+							[1] = { 0, 0.0862745098039216, 0.129411764705882, 1 }
+						}
+					},
+				},
+				EffectMask = Input {
+					SourceOp = "Ellipse2",
+					Source = "Mask",
+				}
+			},
+			ViewInfo = OperatorInfo { Pos = { 981.333, 240.364 } },
+		},
+		Merge4 = Merge {
+			CtrlWZoom = false,
+			Inputs = {
+				Background = Input {
+					SourceOp = "Merge2",
+					Source = "Output",
+				},
+				Foreground = Input {
+					SourceOp = "Background2_1",
+					Source = "Output",
+				},
+				PerformDepthMerge = Input { Value = 0, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 1455.33, 117.939 } },
+		},
+		Saver1 = Saver {
+			Inputs = {
+				ProcessWhenBlendIs00 = Input { Value = 0, },
+				Clip = Input {
+					Value = Clip {
+						Filename = "comp:/logo.png",
+						FormatID = "PNGFormat",
+						Length = 0,
+						Saving = true,
+						TrimIn = 0,
+						ExtendFirst = 0,
+						ExtendLast = 0,
+						Loop = 1,
+						AspectMode = 0,
+						Depth = 0,
+						GlobalStart = -2000000000,
+						GlobalEnd = 0
+					},
+				},
+				OutputFormat = Input { Value = FuID { "PNGFormat" }, },
+				["Gamut.SLogVersion"] = Input { Value = FuID { "SLog2" }, },
+				Input = Input {
+					SourceOp = "Merge4",
+					Source = "Output",
+				},
+				["PNGFormat.PreDivide"] = Input { Value = 1, },
+			},
+			ViewInfo = OperatorInfo { Pos = { 1635.33, 114.116 } },
+		}
+	},
+	Frames = {
+		{
+			FrameTypeID = "ChildFrame",
+			Mode = 3,
+			LayoutPreset = 0,
+			PresetName = "Default",
+			Left = 0,
+			Top = 27,
+			Width = 1920,
+			Height = 938,
+			ZoneInfo = {
+				AuxRight = { Expanded = true },
+				Right = { Expanded = true, },
+				Left = { Expanded = false, },
+				AuxLeft = { Expanded = true },
+				["!Left"] = {
+				},
+				["!Right"] = {
+				}
+			},
+			ViewInfo = {
+				Keyframes = { Show = false, },
+				LayoutStrip = { Show = true, RatioX = 100, },
+				Inspector = { Show = true, Adjust = false, RatioX = 100, RatioY = 1, MRU = 1 },
+				Effects = { Show = false, },
+				Viewer2 = { Show = true, RatioX = 1, RatioY = 0.01, },
+				Comments = { Show = false },
+				Clips = { Show = false, },
+				ActionStrip = { Show = true, RatioX = 100, },
+				Time = { Show = true, RatioX = 100, },
+				MediaPool = { Show = false, },
+				Nodes = { Show = true, RatioX = 1, RatioY = 100, },
+				Metadata = { Show = false, },
+				Viewer1 = { Show = true, RatioX = 1, RatioY = 0.01, },
+				Spline = { Show = false, },
+				OuterColumns = {
+					RatioX = 100,
+					RatioY = 1,
+				},
+				OuterLeft = {
+				},
+				CenterSplit = {
+					RatioX = 1,
+					RatioY = 100,
+				},
+				OuterRight = {
+					PixelX = 420,
+					RatioY = 100,
+				},
+				InnerColumns = {
+					RatioX = 100,
+					RatioY = 1.99763872491145,
+				},
+				MainSplit = {
+					RatioX = 100,
+					RatioY = 1.00236127508855,
+				},
+				InnerLeft = {
+				},
+				InnerRight = {
+				},
+				ViewerSplit = {
+					RatioX = 100,
+					RatioY = 1,
+				}
+			},
+			Views = ordered() {
+				Effects = MultiView {
+					Active = "EffectView",
+					ViewList = ordered() {
+						EffectView = "EffectView"
+					},
+				},
+				Nodes = MultiView {
+					Active = "FlowView",
+					ViewList = ordered() {
+						FlowView = "FlowView"
+					},
+					FlowView = FlowView {
+						Flags = {
+							AutoHideNavigator = true,
+							AutoSnap = true,
+							RemoveRouters = true
+						},
+						NavigatorSize = { 200, 140 },
+						Direction = "Horizontal",
+						PipeStyle = "Direct",
+						RootScale = 0.5,
+						RootOffset = { -174, 15.5805 }
+					}
+				},
+				Keyframes = MultiView {
+					Active = "TimelineView",
+					ViewList = ordered() {
+						TimelineView = "TimelineView"
+					},
+					TimelineView = TimelineView {
+						TreeControlState = {
+						},
+						DisplayMode = "All Tools",
+						ShowCurrentTimeTools = false,
+						Filter = "Show All",
+						ShowSelectedTools = false,
+						ShowAnimatedToolsOnly = false,
+						ShowEditBoxes = false,
+						KeyFrameView = {
+							Position = { Left = 232, Bottom = 320 },
+							ScaleX = 2.14424951267057,
+							OffsetX = -51.4619883040936,
+							OffsetY = 0,
+							AutoScaling = "scroll",
+							AutoSnapTo = "frame",
+							AutoSnapToGuidelines = false,
+							GuidelinesGrabEnabled = true,
+							GuidelinesSnapTo = "none"
+						},
+						Spreadsheet = { LeftPos = 232, Visible = false }
+					}
+				},
+				Spline = MultiView {
+					Active = "SplineView",
+					ViewList = ordered() {
+						SplineView = "SplineEditorView"
+					},
+					SplineView = SplineEditorView {
+						LeftPos = 264,
+						ScaleX = 0.2,
+						ScaleY = 0.00338983050847458,
+						OffsetX = -3.4,
+						OffsetY = 0,
+						AutoScaling = "scroll",
+						AutoSnapTo = "frame",
+						AutoSnapToGuidelines = false,
+						GuidelinesSnapTo = "frame",
+						ShowKeyMarkers = false,
+						IndependentHandles = false,
+						ShowNonSplineModifiers = false,
+						GuidelinesGrabEnabled = true,
+						ShowOneToolOnly = false,
+						ShowSelectedTools = false,
+						ShowAllInputs = false,
+						Filter = "Show All"
+					}
+				},
+				Inspector = MultiView {
+					Active = "Tools",
+					ViewList = ordered() {
+						Tools = "ControlView",
+						Modifiers = "ModifierView"
+					},
+				},
+				Viewer1 = MultiView {
+					Active = "LeftView",
+					ViewList = ordered() {
+						LeftView = "PreviewContainer"
+					},
+				},
+				Viewer2 = MultiView {
+					Active = "RightView",
+					ViewList = ordered() {
+						RightView = "PreviewContainer"
+					},
+				},
+				Time = "TimeView",
+				ActionStrip = "ActionStripView",
+				LayoutStrip = "LayoutStripView"
+			},
+			Layout = {
+				{ ID = "LayoutStrip", FixedY = 36, Resolve = false, Flat = true },
+				{
+					{
+						{ ID = "MediaPool", Fusion = false, RatioX = 1 },
+						{ ID = "Effects", RatioX = 1 },
+						Zone = "Left",
+						Rows = 2,
+						PaneID = "OuterLeft",
+						PixelX = 420
+					},
+					{
+						{
+							{
+								{ ID = "MediaPool", Fusion = false, RatioX = 1 },
+								{ ID = "Effects", RatioX = 1 },
+								PaneID = "InnerLeft",
+								MaxViews = 1,
+								PixelX = 420,
+								Rows = 2,
+								Zone = "!Left"
+							},
+							{
+								{
+									{ ID = "Viewer1", RatioY = 0.01, RatioX = 1 },
+									{ ID = "Viewer2", RatioX = 1 },
+									RatioY = 1,
+									Columns = 2,
+									PaneID = "ViewerSplit"
+								},
+								{ ID = "Time", FixedY = 83, Flat = true },
+								RatioX = 1,
+								Rows = 2
+							},
+							{
+								{ ID = "Inspector", RatioY = 1 },
+								{ ID = "Metadata", RatioY = 1, Fusion = false },
+								PaneID = "InnerRight",
+								MaxViews = 1,
+								PixelX = 420,
+								Rows = 2,
+								Zone = "!Right"
+							},
+							RatioY = 2,
+							Columns = 3,
+							PaneID = "InnerColumns"
+						},
+						{ ID = "ActionStrip", FixedY = 50, Flat = true },
+						{
+							{ ID = "Nodes", RatioX = 1 },
+							{ ID = "Spline", RatioX = 1 },
+							{ ID = "Keyframes", RatioX = 1 },
+							RatioY = 1,
+							Columns = 3,
+							PaneID = "MainSplit"
+						},
+						{ Fusion = false, ID = "Clips", LARGE_FixedY = 160, MEDIUM_FixedY = 138, SMALL_FixedY = 110 },
+						RatioX = 1,
+						Rows = 4,
+						PaneID = "CenterSplit"
+					},
+					{
+						{ ID = "Inspector", RatioY = 1 },
+						{ ID = "Metadata", RatioY = 1, Fusion = false },
+						Zone = "Right",
+						Rows = 2,
+						PaneID = "OuterRight",
+						PixelX = 420
+					},
+					RatioY = 1,
+					Columns = 3,
+					PaneID = "OuterColumns"
+				},
+				RatioX = 1,
+				Rows = 2,
+				RatioY = 1
+			},
+			TopBar = {
+				Left = { "Left", "MediaPool", "Effects", "Clips", "Nodes", "Console" },
+				Right = { "Spline", "Keyframes", "Metadata", "Inspector", "Right" }
+			}
+		}
+	},
+	Prefs = {
+		Comp = {
+			Paths = {
+			},
+			LastFile = "/home/kork/Downloads/wood",
+			FrameFormat = {
+				GuideRatio = 1.77777777777778,
+				Width = 256,
+				Height = 256,
+			},
+			Splines = {
+				SelectPointsFromMultiPolies = false,
+			},
+			Unsorted = {
+				GlobalEnd = 0,
+				RenderSettings = {
+					Configs = {
+						Final = {
+							Quality = true,
+							MotionBlur = true,
+							UpdateMode = "Some",
+							UseNetwork = false,
+							SizeType = 1,
+							CustomWidth = 200,
+							CustomHeight = 160,
+							CustomAspect = true,
+							StepRender = false,
+							StepSize = 5,
+							PriorityClasses = "all",
+							ShowRenderNodes = false
+						},
+						Preview = {
+							Quality = true,
+							MotionBlur = true,
+							UpdateMode = "Some",
+							UseNetwork = false,
+							SizeType = 1,
+							CustomWidth = 200,
+							CustomHeight = 160,
+							CustomAspect = true,
+							StepRender = false,
+							StepSize = 5,
+							PriorityClasses = "all",
+							ShowRenderNodes = false
+						}
+					},
+					CurrentConfig = "Final",
+					PreviewConfig = "Preview"
+				}
+			},
+			Views = {
+				RightView = {
+					Viewer = {
+					},
+				},
+				LeftView = {
+					Viewer = {
+					},
+				},
+				View1 = {
+				},
+			},
+			QuickTime = {
+			},
+			PolyKeyListDlg = {
+				Window = {
+					Left = 909,
+					Top = 414
+				}
+			}
+		}
+	},
+}
+

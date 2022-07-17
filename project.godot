@@ -12,7 +12,7 @@ config_version=4
 
 config/name="OpenScadGraphEditor"
 run/main_scene="res://GraphEditor.tscn"
-config/icon="res://icon.png"
+config/icon="res://Icons/logo0000.png"
 
 [display]
 
