@@ -1,6 +1,6 @@
 # OpenSCAD Graph Editor Manual
 
-_This manual is currently being written._
+## Table of contents
 
 ## Introduction
 OpenSCAD is a 3D CAD program that can be used to create 3D models through scripting. The OpenSCAD Graph Editor is a graphical user interface for OpenSCAD that allows you to create 3D models by connecting nodes in a graph. The editor will automatically generate OpenSCAD code for you.
@@ -93,7 +93,7 @@ In general you can only connect ports which have the same port type (e.g. the sa
 - A port type of `vector3` (light blue) can be connected to a port type of `vector` (blue) but not the other way around.
 - A port type of `vector2` (very light blue) can be connected to a port type of `vector` (blue) but not the other way around.
 
-Also every input port (except geometry, see the next section for details) can only accept a single connection.
+Every input port (except geometry, see the next section for details) can only accept a single connection. It is also not allowed to connect nodes in a way that would form a loop. 
 
 #### Connecting geometry ports
 
@@ -123,6 +123,7 @@ Here we have two cube nodes and a translate node. All nodes have nothing connect
 
 Some input ports may not have a default value and are therefore required. This is the case for the _Translate_ node. It does not have a default value for the translation _Offset_ so the little button is not displayed. You can still specify the value directly in the node or connect another node to the input.
 
+
 ## Overview of built-in nodes
 
 OpenSCAD graph editor contains nodes for all [functions and modules](https://openscad.org/cheatsheet/) built into OpenSCAD. So if you look for a certain function you can just type its name into the _Add node_ dialog. 
@@ -141,7 +142,7 @@ The node will output the geometry connected to the _true_ port if the condition 
 
 #### For-Loop
 
-The for-loop node allows you to repeatedly create geometry with different inputs. It actually consists of two nodes: _Start loop_ and _End loop_ but you will only need to add a _For loop_ node and the _Loop end_ node will be added automatically.
+The for-loop node allows you to repeatedly create geometry with different inputs. It actually consists of two nodes: _Start loop_ and _End loop_ but you will only need to add a _For loop_ node and the _Loop end_ node will be added automatically. Whenever you select any of the two nodes belonging to a loop the editor will automatically highlight the other so you can keep track of which _Start loop_ and _End loop_ nodes belong together.
 
 Consider the following example of a for-loop:
 
@@ -163,6 +164,14 @@ This will add a second input to the _Loop start_ node and the loop will now repe
 
 
 We again use a _Construct range_ node, to build a range of the numbers `0` to `9`. Then we increase the loop nest level to 3 so we have three loops running running over all combinations of three vectors holding the numbers `0` to `9`. This will in total yield `1000` iterations (`10 * 10 * 10` numbers). We call the loop variables `x`, `y` and `z`.  Now we use a _Construct `vector3`_ to build a new `vector3` from the current loop variables. We multiply this vector by 2 so we will get `0,0,0`, `0,0,2`, etc.. Now we use these coordinates to translate a cube in three-dimensional space. The result is `1000` small cubes forming a bigger cube.
+
+#### Intersection loops
+
+A _For loop_ by defaults returns the union of all iterations. Sometimes you want to return the intersection of all iterations. To do this, right-click the _Loop start_ node and select the _Toggle intersection mode_ option. This will will switch the _For loop_ to an _Intersection-for loop_.
+
+![](images/intersect_for.gif)
+
+In the example we have three spheres which are created by a _For loop_. You can see the three spheres in the output geometry. Now we switch the _For loop_ to an _Intersection-for loop_ and we get only the intersection of all spheres.
 
 ### Vector nodes
 
@@ -215,7 +224,101 @@ This special node takes two `vector2`, `vector3` or `vector` values. It multiply
 
 This functionality is not actually built into OpenSCAD (e.g. using the normal multiplication operator `*` will return the dot product of the vectors). Under the hood this will build a loop that walks over the vectors and multiplies the values pairwise. This was added as this operation is quite useful and would otherwise require you to build a lot more nodes.
 
-## Advanced use
+### Miscellaneous nodes
+#### Cast
+
+Sometimes a node needs an input value that doesn't match the type of the output value. For example you may want to construct a range which has 3 items in it and technically is a `vector`. But in this case you are sure it is actually a `vector3`. The editor has no way of knowing this without actually running the program, so it will not let you connect the output of _Construct range_ to anything that takes a `vector3`. You can use the _Cast_ node to work around this. The _Cast_ node has an input and output port of type `any` so it can be connected to anything (except geometry).
+
+![](images/cast.png)
+
+The _Cast_ node will not magically convert a node to a different type. It is simply a way of telling the editor: _"I know what I am doing, trust me that this is the correct type."_ If you connect ports that actually do not match the OpenSCAD compiler will show you an error when you try to run the program.
+
+## Keeping the graph neat and tidy
+
+When you add and connect a lot of nodes it is easy to quickly get into a big ball of spaghetti which is not very readable. You want to keep your graph as tidy as possible, so you can look at it some time later and still know what you were doing. OpenSCAD graph editor has some features to help you keep your graph clean.
+
+### Comments
+
+You can add a comment to any node by right-clicking it and selecting _Add comment_ or by selecting a node and pressing the `F2` key. This allows you to add a short comment which will appear on top of the node.
+
+![](images/node_comments.gif)
+
+
+### Reroute nodes
+
+When you have quite a few nodes connected to each other it can become difficult to avoid having connections crossing over other connections and thereby making the graph look messy. The _Reroute_ node allows you to reroute a connection, so you can prevent connections from crossing over each other. You can create a reroute node either by using the _Add node_ dialog or by holding `Shift` while you drag a connection to an empty space. 
+
+#### Wireless reroute nodes
+
+Sometimes even with reroute nodes a graph will become too messy because there are just so many connections and there is no really good way of routing them so they don't create spaghetti. For this case you can use a _Wireless reroute_ node. This works the same way as a normal reroute node but it only shows its connection to the input port when it is selected. This can be very useful in de-cluttering dense graphs. You should however use the wireless nodes sparingly as they keep you from understanding your node graph at a glance.
+
+To create a _Wireless reroute_ node you can either right-click an existing reroute node and select _Make wireless_ in the popup menu or you can hold `Ctrl+Shift` while dragging a connection to an empty spot.
+
+You can also turn a _Wireless reroute_ node back into a normal _Reroute node_ by right-clicking it and selecting _Make wired_ in the popup menu.
+
+The following image shows how you can clean up a cluttered node graph with reroute nodes:
+
+![](images/using_reroute_nodes.gif)
+
+### Straighten connections
+
+You can straighten the connections between nodes by selecting a the nodes between which you want to straighten the connections and then pressing the `Q` key. 
+
+Connections will be straightened from right to left, e.g. the right-most node will never be moved. The algorithm will work from the right-most node and then move nodes left of the right-most node up and down so that the first connection between them is straight. 
+
+## Debugging aids
+
+Sometimes it is not immediately obvious why something is not working as expected. OpenSCAD has some debugging aids built-in which you can quickly toggle for all nodes which produce geometry.
+
+### Changing the color of the output
+
+A very simple way to see what is going on is simply adding a bit of color to a node so you can see which node produces which output. You can color the output of a node by right-clicking it and selecting _Set color_.
+
+![](images/changing_color.gif)
+
+In this example we give sphere a purple color and the cube a blue color.
+
+### Debug modifiers
+
+OpenSCAD provides several modifiers which change the way a sub-tree is rendered. You can quickly toggle these modifiers for any node outputting geometry through the node's context menu.
+
+![](images/debugging_aids_context_menu.png)
+
+#### Debug subtree
+
+The _Debug subtree_ modifier will render the node's output in a translucent red color. This is for example useful in debugging a  _Difference_ node as it allows you to see the geometry that is being subtracted.
+
+![](images/debug_modifier.png)
+
+In this example where two cylinders are subtracted from a cube, one cylinder has a debug modifier applied. You can see this by the little "bug" icon above the node. Now the cylinder is rendered in a translucent red color.
+
+#### Background subtree
+
+The _Background subtree_ works similar to the _Debug subtree_ modifier but it will render the node's output in a translucent grey color. Also the output of the node will not be used for any subsequent operations in the graph.
+
+![](images/background_modifier.png)
+
+This is the same example as above but with the background modifier applied. You can see the cylinder is rendered in a translucent grey color and is no longer subtracted from the cube.
+
+
+#### Disable subtree
+
+The _Disable subtree_ modifier will disable the node's output. This is useful if you want to temporarily disable a node.
+
+![](images/disable_modifier.png)
+
+The second cylinder is now disabled. It's node is being displayed slightly translucent in the graph editor to indicate this. The cylinder does no longer appear in live preview.
+
+#### Make root modifiers
+
+The _Make root modifiers_ modifier is essentially the opposite of the _Disable subtree_ modifier. It will disable all other nodes and only render the node with which has the modifier applied.
+
+![](images/make_root_modifier.png)
+
+Now only the cylinder is rendered, everything else is disabled. Only one node can have this modifier at a time. If you add the modifier to another node, it will remove the modifier from the node which previously had it.
+
+
+## Reusable code with functions and modules
 ### Modules
 #### Creating a new module
 OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the _M_ icon above the project tree. 
@@ -324,6 +427,8 @@ From here on functions work exactly the same as modules. So you can use them the
 - `Ctrl+X` / `Cmd+X` - Cut the selected nodes.
 - `Ctrl+Z` / `Cmd+Z` - Undo the last action.
 - `Ctrl+Shift+Z` / `Cmd+Shift+Z` - Redo the last action.
+- Holding `Shift` while dragging a connection to an empty space - Create a reroute node.
+- Holding `Ctrl+Shift` while dragging a connection to an empty space - Create a wireless node.
 
 ### Documentation comment format
 OpenSCAD graph editor uses a standardized format for documentation comments. If you follow this format in text-based OpenSCAD libraries, OpenSCAD graph editor will be able to parse the format and show better documentation for the nodes when pressing `F1`. 
