@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -6,6 +7,8 @@ using OpenScadGraphEditor.Widgets.AddDialog;
 
 namespace OpenScadGraphEditor.Nodes.ForLoop
 {
+    
+    [UsedImplicitly]
     public class ForLoopAddDialogEntryFactory : IAddDialogEntryFactory
     {
         public IEnumerable<IAddDialogEntry> BuildEntries(ScadProject currentProject, ICanPerformRefactorings canPerformRefactorings)
