@@ -51,7 +51,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             BoundNode = node;
             Title = ""; // we render the title ourselves, see below
-            HintTooltip = node.NodeDescription;
+            HintTooltip = node.NodeDescription.WordWrap(40);
             Offset = node.Offset;
 
             if (node is IAmAnExpression && node.OutputPortCount == 1)
