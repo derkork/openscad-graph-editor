@@ -54,7 +54,7 @@ namespace OpenScadGraphEditor.Library
                 currentProject.ExternalReferences
                     .SelectMany(it => it.Modules)
                     .Select(it => new SingleNodeBasedEntry(
-                        Resources.FunctionIcon,
+                        Resources.ModuleIcon,
                         () => NodeFactory.Build<ModuleInvocation>(it),
                         canPerformRefactorings
                     ))

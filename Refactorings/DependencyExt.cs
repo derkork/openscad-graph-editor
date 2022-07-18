@@ -127,15 +127,17 @@ namespace OpenScadGraphEditor.Refactorings
             
             // now make a dictionary which has the full path to the
             // external reference as key and the reference itself as value
+            // use the relative path in case we cannot get the full path (because the file doesn't exist anymore)
             var referencesToRemoveDict = 
-                referencesToRemove.ToDictionary(it => project.TryGetFullPathTo(it, out var fullPath) ? fullPath : null, it => it);
+                referencesToRemove.ToDictionary(it => project.TryGetFullPathTo(it, out var fullPath) ? fullPath : it.IncludePath, it => it);
             
             // now get the set of references that are actually used by the project
             var referencesInUse = project.ExternalReferences.Except(referencesToRemove).ToHashSet();
             
             // get a dictionary of their full paths as well
+            // again, use the relative path in case we cannot get the full path (because the file doesn't exist anymore)
             var referencesInUseDict = 
-                referencesInUse.ToDictionary(it => project.TryGetFullPathTo(it, out var fullPath) ? fullPath : null, it => it);
+                referencesInUse.ToDictionary(it => project.TryGetFullPathTo(it, out var fullPath) ? fullPath : it.IncludePath, it => it);
 
 
             // now walk over the reference we keep and try to find out if it refers to one of the references
