@@ -329,7 +329,7 @@ Connections will be straightened from right to left, e.g. the right-most node wi
 
 ## Debugging aids
 
-Sometimes it is not immediately obvious why something is not working as expected. OpenSCAD has some debugging aids built-in which you can quickly toggle for all nodes which produce geometry.
+Sometimes it is not immediately obvious why something is not working as expected. OpenSCAD has some debugging aids built-in which help you see what is going on.
 
 ### Changing the color of the output
 
@@ -337,7 +337,7 @@ A very simple way to see what is going on is simply adding a bit of color to a n
 
 ![](images/changing_color.gif)
 
-In this example we give sphere a purple color and the cube a blue color.
+In this example we give sphere a purple color and the cube a blue color. Naturally this will only work for nodes that produce geometry output.
 
 ### Debug modifiers
 
@@ -378,6 +378,19 @@ The _Make root modifiers_ modifier is essentially the opposite of the _Disable s
 
 Now only the cylinder is rendered, everything else is disabled. Only one node can have this modifier at a time. If you add the modifier to another node, it will remove the modifier from the node which previously had it.
 
+
+### Inspecting expressions
+
+When you build expressions in the graph, sometimes the resulting graph can be a bit overwhelming and it would be nice to be able to see the expression in a more conventional format. That is why OpenSCAD graph editor allows you to see the built expression by simply hovering over any node that produces an expression:
+
+![](images/inspect_expression.png)
+
+
+### Inspecting the generated code
+
+If you want to inspect the generated OpenSCAD code you can press the _View Code_ button in the top right of the editor. This will replace the node graph with a text editor which shows the generated code. 
+
+![](images/code_preview.png)
 
 ## Reusable code with functions and modules
 ### Modules
@@ -476,6 +489,58 @@ Functions have an additional node where you can connect the return value of the 
 The two numbers are given as parameters to the function. Then we use an _Add_ node to add the two numbers. The output of the _Add_ node is connected to the _Return_ node's input port, so now the function will return the sum of the two numbers.
 
 From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, find their usages and can edit their documentation in the same way as you do for modules. 
+
+## Using functions and modules from text-based libraries
+
+OpenSCAD has no shortage of [libraries](https://openscad.org/libraries.html) which simplify a lot of things, from creating standardized parts like nuts and bolts over ready-made enclosures, rounded edges, threads, etc. Therefore OpenSCAD graph editor allows you to include these libraries and use their functions and modules just like you would use any built-in function and module. 
+
+### Adding a reference to a library
+
+You can add a reference to a library by clicking the `<>` icon in the top right. This will open a dialog where you can select the library you want to add:
+
+![](images/include_files.gif)
+
+You can then choose an include mode:
+
+- _Include_: The library will be included in the OpenSCAD code and all code that is in the library file outside of module/function declarations will be executed.
+- _Use_ : The library will be included in the OpenSCAD code but all code that is in the library file outside of module/function declarations will **not be executed**.
+
+Next you have the option how you want to refer to the library.
+
+- _Relative_ - the library path will be relative to the current file. This is recommended for most cases as you can transfer the project and its libraries to another computer. This option is only available after you have saved the current file, otherwise there would be no way of calculating a relative path.
+- _Absolute_ - the library path will be absolute. This is usually not recommended as the file will then only work on the computer it was created on.
+- _Library_ - the library will be resolved from the OpenSCAD library path. This is recommended if you want to use libraries in multiple projects.
+
+Finally you can select the actual library file. If you have selected _Relative_ or _Absolute_ mode, you can use a file picker to pick the library file. If you have selected _Library_ mode, a dropdown will appear showing all OpenSCAD libraries within the OpenSCAD library path. 
+
+Once everything is set up, press _OK_ to add the library. OpenSCAD graph editor will now parse the library and show all functions and modules in the tree. For big libraries with lots of functions and modules and possibly lots of recursive includes (like BOSL2) this may take a few seconds, so please be patient.
+
+
+### Using functions and modules from the library
+
+You can use functions and modules from the library by dragging them from the tree into the graph or through the _Add Node_ dialog, just like any other built-in function or module:
+
+![](images/using_external_functionality.gif)
+
+Wherever possible, OpenSCAD graph editor will try to infer the correct type of the parameters from the code. If you want to make sure that the correct parameter types are inferred, you can add documentation comments to the function or module. See the section about the [documentation comment format](#documentation-comment-format) for details.
+
+### Refreshing external libraries
+
+For performance and usability reasons OpenSCAD graph editor does not automatically refresh external libraries when they change. You can refresh a library by right-clicking its entry in the project tree and then selecting the _Refresh <library>_ option:
+
+![](images/refresh_reference.png)
+
+Refreshing a library will re-parse the library sources and then update any references to changed functions and modules in the graph. The following will happen:
+
+- If you deleted a function, module or variable from the library all its uses will be deleted from all graphs. This will also delete all connections from and to the deleted nodes.
+- If you added a function, module or variable to the library it will appear in the tree and in the _Add Node_ dialog.
+- If you have changed the parameters of a function or module, all usages will be updated:
+  - If a parameter was added, the node will get an additional input port.
+  - If a parameter was removed, the node will lose an input port and all connections to that input port will be removed.
+  - If a parameter changed position, the input port will be moved to the new position and all connections will be updated.
+
+You may have noticed that there is no functionality for supporting renames. This is simply because a rename operation looks like the combination of a delete and an add operation. There is no reliable way of telling these operations apart. If you would like to rename something it is recommended that you first add a copy of the item with the new name, then use the built-in usage-search to find all places where the old name is used and replace it with the new name. Then you can delete the original item.
+
 
 ## Reference
 ### Keyboard shortcuts
