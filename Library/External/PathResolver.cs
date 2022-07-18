@@ -6,6 +6,7 @@ using System.Text;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Widgets;
 using Serilog;
 using Directory = System.IO.Directory;
 using Environment = System.Environment;
@@ -54,9 +55,9 @@ namespace OpenScadGraphEditor.Library.External
                     return "OpenScad.app";
                 default:
                     throw new ArgumentOutOfRangeException();
-            } 
+            }
         }
-        
+
 
         /// <summary>
         /// Checks whether two paths refer to the same file. Both paths must be absolute.
@@ -75,18 +76,19 @@ namespace OpenScadGraphEditor.Library.External
         /// <summary>
         /// Tries to resolve a path from an include statement. Returns a canonical, normalized path.
         /// </summary>
-        public static bool TryResolve([CanBeNull] string pathToSourceFile, string includePath, out string resolvedFullPath)
+        public static bool TryResolve([CanBeNull] string pathToSourceFile, string includePath,
+            out string resolvedFullPath)
         {
-            var sourceDirectory =  pathToSourceFile.Empty() ? "" : Path.GetDirectoryName(pathToSourceFile);
-            
+            var sourceDirectory = pathToSourceFile.Empty() ? "" : Path.GetDirectoryName(pathToSourceFile);
+
             if (!sourceDirectory.Empty())
             {
                 GdAssert.That(Path.IsPathRooted(sourceDirectory), "Source path is not absolute.");
             }
-            
+
             var isAbsolute = Path.IsPathRooted(includePath);
 
-            
+
             if (isAbsolute)
             {
                 resolvedFullPath = new Uri(includePath).LocalPath;
@@ -113,10 +115,11 @@ namespace OpenScadGraphEditor.Library.External
                 {
                     continue;
                 }
+
                 resolvedFullPath = new Uri(tryResolve).LocalPath;
                 return true;
             }
-            
+
             // still no joy, give up.
 
             resolvedFullPath = default;
@@ -131,7 +134,7 @@ namespace OpenScadGraphEditor.Library.External
         {
             return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
-        
+
         /// <summary>
         /// Calculates the given <see cref="absolutePath"/> relative to the given <see cref="relativeToDirectory"/> path.
         /// </summary>
@@ -141,7 +144,7 @@ namespace OpenScadGraphEditor.Library.External
             var relativeToDirectoryParts = NormalizePath(relativeToDirectory).Split('/');
 
             // Get the shortest of the two paths
-            var len =Mathf.Min(absoluteDirectoryParts.Length, relativeToDirectoryParts.Length);
+            var len = Mathf.Min(absoluteDirectoryParts.Length, relativeToDirectoryParts.Length);
 
             // Use to determine where in the loop we exited
             var lastCommonRoot = -1;
@@ -194,25 +197,41 @@ namespace OpenScadGraphEditor.Library.External
         }
 
 
+        /// <summary>
+        /// Returns all library files relative to the library root folder.
+        /// </summary>
         public static string[] GetAllLibraryFiles()
         {
             var paths = GetLibraryPaths();
             return paths.SelectMany(path =>
-            {
-                try
                 {
-                    if (Directory.Exists(path))
+                    try
                     {
-                        return Directory.GetFiles(path, "*.scad", SearchOption.AllDirectories);
-                    }
-                }
-                catch (Exception)
-                {
-                    Log.Warning("Could not read library files from {Path}", path);
-                }
+                        if (Directory.Exists(path))
+                        {
+                            return Directory.GetFiles(path, "*.scad", SearchOption.AllDirectories)
+                                .Select(it =>
+                                {
+                                    if (TryAbsoluteToRelative(it, path, out var result))
+                                    {
+                                        return result;
+                                    }
 
-                return Array.Empty<string>();
-            }).ToArray();
+                                    ;
+                                    NotificationService.ShowError("Couldn't convert " + it + " to relative path.");
+                                    return "";
+                                })
+                                .Where(it => !it.Empty());
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Log.Warning("Could not read library files from {Path}", path);
+                    }
+
+                    return Array.Empty<string>();
+                })
+                .ToArray();
         }
 
         private static IEnumerable<string> GetWindowsLibraryPaths()
