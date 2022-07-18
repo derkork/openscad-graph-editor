@@ -3,6 +3,7 @@
 ## Table of Contents
 <!--ts-->
 * [OpenSCAD Graph Editor Manual](#openscad-graph-editor-manual)
+   * [Table of Contents](#table-of-contents)
    * [Introduction](#introduction)
    * [Installation &amp; Setup](#installation--setup)
       * [Prerequisites for live preview](#prerequisites-for-live-preview)
@@ -42,6 +43,8 @@
          * [Background subtree](#background-subtree)
          * [Disable subtree](#disable-subtree)
          * [Make root modifiers](#make-root-modifiers)
+      * [Inspecting expressions](#inspecting-expressions)
+      * [Inspecting the generated code](#inspecting-the-generated-code)
    * [Reusable code with functions and modules](#reusable-code-with-functions-and-modules)
       * [Modules](#modules)
          * [Creating a new module](#creating-a-new-module)
@@ -53,6 +56,10 @@
          * [Adding documentation to modules](#adding-documentation-to-modules)
       * [Functions](#functions)
          * [Making a function return a value](#making-a-function-return-a-value)
+   * [Using functions and modules from text-based libraries](#using-functions-and-modules-from-text-based-libraries)
+      * [Adding a reference to a library](#adding-a-reference-to-a-library)
+      * [Using functions and modules from the library](#using-functions-and-modules-from-the-library)
+      * [Refreshing external libraries](#refreshing-external-libraries)
    * [Reference](#reference)
       * [Keyboard shortcuts](#keyboard-shortcuts)
       * [Documentation comment format](#documentation-comment-format)
