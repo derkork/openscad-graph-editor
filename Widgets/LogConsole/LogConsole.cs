@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using GodotExt;
 using Serilog.Core;
@@ -8,11 +9,16 @@ namespace OpenScadGraphEditor.Widgets.LogConsole
     public class LogConsole : Control, ILogEventSink
     {
         private RichTextLabel _logOutput;
-        
+
+        /// <summary>
+        /// Event being raised when the user requests to open the log file.
+        /// </summary>
+        public event Action OpenLogFileRequested;
         
         public override void _Ready()
         {
             _logOutput = this.WithName<RichTextLabel>("LogOutput");
+            this.WithName<IconButton.IconButton>("OpenLogButton").ButtonPressed += () => OpenLogFileRequested?.Invoke();
         }
         
         public void Open()
