@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Widgets/LogConsole/LogConsole.cs" type="Script" id=1]
+[ext_resource path="res://Icons/logfile0000.png" type="Texture" id=2]
+[ext_resource path="res://Widgets/IconButton/IconButton.tscn" type="PackedScene" id=3]
 
 [node name="LogConsole" type="MarginContainer"]
 anchor_right = 1.0
@@ -28,29 +30,48 @@ margin_right = 86.0
 margin_bottom = 25.0
 text = "Console"
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 35.0
 margin_right = 1900.0
 margin_bottom = 335.0
-rect_min_size = Vector2( 0, 300 )
 
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/HBoxContainer2"]
+margin_right = 41.0
+margin_bottom = 300.0
+
+[node name="OpenLogButton" parent="VBoxContainer/HBoxContainer2/VBoxContainer" instance=ExtResource( 3 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 41.0
+margin_bottom = 37.0
+Icon = ExtResource( 2 )
+HintTooltip = "Open log file"
+Padding = Vector2( 8, 0 )
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer2"]
+margin_left = 49.0
 margin_right = 1900.0
+margin_bottom = 300.0
+rect_min_size = Vector2( 0, 300 )
+size_flags_horizontal = 3
+
+[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer2/MarginContainer"]
+margin_right = 1851.0
 margin_bottom = 300.0
 color = Color( 0.0470588, 0.0352941, 0.0745098, 0.901961 )
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/MarginContainer"]
-margin_right = 1900.0
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer2/MarginContainer"]
+margin_right = 1851.0
 margin_bottom = 300.0
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
 custom_constants/margin_left = 10
 custom_constants/margin_bottom = 10
 
-[node name="LogOutput" type="RichTextLabel" parent="VBoxContainer/MarginContainer/MarginContainer"]
+[node name="LogOutput" type="RichTextLabel" parent="VBoxContainer/HBoxContainer2/MarginContainer/MarginContainer"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 1890.0
+margin_right = 1841.0
 margin_bottom = 290.0
 focus_mode = 2
 size_flags_vertical = 3

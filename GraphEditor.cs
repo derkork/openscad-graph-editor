@@ -91,16 +91,21 @@ namespace OpenScadGraphEditor
         public override void _Ready()
         {
             _logConsole = this.WithName<LogConsole>("LogConsole");
+            var logFile = OS.GetUserDataDir() + "/log.txt";
             
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
+                .WriteTo.File(logFile, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 5)
                 .WriteTo.Sink(_logConsole)
                 .CreateLogger();
+            GD.Print("OpenSCAD log file is: " + logFile);
             Log.Information("Initializing OpenScad Graph Editor");
             
             OS.LowProcessorUsageMode = true;
-            
+
+            _logConsole.OpenLogFileRequested += () => OS.ShellOpen(logFile);
+
             _configuration.Load();
             
             // scale all themes to editor scale
