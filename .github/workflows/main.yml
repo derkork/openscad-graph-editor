@@ -39,17 +39,10 @@ jobs:
           relative_project_path: ./
           archive_output: true
 
-      - name: list
-        env:
-          LE_PATH: ${{ steps.export.outputs.archive_directory }}
-        run: |
-          ls -la $LE_PATH
-          find .
-
       - name: create release
         uses: softprops/action-gh-release@v0.1.14
         with:
           tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
-          files: ${{ steps.export.outputs.archive_directory }}/*
+          files: ${{env.HOME}}/.local/share/godot/archives/*
           fail_on_unmatched_files: true
           body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
