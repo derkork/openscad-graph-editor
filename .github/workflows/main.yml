@@ -4,7 +4,9 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' 
-
+env:
+  GODOT_VERSION: 3.4.4
+  
 jobs:
   # job id, can be anything
   export_editor:
