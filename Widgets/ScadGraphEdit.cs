@@ -335,6 +335,26 @@ namespace OpenScadGraphEditor.Widgets
             {
                 StraightenSelection();
             }
+
+            if (evt.IsAlignLeft())
+            {
+                AlignSelectionLeft();
+            }
+            
+            if (evt.IsAlignRight())
+            {
+                AlignSelectionRight();
+            }
+            
+            if (evt.IsAlignTop())
+            {
+                AlignSelectionTop();
+            }
+            
+            if (evt.IsAlignBottom())
+            {
+                AlignSelectionBottom();
+            }
         }
 
         private void StraightenSelection()
@@ -442,6 +462,52 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
+        private void AlignSelectionLeft()
+        {
+            AlignSelection("Align left", 
+                () => GetSelectedNodes().Min(it  => it.Offset.x),
+                (it, position) => new Vector2(position, it.Offset.y));
+        }
+
+        private void AlignSelectionRight()
+        {
+            AlignSelection("Align right", 
+                () => GetSelectedNodes().Max(it  => it.Offset.x),
+                (it, position) => new Vector2(position, it.Offset.y));
+        }
+        
+        private void AlignSelectionTop()
+        {
+            AlignSelection("Align top", 
+                () => GetSelectedNodes().Min(it  => it.Offset.y),
+                (it, position) => new Vector2(it.Offset.x, position));
+        }
+        
+        private void AlignSelectionBottom()
+        {
+            AlignSelection("Align bottom", 
+                () => GetSelectedNodes().Max(it  => it.Offset.y),
+                (it, position) => new Vector2(it.Offset.x, position));
+        }
+        
+        private void AlignSelection(string humanReadableName, Func<float> getPosition, Func<ScadNode, float, Vector2> getOffset)
+        {
+            if (GetSelectedNodes().Count() < 2)
+            {
+                NotificationService.ShowNotification("Select at least two nodes to align.");
+                return;
+            }
+            
+            var alignmentPosition = getPosition();
+            var refactorings =
+                GetSelectedNodes()
+                    .Select(it =>
+                        new ChangeNodePositionRefactoring(Graph, it, getOffset(it, alignmentPosition)));
+
+            PerformRefactorings(humanReadableName, refactorings);
+        }
+        
+        
         private IEnumerable<ScadNode> GetSelectedNodes()
         {
             return _selection.Select(it => _widgets[it].BoundNode);
