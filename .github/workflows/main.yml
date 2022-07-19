@@ -20,6 +20,18 @@ jobs:
         # Ensure that you get the entire project history
         with:
           fetch-depth: 0
+      - name: Install dotnet tools
+        run: |
+          wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+          dpkg -i packages-microsoft-prod.deb
+          rm packages-microsoft-prod.deb
+          apt-get update -qq
+          apt-get install -y apt-transport-https
+          apt-get update -qq
+          apt-get install -y dotnet-sdk-6.0
+      - name: Install Dependencies
+        run: |
+          nuget restore
       - name: get tag from version
         id: tag_version
         run: |
@@ -31,12 +43,18 @@ jobs:
           echo ::set-output name=WINE_PATH::$(which wine64)
       
       - name: export
-        uses: firebelley/godot-export@v3.0.0
+        uses: firebelley/godot-export@v4.1.0
         with:
           godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.4.4/mono/Godot_v3.4.4-stable_mono_linux_headless_64.zip
           godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.4.4/mono/Godot_v3.4.4-stable_mono_export_templates.tpz
+          wine_path: ${{ steps.wine_install.outputs.WINE_PATH }}
           relative_project_path: ./
-          create_release: true
-          base_version:  ${{ steps.tag_version.outputs.TAG_VERSION}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          archive_output: true
+
+      - name: create release
+        uses: softprops/action-gh-release@v0.1.14
+        with:
+          tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
+          files: /home/runner/.local/share/godot/archives/*
+          fail_on_unmatched_files: true
+          body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
