@@ -33,10 +33,12 @@ jobs:
       - name: Install Dependencies
         run: |
           nuget restore
+      
       - name: get tag from version
         id: tag_version
         run: |
             echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/tags/v}
+      
       - name: install wine
         id: wine_install
         run: |
@@ -44,18 +46,25 @@ jobs:
           echo ::set-output name=WINE_PATH::$(which wine64)
       
       - name: export
-        uses: firebelley/godot-export@v4.1.0
-        with:
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.4.4/mono/Godot_v3.4.4-stable_mono_linux_headless_64.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.4.4/mono/Godot_v3.4.4-stable_mono_export_templates.tpz
-          wine_path: ${{ steps.wine_install.outputs.WINE_PATH }}
-          relative_project_path: ./
-          archive_output: true
+        run: |
+          mkdir -p builds/linux
+          godot --export Linux/X11
+          mkdir -p builds/windows
+          godot --export "Mac OSX"
+          mkdir -p builds/osx
+          godot --export "Windows Desktop"
+          
+      - name: zip
+        run: |
+          mkdir builds/archives
+          (cd builds/linux; zip -r ../archives/Linux.zip .)
+          (cd builds/windows; zip -r ../archives/Windows.zip .)
+          cp builds/osx/openscad-graph-editor.app.zip builds/archives/MacOSX.zip
 
       - name: create release
         uses: softprops/action-gh-release@v0.1.14
         with:
           tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
-          files: /home/runner/.local/share/godot/archives/*
+          files: build/archives/*
           fail_on_unmatched_files: true
           body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
