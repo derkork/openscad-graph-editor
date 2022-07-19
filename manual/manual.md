@@ -334,6 +334,12 @@ You can straighten the connections between nodes by selecting a the nodes betwee
 
 Connections will be straightened from right to left, e.g. the right-most node will never be moved. The algorithm will work from the right-most node and then move nodes left of the right-most node up and down so that the first connection between them is straight. 
 
+
+### Align nodes
+
+You can align nodes by selecting at least two of them and then press the `W`, `A`, `S` or `D` key to align their top, left, bottom or right edges.
+
+
 ## Debugging aids
 
 Sometimes it is not immediately obvious why something is not working as expected. OpenSCAD has some debugging aids built-in which help you see what is going on.
@@ -555,6 +561,10 @@ You may have noticed that there is no functionality for supporting renames. This
 - `F1` - Open help for the currently selected node.
 - `F2` - Change comment for the currently selected node.
 - `Q` - straighten connections between the selected nodes.
+- `A` - align selected nodes to the left.
+- `D` - align selected nodes to the right.
+- `W` - align selected nodes to the top.
+- `S` - align selected nodes to the bottom.
 - `Ctrl+C` / `Cmd+C` - Copy the selected nodes.
 - `Ctrl+V` / `Cmd+V` - Paste the copied nodes.
 - `Ctrl+X` / `Cmd+X` - Cut the selected nodes.
