@@ -56,9 +56,9 @@ jobs:
         run: |
           mkdir -p builds/linux
           godot --export Linux/X11
-          mkdir -p builds/windows
-          godot --export "Mac OSX"
           mkdir -p builds/osx
+          godot --export "Mac OSX"
+          mkdir -p builds/windows
           godot --export "Windows Desktop"
           
       - name: zip
