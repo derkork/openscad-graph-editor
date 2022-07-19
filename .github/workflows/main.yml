@@ -10,7 +10,7 @@ jobs:
   export_editor:
     # Always use ubuntu-latest for this action
     runs-on: ubuntu-latest
-    container: barichello/godot-ci:mono-3.4.2
+    container: barichello/godot-ci:mono-3.4.4
     # Job name, can be anything
     name: Export Game Job
     steps:
@@ -33,6 +33,11 @@ jobs:
       - name: Install Dependencies
         run: |
           nuget restore
+          
+      - name: Setup templates
+        run: |
+          mkdir -v -p ~/.local/share/godot/templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable.mono ~/.local/share/godot/templates/${GODOT_VERSION}.stable.mono
       
       - name: get tag from version
         id: tag_version
