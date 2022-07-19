@@ -40,7 +40,7 @@ jobs:
       - name: install wine
         id: wine_install
         run: |
-          sudo apt install wine64
+          apt-get install -y wine64
           echo ::set-output name=WINE_PATH::$(which wine64)
       
       - name: export
