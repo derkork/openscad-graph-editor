@@ -42,7 +42,6 @@ jobs:
       - name: create release
         uses: softprops/action-gh-release@v0.1.14
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
           files: ${{ steps.export.outputs.archive_directory }}/*
           body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
