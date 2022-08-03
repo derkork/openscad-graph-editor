@@ -16,6 +16,10 @@ This will remove the quarantine flag from the application and it should now run.
 ### Can it run on Apple silicon?
 Not natively. You will need to use [Rosetta 2](https://support.apple.com/en-us/HT211861) to let it run on Apple silicon.
 
+### The font is really tiny
+
+You can change the UI scaling in the settings dialog. Click the the button _Settings_ and then change the UI scaling to 150% or 200%. You will need to restart the editor afterwards.
+
 ## Questions about features
 ### Can this do full roundtrip between OpenSCAD code and the visual graph?
 
