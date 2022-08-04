@@ -73,5 +73,11 @@ namespace OpenScadGraphEditor.Tests.Drivers
                     .FirstOrDefault(),
                 $"{Description} -> CheckBox Literal {port}");
         
+        public Vector3EditDriver Vector3Literal(Port port) =>
+            new Vector3EditDriver(() => GetPortContainer(port)?
+                    .WithNameOrNull<Container>("InnerContainer")?
+                    .GetChildNodes<Vector3Edit>()?
+                    .FirstOrDefault(),
+                $"{Description} -> Vector3 Literal {port}");
     }
 }

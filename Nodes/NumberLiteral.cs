@@ -1,4 +1,5 @@
 using System.Globalization;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -11,12 +12,12 @@ namespace OpenScadGraphEditor.Nodes
 
         public double Value { get; set; }
 
-        public override string RenderedValue => Value.ToString(CultureInfo.InvariantCulture);
+        public override string RenderedValue => Value.SafeToString();
 
         public override string SerializedValue
         {
-            get => Value.ToString(CultureInfo.InvariantCulture);
-            set => Value = double.Parse(value);
+            get => Value.SafeToString();
+            set => Value = value.SafeParse();
         }
     }
 }

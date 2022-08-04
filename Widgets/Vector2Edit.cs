@@ -35,8 +35,8 @@ namespace OpenScadGraphEditor.Widgets
 
         protected override void ApplyControlValue()
         {
-            _x.Text = Literal.X.ToString(CultureInfo.InvariantCulture);
-            _y.Text = Literal.Y.ToString(CultureInfo.InvariantCulture);
+            _x.Text = Literal.X.SafeToString();
+            _y.Text = Literal.Y.SafeToString();
         }
 
         private void OnFocusExited()
@@ -52,7 +52,7 @@ namespace OpenScadGraphEditor.Widgets
         
         private static double ParseDouble(LineEdit lineEdit)
         {
-            if (double.TryParse(lineEdit.Text, out var value))
+            if (lineEdit.Text.SafeTryParse(out var value))
             {
                 return value;
             }

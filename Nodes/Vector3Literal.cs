@@ -1,3 +1,5 @@
+using OpenScadGraphEditor.Utils;
+
 namespace OpenScadGraphEditor.Nodes
 {
     public class Vector3Literal : LiteralBase
@@ -6,17 +8,17 @@ namespace OpenScadGraphEditor.Nodes
         public double Y { get; set; }
         public double Z { get; set; }
 
-        public override string RenderedValue => $"[{X}, {Y}, {Z}]";
+        public override string RenderedValue => $"[{X.SafeToString()}, {Y.SafeToString()}, {Z.SafeToString()}]";
 
         public override string SerializedValue
         {
-            get => $"{X}|{Y}|{Z}";
+            get => $"{X.SafeToString()}|{Y.SafeToString()}|{Z.SafeToString()}";
             set
             {
                 var parts = value.Split('|');
-                X = double.Parse(parts[0]);
-                Y = double.Parse(parts[1]);
-                Z = double.Parse(parts[2]);
+                X = parts[0].SafeParse();
+                Y = parts[1].SafeParse();
+                Z = parts[2].SafeParse();
             }
         }
         

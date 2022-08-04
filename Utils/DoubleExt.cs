@@ -1,0 +1,31 @@
+using System.Globalization;
+
+namespace OpenScadGraphEditor.Utils
+{
+    public static class DoubleExt
+    {
+        /// <summary>
+        /// Parses a double in a safe, culture-invariant way.
+        /// </summary>
+        public static bool SafeTryParse(this string number, out double result)
+        {
+            return double.TryParse(number, NumberStyles.Any, CultureInfo.InvariantCulture, out result);
+        }
+        
+        /// <summary>
+        /// Parses a double in a safe, culture-invariant way.
+        /// </summary>
+        public static double SafeParse(this string number)
+        {
+            return double.Parse(number, NumberStyles.Any, CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// Converts a double to a string in a safe, culture-invariant way.
+        /// </summary>
+        public static string SafeToString(this double number)
+        {
+            return number.ToString(CultureInfo.InvariantCulture);
+        }
+    }
+}

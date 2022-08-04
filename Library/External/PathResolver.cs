@@ -217,7 +217,6 @@ namespace OpenScadGraphEditor.Library.External
                                         return result;
                                     }
 
-                                    ;
                                     NotificationService.ShowError("Couldn't convert " + it + " to relative path.");
                                     return "";
                                 })

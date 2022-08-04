@@ -1,6 +1,7 @@
 using System.Globalization;
 using Godot;
 using Godot.Collections;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library.IO
 {
@@ -43,7 +44,7 @@ namespace OpenScadGraphEditor.Library.IO
 
         public double GetDataDouble(string key, double defaultValue = 0)
         {
-            if (StoredData.TryGetValue(key, out var resultAsString) && double.TryParse(resultAsString, out var result))
+            if (StoredData.TryGetValue(key, out var resultAsString) && resultAsString.SafeTryParse(out var result))
             {
                 return result;
             }
@@ -73,7 +74,7 @@ namespace OpenScadGraphEditor.Library.IO
 
         public void SetData(string key, double value)
         {
-            StoredData[key] = value.ToString(CultureInfo.InvariantCulture);
+            StoredData[key] = value.SafeToString();
         }
 
         public void SetData(string key, bool value)
