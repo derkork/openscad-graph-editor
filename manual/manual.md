@@ -226,12 +226,18 @@ You can nest loops inside of each other by creating multiple _For loop_ nodes. H
 
 ![](images/add_loop_nest_level.png)
 
-This will add a second input to the _Loop start_ node and the loop will now repeat for each combination of values in the two input vectors. Consider this example:
+This will add a second input to the _Loop start_ node and the loop will now repeat for each combination of values in the two input vectors. Consider the following example. We start with a loop that renders ten cubes in a row. To do this we use a _Construct Range_ node to build a vector that has the numbers `0` to `9` in it. We use that as input for the loop and then calculate a translation vector that moves the cube 0, 2, 4, 6, ... units along the X-axis in each iteration:
+
+![](images/loop_example_1d.png)
+
+Now say we want to have a square made out of cubes, so we need to translate the cube both in X and Z direction. For this we can simply add a loop level and connect the range output to the second input of the loop. Now the loop will run once for each combination of x and y. We use the values of x and y to calculate the translation vector.
+
+![](images/loop_example_2d.png)
+
+We can take this one step further and add a third loop level. Now the loop will run once for each combination of x, y and z. We use the values of x, y and z to calculate the translation vector. This yields us a cube made out of cubes:
 
 ![](images/nested_loop_example.png)
 
-
-We again use a _Construct range_ node, to build a range of the numbers `0` to `9`. Then we increase the loop nest level to 3 so we have three loops running running over all combinations of three vectors holding the numbers `0` to `9`. This will in total yield `1000` iterations (`10 * 10 * 10` numbers). We call the loop variables `x`, `y` and `z`.  Now we use a _Construct `vector3`_ to build a new `vector3` from the current loop variables. We multiply this vector by 2 so we will get `0,0,0`, `0,0,2`, etc.. Now we use these coordinates to translate a cube in three-dimensional space. The result is `1000` small cubes forming a bigger cube.
 
 #### Intersection loops
 
@@ -255,7 +261,7 @@ You can either give the values directly or connect other nodes to the input port
 
 #### Split `vector2` / `vector3`
 
-These node do the opposite of _Construct `vector2`/`vector3`_ - they allow you to extract the values of a `vector2` or `vector3`:
+These nodes do the opposite of _Construct `vector2`/`vector3`_ - they allow you to extract the values of a `vector2` or `vector3`:
 
 ![](images/split_vector23.png)
 
@@ -418,7 +424,7 @@ Editing a module graph works exactly the same as editing the main graph (the mai
 
 #### Using a module
 
-To use a module in you main graph (or another module) you can either add it through the _Add Node_ dialog by just typing the module's name or you can drag it from the project tree into the graph like this:
+To use a module in your main graph (or another module) you can either add it through the _Add Node_ dialog by just typing the module's name or you can drag it from the project tree into the graph like this:
 
 ![](images/drag_module.gif)
 
@@ -446,7 +452,7 @@ It is possible to rename a module and add, reorder, rename and delete parameters
 
 ![](images/refactoring_popup.png)
 
-Now the refactoring dialog will open and you can change the module's name, the name and type of any of its parameters. You can also reorder parameters by pressing the up and down buttons next to each parameter. You can also delete parameters. Once you are done, press _OK_ to apply the changes.
+Now the refactoring dialog will open and you can change the module's name, the name, and the type of any of its parameters. You can also reorder parameters by pressing the up and down buttons next to each parameter. You can also delete parameters. Once you are done, press _OK_ to apply the changes.
 
 ![](images/refactoring_dialog.png)
 
@@ -454,14 +460,14 @@ This will automatically update the module's entry point and all places where the
 
 - All name changes will be reflected in the node view and the generated code.
 - If you reorder parameters, connections will be preserved and reordered accordingly.
-- If you rename a parameter this has no effect on the connections to this parameter, e.g. all connections to the parameter will remain as they were.
+- If you rename a parameter, this has no effect on the connections to this parameter, e.g. all connections to the parameter will remain as they were.
 - If you delete a parameter, all connections to that parameter will be deleted.
-- If you add a parameter it will be available as new port for the module's node but no connections will be created for it.
+- If you add a parameter, it will be available as new port for the module's node but no connections will be created for it.
 - If you change parameter types, the connections to the parameter will be preserved as long as the types are compatible. If the types are no longer compatible, connections to that parameter's port will be deleted.
 
 #### Finding usages of modules
 
-After you have refactored a module, you may want to check places where this module is used e.g. to add new connections to an added parameter. To find all places where a module is used, right-click the module's entry point or any instance where you use the module. A popup menu will open. Select the _Find usages of &lt;module&gt;_ entry. A tool window will open with a list of all places where the module is used. You can double-click any entry in this list and the corresponding node will be shown on screen and briefly highlighted.
+After you have refactored a module, you may want to check places where this module is used, e.g. to add new connections to an added parameter. To find all places where a module is used, right-click the module's entry point or any instance where you use the module. A popup menu will open. Select the _Find usages of &lt;module&gt;_ entry. A tool window will open with a list of all places where the module is used. You can double-click any entry in this list and the corresponding node will be shown on screen and briefly highlighted.
 
 ![](images/usage_search.gif)
 
@@ -518,7 +524,7 @@ You can then choose an include mode:
 - _Include_: The library will be included in the OpenSCAD code and all code that is in the library file outside of module/function declarations will be executed.
 - _Use_ : The library will be included in the OpenSCAD code but all code that is in the library file outside of module/function declarations will **not be executed**.
 
-Next you have the option how you want to refer to the library.
+Next you can choose how you want to refer to the library.
 
 - _Relative_ - the library path will be relative to the current file. This is recommended for most cases as you can transfer the project and its libraries to another computer. This option is only available after you have saved the current file, otherwise there would be no way of calculating a relative path.
 - _Absolute_ - the library path will be absolute. This is usually not recommended as the file will then only work on the computer it was created on.
