@@ -226,15 +226,15 @@ You can nest loops inside of each other by creating multiple _For loop_ nodes. H
 
 ![](images/add_loop_nest_level.png)
 
-This will add a second input to the _Loop start_ node and the loop will now repeat for each combination of values in the two input vectors. Consider the following example. We start with a loop that renders ten cubes in a row. To do this we use a _Construct Range_ node to build a vector that has the numbers `0` to `9` in it. We use that as input for the loop and then calculate a translation vector that moves the cube 0, 2, 4, 6, ... units along the X-axis in each iteration:
+This will add a second input to the _Loop start_ node and the loop will now repeat for each combination of values in the two input vectors. Consider the following example. We start with a loop that renders ten cubes in a row. To do this we use a _Construct Range_ node to build a vector that has the numbers `0` to `9` in it. We use that as input for the loop and then calculate a translation vector that moves the cube 0, 2, 4, 6, ... units along the `x`-axis in each iteration:
 
 ![](images/loop_example_1d.png)
 
-Now say we want to have a square made out of cubes, so we need to translate the cube both in X and Z direction. For this we can simply add a loop level and connect the range output to the second input of the loop. Now the loop will run once for each combination of x and y. We use the values of x and y to calculate the translation vector.
+Now say we want to have a square made out of cubes, so we need to translate the cube both in `x` and `y` direction. For this we can simply add a loop level and connect the range output to the second input of the loop. Now the loop will run once for each combination of `x` and `y`. We use the values of `x` and `y` to calculate the translation vector.
 
 ![](images/loop_example_2d.png)
 
-We can take this one step further and add a third loop level. Now the loop will run once for each combination of x, y and z. We use the values of x, y and z to calculate the translation vector. This yields us a cube made out of cubes:
+We can take this one step further and add a third loop level. Now the loop will run once for each combination of `x`, `y` and `z`. We use the values of `x`, `y` and `z` to calculate the translation vector. This yields us a cube made out of cubes:
 
 ![](images/nested_loop_example.png)
 
