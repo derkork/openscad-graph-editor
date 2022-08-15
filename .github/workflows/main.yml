@@ -28,13 +28,14 @@ jobs:
         run:
           sed -i 's/## Development Build ##/${{steps.tag_version.outputs.TAG_VERSION}}/g' AppVersion.cs
         
-      - name: export
+      - name: setup godot
         uses: paulloz/godot-action@v1
         with:
           version: 3.5.0
           mono: true
           export-templates: true
-            
+      
+      - name: export game      
         run: |
           nuget restore
           mkdir -p builds/linux
