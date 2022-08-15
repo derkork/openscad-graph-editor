@@ -93,6 +93,8 @@ namespace OpenScadGraphEditor
             _logConsole = this.WithName<LogConsole>("LogConsole");
             var logFile = OS.GetUserDataDir() + "/log.txt";
             
+            OS.SetWindowTitle($"OpenSCAD Graph Editor ({AppVersion.Version})");
+            
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
@@ -1256,6 +1258,15 @@ namespace OpenScadGraphEditor
             var type = invokableDescription is FunctionDescription ? "function" : "module";
             _usageDialog.Open($"Usages of {type} {invokableDescription.Name}", usagePoints);
             _usageButton.Show();
+        }
+
+        public override void _Notification(int what)
+        {
+            if (what == NotificationWmAbout)
+            {
+                // OSX about menu.
+                NotificationService.ShowNotification($"This is OpenSCAD Graph Editor ({AppVersion.Version}");
+            }
         }
     }
 }
