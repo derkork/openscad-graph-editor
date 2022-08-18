@@ -75,7 +75,7 @@ OpenSCAD is a 3D CAD program that can be used to create 3D models through script
 
 ## Installation & Setup
 
-You can download the latest release of the OpenSCAD Graph Editor from [GitHub](https://github.com/derkork/openscad-graph-editor/releases) extract it to a convenient location and run the program. No installation procedure is required. 
+You can download the latest release of the OpenSCAD Graph Editor from [GitHub](https://github.com/derkork/openscad-graph-editor/releases). There is a ZIP file for each supported operating system (e.g. `Windows.zip`, `MacOSX.zip`, `Linux.zip`) on each release. Pick the zip file for your operating system and extract it to a convenient location and run the program. No installation procedure is required. Note if you are on MacOSX you may get a warning that the program is damaged. This is because the application is not notarized with Apple. See [this FAQ entry](https://github.com/derkork/openscad-graph-editor/blob/master/manual/faq.md#i-cannot-open-the-app-on-the-mac-it-says-it-is-damaged) for instructions on how to fix this. 
 
 ### Prerequisites for live preview
 If you want to have a live preview while you are editing, you will also need to download and install [OpenSCAD](https://openscad.org/downloads.html). Then arrange the windows of OpenSCAD Graph Editor and OpenSCAD so that they are next to each other (or place them on different monitors if you happen to have a multi-monitor setup). It is recommended that you hide the editor in the OpenSCAD window (_Window_ -> _Hide Editor_).
