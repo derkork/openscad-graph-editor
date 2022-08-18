@@ -6,8 +6,13 @@
 _This is an early version. It works reasonably well but it has not seen a lot of use and testing so it is not yet recommended for productive use.  You are welcome to [try it out](https://github.com/derkork/openscad-graph-editor/releases/latest) and give feedback at this stage. There is a [Discord](https://discord.gg/AsxWyczCJF) server for discussion. Please also check the [FAQ](manual/faq.md) if you have problems._
 
 
+## Quick Links
+
 <p align="center">
-  <a href="https://github.com/derkork/openscad-graph-editor/releases/latest">Download latest version</a>
+  <a href="https://github.com/derkork/openscad-graph-editor/releases/latest">Download latest version</a> | 
+  <a href="https://github.com/derkork/openscad-graph-editor/blob/master/manual/manual.md">Read the manual</a> |
+  <a href="https://github.com/derkork/openscad-graph-editor/blob/master/manual/faq.md">Check the FAQ</a> |
+  <a href="https://discord.gg/AsxWyczCJF">Ask questions on Discord</a>
 </p>
 
 OpenSCAD Graph Editor is a graphical user interface for [OpenSCAD](https://openscad.org) that allows you to create 3D models by connecting nodes in a graph. The editor will automatically generate OpenSCAD code for you. It integrates with the OpenSCAD program so you can preview your models in real time while you are editing the graph. Please check the [manual](manual/manual.md) to find out how to install and use the program.
