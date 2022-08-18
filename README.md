@@ -15,6 +15,8 @@ _This is an early version. It works reasonably well but it has not seen a lot of
   <a href="https://discord.gg/AsxWyczCJF">Ask questions on Discord</a>
 </p>
 
+## What is OpenSCAD Graph Editor?
+
 OpenSCAD Graph Editor is a graphical user interface for [OpenSCAD](https://openscad.org) that allows you to create 3D models by connecting nodes in a graph. The editor will automatically generate OpenSCAD code for you. It integrates with the OpenSCAD program so you can preview your models in real time while you are editing the graph. Please check the [manual](manual/manual.md) to find out how to install and use the program.
 
 ![](manual/images/screenshot.png)
