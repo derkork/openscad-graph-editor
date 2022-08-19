@@ -472,8 +472,8 @@ namespace OpenScadGraphEditor.Widgets
         private void AlignSelectionRight()
         {
             AlignSelection("Align right", 
-                () => GetSelectedNodes().Max(it  => it.Offset.x),
-                (it, position) => new Vector2(position, it.Offset.y));
+                () => GetSelectedNodes().Max(it  => it.Offset.x + _widgets[it.Id].RectSize.x),
+                (it, position) => new Vector2(position - _widgets[it.Id].RectSize.x, it.Offset.y));
         }
         
         private void AlignSelectionTop()
