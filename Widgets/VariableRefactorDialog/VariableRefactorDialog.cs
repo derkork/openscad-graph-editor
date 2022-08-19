@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
@@ -13,10 +14,12 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         public event Action<Refactoring[]> RefactoringsRequested;
 
         private LineEdit _nameEdit;
+        private VariableDescription _baseDescription;
 
         private DialogMode _mode = DialogMode.Edit;
         private Button _okButton;
         private Label _errorLabel;
+        private ScadProject _currentProject;
 
         public override void _Ready()
         {
@@ -26,7 +29,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _nameEdit
                 .Connect("text_entered")
                 .To(this, nameof(OnNameEntered));
-            
+
             _errorLabel = this.WithName<Label>("ErrorLabel");
             _nameEdit
                 .Connect("text_changed")
@@ -43,19 +46,22 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         }
 
 
-        public void OpenForNewVariable()
+        public void OpenForNewVariable(ScadProject currentProject)
         {
             Clear();
             _mode = DialogMode.Create;
+            _currentProject = currentProject;
             ValidateAll();
             PopupCentered();
             SetAsMinsize();
         }
 
-        public void Open(VariableDescription description)
+        public void Open(VariableDescription description, ScadProject currentProject)
         {
             Clear();
             _mode = DialogMode.Edit;
+            _baseDescription = description;
+            _currentProject = currentProject;
 
             _nameEdit.Text = description.Name;
             ValidateAll();
@@ -66,6 +72,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private void Clear()
         {
             _nameEdit.Text = "";
+            _baseDescription = null;
+            _currentProject = null;
         }
 
         private void OnOkPressed()
@@ -73,10 +81,16 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             switch (_mode)
             {
                 case DialogMode.Edit:
+                    RefactoringsRequested?.Invoke(new Refactoring[]
+                    {
+                        new RenameVariableRefactoring(_baseDescription, _nameEdit.Text)
+                    });
                     break;
                 case DialogMode.Create:
                     RefactoringsRequested?.Invoke(new Refactoring[]
-                        {new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text))});
+                    {
+                        new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text))
+                    });
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -99,15 +113,24 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private void ValidateAll()
         {
             ValidityChecker.For(_errorLabel, _okButton)
+                .Check(
+                    // we create a variable, then the name must be different from all other variables in the project
+                    (_mode == DialogMode.Create &&
+                     _currentProject.Variables.Select(it => it.Name).All(it => it != _nameEdit.Text))
+                    // we edit a variable, then the name must be different from all other variables in the project 
+                    || (_mode == DialogMode.Edit && _currentProject.Variables.Where(it => it != _baseDescription)
+                        .Select(it => it.Name).All(it => it != _nameEdit.Text))
+                    , "The name is already used in this project."
+                )
                 .Check(_nameEdit.Text.IsValidIdentifier(),
                     "Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .UpdateUserInterface();
         }
-        
+
         private void OnNameEntered([UsedImplicitly] string newText)
         {
-            if (newText.IsValidIdentifier())
+            if (!_okButton.Disabled)
             {
                 OnOkPressed();
             }

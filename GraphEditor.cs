@@ -375,6 +375,10 @@ namespace OpenScadGraphEditor
             {
                 if (_currentProject.IsDefinedInThisProject(scadVariableListEntry.Description))
                 {
+                    actions.Add(new QuickAction($"Rename {scadVariableListEntry.Description.Name}",
+                            () => _variableRefactorDialog.Open(scadVariableListEntry.Description, _currentProject)
+                        )
+                    );
                     actions.Add(new QuickAction(deleteTitle,
                         () => OnRefactoringRequested(
                             deleteTitle, new DeleteVariableRefactoring(scadVariableListEntry.Description))));
@@ -720,7 +724,7 @@ namespace OpenScadGraphEditor
 
         private void OnAddVariablePressed()
         {
-            _variableRefactorDialog.OpenForNewVariable();
+            _variableRefactorDialog.OpenForNewVariable(_currentProject);
         }
 
         private void OnAddModulePressed()
