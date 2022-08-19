@@ -338,7 +338,7 @@ namespace OpenScadGraphEditor.Nodes
             if (effectiveModifiers.HasFlag(ScadNodeModifier.Color))
             {
                 var colorModifier =
-                    $"color([{effectiveColor.r}, {effectiveColor.g}, {effectiveColor.b}, {effectiveColor.a}]) {{0}}";
+                    $"color([{effectiveColor.r.SafeToString()}, {effectiveColor.g.SafeToString()}, {effectiveColor.b.SafeToString()}, {effectiveColor.a.SafeToString()}]) {{0}}";
                 if (renderModifier.Empty())
                 {
                     renderModifier = colorModifier;

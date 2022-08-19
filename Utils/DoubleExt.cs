@@ -27,5 +27,13 @@ namespace OpenScadGraphEditor.Utils
         {
             return number.ToString(CultureInfo.InvariantCulture);
         }
+
+        /// <summary>
+        /// Converts a double to a string in a safe, culture-invariant way.
+        /// </summary>
+        public static string SafeToString(this float number)
+        {
+            return number.ToString(CultureInfo.InvariantCulture);
+        }
     }
 }
