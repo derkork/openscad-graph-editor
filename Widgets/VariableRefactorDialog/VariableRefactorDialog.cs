@@ -23,6 +23,10 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             GetCloseButton().Visible = false;
 
             _nameEdit = this.WithName<LineEdit>("NameEdit");
+            _nameEdit
+                .Connect("text_entered")
+                .To(this, nameof(OnNameEntered));
+            
             _errorLabel = this.WithName<Label>("ErrorLabel");
             _nameEdit
                 .Connect("text_changed")
@@ -99,6 +103,14 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     "Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
                 )
                 .UpdateUserInterface();
+        }
+        
+        private void OnNameEntered([UsedImplicitly] string newText)
+        {
+            if (newText.IsValidIdentifier())
+            {
+                OnOkPressed();
+            }
         }
     }
 }
