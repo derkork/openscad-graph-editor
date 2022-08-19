@@ -88,6 +88,11 @@ namespace OpenScadGraphEditor.Nodes
 
         public override string Render(ScadGraph context, int portIndex)
         {
+            if (portIndex < 0 || portIndex >= _description.Parameters.Count)
+            {
+                return "";
+            }
+            
             // return simply the parameter name.
             return _description.Parameters[portIndex].Name;
         }
