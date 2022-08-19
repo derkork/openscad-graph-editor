@@ -34,6 +34,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
         private DialogMode _mode = DialogMode.Edit;
         private Button _okButton;
+        private ScadProject _currentProject;
 
         public override void _Ready()
         {
@@ -107,9 +108,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         }
 
 
-        public void OpenForNewFunction()
+        public void OpenForNewFunction(ScadProject currentProject)
         {
             Clear();
+            _currentProject = currentProject;
             WindowTitle = "New Function";
             _mode = DialogMode.CreateFunction;
             _returnTypeLabel.Visible = true;
@@ -120,9 +122,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             PopupCentered();
         }
 
-        public void OpenForNewModule()
+        public void OpenForNewModule(ScadProject currentProject)
         {
             Clear();
+            _currentProject = currentProject;
             WindowTitle = "New Module";
             _mode = DialogMode.CreateModule;
             _returnTypeLabel.Visible = false;
@@ -131,9 +134,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             PopupCentered();
         }
 
-        public void Open(InvokableDescription description)
+        public void Open(InvokableDescription description, ScadProject currentProject)
         {
             Clear();
+            _currentProject = currentProject;
             WindowTitle = $"Refactor {description.Name}";
             _baseDescription = description;
             _mode = DialogMode.Edit;
@@ -167,6 +171,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void Clear()
         {
             _baseDescription = null;
+            _currentProject = null;
             _nameEdit.Text = "";
             _parameterLines.ForAll(it => it.Discard());
             _parameterLines.Clear();
@@ -330,6 +335,16 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void ValidateAll()
         {
             ValidityChecker.For(_errorLabel, _okButton)
+                .Check(
+                    // we create a function, then the name must be different from all other functions in the project
+                    (_mode == DialogMode.CreateFunction && _currentProject.Functions.Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    // we create a module, then the name must be different from all other modules in the project
+                    || (_mode == DialogMode.CreateModule && _currentProject.Modules.Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    // we edit a function, then the name must be different from all other functions in the project
+                    || (_mode == DialogMode.Edit && _baseDescription is FunctionDescription && _currentProject.Functions.Where(it => it.Description != _baseDescription).Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    // we edit a module, then the name must be different from all other modules in the project
+                    || (_mode == DialogMode.Edit && _baseDescription is ModuleDescription && _currentProject.Modules.Where(it => it.Description != _baseDescription).Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    , "The name is already used in this project.")
                 .Check(
                     _nameEdit.Text.IsValidIdentifier(),
                     $"Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."

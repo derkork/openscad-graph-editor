@@ -349,7 +349,7 @@ namespace OpenScadGraphEditor
                     if (!(invokableDescription is MainModuleDescription))
                     {
                         actions.Add(new QuickAction($"Refactor {invokableDescription.Name}",
-                                () => _invokableRefactorDialog.Open(invokableDescription)
+                                () => _invokableRefactorDialog.Open(invokableDescription, _currentProject)
                             )
                         );
                         
@@ -715,7 +715,7 @@ namespace OpenScadGraphEditor
 
         private void OnAddFunctionPressed()
         {
-            _invokableRefactorDialog.OpenForNewFunction();
+            _invokableRefactorDialog.OpenForNewFunction(_currentProject);
         }
 
         private void OnAddVariablePressed()
@@ -725,7 +725,7 @@ namespace OpenScadGraphEditor
 
         private void OnAddModulePressed()
         {
-            _invokableRefactorDialog.OpenForNewModule();
+            _invokableRefactorDialog.OpenForNewModule(_currentProject);
         }
 
         private void OnRefactoringRequested(string humanReadableDescription, Refactoring refactoring)
@@ -984,7 +984,7 @@ namespace OpenScadGraphEditor
 
                     actions = actions.Append(
                         new QuickAction($"Refactor {name}",
-                            () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription)
+                            () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription, _currentProject)
                         )
                     );
 
