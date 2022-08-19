@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2022-08-20
+### Added
+- It is now possible to rename variables.
+- When you press the `Enter` key, in the variable edit dialog the dialog closes like if you would have clicked the _OK_ button (fixes [#11](https://github.com/derkork/openscad-graph-editor/issues/11)).
+ 
+### Fixed
+- When you align nodes to the right, their right edge is now aligned properly (fixes [#12](https://github.com/derkork/openscad-graph-editor/issues/12)).
+- Color values are now properly rendered regardless of the current system locale (fixes [#10](https://github.com/derkork/openscad-graph-editor/issues/10)).
+- Deleting a function/module that is currently open no longer will throw an exception.
+- When renaming/creating a module/function the dialog will now check that the name is not already used.
+- When creating a function with no parameters, the renderer will no longer throw an exception.
+
 ## [0.2.0] - 2022-08-15
 ### Added
 - The main window now shows the version number in the title bar (fixes [#6](https://github.com/derkork/openscad-graph-editor/issues/6)).
