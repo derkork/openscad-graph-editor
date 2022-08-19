@@ -761,6 +761,12 @@ namespace OpenScadGraphEditor
                     .ToList()
                     .ForAll(Close);
 
+                if (_tabContainer.CurrentTab >= _tabContainer.GetTabCount())
+                {
+                    // open the left most tab
+                    _tabContainer.CurrentTab = 0;
+                }
+
                 for (var i = 0; i < _tabContainer.GetTabCount();i++)
                 {
                     var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
