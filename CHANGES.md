@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2022-08-22
+### Fixed
+
+- When you undo a change the editor no longer switches to an unrelated tab (fixes [#16](https://github.com/derkork/openscad-graph-editor/issues/16)).
+- The _Negate_ node now can also be used for vectors (fixes [#14](https://github.com/derkork/openscad-graph-editor/issues/14))
+- When doing undo/redo the graph is now properly repainted.
+
 ## [0.3.0] - 2022-08-20
 ### Added
 - It is now possible to rename variables.

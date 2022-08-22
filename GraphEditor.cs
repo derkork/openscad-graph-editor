@@ -117,6 +117,9 @@ namespace OpenScadGraphEditor
             _rootResolver = new BuiltInLibrary();
 
             _tabContainer = this.WithName<TabContainer>("TabContainer");
+            _tabContainer
+                .Connect("tab_changed")
+                .To(this, nameof(OnTabChanged));
 
             _addDialog = this.WithName<AddDialog>("AddDialog");
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
@@ -278,6 +281,16 @@ namespace OpenScadGraphEditor
             else
             {
                 _usageDialog.Hide();
+            }
+        }
+
+        private void OnTabChanged(int index)
+        {
+            var editor = _tabContainer.GetChild<ScadGraphEdit>(index);
+            if (editor.Graph != null)
+            {
+                // re-paint
+                editor.Render(editor.Graph);
             }
         }
         

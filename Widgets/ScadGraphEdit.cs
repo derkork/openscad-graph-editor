@@ -204,7 +204,7 @@ namespace OpenScadGraphEditor.Widgets
             foreach (var connection in Graph.GetAllConnections())
             {
                 // do not show connections to wireless reroutes by default, unless the reroute node is currently selected
-                if (connection.To is RerouteNode rerouteNode && rerouteNode.IsWireless && !_selection.Contains(connection.To.Id))
+                if (connection.To is RerouteNode {IsWireless: true} && !_selection.Contains(connection.To.Id))
                 {
                     continue; 
                 }
