@@ -18,10 +18,10 @@ namespace OpenScadGraphEditor.Nodes
         public NegateOperator()
         {
             InputPorts
-                .Number(allowLiteral:false);
+                .Any();
 
             OutputPorts
-                .Number(allowLiteral:false);
+                .Any();
         }
 
         public override string GetPortDocumentation(PortId portId)
