@@ -30,15 +30,21 @@ namespace OpenScadGraphEditor.History
             var savedProject = project.Save();
             // create a history stack item
             var item = new HistoryStackItem(operationName, savedProject, editorState);
-            // add it to the history
-            _history.Add(item);
-            // set the current index to the new item
-            _currentIndex++;
-            // remove all history states after the current one
+            // remove all history states after the current one (if you have redo steps they will now be overwritten
+            // by a new timeline.
             if (_history.Count > _currentIndex + 1)
             {
                 _history.RemoveRange(_currentIndex + 1, _history.Count - _currentIndex - 1);
             }
+            // add it to the history
+            _history.Add(item);
+            // set the current index to the new item
+            _currentIndex++;
+        }
+
+        public HistoryStackItem Peek()
+        {
+            return _history[_currentIndex];
         }
 
 

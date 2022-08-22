@@ -23,5 +23,10 @@ namespace OpenScadGraphEditor.History
             InvokableId = invokableId;
             ScrollOffset = scrollOffset;
         }
+
+        public bool DiffersFrom(EditorOpenTab otherOpenTab)
+        {
+            return InvokableId != otherOpenTab.InvokableId || ScrollOffset != otherOpenTab.ScrollOffset;
+        }
     }
 }

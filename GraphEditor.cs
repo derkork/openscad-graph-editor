@@ -752,6 +752,17 @@ namespace OpenScadGraphEditor
 
                 _refactoringInProgress = true;
                 Log.Debug(">> Refactorings start");
+
+                var top = _currentHistoryStack.Peek();
+                var currentEditorState = GetEditorState();
+                // the editor state could be different from how it was when we finished the previous refactoring (e.g tab changed or 
+                // the editor was moved). we therefore patch the new editor state onto the top of the stack.
+                // so we can return to that state once we undo this refactoring. This way we fix a problem that
+                // when you open a new tab, and move a node there, then undo that the new tab is closed.
+                // it is important to patch this _before_ we do the refactoring otherwise we may refer to
+                // data that is no longer there after the refactoring.
+                top.PatchEditorState(currentEditorState);
+
                 var context = new RefactoringContext(_currentProject);
                 context.PerformRefactorings(refactorings);
 
@@ -801,7 +812,7 @@ namespace OpenScadGraphEditor
             Clear();
             _currentProject = new ScadProject(_rootResolver);
             Open(_currentProject.MainModule);
-            // important, this needs to be done after the main module is opened
+            // important, this needs to be done after the main module is opened, so we get correct editor state
             _currentHistoryStack = new HistoryStack(_currentProject, GetEditorState());
             RefreshControls();
         }
@@ -809,7 +820,10 @@ namespace OpenScadGraphEditor
         private EditorState GetEditorState()
         {
             // create a list of currently open tabs
-            var tabs = _openEditors.Select(it => new EditorOpenTab(it.Key, it.Value.ScrollOffset));
+            
+            // order is important here, so we get the child order from the _tabContainer rather than using
+            // _openEditors
+            var tabs = _tabContainer.GetChildNodes<ScadGraphEdit>().Select(it => new EditorOpenTab(it.Graph.Description.Id, it.ScrollOffset)).ToList();
             return new EditorState(tabs, _tabContainer.CurrentTab);
         }
 

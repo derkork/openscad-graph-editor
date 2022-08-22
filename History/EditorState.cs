@@ -16,7 +16,7 @@ namespace OpenScadGraphEditor.History
        public EditorState(IEnumerable<EditorOpenTab> openTabs, int currentTabIndex)
        {
            OpenTabs = openTabs.ToList();
-           GdAssert.That(currentTabIndex >= 0 && currentTabIndex < OpenTabs.Count(), "currentTabIndex is out of range");
+           GdAssert.That(currentTabIndex >= 0 && currentTabIndex < OpenTabs.Count, "currentTabIndex is out of range");
            CurrentTabIndex = currentTabIndex;
        }
     }

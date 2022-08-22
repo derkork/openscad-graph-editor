@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.History
     public class HistoryStackItem
     {
         public SavedProject ProjectState { get; }
-        public EditorState EditorState { get; }
+        public EditorState EditorState { get; private set; }
         public string OperationName { get; }
         
         public HistoryStackItem(string operationName, SavedProject projectState, EditorState editorState)
@@ -17,6 +17,11 @@ namespace OpenScadGraphEditor.History
             ProjectState = projectState;
             EditorState = editorState;
             OperationName = operationName;
+        }
+        
+        public void PatchEditorState(EditorState editorState)
+        {
+            EditorState = editorState;
         }
     }
 }
