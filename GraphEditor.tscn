@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=2]
+[gd_scene load_steps=28 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -26,6 +26,7 @@
 [ext_resource path="res://ui_theme.tres" type="Theme" id=24]
 [ext_resource path="res://Widgets/SettingsDialog/SettingsDialog.tscn" type="PackedScene" id=25]
 [ext_resource path="res://Icons/openscad_logo.png" type="Texture" id=26]
+[ext_resource path="res://Widgets/StylusDebugDialog/StylusDebugDialog.tscn" type="PackedScene" id=27]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -61,6 +62,8 @@ margin_bottom = 250.0
 
 [node name="SettingsDialog" parent="." instance=ExtResource( 25 )]
 
+[node name="StylusDebugDialog" parent="." instance=ExtResource( 27 )]
+
 [node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
 
 [node name="FileDialog" type="FileDialog" parent="."]
@@ -77,8 +80,8 @@ window_title = "Open a File"
 mode = 0
 access = 2
 filters = PoolStringArray( "*.graph.tres; OpenSCAD graphs" )
-current_dir = "/home/kork/devel/OpenScadGraphEditor"
-current_path = "/home/kork/devel/OpenScadGraphEditor/"
+current_dir = "/devel/openscad-graph-editor"
+current_path = "/devel/openscad-graph-editor/"
 __meta__ = {
 "_edit_use_anchors_": false
 }

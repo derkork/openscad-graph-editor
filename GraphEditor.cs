@@ -24,6 +24,7 @@ using OpenScadGraphEditor.Widgets.LogConsole;
 using OpenScadGraphEditor.Widgets.NodeColorDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
 using OpenScadGraphEditor.Widgets.SettingsDialog;
+using OpenScadGraphEditor.Widgets.StylusDebugDialog;
 using OpenScadGraphEditor.Widgets.UsageDialog;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 using Serilog;
@@ -58,6 +59,7 @@ namespace OpenScadGraphEditor
         private VariableRefactorDialog _variableRefactorDialog;
         private NodeColorDialog _nodeColorDialog;
         private CommentEditingDialog _commentEditingDialog;
+        private StylusDebugDialog _stylusDebugDialog;
         private SettingsDialog _settingsDialog;
         private HelpDialog _helpDialog;
         private UsageDialog _usageDialog;
@@ -82,12 +84,7 @@ namespace OpenScadGraphEditor
         private readonly Configuration _configuration = new Configuration();
         private IconButton _openOpenScadButton;
 
-        /// <summary>
-        /// We use this for testing to see if we get the intended results.
-        /// </summary>
-        public ScadProject CurrentProject => _currentProject;
 
-        
         public override void _Ready()
         {
             _logConsole = this.WithName<LogConsole>("LogConsole");
@@ -129,6 +126,7 @@ namespace OpenScadGraphEditor
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
             
             _settingsDialog = this.WithName<SettingsDialog>("SettingsDialog");
+            _stylusDebugDialog = this.WithName<StylusDebugDialog>("StylusDebugDialog");
             
             _consoleButton = this.WithName<Button>("ConsoleButton");
             _consoleButton
@@ -1246,6 +1244,11 @@ namespace OpenScadGraphEditor
             if (evt.IsRedo() && _currentHistoryStack.CanRedo(out _))
             {
                 Redo();
+            }
+
+            if (evt.IsStylusDebug())
+            {
+                _stylusDebugDialog.Show();
             }
         }
 

@@ -69,5 +69,8 @@ namespace OpenScadGraphEditor.Utils
         // escape
         public static bool IsEscape(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.Escape);
         
+        // stylus debug (Ctrl+Shift+S)
+        public static bool IsStylusDebug(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.T) && inputEvent.IsCmdOrControlPressed() && inputEvent.IsShiftPressed();
+        
     }
 }
