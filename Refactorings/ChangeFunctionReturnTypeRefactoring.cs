@@ -50,6 +50,10 @@ namespace OpenScadGraphEditor.Refactorings
                 var affectedConnections = graph.GetAllConnections()
                     .Where(it => it.InvolvesAnyPort(scadNode, returnValuePorts))
                     .ToList();
+                
+                // and remove them, we'll add the valid ones back later. We do this now because the connection rules
+                // check for duplicate connections and would veto a connection that already exists.
+                affectedConnections.ForAll(it => graph.RemoveConnection(it));
 
                 // now instruct the node to rebuild its ports using the updated return type
                 node.SetupPorts(_description);
@@ -60,13 +64,13 @@ namespace OpenScadGraphEditor.Refactorings
                     scadNode.DropPortLiteral(it);
                     scadNode.BuildPortLiteral(it);
                 });
-
-                // now for all the connections we have saved, check if they are still valid.
+                
+                // now for all the connections we have saved, check if they are still valid and re-add the ones
+                // that were not vetoed.
                 affectedConnections
-                    .Where(it => ConnectionRules.CanConnect(it).Decision == ConnectionRules.OperationRuleDecision.Veto)
+                    .Where(it => ConnectionRules.CanConnect(it).Decision != ConnectionRules.OperationRuleDecision.Veto)
                     .ToList()
-                    // and remove the ones that are vetoed.
-                    .ForAll(it => graph.RemoveConnection(it));
+                    .ForAll(it => graph.AddConnection(it.From.Id, it.FromPort, it.To.Id, it.ToPort));
             }
         }
     }

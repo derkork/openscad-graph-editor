@@ -64,6 +64,11 @@ namespace OpenScadGraphEditor.Refactorings
                         .Where(it => it.IsFrom(scadNode, outputPort)));
                 }
 
+                // now remove all affected connections. we will add them later, but we need to remove them first
+                // because otherwise the connection rules would detect duplicate connections and would veto
+                // valid connections.
+                affectedConnections.ForAll(it => graph.RemoveConnection(it));
+                
                 // now instruct the node to rebuild its ports using the updated parameter type
                 node.SetupPorts(_description);
 
@@ -96,13 +101,12 @@ namespace OpenScadGraphEditor.Refactorings
                     }
                 }
 
-
                 // now for all the connections we have saved, check if they are still valid.
+                // and re-add them if they are.
                 affectedConnections
-                    .Where(it => ConnectionRules.CanConnect(it).Decision == ConnectionRules.OperationRuleDecision.Veto)
+                    .Where(it => ConnectionRules.CanConnect(it).Decision != ConnectionRules.OperationRuleDecision.Veto)
                     .ToList()
-                    // and remove the ones that are vetoed.
-                    .ForAll(it => graph.RemoveConnection(it));
+                    .ForAll(it => graph.AddConnection(it.From.Id, it.FromPort, it.To.Id, it.ToPort));
                 
                 // finally if the parameter was optional before but the new parameter type does not support literals
                 // then we need to make the parameter mandatory
