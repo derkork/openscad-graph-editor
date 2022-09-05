@@ -597,6 +597,7 @@ namespace OpenScadGraphEditor.Widgets
             HighlightBoundNodes();
         }
 
+        // Godot 3.4
         private void OnDeleteSelection()
         {
             var refactorings = 
@@ -605,6 +606,12 @@ namespace OpenScadGraphEditor.Widgets
                     .ToList();
             _selection.Clear();
             PerformRefactorings("Delete selection",  refactorings);
+        }
+
+        // Godot 3.5
+        private void OnDeleteSelection(Node[] _)
+        {
+            OnDeleteSelection();
         }
 
 
