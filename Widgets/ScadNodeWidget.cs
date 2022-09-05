@@ -388,7 +388,7 @@ namespace OpenScadGraphEditor.Widgets
             }
 
             // draw comment
-            if (BoundNode.TryGetComment(out var comment))
+            if (TryGetComment(out var comment))
             {
                 // calculate how big the comment will be.
                 var commentSize = _commentFont.GetStringSize(comment);
@@ -408,6 +408,11 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
+        protected virtual bool TryGetComment(out string comment)
+        {
+            return BoundNode.TryGetComment(out comment);
+        }
+        
         protected void RaiseSizeChanged(Vector2 newSize)
         {
             SizeChanged?.Invoke(newSize);

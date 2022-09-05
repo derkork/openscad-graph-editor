@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library;
@@ -12,6 +13,8 @@ namespace OpenScadGraphEditor.Widgets
         private PortType _portType;
         protected override Theme UseTheme => Resources.SimpleNodeWidgetTheme;
         public override bool RenderTitle => false;
+
+        private ScadGraph _boundGraph;
 
         public override void _Ready()
         {
@@ -30,11 +33,55 @@ namespace OpenScadGraphEditor.Widgets
         {
             BoundNode = node;
             Offset = node.Offset;
+            _boundGraph = graph;
             RefreshType();
             if (_portType.IsExpressionType())
             {
                 HintTooltip = ((RerouteNode) node).Render(graph, 0);
             }
+        }
+
+        protected override bool TryGetComment(out string comment)
+        {
+            comment = default;
+
+            if (_boundGraph == null || BoundNode == null)
+            {
+                return false;
+            }
+
+            if (BoundNode.TryGetComment(out comment))
+            {
+                return true; // if the node has a manual comment, use this one.
+            }
+
+            var referenceNode = BoundNode;
+            
+            // try to find a predecessor that has a comment
+            // we will skip over reroute nodes that have no comment until we reach a non-reroute node.
+            do
+            {
+                var predecessor = _boundGraph.GetAllConnections().FirstOrDefault(it => it.To == referenceNode)?.From;
+                if (predecessor == null)
+                {
+                    return false;
+                }
+
+                if (predecessor.TryGetComment(out comment))
+                {
+                    return true;
+                }
+
+                if (predecessor is RerouteNode)
+                {
+                    // try again
+                    referenceNode = predecessor;
+                }
+                else
+                {
+                    return false; 
+                }
+            } while (true);
         }
 
         private void RefreshType()
