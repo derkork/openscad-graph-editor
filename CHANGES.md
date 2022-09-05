@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2022-09-05
+### Breaking change
+- Nodes are now translated into OpenSCAD code from top to bottom and then left to right. Before, the order was undefined. This change allows you to influence the order in which assignments of variables happen and where exactly in the code `echo` statements are executed.
+
+  Depending on how you use variables and `echo` nodes in your graph this change may modify the behaviour of your graph, hence I declare this a breaking change. You may need to rearrange these nodes in your graph to get back the previous execution order.
+
+### Added
+- The manual now contains a section on [how to use variables](manual/manual.md#variables).
+
 ## [0.3.1] - 2022-08-22
 ### Fixed
 
