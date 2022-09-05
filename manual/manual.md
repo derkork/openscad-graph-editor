@@ -36,6 +36,7 @@
       * [Reroute nodes](#reroute-nodes)
          * [Wireless reroute nodes](#wireless-reroute-nodes)
       * [Straighten connections](#straighten-connections)
+      * [Align nodes](#align-nodes)
    * [Debugging aids](#debugging-aids)
       * [Changing the color of the output](#changing-the-color-of-the-output)
       * [Debug modifiers](#debug-modifiers)
@@ -45,7 +46,11 @@
          * [Make root modifiers](#make-root-modifiers)
       * [Inspecting expressions](#inspecting-expressions)
       * [Inspecting the generated code](#inspecting-the-generated-code)
-   * [Reusable code with functions and modules](#reusable-code-with-functions-and-modules)
+   * [Reusable code with variables, functions and modules](#reusable-code-with-variables-functions-and-modules)
+      * [Variables](#variables)
+         * [Creating a new variable](#creating-a-new-variable)
+         * [Using a variable](#using-a-variable)
+         * [Things to keep in mind when using variables](#things-to-keep-in-mind-when-using-variables)
       * [Modules](#modules)
          * [Creating a new module](#creating-a-new-module)
          * [Using a module](#using-a-module)
@@ -411,7 +416,71 @@ If you want to inspect the generated OpenSCAD code you can press the _View Code_
 
 ![](images/code_preview.png)
 
-## Reusable code with functions and modules
+## Reusable code with variables, functions and modules
+### Variables
+Variables allow you to parametrize your graph. Instead of making an object that has fixed dimensions, you can create variables which allow you to change the dimensions of your object without having to change the graph. They can also be used to toggle certain features of your object on and off. This is very useful if you want different variations of the same object. If you upload your OpenSCAD files on sites like Thingiverse, users can then easily change the dimensions and features of your object to fit their needs.
+
+#### Creating a new variable
+To create a variable, click the _V_ icon above the project tree. This will open the _Variables_ dialog. 
+
+![](images/create_variable.gif)
+
+You can give the variable a name and then press _OK_. Now the variable will be visible in your project tree.
+
+#### Using a variable
+
+To use a variable, you can simply drag it into the graph from your project tree. This will offer you two options:
+
+- Get `&lt;name of the variable&gt;` - will create a node that provides the value of the variable which you can then connect to another node.
+- Set `&lt;name of the variable&gt;` - will create a node that allows you to set the value of the variable.
+
+The next image shows you to set a variable's value to 10 and then using an `echo` node to print the value of the variable:
+
+![](images/getting_setting_variables.gif)
+
+#### Things to keep in mind when using variables
+
+Variables in OpenSCAD are useful, but they have a few peculiarities that are different from how variables work in other programming languages. Especially when setting variables, it is important to understand how they work. OpenSCAD Graph Editor will generate code that orders the nodes by their position in the graph. Nodes will be sorted top to bottom and left to right. For example consider these two nodes that set a variable:
+
+![](images/variable_order1.png)
+
+This will produce the following OpenScad code:
+
+```openscad
+my_custom_variable = 10;
+my_custom_variable = 15;
+```
+
+If you rearrange the nodes, the order in which the variables are set will change:
+
+![](images/variable_order2.png)
+
+Here the assignment of the value `15` is above the assignment of the value `10`, so the generated code will be:
+
+```openscad
+my_custom_variable = 15;
+my_custom_variable = 10;
+```
+There is however a big pitfall here. OpenSCAD will run variable assignments [before any other code - at compile time](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/General#Variables_are_set_at_compile-time,_not_run-time). This means that if you assign a value to the same variable multiple times, the last assignment will win no matter what. This can have some unintuitive side effects. Consider this graph:
+
+![](images/unintuitive_variables.png)
+
+It sets the value of `my_custom_variable` to `10`, then prints `my_custom_variable` and then sets the value of `my_custom_variable` to `15`. The generated code will be:
+
+```openscad
+my_custom_variable = 15;
+echo(my_custom_variable);
+my_custom_variable = 10;
+```
+However, when you execute this, the printed value will actually be `10`, because `10` was the last value assigned to `my_custom_variable`. It is therefore a good idea to only use variables to parameterize your graph, but not to store any intermediate values. 
+
+Because OpenSCAD Graph Editor is a visual editor, there is a lot less need for having intermediate values stored in a variable. You can simply connect the output of a calculation into multiple inputs without the need to create a variable for this:
+
+![](images/intermediate_results_without_variables.png)
+
+Another option is to put more complex calculations into a [function](#functions) and use that function.
+You can also make use of [wireless reroute nodes](#wireless-reroute-nodes) to keep your graph neat and tidy.
+
 ### Modules
 #### Creating a new module
 OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the _M_ icon above the project tree. 
