@@ -431,8 +431,8 @@ You can give the variable a name and then press _OK_. Now the variable will be v
 
 To use a variable, you can simply drag it into the graph from your project tree. This will offer you two options:
 
-- Get `&lt;name of the variable&gt;` - will create a node that provides the value of the variable which you can then connect to another node.
-- Set `&lt;name of the variable&gt;` - will create a node that allows you to set the value of the variable.
+- Get `name of the variable` - will create a node that provides the value of the variable which you can then connect to another node.
+- Set `name of the variable` - will create a node that allows you to set the value of the variable.
 
 The next image shows you to set a variable's value to 10 and then using an `echo` node to print the value of the variable:
 
