@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2022-09-05
+### Fixed
+
+- When changing the parameter/return type of modules and functions the connections to these parameters will now only be removed if the connection would be invalid with the new type. Before, all connections to these parameters would be deleted.  (fixes [#20](https://github.com/derkork/openscad-graph-editor/issues/20)).
+
 ## [0.4.0] - 2022-09-05
 ### Breaking change
 - Nodes are now translated into OpenSCAD code from top to bottom and then left to right. Before, the order was undefined. This change allows you to influence the order in which assignments of variables happen and where exactly in the code `echo` statements are executed.
