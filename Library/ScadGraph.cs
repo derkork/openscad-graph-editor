@@ -54,7 +54,15 @@ namespace OpenScadGraphEditor.Library
                 return hasFlowOutput;
             });
             
-            var content = candidates.Select(it =>
+            // sort the candidates by their position in the graph
+            // nodes with a lower y value will be rendered first
+            // nodes with the same y value will be sorted by their x value
+            var sortedCandidates = candidates
+                .OrderBy(it => it.Offset.y)
+                .ThenBy(it => it.Offset.x)
+                .ToList();
+            
+            var content = sortedCandidates.Select(it =>
             {
                 var nodeContent = it.Render(this, 0);
                 
