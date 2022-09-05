@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Depending on how you use variables and `echo` nodes in your graph this change may modify the behaviour of your graph, hence I declare this a breaking change. You may need to rearrange these nodes in your graph to get back the previous execution order.
 
 ### Added
-- The manual now contains a section on [how to use variables](manual/manual.md#variables).
+- The manual now contains a section on [how to use variables](manual/manual.md#variables) (fixes [#18](https://github.com/derkork/openscad-graph-editor/issues/18)).
 
 ## [0.3.1] - 2022-08-22
 ### Fixed
