@@ -146,7 +146,7 @@ Sometimes it may not be immediately obvious what a node does and what needs to b
 
 ### Connecting nodes
 
-You can connect nodes by dragging one of output ports of a node to an input port of another node or vice versa. Every connection must be made between an input port and an output port. The connections indicate how data flows between nodes. **Data always flows from left to right.** This is true for all port types (including geometry). Let's explore this in a few examples:
+You can connect nodes by dragging one of the output ports of a node to an input port of another node or vice versa. Every connection must be made between an input port and an output port. The connections indicate how data flows between nodes. **Data always flows from left to right.** This is true for all port types (including geometry). Let's explore this in a few examples:
 
 ![](images/flow_example_1.png)
 
@@ -392,7 +392,7 @@ The _Disable subtree_ modifier will disable the node's output. This is useful if
 
 ![](images/disable_modifier.png)
 
-The second cylinder is now disabled. It's node is being displayed slightly translucent in the graph editor to indicate this. The cylinder does no longer appear in live preview.
+The second cylinder is now disabled. Its node is being displayed slightly translucent in the graph editor to indicate this. The cylinder does no longer appear in live preview.
 
 #### Make root modifiers
 
@@ -418,7 +418,7 @@ If you want to inspect the generated OpenSCAD code you can press the _View Code_
 
 ## Reusable code with variables, functions and modules
 ### Variables
-Variables allow you to parametrize your graph. Instead of making an object that has fixed dimensions, you can create variables which allow you to change the dimensions of your object without having to change the graph. They can also be used to toggle certain features of your object on and off. This is very useful if you want different variations of the same object. If you upload your OpenSCAD files on sites like Thingiverse, users can then easily change the dimensions and features of your object to fit their needs.
+Variables allow you to parameterize your graph. Instead of making an object that has fixed dimensions, you can create variables which allow you to change the dimensions of your object without having to change the graph. They can also be used to toggle certain features of your object on and off. This is very useful if you want different variations of the same object. If you upload your OpenSCAD files on sites like Thingiverse, users can then easily change the dimensions and features of your object to fit their needs.
 
 #### Creating a new variable
 To create a variable, click the _V_ icon above the project tree. This will open the _Variables_ dialog. 
