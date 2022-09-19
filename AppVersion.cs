@@ -1,5 +1,3 @@
-using Godot;
-
 namespace OpenScadGraphEditor
 {
     public static class AppVersion

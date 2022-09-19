@@ -23,7 +23,7 @@ namespace OpenScadGraphEditor.Tests.Drivers
             Mode = new OptionButtonDriver(() => Root?.WithNameOrNull<OptionButton>("ImportModeOptionButton"), $"{Description}-> Mode");
             PathMode = new OptionButtonDriver(() => Root?.WithNameOrNull<OptionButton>("PathModeOptionButton"), $"{Description}-> PathMode");
             FileSelectButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("SelectButton"), $"{Description}-> FileSelectButton");
-            ImportFileDialog = new FileDialogDriver(() => Root?.WithNameOrNull<FileDialog>("ImportFileDialog"), $"{Description}-> ImportFileDialog");
+            ImportFileDialog = new FileDialogDriver(() => Root?.WithNameOrNull<FileDialog>("_FileDialog"), $"{Description}-> ImportFileDialog");
             OkButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("OkButton"), $"{Description}-> OkButton");
             CancelButton = new ButtonDriver(() => Root?.WithNameOrNull<Button>("CancelButton"), $"{Description}-> CancelButton");
             
