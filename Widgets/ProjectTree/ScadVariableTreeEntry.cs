@@ -1,5 +1,6 @@
 using Godot;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.ProjectTree
@@ -10,7 +11,7 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
 
         public override string Id => Description.Id;
 
-        public override string Title => Description.Name;
+        public override string Title => $"{Description.Name} <{Description.TypeHint.HumanReadableName()}>";
         public override bool CanBeDragged => true;
         public override bool CanBeActivated => true;
         public override VariableDescription Description { get; }

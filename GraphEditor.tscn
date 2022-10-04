@@ -80,8 +80,6 @@ window_title = "Open a File"
 mode = 0
 access = 2
 filters = PoolStringArray( "*.graph.tres; OpenSCAD graphs" )
-current_dir = "/devel/openscad-graph-editor"
-current_path = "/devel/openscad-graph-editor/"
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -1,17 +1,45 @@
 using System;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library
 {
-    public static class VariableBuilder
+    public class VariableBuilder
     {
-        public static VariableDescription NewVariable(string name, string id = "")
+        private VariableDescription _result;
+        
+        private VariableBuilder() {}
+        
+        public static VariableBuilder NewVariable(string name, string id = "")
         {
-            var result = new VariableDescription
+            var result = new VariableBuilder
             {
-                Id = id.Length > 0 ? id : Guid.NewGuid().ToString(),
-                Name = name
+                _result = new VariableDescription
+                {
+                    Id = id.Length > 0 ? id : Guid.NewGuid().ToString(),
+                    Name = name
+                }
             };
             return result;
+        }
+        
+        // description
+        public VariableBuilder WithDescription(string description)
+        {
+            _result.Description = description;
+            return this;
+        }
+        
+        // type
+        public VariableBuilder WithType(PortType type)
+        {
+            _result.TypeHint = type;
+            return this;
+        }
+        
+        // build
+        public VariableDescription Build()
+        {
+            return _result;
         }
     }
 }

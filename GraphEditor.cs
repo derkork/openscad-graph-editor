@@ -386,7 +386,7 @@ namespace OpenScadGraphEditor
             {
                 if (_currentProject.IsDefinedInThisProject(scadVariableListEntry.Description))
                 {
-                    actions.Add(new QuickAction($"Rename {scadVariableListEntry.Description.Name}",
+                    actions.Add(new QuickAction($"Refactor {scadVariableListEntry.Description.Name}",
                             () => _variableRefactorDialog.Open(scadVariableListEntry.Description, _currentProject)
                         )
                     );
@@ -1004,42 +1004,66 @@ namespace OpenScadGraphEditor
             // and one to go to the definition. Only do this if the invokable is part of this project (and not built-in or included).
             if (node is IReferToAnInvokable iReferToAnInvokable)
             {
-                var name = iReferToAnInvokable.InvokableDescription.Name;
-                if (_currentProject.IsDefinedInThisProject(iReferToAnInvokable.InvokableDescription))
+                var invokableDescription = iReferToAnInvokable.InvokableDescription;
+                var name = invokableDescription.Name;
+                if (_currentProject.IsDefinedInThisProject(invokableDescription))
                 {
                     // if the node isn't actually the entry point, add an action to go to the entrypoint
                     if (!(node is EntryPoint))
                     {
                         actions = actions.Append(
                             new QuickAction($"Go to definition of {name}",
-                                () => Open(_currentProject.FindDefiningGraph(iReferToAnInvokable.InvokableDescription))
+                                () => Open(_currentProject.FindDefiningGraph(invokableDescription))
                             )
                         );
                     }
 
                     actions = actions.Append(
                         new QuickAction($"Refactor {name}",
-                            () => _invokableRefactorDialog.Open(iReferToAnInvokable.InvokableDescription, _currentProject)
+                            () => _invokableRefactorDialog.Open(invokableDescription, _currentProject)
                         )
                     );
 
                     actions = actions.Append(
                         new QuickAction($"Edit documentation of {name}",
-                            () => _documentationDialog.Open(iReferToAnInvokable.InvokableDescription)
+                            () => _documentationDialog.Open(invokableDescription)
                         )
                     );
                 }
 
-                if (!iReferToAnInvokable.InvokableDescription.IsBuiltin)
+                if (!invokableDescription.IsBuiltin)
                 {
                     actions = actions.Append(
                         new QuickAction($"Find usages of {name}",
-                            () => FindAndShowUsages(iReferToAnInvokable.InvokableDescription)
+                            () => FindAndShowUsages(invokableDescription)
                         )
                     );
                 }
             }
 
+            // if the node references some invokable, add an action to open the refactor dialog for this invokable.
+            // and one to go to the definition. Only do this if the invokable is part of this project (and not built-in or included).
+            if (node is IReferToAVariable iReferToAVariable)
+            {
+                var variableDescription = iReferToAVariable.VariableDescription;
+                var name = variableDescription.Name;
+                if (_currentProject.IsDefinedInThisProject(variableDescription))
+                {
+                    actions = actions.Append(
+                        new QuickAction($"Refactor {name}",
+                            () => _variableRefactorDialog.Open(variableDescription, _currentProject)
+                        )
+                    );
+                }
+
+                actions = actions.Append(
+                    new QuickAction($"Find usages of {name}",
+                        () => FindAndShowUsages(variableDescription)
+                    )
+                );
+            }
+
+            
 
             if (node is ICanHaveModifier)
             {

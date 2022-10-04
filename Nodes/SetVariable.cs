@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Utils;
@@ -15,9 +17,6 @@ namespace OpenScadGraphEditor.Nodes
 
         public SetVariable()
         {
-            InputPorts
-                .Any("Value");
-
             OutputPorts
                 .Geometry();
         }
@@ -44,8 +43,13 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            VariableDescription = referenceResolver.ResolveVariableReference(node.GetDataString("variable_description_id")); 
+            SetupPorts(referenceResolver.ResolveVariableReference(node.GetDataString("variable_description_id")));
             base.RestorePortDefinitions(node, referenceResolver);
+        }
+
+        public IEnumerable<PortId> GetPortsReferringToVariable()
+        {
+            yield return PortId.Input(0);
         }
 
         public override string Render(ScadGraph context, int portIndex)
@@ -62,6 +66,9 @@ namespace OpenScadGraphEditor.Nodes
         public void SetupPorts(VariableDescription description)
         {
             VariableDescription = description;
+            var portType = description.TypeHint;
+            InputPorts.Clear();
+            InputPorts.OfType(portType, literalType: portType.GetMatchingLiteralType());
         }
     }
 }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Widgets/InvokableRefactorDialog/InvokableRefactorDialog.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/SelectOnFocusLineEdit.cs" type="Script" id=2]
@@ -8,9 +8,9 @@
 [ext_resource path="res://Icons/close0000.png" type="Texture" id=6]
 [ext_resource path="res://Icons/down0000.png" type="Texture" id=7]
 [ext_resource path="res://Icons/plus0000.png" type="Texture" id=8]
+[ext_resource path="res://Widgets/PortTypeSelector.cs" type="Script" id=9]
 
 [node name="InvokableRefactorDialog" type="WindowDialog"]
-visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -71,6 +71,7 @@ margin_top = 48.0
 margin_right = 668.0
 margin_bottom = 84.0
 text = "Item 0"
+script = ExtResource( 9 )
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="RootContainer/VBoxContainer"]
 margin_top = 94.0
@@ -148,6 +149,7 @@ margin_bottom = 40.0
 text = "Item 0"
 items = [ "Item 0", null, false, 0, null ]
 selected = 0
+script = ExtResource( 9 )
 
 [node name="TemplateParameterUpButton" parent="RootContainer/VBoxContainer/ScrollContainer/MarginContainer/MarginContainer/ParameterGrid" instance=ExtResource( 5 )]
 anchor_right = 0.0
