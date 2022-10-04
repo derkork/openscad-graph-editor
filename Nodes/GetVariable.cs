@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 
@@ -11,17 +12,6 @@ namespace OpenScadGraphEditor.Nodes
         public override string NodeTitle => $"Get {VariableDescription?.Name ?? "Variable"}";
         public override string NodeDescription => "Gets a variable's value.";
 
-        
-        public GetVariable()
-        {
-            // no input ports
-
-            // since variables have no defined type, we need to use "Any" as output type.
-            OutputPorts
-                .Any();
-        }
-
-
         public override string GetPortDocumentation(PortId portId)
         {
             return "The value of the variable.";
@@ -30,6 +20,13 @@ namespace OpenScadGraphEditor.Nodes
         public void SetupPorts(VariableDescription description)
         {
             VariableDescription = description;
+            OutputPorts.Clear();
+            OutputPorts.OfType(description.TypeHint);
+        }
+
+        public IEnumerable<PortId> GetPortsReferringToVariable()
+        {
+            yield return PortId.Output(0);
         }
 
 
@@ -41,7 +38,7 @@ namespace OpenScadGraphEditor.Nodes
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver referenceResolver)
         {
-            VariableDescription = referenceResolver.ResolveVariableReference(node.GetDataString("variable_description_id")); 
+            SetupPorts(referenceResolver.ResolveVariableReference(node.GetDataString("variable_description_id"))); 
             base.RestorePortDefinitions(node, referenceResolver);
         }
 

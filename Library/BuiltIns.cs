@@ -569,29 +569,77 @@ namespace OpenScadGraphEditor.Library
             Variables = new List<VariableDescription>()
             {
                 // PI
-                VariableBuilder.NewVariable("PI", "__builtin__variable__PI"),
+                VariableBuilder.NewVariable("PI", "__builtin__variable__PI")
+                    .WithDescription("Mathematical constant PI.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $children
-                VariableBuilder.NewVariable("$children", "__builtin__variable__$children"),
+                VariableBuilder.NewVariable("$children", "__builtin__variable__$children")
+                    .WithDescription("The number of children of the current module.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $parent_modules
-                VariableBuilder.NewVariable("$parent_modules", "__builtin__variable__$parent_modules"),
+                VariableBuilder.NewVariable("$parent_modules", "__builtin__variable__$parent_modules")
+                    .WithDescription("The number of parent modules in the instantiation stack.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $fa
-                VariableBuilder.NewVariable("$fa", "__builtin__variable__$fa"),
+                VariableBuilder.NewVariable("$fa", "__builtin__variable__$fa")
+                    .WithDescription("The global minimum angle for a fragment.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $fs
-                VariableBuilder.NewVariable("$fs", "__builtin__variable__$fs"),
+                VariableBuilder.NewVariable("$fs", "__builtin__variable__$fs")
+                    .WithDescription("The global minimum size for a fragment.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $fn
-                VariableBuilder.NewVariable("$fn", "__builtin__variable__$fn"),
+                VariableBuilder.NewVariable("$fn", "__builtin__variable__$fn")
+                    .WithDescription("The global number of fragments for approximating a circle.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $t
-                VariableBuilder.NewVariable("$t", "__builtin__variable__$t"),
+                VariableBuilder.NewVariable("$t", "__builtin__variable__$t")
+                    .WithDescription("The animation step.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $vpr
-                VariableBuilder.NewVariable("$vpr", "__builtin__variable__$vpr"),
+                VariableBuilder.NewVariable("$vpr", "__builtin__variable__$vpr")
+                    .WithDescription("The current viewport rotation.")
+                    .WithType(PortType.Vector3)
+                    .Build()
+                ,
                 // $vpt
-                VariableBuilder.NewVariable("$vpt", "__builtin__variable__$vpt"),
+                VariableBuilder.NewVariable("$vpt", "__builtin__variable__$vpt")
+                    .WithDescription("The current viewport translation.")
+                    .WithType(PortType.Vector3)
+                    .Build()
+                ,
                 // $vpd
-                VariableBuilder.NewVariable("$vpd", "__builtin__variable__$vpd"),
+                VariableBuilder.NewVariable("$vpd", "__builtin__variable__$vpd")
+                    .WithDescription("The current camera distance.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $vpf
-                VariableBuilder.NewVariable("$vpf", "__builtin__variable__$vpf"),
+                VariableBuilder.NewVariable("$vpf", "__builtin__variable__$vpf")
+                    .WithDescription("The current camera field of view.")
+                    .WithType(PortType.Number)
+                    .Build()
+                ,
                 // $preview
-                VariableBuilder.NewVariable("$preview", "__builtin__variable__$preview"),
+                VariableBuilder.NewVariable("$preview", "__builtin__variable__$preview")
+                    .WithDescription("Indicator whether we are currently in preview mode")
+                    .WithType(PortType.Boolean)
+                    .Build()
+                ,
             };
         }
     }

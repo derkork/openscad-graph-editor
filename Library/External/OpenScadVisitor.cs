@@ -53,7 +53,10 @@ namespace OpenScadGraphEditor.Library.External
             // ReSharper disable once SimplifyLinqExpressionUseAll
             if (!_externalReference.Variables.Any(it => it.Name == variableName))
             {
-                var variable = VariableBuilder.NewVariable(variableName, MakeId("variable", variableName));
+                // TODO: we may want to infer the type from the value, but this could also lead to problems
+                // when the variable holds multiple different types over its lifetime, so for now we keep this
+                // as "Any".
+                var variable = VariableBuilder.NewVariable(variableName, MakeId("variable", variableName)).Build();
                 _externalReference.Variables.Add(variable);
             }
 

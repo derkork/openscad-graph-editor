@@ -1,4 +1,6 @@
 using Godot;
+using JetBrains.Annotations;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Library.IO
 {
@@ -18,6 +20,26 @@ namespace OpenScadGraphEditor.Library.IO
         /// </summary>
         [Export]
         public string Name { get; set; } = "";
+
         
+        /// <summary>
+        /// Description of the variable.
+        /// </summary>
+        [Export]
+        public string Description { get; set; } = "";
+
+
+        /// <summary>
+        /// Type hint for the variable.
+        /// </summary>
+        [Export]
+        public PortType TypeHint { get; set; } = PortType.Any;
+
+        /// <summary>
+        /// Customizer setup for this variable.
+        /// </summary>
+        [Export]
+        [CanBeNull]
+        public SavedVariableCustomizerDescription CustomizerDescription { get; set; }
     }
 }

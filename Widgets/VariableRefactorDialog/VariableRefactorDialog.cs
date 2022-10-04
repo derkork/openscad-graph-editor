@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
@@ -14,6 +15,9 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         public event Action<Refactoring[]> RefactoringsRequested;
 
         private LineEdit _nameEdit;
+        private LineEdit _descriptionEdit;
+        private PortTypeSelector _typeHintOptionButton;
+
         private VariableDescription _baseDescription;
 
         private DialogMode _mode = DialogMode.Edit;
@@ -29,6 +33,10 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _nameEdit
                 .Connect("text_entered")
                 .To(this, nameof(OnNameEntered));
+
+
+            _descriptionEdit = this.WithName<LineEdit>("DescriptionEdit");
+            _typeHintOptionButton = this.WithName<PortTypeSelector>("TypeHintOptionButton");
 
             _errorLabel = this.WithName<Label>("ErrorLabel");
             _nameEdit
@@ -81,15 +89,39 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             switch (_mode)
             {
                 case DialogMode.Edit:
-                    RefactoringsRequested?.Invoke(new Refactoring[]
+                    var refactorings = new List<Refactoring>();
+                    // rename variable if necessary.
+                    if (_baseDescription.Name != _nameEdit.Text)
                     {
-                        new RenameVariableRefactoring(_baseDescription, _nameEdit.Text)
-                    });
+                        refactorings.Add(new RenameVariableRefactoring(_baseDescription, _nameEdit.Text));
+                    }
+
+                    // if the description text has changed, update it.
+                    if (_baseDescription.Description != _descriptionEdit.Text)
+                    {
+                        refactorings.Add(
+                            new ChangeVariableDocumentationRefactoring(_baseDescription, _descriptionEdit.Text));
+                    }
+                    
+                    // if the type hint has changed, update it.
+                    if (_baseDescription.TypeHint != _typeHintOptionButton.SelectedPortType)
+                    {
+                        refactorings.Add(
+                            new ChangeVariableTypeRefactoring(_baseDescription, _typeHintOptionButton.SelectedPortType));
+                    }
+                    
+                    RefactoringsRequested?.Invoke(refactorings.ToArray());
+
                     break;
                 case DialogMode.Create:
                     RefactoringsRequested?.Invoke(new Refactoring[]
                     {
-                        new IntroduceVariableRefactoring(VariableBuilder.NewVariable(_nameEdit.Text))
+                        new IntroduceVariableRefactoring(VariableBuilder
+                            .NewVariable(_nameEdit.Text)
+                            .WithDescription(_descriptionEdit.Text)
+                            .WithType(_typeHintOptionButton.SelectedPortType)
+                            .Build()
+                        )
                     });
                     break;
                 default:

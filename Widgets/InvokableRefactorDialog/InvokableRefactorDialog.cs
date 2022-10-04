@@ -19,10 +19,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;
-        private OptionButton _returnTypeOptionButton;
+        private PortTypeSelector _returnTypeOptionButton;
         private InvokableDescription _baseDescription;
         private LineEdit _templateParameterName;
-        private OptionButton _templateParameterTypeHint;
+        private PortTypeSelector _templateParameterTypeHint;
         private IconButton.IconButton _templateParameterUpButton;
         private IconButton.IconButton _templateParameterDownButton;
         private IconButton.IconButton _templateParameterDeleteButton;
@@ -30,7 +30,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private Label _errorLabel;
         private GridContainer _parameterGrid;
         private readonly List<ParameterLine> _parameterLines = new List<ParameterLine>();
-        private readonly Dictionary<PortType, int> _indexByPortTypes = new Dictionary<PortType, int>();
 
         private DialogMode _mode = DialogMode.Edit;
         private Button _okButton;
@@ -45,47 +44,14 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 .Connect("text_changed")
                 .To(this, nameof(OnIdentifierChanged));
             _returnTypeLabel = this.WithName<Label>("ReturnTypeLabel");
-            _returnTypeOptionButton = this.WithName<OptionButton>("ReturnTypeSelector");
+            _returnTypeOptionButton = this.WithName<PortTypeSelector>("ReturnTypeSelector");
 
             _errorLabel = this.WithName<Label>("ErrorLabel");
 
             _templateParameterName = this.WithName<LineEdit>("TemplateParameterName");
             _templateParameterName.Visible = false;
-            _templateParameterTypeHint = this.WithName<OptionButton>("TemplateParameterTypeHint");
+            _templateParameterTypeHint = this.WithName<PortTypeSelector>("TemplateParameterTypeHint");
             _templateParameterTypeHint.Visible = false;
-
-            // prepare with the known port types
-            var index = 0;
-            _returnTypeOptionButton.Clear();
-            _templateParameterTypeHint.Clear();
-
-            _templateParameterTypeHint.AddItem(PortType.Any.HumanReadableName(), (int) PortType.Any);
-            _returnTypeOptionButton.AddItem(PortType.Any.HumanReadableName(), (int) PortType.Any);
-            _indexByPortTypes[PortType.Any] = index++;
-
-            _templateParameterTypeHint.AddItem(PortType.Number.HumanReadableName(), (int) PortType.Number);
-            _returnTypeOptionButton.AddItem(PortType.Number.HumanReadableName(), (int) PortType.Number);
-            _indexByPortTypes[PortType.Number] = index++;
-
-            _templateParameterTypeHint.AddItem(PortType.Boolean.HumanReadableName(), (int) PortType.Boolean);
-            _returnTypeOptionButton.AddItem(PortType.Boolean.HumanReadableName(), (int) PortType.Boolean);
-            _indexByPortTypes[PortType.Boolean] = index++;
-
-            _templateParameterTypeHint.AddItem(PortType.Vector3.HumanReadableName(), (int) PortType.Vector3);
-            _returnTypeOptionButton.AddItem(PortType.Vector3.HumanReadableName(), (int) PortType.Vector3);
-            _indexByPortTypes[PortType.Vector3] = index++;
-            
-            _templateParameterTypeHint.AddItem(PortType.Vector2.HumanReadableName(), (int) PortType.Vector2);
-            _returnTypeOptionButton.AddItem(PortType.Vector2.HumanReadableName(), (int) PortType.Vector2);
-            _indexByPortTypes[PortType.Vector2] = index++;
-
-            _templateParameterTypeHint.AddItem(PortType.String.HumanReadableName(), (int) PortType.String);
-            _returnTypeOptionButton.AddItem(PortType.String.HumanReadableName(), (int) PortType.String);
-            _indexByPortTypes[PortType.String] = index++;
-
-            _templateParameterTypeHint.AddItem(PortType.Vector.HumanReadableName(), (int) PortType.Vector);
-            _returnTypeOptionButton.AddItem(PortType.Vector.HumanReadableName(), (int) PortType.Vector);
-            _indexByPortTypes[PortType.Vector] = index; // no ++ here since it is the last
 
             _templateParameterUpButton = this.WithName<IconButton.IconButton>("TemplateParameterUpButton");
             _templateParameterUpButton.Visible = false;
@@ -116,7 +82,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             _mode = DialogMode.CreateFunction;
             _returnTypeLabel.Visible = true;
             _returnTypeOptionButton.Visible = true;
-            _returnTypeOptionButton.Select(_indexByPortTypes[PortType.Any]);
+            _returnTypeOptionButton.SelectedPortType = PortType.Any;
             ValidateAll();
             SetAsMinsize();
             PopupCentered();
@@ -148,7 +114,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 case FunctionDescription functionDescription:
                     _returnTypeLabel.Visible = true;
                     _returnTypeOptionButton.Visible = true;
-                    _returnTypeOptionButton.Select(_indexByPortTypes[functionDescription.ReturnTypeHint]);
+                    _returnTypeOptionButton.SelectedPortType = functionDescription.ReturnTypeHint;
                     break;
                 case ModuleDescription _:
                     _returnTypeLabel.Visible = false;
@@ -246,7 +212,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     // also check if the return type has changed in case we are editing a function
                     if (_baseDescription is FunctionDescription aFunctionDescription)
                     {
-                        var selectedReturnType = (PortType) _returnTypeOptionButton.GetSelectedId();
+                        var selectedReturnType = _returnTypeOptionButton.SelectedPortType;
                         if (aFunctionDescription.ReturnTypeHint != selectedReturnType)
                         {
                             refactorings.Add(
@@ -274,7 +240,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                     break;
                 case DialogMode.CreateFunction:
                     var functionDescription = FunctionBuilder
-                        .NewFunction(_nameEdit.Text, returnType: (PortType) _returnTypeOptionButton.GetSelectedId());
+                        .NewFunction(_nameEdit.Text, returnType: _returnTypeOptionButton.SelectedPortType);
                     foreach (var line in _parameterLines)
                     {
                         functionDescription.WithParameter(line.Name, line.TypeHint);
@@ -398,7 +364,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             downButton.Visible = true;
 
             nameEdit.Text = name;
-            optionButton.Select(_indexByPortTypes[typeHint]);
+            optionButton.SelectedPortType = typeHint;
 
             var line = new ParameterLine(
                 nameEdit,
@@ -499,12 +465,12 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             public int OriginalIndex { get; }
 
             private readonly LineEdit _nameEdit;
-            private readonly OptionButton _typeHint;
+            private readonly PortTypeSelector _typeHint;
             private readonly IconButton.IconButton _upButton;
             private readonly IconButton.IconButton _downButton;
             private readonly IconButton.IconButton _deleteButton;
 
-            public ParameterLine(LineEdit nameEdit, OptionButton typeHint, IconButton.IconButton upButton, IconButton.IconButton downButton,
+            public ParameterLine(LineEdit nameEdit, PortTypeSelector typeHint, IconButton.IconButton upButton, IconButton.IconButton downButton,
                 IconButton.IconButton deleteButton, string originalName = null, int originalPortType = -1, int originalIndex = -1)
             {
                 OriginalName = originalName;
@@ -518,7 +484,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             }
 
             public string Name => _nameEdit.Text;
-            public PortType TypeHint => (PortType) _typeHint.GetSelectedId();
+            public PortType TypeHint => _typeHint.SelectedPortType;
 
             public void RemoveFrom(Control container)
             {
