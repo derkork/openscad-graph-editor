@@ -5,6 +5,7 @@ using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
@@ -24,6 +25,23 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private Button _okButton;
         private Label _errorLabel;
         private ScadProject _currentProject;
+        private OptionButton _constraintTypeOptionButton;
+        private CheckBox _showInCustomizerCheckBox;
+        private Label _constraintsLabel;
+        private Control _constraintSpacer;
+        private Control _minStepMaxContainer;
+        private LineEdit _minEdit;
+        private LineEdit _stepEdit;
+        private LineEdit _maxEdit;
+        private Control _maxLengthContainer;
+        private LineEdit _maxLengthEdit;
+        private Control _keyValuePairContainer;
+        private IconButton.IconButton _keyValuePairAddButton;
+        private GridContainer _keyValuePairGrid;
+        private LineEdit _templateValueEdit;
+        private LineEdit _templateLabelEdit;
+        private IconButton.IconButton _templateDeleteButton;
+        
 
         public override void _Ready()
         {
@@ -37,7 +55,42 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
             _descriptionEdit = this.WithName<LineEdit>("DescriptionEdit");
             _typeHintOptionButton = this.WithName<PortTypeSelector>("TypeHintOptionButton");
+            _typeHintOptionButton
+                .Connect("item_selected")
+                .To(this, nameof(OnVariableTypeChanged));
 
+            
+            _showInCustomizerCheckBox = this.WithName<CheckBox>("ShowInCustomizerCheckBox");
+            _showInCustomizerCheckBox.Connect("toggled")
+                .To(this, nameof(OnShowInCustomizerChanged));
+            
+            _constraintsLabel = this.WithName<Label>("ConstraintsLabel");
+            
+            _constraintTypeOptionButton = this.WithName<OptionButton>("ConstraintTypeOptionButton");
+            _constraintTypeOptionButton
+                .Connect("item_selected")
+                .To(this, nameof(OnConstraintTypeChanged));
+
+            _constraintSpacer = this.WithName<Control>("ConstraintSpacer");
+            
+            _minStepMaxContainer = this.WithName<Control>("MinStepMaxContainer");
+            _minEdit = this.WithName<LineEdit>("MinEdit");
+            _stepEdit = this.WithName<LineEdit>("StepEdit");
+            _maxEdit = this.WithName<LineEdit>("MaxEdit");
+            
+            _maxLengthContainer = this.WithName<Control>("MaxLengthContainer");
+            _maxLengthEdit = this.WithName<LineEdit>("MaxLengthEdit");
+            
+            _keyValuePairContainer = this.WithName<Control>("KeyValuePairContainer");
+            _keyValuePairAddButton = this.WithName<IconButton.IconButton>("KeyValuePairAddButton");
+            _keyValuePairAddButton.ButtonPressed += OnAddKeyValuePairPressed;
+            
+            _keyValuePairGrid = this.WithName<GridContainer>("KeyValuePairGrid");
+            _templateValueEdit = this.WithName<LineEdit>("TemplateValueEdit");
+            _templateLabelEdit = this.WithName<LineEdit>("TemplateLabelEdit");
+            _templateDeleteButton = this.WithName<IconButton.IconButton>("TemplateDeleteButton");
+            
+            
             _errorLabel = this.WithName<Label>("ErrorLabel");
             _nameEdit
                 .Connect("text_changed")
@@ -82,6 +135,13 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _nameEdit.Text = "";
             _baseDescription = null;
             _currentProject = null;
+
+            _typeHintOptionButton.Select(0);
+            OnVariableTypeChanged(0);
+
+            _showInCustomizerCheckBox.Pressed = false;
+            OnShowInCustomizerChanged(false);
+
         }
 
         private void OnOkPressed()
@@ -166,6 +226,123 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             {
                 OnOkPressed();
             }
+        }
+        
+        private void OnShowInCustomizerChanged(bool currentlyDown)
+        {
+            if (currentlyDown)
+            {
+                // turn on the customizer parts
+                _constraintsLabel.Visible = true;
+                _constraintTypeOptionButton.Visible = true;
+                // show the relevant parts for the constraint type
+                OnConstraintTypeChanged(0); 
+            }
+            else
+            {
+                // turn off all customizer parts
+                _constraintsLabel.Visible = false;
+                _constraintTypeOptionButton.Visible = false;
+                _constraintSpacer.Visible = false;
+                _minStepMaxContainer.Visible = false;
+                _maxLengthContainer.Visible = false;
+                _keyValuePairContainer.Visible = false;
+            }
+            
+            SetAsMinsize();
+        }
+        
+        private void OnVariableTypeChanged([UsedImplicitly] int _)
+        {
+            // save the currently selected constraint type, so we keep it if it is compatible
+            var currentConstraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId();
+            
+            // depending on the variable type we will fill the constraint option button with the appropriate options.
+            _constraintTypeOptionButton.Clear();
+            _constraintTypeOptionButton.AddItem("None", (int) VariableCustomizerConstraintType.None);
+            
+            switch (_typeHintOptionButton.SelectedPortType)
+            {
+                case PortType.Number:
+                case PortType.Vector2:
+                case PortType.Vector3:
+                case PortType.Vector:
+                    _constraintTypeOptionButton.AddItem("Min / Step / Max", (int) VariableCustomizerConstraintType.MinStepMax);
+                    _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.NumericOptions);
+                    break;
+                case PortType.String:
+                    _constraintTypeOptionButton.AddItem("Maximum length", (int) VariableCustomizerConstraintType.MaxLength);
+                    _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.StringOptions);
+                    break;
+                // no constraints available, so don't add any options.
+            }
+
+            var found = false;
+            // if the current constraint type is still available, select it.
+            for (var i = 0; i < _constraintTypeOptionButton.GetItemCount(); i++)
+            {
+                if (_constraintTypeOptionButton.GetItemId(i) == (int) currentConstraintType)
+                {
+                    _constraintTypeOptionButton.Select(i);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                // if the current constraint type is not available, select the first one.
+                _constraintTypeOptionButton.Select(0);
+                OnConstraintTypeChanged(0);
+            }
+            SetAsMinsize();
+        }
+        
+        private void OnConstraintTypeChanged([UsedImplicitly] int _)
+        {
+            var constraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId();
+            switch (constraintType)
+            {
+                case VariableCustomizerConstraintType.None:
+                    // hide all constraint parts
+                    _constraintSpacer.Visible = false;
+                    _minStepMaxContainer.Visible = false;
+                    _maxLengthContainer.Visible = false;
+                    _keyValuePairContainer.Visible = false;
+                    break;
+                case VariableCustomizerConstraintType.MinStepMax:
+                    // show the min step max parts + the spacer, hide the rest
+                    _constraintSpacer.Visible = true;
+                    _minStepMaxContainer.Visible = true;
+                    _maxLengthContainer.Visible = false;
+                    _keyValuePairContainer.Visible = false;
+                    break;
+                case VariableCustomizerConstraintType.MaxLength:
+                    // show the max length parts + the spacer, hide the rest
+                    _constraintSpacer.Visible = true;
+                    _minStepMaxContainer.Visible = false;
+                    _maxLengthContainer.Visible = true;
+                    _keyValuePairContainer.Visible = false; 
+                    break;
+                case VariableCustomizerConstraintType.NumericOptions:
+                case VariableCustomizerConstraintType.StringOptions:
+                    // show the key value pair parts + the spacer, hide the rest
+                    _constraintSpacer.Visible = true;
+                    _minStepMaxContainer.Visible = false;
+                    _maxLengthContainer.Visible = false;
+                    _keyValuePairContainer.Visible = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            SetAsMinsize();
+            
+        }
+
+        private void OnAddKeyValuePairPressed()
+        {
+            
         }
     }
 }
