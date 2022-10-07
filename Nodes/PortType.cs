@@ -66,5 +66,26 @@ namespace OpenScadGraphEditor.Nodes
                     throw new ArgumentOutOfRangeException(nameof(self), self, null);
             } 
         }
+
+        public static bool IsNumericInCustomizer(this PortType self)
+        {
+            switch (self)
+            {
+                case PortType.None:
+                case PortType.Geometry:
+                case PortType.Boolean:
+                case PortType.String:
+                case PortType.Any:
+                case PortType.Reroute:
+                    return false;
+                case PortType.Number:
+                case PortType.Vector3:
+                case PortType.Vector:
+                case PortType.Vector2:
+                    return true;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(self), self, null);
+            }
+        }
     }
 }

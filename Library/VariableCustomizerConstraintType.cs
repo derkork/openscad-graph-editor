@@ -20,13 +20,8 @@
         MaxLength = 2,
         
         /// <summary>
-        /// A constraint for a number variable which limits its value to a list of possible values.
+        /// A constraint which allows only a specific set of values.
         /// </summary>
-        NumericOptions = 3,
-        
-        /// <summary>
-        /// A constraint for a string variable which limits its value to a list of possible values.
-        /// </summary>
-        StringOptions = 4,
+        Options = 3,
     }
 }

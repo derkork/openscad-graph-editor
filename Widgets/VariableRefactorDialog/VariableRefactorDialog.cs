@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 {
@@ -41,6 +42,11 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private LineEdit _templateValueEdit;
         private LineEdit _templateLabelEdit;
         private IconButton.IconButton _templateDeleteButton;
+        private IconButton.IconButton _templateUpButton;
+        private IconButton.IconButton _templateDownButton;
+        private readonly List<KeyValueLine> _keyValueLines = new List<KeyValueLine>();
+        
+        
         
 
         public override void _Ready()
@@ -77,9 +83,26 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _minEdit = this.WithName<LineEdit>("MinEdit");
             _stepEdit = this.WithName<LineEdit>("StepEdit");
             _maxEdit = this.WithName<LineEdit>("MaxEdit");
+
+            _minEdit.Connect("focus_exited")
+                .WithBinds(_minEdit, true)
+                .To(this, nameof(OnNumericFieldChanged));
+            
+            _stepEdit.Connect("focus_exited")
+                .WithBinds(_stepEdit, true)
+                .To(this, nameof(OnNumericFieldChanged));
+            
+            _maxEdit.Connect("focus_exited")
+                .WithBinds(_stepEdit, true)
+                .To(this, nameof(OnNumericFieldChanged));
+            
             
             _maxLengthContainer = this.WithName<Control>("MaxLengthContainer");
             _maxLengthEdit = this.WithName<LineEdit>("MaxLengthEdit");
+            
+            _maxLengthEdit.Connect("focus_exited")
+                .WithBinds(_maxLengthEdit, false)
+                .To(this, nameof(OnNumericFieldChanged));
             
             _keyValuePairContainer = this.WithName<Control>("KeyValuePairContainer");
             _keyValuePairAddButton = this.WithName<IconButton.IconButton>("KeyValuePairAddButton");
@@ -88,8 +111,15 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _keyValuePairGrid = this.WithName<GridContainer>("KeyValuePairGrid");
             _templateValueEdit = this.WithName<LineEdit>("TemplateValueEdit");
             _templateLabelEdit = this.WithName<LineEdit>("TemplateLabelEdit");
+            _templateUpButton = this.WithName<IconButton.IconButton>("TemplateUpButton");
+            _templateDownButton = this.WithName<IconButton.IconButton>("TemplateDownButton");
             _templateDeleteButton = this.WithName<IconButton.IconButton>("TemplateDeleteButton");
-            
+
+            _templateValueEdit.Visible = false;
+            _templateLabelEdit.Visible = false;
+            _templateDeleteButton.Visible = false;
+            _templateUpButton.Visible = false;
+            _templateDownButton.Visible = false;
             
             _errorLabel = this.WithName<Label>("ErrorLabel");
             _nameEdit
@@ -268,11 +298,11 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 case PortType.Vector3:
                 case PortType.Vector:
                     _constraintTypeOptionButton.AddItem("Min / Step / Max", (int) VariableCustomizerConstraintType.MinStepMax);
-                    _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.NumericOptions);
+                    _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.Options);
                     break;
                 case PortType.String:
                     _constraintTypeOptionButton.AddItem("Maximum length", (int) VariableCustomizerConstraintType.MaxLength);
-                    _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.StringOptions);
+                    _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.Options);
                     break;
                 // no constraints available, so don't add any options.
             }
@@ -295,6 +325,9 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 _constraintTypeOptionButton.Select(0);
                 OnConstraintTypeChanged(0);
             }
+
+            FixKeyValuePairs();
+            
             SetAsMinsize();
         }
         
@@ -324,8 +357,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     _maxLengthContainer.Visible = true;
                     _keyValuePairContainer.Visible = false; 
                     break;
-                case VariableCustomizerConstraintType.NumericOptions:
-                case VariableCustomizerConstraintType.StringOptions:
+                case VariableCustomizerConstraintType.Options:
                     // show the key value pair parts + the spacer, hide the rest
                     _constraintSpacer.Visible = true;
                     _minStepMaxContainer.Visible = false;
@@ -342,7 +374,218 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private void OnAddKeyValuePairPressed()
         {
+            AddKeyValuePair("0", "");            
+        }
+
+        private void AddKeyValuePair(string value, string label)
+        {
+            var entryUuid = Guid.NewGuid().ToString();
+            // while we technically don't need it, we give every new item a unique name using the uuid and a string
+            // this makes it easier for the test driver to attach to it.
+            var valueEdit = _templateValueEdit.Clone();
+            valueEdit.Name = $"value-{entryUuid}";
+            var labelEdit = _templateLabelEdit.Clone();
+            labelEdit.Name = "label-" + entryUuid;
             
+            var deleteButton = _templateDeleteButton.Clone();
+            deleteButton.Name = "delete-" + entryUuid;
+            var upButton = _templateUpButton.Clone();
+            upButton.Name = "up-" + entryUuid;
+            var downButton = _templateDownButton.Clone();
+            downButton.Name = "down-" + entryUuid;
+
+            valueEdit.Visible = true;
+            labelEdit.Visible = true;
+            deleteButton.Visible = true;
+            upButton.Visible = true;
+            downButton.Visible = true;
+
+            valueEdit.Text = value;
+            labelEdit.Text = label;
+
+            var line = new KeyValueLine(
+                valueEdit,
+                labelEdit,
+                upButton,
+                downButton,
+                deleteButton
+            );
+            _keyValueLines.Add(line);
+
+
+            if (_typeHintOptionButton.SelectedPortType.IsNumericInCustomizer())
+            {
+                // add a numeric constraint on the values
+                valueEdit.Connect("focus_exited")
+                    .WithBinds(valueEdit, false)
+                    .To(this, nameof(OnNumericFieldChanged));
+            }
+
+            deleteButton.ButtonPressed += () => OnRemoveParameterPressed(line);
+            upButton.ButtonPressed += () => OnParameterUpPressed(line);
+            downButton.ButtonPressed += () => OnParameterDownPressed(line);
+
+            line.InsertInto(_keyValuePairGrid);
+
+            RepaintKeyValuePairs();
+            ValidateAll();
+            SetAsMinsize();
+            
+            // give the new  value edit the focus
+            valueEdit.GrabFocus();
+        }
+
+        private void FixKeyValuePairs()
+        {
+            // if the variable type is switched from something numeric to something non-numeric or vice versa
+            // we need to remove/add all the numeric constraints from/to the value edits and maybe also need
+            // to fix up the values.
+            var isNumeric = _typeHintOptionButton.SelectedPortType.IsNumericInCustomizer();
+            foreach (var line in _keyValueLines)
+            {
+                if (isNumeric)
+                {
+                    // if there is currently no numeric constraint, add one
+                    if (!line.ValueEdit.IsConnected("focus_exited", this, nameof(OnNumericFieldChanged)))
+                    {
+                        // add a numeric constraint on the values
+                        line.ValueEdit.Connect("focus_exited")
+                            .WithBinds(line.ValueEdit, false)
+                            .To(this, nameof(OnNumericFieldChanged));
+                    }
+                    
+                    // if the value is not a number, set it to 0
+                    if (!line.ValueEdit.Text.SafeTryParse(out _))
+                    {
+                        line.ValueEdit.Text = "0";
+                    }
+                }
+                else
+                {
+                    // if there is currently a numeric constraint, remove it
+                    if (line.ValueEdit.IsConnected("focus_exited", this, nameof(OnNumericFieldChanged)))
+                    {
+                        line.ValueEdit.Disconnect("focus_exited", this, nameof(OnNumericFieldChanged));
+                    }
+                }
+            }
+        }
+        
+        private void RepaintKeyValuePairs()
+        {
+            // remove all keyValuePairs
+            _keyValueLines.ForAll(it => it.RemoveFrom(_keyValuePairGrid));
+            // and re-insert in correct order
+            _keyValueLines.ForAll(it => it.InsertInto(_keyValuePairGrid));
+        }
+
+        private void OnRemoveParameterPressed(KeyValueLine line)
+        {
+            _keyValueLines.Remove(line);
+            line.Discard();
+
+            RepaintKeyValuePairs();
+        }
+
+        private void OnParameterUpPressed(KeyValueLine line)
+        {
+            var index = _keyValueLines.IndexOf(line);
+            if (index <= 0)
+            {
+                return; // nothing to do
+            }
+
+            // swap the line with the one above. 
+            var targetIndex = index - 1;
+            var toMoveDown = _keyValueLines[targetIndex];
+            _keyValueLines[targetIndex] = line;
+            _keyValueLines[index] = toMoveDown;
+
+            RepaintKeyValuePairs();
+        }
+
+        private void OnParameterDownPressed(KeyValueLine line)
+        {
+            var index = _keyValueLines.IndexOf(line);
+            if (index == -1 || index + 1 >= _keyValueLines.Count)
+            {
+                return; // nothing to do
+            }
+
+            // swap the line with the one above. 
+            var targetIndex = index + 1;
+            var toMoveUp = _keyValueLines[targetIndex];
+            _keyValueLines[targetIndex] = line;
+            _keyValueLines[index] = toMoveUp;
+
+            RepaintKeyValuePairs();
+        }
+
+        
+        private void OnNumericFieldChanged(LineEdit lineEdit, bool allowEmpty)
+        {
+            if (allowEmpty && lineEdit.Text == "")
+            {
+                return;
+            }
+            
+            if (lineEdit.Text.SafeTryParse(out var result))
+            {
+                // text is numeric, allow it.
+                lineEdit.Text = result.SafeToString();
+            }
+            else
+            {
+                // revert to a good default value
+                lineEdit.Text = allowEmpty ? "" : "0";
+            }
+        }
+        
+        
+        private class KeyValueLine
+        {
+            public LineEdit ValueEdit { get; }
+            private readonly LineEdit _labelEdit;
+            private readonly IconButton.IconButton _upButton;
+            private readonly IconButton.IconButton _downButton;
+            private readonly IconButton.IconButton _deleteButton;
+
+            public KeyValueLine(LineEdit valueEdit, LineEdit labelEdit, IconButton.IconButton upButton, IconButton.IconButton downButton,
+                IconButton.IconButton deleteButton)
+            {
+                ValueEdit = valueEdit;
+                _labelEdit = labelEdit;
+                _upButton = upButton;
+                _downButton = downButton;
+                _deleteButton = deleteButton;
+            }
+
+            public void RemoveFrom(Control container)
+            {
+                container.RemoveChild(ValueEdit);
+                container.RemoveChild(_labelEdit);
+                container.RemoveChild(_upButton);
+                container.RemoveChild(_downButton);
+                container.RemoveChild(_deleteButton);
+            }
+
+            public void InsertInto(Control container)
+            {
+                container.AddChild(ValueEdit);
+                container.AddChild(_labelEdit);
+                container.AddChild(_upButton);
+                container.AddChild(_downButton);
+                container.AddChild(_deleteButton);
+            }
+
+            public void Discard()
+            {
+                ValueEdit.RemoveAndFree();
+                _labelEdit.RemoveAndFree();
+                _upButton.RemoveAndFree();
+                _downButton.RemoveAndFree();
+                _deleteButton.RemoveAndFree();
+            }
         }
     }
 }
