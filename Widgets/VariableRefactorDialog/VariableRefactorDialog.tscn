@@ -16,10 +16,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -300.0
-margin_top = -227.0
-margin_right = 500.0
-margin_bottom = 404.0
+margin_left = -400.0
+margin_top = -338.0
+margin_right = 400.0
+margin_bottom = 338.0
 rect_min_size = Vector2( 800, 0 )
 theme = ExtResource( 2 )
 window_title = "Edit Variable"
@@ -37,23 +37,23 @@ custom_constants/margin_bottom = 10
 margin_left = 10.0
 margin_top = 10.0
 margin_right = 790.0
-margin_bottom = 621.0
+margin_bottom = 683.0
 custom_constants/separation = 10
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
 margin_right = 780.0
-margin_bottom = 525.0
+margin_bottom = 601.0
 custom_constants/hseparation = 15
 columns = 2
 
 [node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 10.0
-margin_right = 133.0
+margin_right = 137.0
 margin_bottom = 30.0
 text = "Name"
 
 [node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 148.0
+margin_left = 152.0
 margin_right = 780.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
@@ -61,12 +61,12 @@ script = ExtResource( 3 )
 
 [node name="DescriptionLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 58.0
-margin_right = 133.0
+margin_right = 137.0
 margin_bottom = 78.0
 text = "Description"
 
 [node name="DescriptionEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 148.0
+margin_left = 152.0
 margin_top = 48.0
 margin_right = 780.0
 margin_bottom = 88.0
@@ -75,48 +75,76 @@ script = ExtResource( 3 )
 
 [node name="TypeLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
 margin_top = 104.0
-margin_right = 133.0
+margin_right = 137.0
 margin_bottom = 124.0
 text = "Type"
 
 [node name="TypeHintOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 148.0
+margin_left = 152.0
 margin_top = 96.0
 margin_right = 780.0
 margin_bottom = 132.0
 script = ExtResource( 4 )
 
-[node name="ShowInCustomizerLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_top = 154.0
-margin_right = 133.0
-margin_bottom = 174.0
-text = "Show in customizer"
+[node name="DefaultValueLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 140.0
+margin_right = 137.0
+margin_bottom = 160.0
+text = "Default Value"
 
-[node name="ShowInCustomizerCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 148.0
+[node name="DefaultValueControl" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 152.0
 margin_top = 140.0
 margin_right = 780.0
-margin_bottom = 188.0
+margin_bottom = 160.0
+text = "<replaced at runtime>"
+
+[node name="ShowInCustomizerLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 182.0
+margin_right = 137.0
+margin_bottom = 202.0
+text = "Show in Customizer"
+
+[node name="ShowInCustomizerCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 152.0
+margin_top = 168.0
+margin_right = 780.0
+margin_bottom = 216.0
+
+[node name="CustomizerTabLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 234.0
+margin_right = 137.0
+margin_bottom = 254.0
+text = "Customizer Tab"
+
+[node name="CustomizerTabEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 152.0
+margin_top = 224.0
+margin_right = 780.0
+margin_bottom = 264.0
+size_flags_horizontal = 3
+placeholder_text = "Parameters"
+script = ExtResource( 3 )
 
 [node name="ConstraintsLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_top = 204.0
-margin_right = 133.0
-margin_bottom = 224.0
+margin_top = 280.0
+margin_right = 137.0
+margin_bottom = 300.0
 text = "Constraints"
 
 [node name="ConstraintTypeOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 148.0
-margin_top = 196.0
+margin_left = 152.0
+margin_top = 272.0
 margin_right = 780.0
-margin_bottom = 232.0
+margin_bottom = 308.0
 text = "None"
 items = [ "None", null, false, 0, null ]
 selected = 0
 
 [node name="ConstraintSpacer" type="Control" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_top = 240.0
-margin_right = 133.0
-margin_bottom = 525.0
+margin_top = 316.0
+margin_right = 137.0
+margin_bottom = 601.0
 
 [node name="MinStepMaxContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
 visible = false
@@ -194,56 +222,56 @@ size_flags_horizontal = 3
 script = ExtResource( 3 )
 
 [node name="KeyValuePairContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer"]
-margin_left = 148.0
-margin_top = 240.0
+margin_left = 152.0
+margin_top = 316.0
 margin_right = 780.0
-margin_bottom = 525.0
+margin_bottom = 601.0
 
 [node name="Header" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer"]
-margin_right = 632.0
+margin_right = 628.0
 margin_bottom = 37.0
 custom_constants/margin_top = 5
 
 [node name="Header" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/Header"]
 margin_top = 5.0
-margin_right = 632.0
+margin_right = 628.0
 margin_bottom = 37.0
 columns = 5
 
 [node name="ValueLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/Header/Header"]
 margin_top = 6.0
-margin_right = 250.0
+margin_right = 248.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 text = "Value"
 align = 1
 
 [node name="LabelLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/Header/Header"]
-margin_left = 258.0
+margin_left = 256.0
 margin_top = 6.0
-margin_right = 508.0
+margin_right = 504.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 text = "Label"
 align = 1
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/Header/Header"]
-margin_left = 516.0
-margin_right = 548.0
+margin_left = 512.0
+margin_right = 544.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 32, 0 )
 
 [node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/Header/Header"]
-margin_left = 556.0
-margin_right = 588.0
+margin_left = 552.0
+margin_right = 584.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 32, 0 )
 
 [node name="KeyValuePairAddButton" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/Header/Header" instance=ExtResource( 6 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 596.0
-margin_right = 632.0
+margin_left = 592.0
+margin_right = 628.0
 margin_bottom = 32.0
 size_flags_horizontal = 9
 Icon = ExtResource( 7 )
@@ -251,22 +279,22 @@ Padding = Vector2( 8, 2 )
 
 [node name="ScrollingPart" type="ScrollContainer" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer"]
 margin_top = 45.0
-margin_right = 632.0
+margin_right = 628.0
 margin_bottom = 285.0
 rect_min_size = Vector2( 0, 240 )
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart"]
-margin_right = 632.0
+margin_right = 628.0
 margin_bottom = 240.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer"]
-margin_right = 632.0
+margin_right = 628.0
 margin_bottom = 240.0
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer"]
-margin_right = 632.0
+margin_right = 628.0
 margin_bottom = 240.0
 custom_constants/margin_right = 5
 custom_constants/margin_top = 5
@@ -276,21 +304,21 @@ custom_constants/margin_bottom = 5
 [node name="KeyValuePairGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer/MarginContainer"]
 margin_left = 5.0
 margin_top = 5.0
-margin_right = 627.0
+margin_right = 623.0
 margin_bottom = 235.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 5
 
 [node name="TemplateValueEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer/MarginContainer/KeyValuePairGrid"]
-margin_right = 250.0
+margin_right = 248.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 script = ExtResource( 3 )
 
 [node name="TemplateLabelEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer/MarginContainer/KeyValuePairGrid"]
-margin_left = 258.0
-margin_right = 508.0
+margin_left = 256.0
+margin_right = 504.0
 margin_bottom = 40.0
 size_flags_horizontal = 3
 placeholder_text = "<same as value>"
@@ -299,8 +327,8 @@ script = ExtResource( 3 )
 [node name="TemplateUpButton" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer/MarginContainer/KeyValuePairGrid" instance=ExtResource( 6 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 516.0
-margin_right = 546.0
+margin_left = 512.0
+margin_right = 542.0
 margin_bottom = 40.0
 size_flags_horizontal = 9
 Icon = ExtResource( 8 )
@@ -309,8 +337,8 @@ Padding = Vector2( 5, 0 )
 [node name="TemplateDownButton" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer/MarginContainer/KeyValuePairGrid" instance=ExtResource( 6 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 554.0
-margin_right = 584.0
+margin_left = 550.0
+margin_right = 580.0
 margin_bottom = 40.0
 size_flags_horizontal = 9
 Icon = ExtResource( 9 )
@@ -319,26 +347,26 @@ Padding = Vector2( 5, 0 )
 [node name="TemplateDeleteButton" parent="MarginContainer/VBoxContainer/GridContainer/KeyValuePairContainer/ScrollingPart/MarginContainer/MarginContainer/KeyValuePairGrid" instance=ExtResource( 6 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 592.0
-margin_right = 622.0
+margin_left = 588.0
+margin_right = 618.0
 margin_bottom = 40.0
 size_flags_horizontal = 9
 Icon = ExtResource( 5 )
 Padding = Vector2( 5, 0 )
 
 [node name="ErrorLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_top = 535.0
+margin_top = 611.0
 margin_right = 780.0
-margin_bottom = 555.0
+margin_bottom = 631.0
 custom_colors/font_color = Color( 1, 1, 0, 1 )
 text = "Error Text!"
 align = 2
 autowrap = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 565.0
+margin_top = 641.0
 margin_right = 780.0
-margin_bottom = 597.0
+margin_bottom = 673.0
 alignment = 2
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]

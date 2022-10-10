@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 
@@ -30,19 +31,35 @@ namespace OpenScadGraphEditor.Library
         /// </summary>
         public VariableCustomizerDescription CustomizerDescription { get; set; } = new VariableCustomizerDescription();
 
+        
+        /// <summary>
+        /// The default value of this variable or null if there is no default value.
+        /// </summary>
+        [CanBeNull]
+        public IScadLiteral DefaultValue { get; set; } = null;
+        
         public void LoadFrom(SavedVariableDescription savedVariableDescription)
         {
             Id = savedVariableDescription.Id;
             Name = savedVariableDescription.Name;
             Description = savedVariableDescription.Description;
             TypeHint = savedVariableDescription.TypeHint;
+            
+            if (savedVariableDescription.DefaultValue != null)
+            {
+                // we build a new literal based on the variable type.
+                var literalType = TypeHint.GetMatchingLiteralType();
+                DefaultValue = literalType.BuildLiteral(savedVariableDescription.DefaultValue);
+            }
+            
+            
             if (savedVariableDescription.CustomizerDescription != null)
             {
-                CustomizerDescription.LoadFrom(savedVariableDescription.CustomizerDescription);
+                CustomizerDescription.LoadFrom(this, savedVariableDescription.CustomizerDescription);
             }
             else
             {
-                CustomizerDescription.Reset();
+                CustomizerDescription = new VariableCustomizerDescription();
             }
         }
 
@@ -52,6 +69,7 @@ namespace OpenScadGraphEditor.Library
             savedVariableDescription.Name = Name;
             savedVariableDescription.Description = Description;
             savedVariableDescription.TypeHint = TypeHint;
+            savedVariableDescription.DefaultValue = DefaultValue?.SerializedValue;
             savedVariableDescription.CustomizerDescription = new SavedVariableCustomizerDescription();
             CustomizerDescription.SaveInto(savedVariableDescription.CustomizerDescription);
         }

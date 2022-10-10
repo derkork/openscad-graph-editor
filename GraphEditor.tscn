@@ -55,7 +55,6 @@ margin_bottom = 131.0
 script = ExtResource( 5 )
 
 [node name="InvokableRefactorDialog" parent="." instance=ExtResource( 4 )]
-visible = false
 margin_bottom = 250.0
 
 [node name="NodeColorDialog" parent="." instance=ExtResource( 16 )]
@@ -65,6 +64,7 @@ margin_bottom = 250.0
 [node name="StylusDebugDialog" parent="." instance=ExtResource( 27 )]
 
 [node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
+visible = false
 
 [node name="FileDialog" type="FileDialog" parent="."]
 anchor_left = 0.5

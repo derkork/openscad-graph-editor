@@ -36,6 +36,13 @@ namespace OpenScadGraphEditor.Library.IO
         public PortType TypeHint { get; set; } = PortType.Any;
 
         /// <summary>
+        /// The default value of the variable, or null if it is not set.
+        /// </summary>
+        [Export]
+        [CanBeNull]
+        public string DefaultValue { get; set; }
+        
+        /// <summary>
         /// Customizer setup for this variable.
         /// </summary>
         [Export]
