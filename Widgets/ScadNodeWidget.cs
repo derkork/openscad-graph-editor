@@ -37,7 +37,7 @@ namespace OpenScadGraphEditor.Widgets
         /// <summary>
         /// Whether or not the title should be rendered.
         /// </summary>
-        public virtual bool RenderTitle => true;
+        protected virtual bool RenderTitle => true;
 
         public override void _Ready()
         {
@@ -60,14 +60,7 @@ namespace OpenScadGraphEditor.Widgets
             }
             
             var modifiers = BoundNode.GetModifiers();
-            if (modifiers.HasFlag(ScadNodeModifier.Disable))
-            {
-                Modulate = new Color(1, 1, 1, 0.3f);
-            }
-            else
-            {
-                Modulate = Colors.White;
-            }
+            Modulate = modifiers.HasFlag(ScadNodeModifier.Disable) ? new Color(1, 1, 1, 0.3f) : Colors.White;
 
             var maxPorts = Mathf.Max(node.InputPortCount, node.OutputPortCount);
 
@@ -225,67 +218,8 @@ namespace OpenScadGraphEditor.Widgets
 
             if (node.TryGetLiteral(port, out var literal))
             {
-                switch (literal)
-                {
-                    case BooleanLiteral booleanLiteral:
-                        if (!(existingWidget is BooleanEdit booleanEdit))
-                        {
-                            booleanEdit = Prefabs.New<BooleanEdit>();
-                        }
-
-                        booleanEdit.BindTo(booleanLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
-                        literalWidget = booleanEdit;
-                        break;
-
-                    case NumberLiteral numberLiteral:
-                        if (!(existingWidget is NumberEdit numberEdit))
-                        {
-                            numberEdit = Prefabs.New<NumberEdit>();
-                        }
-
-                        numberEdit.BindTo(numberLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
-                        literalWidget = numberEdit;
-                        break;
-
-                    case StringLiteral stringLiteral:
-                        if (!(existingWidget is StringEdit stringEdit))
-                        {
-                            stringEdit = Prefabs.New<StringEdit>();
-                        }
-
-                        stringEdit.BindTo(stringLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
-                        literalWidget = stringEdit;
-                        break;
-                    
-                    case NameLiteral nameLiteral:
-                        if (!(existingWidget is NameEdit nameEdit))
-                        {
-                            nameEdit = Prefabs.New<NameEdit>();
-                        }
-                        nameEdit.BindTo(nameLiteral, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
-                        literalWidget = nameEdit;
-                        break;
-
-                    case Vector3Literal vector3Literal:
-                        if (!(existingWidget is Vector3Edit vector3Edit))
-                        {
-                            vector3Edit = Prefabs.New<Vector3Edit>();
-                        }
-
-                        vector3Edit.BindTo(vector3Literal, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
-                        literalWidget = vector3Edit;
-                        break;
-
-                    case Vector2Literal vector2Literal:
-                        if (!(existingWidget is Vector2Edit vector2Edit))
-                        {
-                            vector2Edit = Prefabs.New<Vector2Edit>();
-                        }
-
-                        vector2Edit.BindTo(vector2Literal, port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected);
-                        literalWidget = vector2Edit;
-                        break;
-                }
+                literalWidget = literal.BuildWidget(port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected,
+                    existingWidget);
             }
 
             if (existingWidget != null && existingWidget != literalWidget)

@@ -16,18 +16,21 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
     {
         public event Action<Refactoring[]> RefactoringsRequested;
 
+        private ScadProject _currentProject;
+        private VariableDescription _baseDescription;
+        private DialogMode _mode = DialogMode.Edit;
+
         private LineEdit _nameEdit;
         private LineEdit _descriptionEdit;
         private PortTypeSelector _typeHintOptionButton;
+        private Label _defaultValueLabel;
+        private Control _defaultValueControl;
+        private IScadLiteral _defaultValueLiteral;
 
-        private VariableDescription _baseDescription;
-
-        private DialogMode _mode = DialogMode.Edit;
-        private Button _okButton;
-        private Label _errorLabel;
-        private ScadProject _currentProject;
         private OptionButton _constraintTypeOptionButton;
         private CheckBox _showInCustomizerCheckBox;
+        private Label _customizerTabLabel;
+        private LineEdit _customizerTabEdit;
         private Label _constraintsLabel;
         private Control _constraintSpacer;
         private Control _minStepMaxContainer;
@@ -46,6 +49,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private IconButton.IconButton _templateDownButton;
         private readonly List<KeyValueLine> _keyValueLines = new List<KeyValueLine>();
         
+        private Button _okButton;
+        private Label _errorLabel;
         
         
 
@@ -65,10 +70,15 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 .Connect("item_selected")
                 .To(this, nameof(OnVariableTypeChanged));
 
+            _defaultValueLabel = this.WithName<Label>("DefaultValueLabel");
+            _defaultValueControl = this.WithName<Control>("DefaultValueControl");
             
             _showInCustomizerCheckBox = this.WithName<CheckBox>("ShowInCustomizerCheckBox");
             _showInCustomizerCheckBox.Connect("toggled")
                 .To(this, nameof(OnShowInCustomizerChanged));
+
+            _customizerTabLabel = this.WithName<Label>("CustomizerTabLabel");
+            _customizerTabEdit = this.WithName<LineEdit>("CustomizerTabEdit");
             
             _constraintsLabel = this.WithName<Label>("ConstraintsLabel");
             
@@ -263,6 +273,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             if (currentlyDown)
             {
                 // turn on the customizer parts
+                _customizerTabLabel.Visible = true;
+                _customizerTabEdit.Visible = true;
                 _constraintsLabel.Visible = true;
                 _constraintTypeOptionButton.Visible = true;
                 // show the relevant parts for the constraint type
@@ -271,6 +283,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             else
             {
                 // turn off all customizer parts
+                _customizerTabLabel.Visible = false;
+                _customizerTabEdit.Visible = false;
                 _constraintsLabel.Visible = false;
                 _constraintTypeOptionButton.Visible = false;
                 _constraintSpacer.Visible = false;
@@ -284,6 +298,33 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         
         private void OnVariableTypeChanged([UsedImplicitly] int _)
         {
+
+            // change the widget to match the type
+            _defaultValueLiteral = _typeHintOptionButton.SelectedPortType.GetMatchingLiteralType().BuildLiteral();
+            var newLiteralWidget =
+                _defaultValueLiteral.BuildWidget(false, true, false, _defaultValueControl as IScadLiteralWidget);
+
+            if (newLiteralWidget != null)
+            {
+                // check if we re-used the old widget and if not, replace the old widget with the new one
+                if (newLiteralWidget != _defaultValueControl)
+                {
+                    _defaultValueControl.GetParent().AddChildBelowNode(_defaultValueControl, (Control)newLiteralWidget);
+                    _defaultValueControl.RemoveAndFree();
+                    _defaultValueControl = (Control) newLiteralWidget;
+                }
+                
+                // make sure the default value line is visible
+                _defaultValueControl.Visible = true;
+                _defaultValueLabel.Visible = true;
+            }
+            else
+            {
+                // keep the old widget but hide the whole default value line
+                _defaultValueControl.Visible = false;
+                _defaultValueLabel.Visible = false;
+            }
+            
             // save the currently selected constraint type, so we keep it if it is compatible
             var currentConstraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId();
             

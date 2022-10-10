@@ -10,7 +10,7 @@ namespace OpenScadGraphEditor.Widgets
     {
         private Vector2 _portSize;
         protected override Theme UseTheme => Resources.SimpleNodeWidgetTheme;
-        public override bool RenderTitle => false;
+        protected override bool RenderTitle => false;
 
 
         public override void _Ready()
