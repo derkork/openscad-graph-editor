@@ -41,6 +41,12 @@ namespace OpenScadGraphEditor.Library.IO
         [Export]
         [CanBeNull]
         public string DefaultValue { get; set; }
+
+        /// <summary>
+        /// Should the variable be shown in the customizer?
+        /// </summary>
+        [Export]
+        public bool ShowInCustomizer { get; set; } = true;
         
         /// <summary>
         /// Customizer setup for this variable.

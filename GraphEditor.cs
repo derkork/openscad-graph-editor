@@ -430,7 +430,7 @@ namespace OpenScadGraphEditor
 
         private void Clear()
         {
-            _currentProject?.Discard();
+            _currentProject = null;
             _currentHistoryStack = null;
             _currentFile = null;
             _fileNameLabel.Text = "<not yet saved to a file>";

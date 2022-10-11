@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Library.IO;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
@@ -107,10 +110,7 @@ namespace OpenScadGraphEditor.Library
             _projectFunctionDescriptions.Clear();
             _projectModuleDescriptions.Clear();
             _projectVariables.Clear();
-            _modules.ForAll(it => it.Discard());
-            _functions.ForAll(it => it.Discard());
 
-            MainModule.Discard();
             MainModule = null;
 
             _modules.Clear();
@@ -197,7 +197,8 @@ namespace OpenScadGraphEditor.Library
         public string Render()
         {
             return string.Join("\n",
-                _externalReferences.Select(it => it.Value.Render())
+                Variables.Select(RenderCustomizedVariable)
+                    .Concat(_externalReferences.Select(it => it.Value.Render()))
                     .Concat(_modules.Select(it => it.Render()))
                     .Concat(_functions.Select(it => it.Render()))
                     .Append(MainModule.Render())
@@ -205,12 +206,98 @@ namespace OpenScadGraphEditor.Library
             );
         }
 
-        public void Discard()
+        private string RenderCustomizedVariable(VariableDescription variableDescription)
         {
-            _modules.ForAll(it => it.Discard());
-            _functions.ForAll(it => it.Discard());
-            MainModule?.Discard();
+            if (!variableDescription.ShowInCustomizer)
+            {
+                return "";
+            }
+
+            var constraint = RenderCustomizerConstraint(variableDescription);
+            var description = variableDescription.Description.Length > 0 ? $"// {variableDescription.Description}\n" : "";
+            var tab = variableDescription.CustomizerDescription.Tab.Length > 0
+                ? $"/* [{variableDescription.CustomizerDescription.Tab}] */\n" : "";
+            var defaultValue = variableDescription.DefaultValue?.RenderedValue ?? "0";
+            
+            return $"{tab}{description}{variableDescription.Name} = {defaultValue}; {constraint}\n";
         }
+
+        private string RenderCustomizerConstraint(VariableDescription variableDescription)
+        {
+            var customizerDescription = variableDescription.CustomizerDescription;
+            
+            switch (customizerDescription.ConstraintType)
+            {
+                case VariableCustomizerConstraintType.None:
+                    return "";
+                case VariableCustomizerConstraintType.MinStepMax:
+                    // if everything is empty we render nothing
+                    if (customizerDescription.Min.Length == 0 &&
+                        customizerDescription.Max.Length == 0 &&
+                        customizerDescription.Step.Length == 0)
+                    {
+                        return "";
+                    }
+                    
+                    var min =  customizerDescription.Min;
+                    var max = customizerDescription.Max;
+                    var step = customizerDescription.Step;
+                    
+                    // if min and max are empty we render step, only
+                    if (min.Length == 0 && max.Length == 0)
+                    {
+                        return $"// {step}";
+                    }
+                    
+                    // if min and step are empty we render max, only
+                    if (min.Length == 0 && step.Length == 0)
+                    {
+                        return $"// [{max}]";
+                    }
+                    
+                    // if at this point max is not set, we set it to 1e307
+                    if (max.Length == 0)
+                    {
+                        max = "1e307";
+                    }
+                    
+                    // then either render a min/max
+                    if (step.Length > 0)
+                    {
+                        // render a min/step/max
+                        return $"// [{min}:{step}:{max}]";
+                    }
+                    
+                    // render a min/max
+                    return $"// [{min}:{max}]";
+                case VariableCustomizerConstraintType.MaxLength:
+                    // max length is very easy.
+                    if (customizerDescription.MaxLength.Length == 0)
+                    {
+                        return "";
+                    }
+                    return $"// {customizerDescription.MaxLength}";
+                case VariableCustomizerConstraintType.Options:
+                    // and finally the value-label-pairs. we always render both value and label. if the label is empty
+                    // we render the value as label.
+                    if (customizerDescription.ValueLabelPairs.Count == 0)
+                    {
+                        return "";
+                    }
+                    
+                    var pairs = customizerDescription.ValueLabelPairs.Select(it =>
+                    {
+                        var value = it.Key.RenderedValue;
+                        var label = it.Value.Value.Length >0 ? it.Value.RenderedValue : value;
+                        return $"{value}:{label}";
+                    });
+                    return $"// [{string.Join(",", pairs)}]";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
 
         public ScadGraph AddInvokable(InvokableDescription invokableDescription)
         {
@@ -241,12 +328,10 @@ namespace OpenScadGraphEditor.Library
                 case FunctionDescription _:
                     _functions.Remove(graph);
                     _projectFunctionDescriptions.Remove(description.Id);
-                    graph.Discard();
                     break;
                 case ModuleDescription _:
                     _modules.Remove(graph);
                     _projectModuleDescriptions.Remove(description.Id);
-                    graph.Discard();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

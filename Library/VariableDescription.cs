@@ -27,6 +27,11 @@ namespace OpenScadGraphEditor.Library
         public PortType TypeHint { get; set; } = PortType.Any;
 
         /// <summary>
+        /// Should the variable appear in the customizer?
+        /// </summary>
+        public bool ShowInCustomizer { get; set; } = true;
+        
+        /// <summary>
         /// Customizer description.
         /// </summary>
         public VariableCustomizerDescription CustomizerDescription { get; set; } = new VariableCustomizerDescription();
@@ -36,7 +41,7 @@ namespace OpenScadGraphEditor.Library
         /// The default value of this variable or null if there is no default value.
         /// </summary>
         [CanBeNull]
-        public IScadLiteral DefaultValue { get; set; } = null;
+        public IScadLiteral DefaultValue { get; set; }
         
         public void LoadFrom(SavedVariableDescription savedVariableDescription)
         {
@@ -44,6 +49,7 @@ namespace OpenScadGraphEditor.Library
             Name = savedVariableDescription.Name;
             Description = savedVariableDescription.Description;
             TypeHint = savedVariableDescription.TypeHint;
+            ShowInCustomizer = savedVariableDescription.ShowInCustomizer;
             
             if (savedVariableDescription.DefaultValue != null)
             {
@@ -70,6 +76,7 @@ namespace OpenScadGraphEditor.Library
             savedVariableDescription.Description = Description;
             savedVariableDescription.TypeHint = TypeHint;
             savedVariableDescription.DefaultValue = DefaultValue?.SerializedValue;
+            savedVariableDescription.ShowInCustomizer = ShowInCustomizer;
             savedVariableDescription.CustomizerDescription = new SavedVariableCustomizerDescription();
             CustomizerDescription.SaveInto(savedVariableDescription.CustomizerDescription);
         }
