@@ -41,6 +41,13 @@ namespace OpenScadGraphEditor.Library.IO
         /// </summary>
         [Export]
         public string Max { get; set; } = "";
+        
+        /// <summary>
+        /// When the constraint type is <see cref="VariableCustomizerConstraintType.MaxLength"/>, this property contains
+        /// the maximum length of the string.
+        /// </summary>
+        [Export]
+        public string MaxLength { get; set; } = "";
 
         /// <summary>
         /// When the constraint type is <see cref="VariableCustomizerConstraintType.Options"/>, this property contains

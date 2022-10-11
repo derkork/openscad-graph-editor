@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using Godot.Collections;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
@@ -38,12 +38,19 @@ namespace OpenScadGraphEditor.Library
         /// the maximum value of the variable.
         /// </summary>
         public string Max { get; set; } = "";
+        
+        /// <summary>
+        /// When the constraint type is <see cref="VariableCustomizerConstraintType.MaxLength"/>, this property contains
+        /// the maximum length of the string.
+        /// </summary>
+        public string MaxLength { get; set; } = "";
 
         /// <summary>
         /// When the constraint type is <see cref="VariableCustomizerConstraintType.Options"/>, this property contains
         /// the value and display name of the options.
         /// </summary>
-        public Dictionary<IScadLiteral, IScadLiteral> ValueLabelPairs { get; set; } = new Dictionary<IScadLiteral, IScadLiteral>();
+        // we use a Godot dictionary here because it preserves insert order which is useful in this case
+        public Dictionary<IScadLiteral, StringLiteral> ValueLabelPairs { get; set; } = new Dictionary<IScadLiteral, StringLiteral>();
 
         /// <summary>
         /// Loads the variable customizer description from the specified saved data.
@@ -55,7 +62,8 @@ namespace OpenScadGraphEditor.Library
             Min = saved.Min;
             Step = saved.Step;
             Max = saved.Max;
-            ValueLabelPairs = new Dictionary<IScadLiteral, IScadLiteral>();
+            MaxLength = saved.MaxLength;
+            ValueLabelPairs = new Dictionary<IScadLiteral, StringLiteral>();
             foreach (var pair in saved.ValueLabelPairs)
             {
                 try
@@ -95,7 +103,8 @@ namespace OpenScadGraphEditor.Library
             saved.Min = Min;
             saved.Step = Step;
             saved.Max = Max;
-            saved.ValueLabelPairs = new Godot.Collections.Dictionary<string, string>();
+            saved.MaxLength = MaxLength;
+            saved.ValueLabelPairs = new Dictionary<string, string>();
             foreach (var pair in ValueLabelPairs)
             {
                 saved.ValueLabelPairs.Add(pair.Key.SerializedValue, pair.Value.SerializedValue);

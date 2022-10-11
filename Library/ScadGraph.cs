@@ -182,10 +182,6 @@ namespace OpenScadGraphEditor.Library
             return _connections;
         }
 
-        public void Discard()
-        {
-        }
-
         public void RemoveConnection(ScadConnection connection)
         {
             var removed = _connections.Remove(connection);
