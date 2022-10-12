@@ -13,7 +13,7 @@ namespace OpenScadGraphEditor.Widgets
 {
     public class ScadNodeWidget : GraphNode
     {
-        public event Action<PortId, object> LiteralValueChanged;
+        public event Action<PortId, IScadLiteral> LiteralValueChanged;
         public event Action<PortId, bool> LiteralToggled;
 
         /// <summary>

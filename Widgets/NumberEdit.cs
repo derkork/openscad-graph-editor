@@ -1,4 +1,3 @@
-using System.Globalization;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
@@ -13,7 +12,7 @@ namespace OpenScadGraphEditor.Widgets
 
         protected override void OnFocusExited()
         {
-            EmitValueChange(!Control.Text.SafeTryParse(out var result) ? 0d : result);
+            EmitValueChange(new NumberLiteral(!Control.Text.SafeTryParse(out var result) ? 0d : result));
         }
     }
 }

@@ -9,7 +9,7 @@ namespace OpenScadGraphEditor.Widgets
     public abstract class LiteralWidgetBase<TControl,TLiteral> : HBoxContainer, IScadLiteralWidget where TControl:Control where TLiteral:IScadLiteral
     {
         private IconButton.IconButton _toggleButton;
-        public event Action<object> LiteralValueChanged;
+        public event Action<IScadLiteral> LiteralValueChanged;
         public event Action<bool> LiteralToggled;
         
         protected TControl Control { get; private set; }
@@ -103,7 +103,7 @@ namespace OpenScadGraphEditor.Widgets
         protected abstract void ApplyControlValue();
         
 
-        protected void EmitValueChange(object value)
+        protected void EmitValueChange(IScadLiteral value)
         {
             if (!_silenceEvents)
             {

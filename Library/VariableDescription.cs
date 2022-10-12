@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -77,7 +78,7 @@ namespace OpenScadGraphEditor.Library
             savedVariableDescription.TypeHint = TypeHint;
             savedVariableDescription.DefaultValue = DefaultValue?.SerializedValue;
             savedVariableDescription.ShowInCustomizer = ShowInCustomizer;
-            savedVariableDescription.CustomizerDescription = new SavedVariableCustomizerDescription();
+            savedVariableDescription.CustomizerDescription = Prefabs.New<SavedVariableCustomizerDescription>();
             CustomizerDescription.SaveInto(savedVariableDescription.CustomizerDescription);
         }
     }

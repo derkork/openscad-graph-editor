@@ -8,6 +8,13 @@ namespace OpenScadGraphEditor.Nodes
         public double Y { get; set; }
         public double Z { get; set; }
 
+        public Vector3Literal(double x, double y, double z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+        
         public override string RenderedValue => $"[{X.SafeToString()}, {Y.SafeToString()}, {Z.SafeToString()}]";
 
         public override string SerializedValue

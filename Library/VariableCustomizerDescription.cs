@@ -1,5 +1,5 @@
 ﻿using System;
-using Godot.Collections;
+using System.Collections.Generic;
 using OpenScadGraphEditor.Library.IO;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
@@ -49,8 +49,8 @@ namespace OpenScadGraphEditor.Library
         /// When the constraint type is <see cref="VariableCustomizerConstraintType.Options"/>, this property contains
         /// the value and display name of the options.
         /// </summary>
-        // we use a Godot dictionary here because it preserves insert order which is useful in this case
-        public Dictionary<IScadLiteral, StringLiteral> ValueLabelPairs { get; set; } = new Dictionary<IScadLiteral, StringLiteral>();
+        /// we use list/tuple to preserve the order of the options
+        public List<(IScadLiteral Value, StringLiteral Label)> ValueLabelPairs { get; } = new List<(IScadLiteral Value, StringLiteral Label)>();
 
         /// <summary>
         /// Loads the variable customizer description from the specified saved data.
@@ -63,7 +63,7 @@ namespace OpenScadGraphEditor.Library
             Step = saved.Step;
             Max = saved.Max;
             MaxLength = saved.MaxLength;
-            ValueLabelPairs = new Dictionary<IScadLiteral, StringLiteral>();
+            ValueLabelPairs.Clear(); 
             foreach (var pair in saved.ValueLabelPairs)
             {
                 try
@@ -82,7 +82,7 @@ namespace OpenScadGraphEditor.Library
                     // the label is always a string
                     var label = new StringLiteral(pair.Value);
 
-                    ValueLabelPairs.Add(value, label);
+                    ValueLabelPairs.Add((value, label));
                 }
                 catch (Exception e)
                 {
@@ -104,10 +104,11 @@ namespace OpenScadGraphEditor.Library
             saved.Step = Step;
             saved.Max = Max;
             saved.MaxLength = MaxLength;
-            saved.ValueLabelPairs = new Dictionary<string, string>();
+            // godot dictionaries preserve insert order, so we can use them here
+            saved.ValueLabelPairs = new Godot.Collections.Dictionary<string, string>();
             foreach (var pair in ValueLabelPairs)
             {
-                saved.ValueLabelPairs.Add(pair.Key.SerializedValue, pair.Value.SerializedValue);
+                saved.ValueLabelPairs.Add(pair.Value.SerializedValue, pair.Label.SerializedValue);
             }
             
         }

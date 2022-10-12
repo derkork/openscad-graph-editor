@@ -1,6 +1,5 @@
 using Godot;
 using GodotExt;
-using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
@@ -21,9 +20,9 @@ namespace OpenScadGraphEditor.Widgets
             Control.Pressed = Literal.Value;
         }
 
-        private void NotifyChanged([UsedImplicitly] bool value)
+        private void NotifyChanged(bool value)
         {
-            EmitValueChange(value);
+            EmitValueChange(new BooleanLiteral(value));
         }
     }
 }

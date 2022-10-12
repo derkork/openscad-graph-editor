@@ -379,10 +379,10 @@ namespace OpenScadGraphEditor.Nodes
                     literal = new StringLiteral(portDefinition.DefaultValueAsString);
                     break;
                 case LiteralType.Vector3:
-                    literal = new Vector3Literal();
+                    literal = new Vector3Literal(0, 0, 0);
                     break;
                 case LiteralType.Vector2:
-                    literal = new Vector2Literal();
+                    literal = new Vector2Literal(0, 0);
                     break;
                 case LiteralType.Name:
                     literal = new NameLiteral(portDefinition.DefaultValueAsString);

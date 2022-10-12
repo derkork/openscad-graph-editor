@@ -49,7 +49,7 @@ namespace OpenScadGraphEditor.Widgets
                 }
             }
             
-            EmitValueChange(newValue);
+            EmitValueChange(new NameLiteral(newValue));
         }
     }
 }

@@ -16,6 +16,10 @@ namespace OpenScadGraphEditor.Widgets
             // select everything on focus
             this.Connect("focus_entered")
                 .To(this, nameof(SelectOnFocusEntered));
+            
+            // unselect everything on focus lost
+            this.Connect("focus_exited")
+                .To(this, nameof(DeselectOnFocusExited));
 
         }
         
@@ -37,8 +41,13 @@ namespace OpenScadGraphEditor.Widgets
         
         private void SelectOnFocusEntered()
         {
-            CallDeferred("select_all");
+            CallDeferred(nameof(SelectAll).ToSnakeCase());
         }
         
+        
+        private void DeselectOnFocusExited()
+        {
+            CallDeferred(nameof(Deselect).ToSnakeCase());
+        }
     }
 }
