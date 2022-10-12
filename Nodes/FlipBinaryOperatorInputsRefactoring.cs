@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes.SwitchableBinaryOperator;
 using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Nodes

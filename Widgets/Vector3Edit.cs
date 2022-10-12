@@ -1,4 +1,3 @@
-using System.Globalization;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Nodes;
@@ -48,14 +47,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnFocusExited()
         {
-            var array = new[]
-            {
-                ParseDouble(_x),
-                ParseDouble(_y),
-                ParseDouble(_z)
-            };
-            
-            EmitValueChange(array);
+            EmitValueChange(new Vector3Literal(ParseDouble(_x), ParseDouble(_y), ParseDouble(_z)));
         }
         
         private static double ParseDouble(LineEdit lineEdit)

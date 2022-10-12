@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Library.IO;
@@ -215,8 +213,15 @@ namespace OpenScadGraphEditor.Library
 
             var constraint = RenderCustomizerConstraint(variableDescription);
             var description = variableDescription.Description.Length > 0 ? $"// {variableDescription.Description}\n" : "";
-            var tab = variableDescription.CustomizerDescription.Tab.Length > 0
-                ? $"/* [{variableDescription.CustomizerDescription.Tab}] */\n" : "";
+            // the tab name must be sanitized so it doesn't break the comment and tab notation syntax
+            // we strip out all occurrences of '*/' and '[' and ']' and replace them with
+            // underscores.
+            var tabName = variableDescription.CustomizerDescription.Tab
+                .Replace("*/", "__")
+                .Replace("[", "_")
+                .Replace("]", "_");
+            
+            var tab = tabName.Length > 0 ? $"/* [{tabName}] */\n" : "";
             var defaultValue = variableDescription.DefaultValue?.RenderedValue ?? "0";
             
             return $"{tab}{description}{variableDescription.Name} = {defaultValue}; {constraint}\n";
@@ -246,13 +251,28 @@ namespace OpenScadGraphEditor.Library
                     // if min and max are empty we render step, only
                     if (min.Length == 0 && max.Length == 0)
                     {
-                        return $"// {step}";
+                        // for number types there is a simplified rendering and we use that
+                        if (variableDescription.TypeHint == PortType.Number)
+                        {
+                            return $"// {step}";
+                        }
+                        // for other types (vectors) we need to render the full constraint and 
+                        // we put in a default min and max
+
+                        return $"// [-1e307:{step}:1e307]";
                     }
                     
                     // if min and step are empty we render max, only
                     if (min.Length == 0 && step.Length == 0)
                     {
-                        return $"// [{max}]";
+                        // again we have a simplified rendering for number types
+                        if (variableDescription.TypeHint == PortType.Number)
+                        {
+                            return $"// [{max}]";
+                        }
+                        // for other types we need to render the full constraint and assume a step of 1
+
+                        return $"// [-1e307:1:{max}]";
                     }
                     
                     // if at this point max is not set, we set it to 1e307
@@ -287,8 +307,9 @@ namespace OpenScadGraphEditor.Library
                     
                     var pairs = customizerDescription.ValueLabelPairs.Select(it =>
                     {
-                        var value = it.Key.RenderedValue;
-                        var label = it.Value.Value.Length >0 ? it.Value.RenderedValue : value;
+                        var value = it.Value.RenderedValue;
+                        // use the value as label if the label is empty
+                        var label = it.Label.Value.Length >0 ? it.Label.RenderedValue : value;
                         return $"{value}:{label}";
                     });
                     return $"// [{string.Join(",", pairs)}]";

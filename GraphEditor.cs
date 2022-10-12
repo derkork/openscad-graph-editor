@@ -382,21 +382,21 @@ namespace OpenScadGraphEditor
                 }
             }
 
-            if (entry is ScadVariableTreeEntry scadVariableListEntry)
+            if (entry is ScadVariableTreeEntry scadVariableTreeEntry)
             {
-                if (_currentProject.IsDefinedInThisProject(scadVariableListEntry.Description))
+                if (_currentProject.IsDefinedInThisProject(scadVariableTreeEntry.Description))
                 {
-                    actions.Add(new QuickAction($"Refactor {scadVariableListEntry.Description.Name}",
-                            () => _variableRefactorDialog.Open(scadVariableListEntry.Description, _currentProject)
+                    actions.Add(new QuickAction($"Refactor {scadVariableTreeEntry.Description.Name}",
+                            () => _variableRefactorDialog.Open(scadVariableTreeEntry.Description, _currentProject)
                         )
                     );
                     actions.Add(new QuickAction(deleteTitle,
                         () => OnRefactoringRequested(
-                            deleteTitle, new DeleteVariableRefactoring(scadVariableListEntry.Description))));
+                            deleteTitle, new DeleteVariableRefactoring(scadVariableTreeEntry.Description))));
                 }
 
-                actions.Add(new QuickAction($"Find usages of {scadVariableListEntry.Description.Name}",
-                    () => FindAndShowUsages(scadVariableListEntry.Description)));
+                actions.Add(new QuickAction($"Find usages of {scadVariableTreeEntry.Description.Name}",
+                    () => FindAndShowUsages(scadVariableTreeEntry.Description)));
             }
 
             if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry &&
@@ -419,12 +419,21 @@ namespace OpenScadGraphEditor
             _quickActionsPopup.Open(mousePosition, actions);
         }
 
+        /// <summary>
+        /// Opens the given project tree entry for editing.
+        /// </summary>
         private void Open(ProjectTreeEntry entry)
         {
             if (entry is ScadInvokableTreeEntry invokableTreeEntry
                 && _currentProject.IsDefinedInThisProject(invokableTreeEntry.Description))
             {
                 Open(_currentProject.FindDefiningGraph(invokableTreeEntry.Description));
+            }
+            
+            if (entry is ScadVariableTreeEntry variableTreeEntry
+                && _currentProject.IsDefinedInThisProject(variableTreeEntry.Description))
+            {
+                _variableRefactorDialog.Open(variableTreeEntry.Description, _currentProject);
             }
         }
 

@@ -11,7 +11,7 @@ namespace OpenScadGraphEditor.Widgets
 
         protected override void OnFocusExited()
         {
-            EmitValueChange(Control.Text);
+            EmitValueChange(new StringLiteral(Control.Text));
         }
     }
 }

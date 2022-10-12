@@ -60,10 +60,10 @@ namespace OpenScadGraphEditor.Nodes
                     result =  new NumberLiteral(0);
                     break;
                 case LiteralType.Vector2:
-                    result =  new Vector2Literal();
+                    result =  new Vector2Literal(0,0);
                     break;
                 case LiteralType.Vector3:
-                    result =  new Vector3Literal();
+                    result =  new Vector3Literal(0,0,0);
                     break;
                 case LiteralType.String:
                     result =  new StringLiteral("");

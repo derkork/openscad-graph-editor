@@ -6,6 +6,12 @@ namespace OpenScadGraphEditor.Nodes
     {
         public double X { get;  set; }
         public double Y { get; set; }
+        
+        public Vector2Literal(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
 
         public override string RenderedValue => $"[{X.SafeToString()}, {Y.SafeToString()}]";
 

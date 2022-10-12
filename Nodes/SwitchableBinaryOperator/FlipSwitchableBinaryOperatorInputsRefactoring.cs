@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using GodotExt;
+﻿using System.Linq;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
