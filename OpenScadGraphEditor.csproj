@@ -21,6 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="addons\foldout\foldout.gd" />
     <Content Include="addons\GodotXUnit\.gitignore" />
     <Content Include="addons\GodotXUnit\assets\check.png" />
     <Content Include="addons\GodotXUnit\assets\check.png.import" />
@@ -36,6 +37,7 @@
     <Content Include="addons\GodotXUnit\README" />
     <Content Include="addons\GodotXUnit\XUnitDock.tscn" />
     <Content Include="addons\GodotXUnit\_work\.gdignore" />
+    <Content Include="addons\rotate_container\rotate_container.gd" />
     <Content Include="LICENSE" />
     <Content Include="README.md" />
     <Content Include="Tests\Data\import_test.scad" />
@@ -51,9 +53,6 @@
     <Compile Remove="Library\ICanBeRendered.cs" />
     <Compile Remove="Library\IScadGraph.cs" />
     <Compile Remove="Nodes\MainEntryPoint.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="addons" />
   </ItemGroup>
 
   <PropertyGroup>

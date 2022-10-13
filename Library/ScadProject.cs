@@ -313,7 +313,6 @@ namespace OpenScadGraphEditor.Library
                         return $"{value}:{label}";
                     });
                     return $"// [{string.Join(",", pairs)}]";
-                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
