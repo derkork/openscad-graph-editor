@@ -359,18 +359,20 @@ margin_bottom = 1080.0
 
 [node name="LowerFoldout" type="MarginContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 margin_right = 1920.0
-
-[node name="UsageDialog" parent="MarginContainer/VBoxContainer/VBoxContainer/LowerFoldout" instance=ExtResource( 19 )]
-visible = false
-anchor_right = 0.0
-margin_right = 1920.0
-margin_bottom = 300.0
+script = ExtResource( 29 )
+ControlButtons = [ NodePath("../FoldoutButtonBar/ConsoleButton"), NodePath("../FoldoutButtonBar/UsageButton") ]
 
 [node name="LogConsole" parent="MarginContainer/VBoxContainer/VBoxContainer/LowerFoldout" instance=ExtResource( 23 )]
 visible = false
 anchor_right = 0.0
 margin_right = 1920.0
 margin_bottom = 350.0
+
+[node name="UsageDialog" parent="MarginContainer/VBoxContainer/VBoxContainer/LowerFoldout" instance=ExtResource( 19 )]
+visible = false
+anchor_right = 0.0
+margin_right = 1920.0
+margin_bottom = 300.0
 
 [node name="FoldoutButtonBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer"]
 margin_top = 8.0
@@ -380,13 +382,14 @@ margin_bottom = 44.0
 [node name="ConsoleButton" type="ToolButton" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldoutButtonBar"]
 margin_right = 81.0
 margin_bottom = 36.0
+toggle_mode = true
 text = "Console"
 
 [node name="UsageButton" type="ToolButton" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldoutButtonBar"]
-visible = false
-margin_left = 118.0
-margin_right = 209.0
-margin_bottom = 41.0
+margin_left = 89.0
+margin_right = 156.0
+margin_bottom = 36.0
+toggle_mode = true
 text = "Usage"
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer"]

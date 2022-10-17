@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
@@ -10,6 +11,9 @@ namespace OpenScadGraphEditor.Widgets
     {
         private List<NodePath> _controlButtons = new List<NodePath>();
 
+        
+        public event Action<bool> OnFoldoutChanged;
+        
         [Export]
         public List<NodePath> ControlButtons
         {
@@ -23,10 +27,40 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void _Ready()
         {
-            for (int i = 0; i < ControlButtons.Count; i++)
+            for (var i = 0; i < ControlButtons.Count; i++)
             {
                 var button = GetNode<Button>(ControlButtons[i]);
                 button.Connect("pressed", this, nameof(OnButtonPressed), new Godot.Collections.Array {i, button});
+            }
+        }
+        
+        public void ShowChild(Control child)
+        {
+            var index = GetChildren().IndexOf(child);
+            GdAssert.That(index > -1, "Tried to show non-existing child");
+            var button = GetNode<Button>(ControlButtons[index]);
+
+            child.Visible = true;
+            button.Pressed = true;
+            
+            // hide all other children
+            for (var i = 0; i < GetChildCount(); i++)
+            {
+                if (i == index)
+                {
+                    continue;
+                }
+                GetChild<Control>(i).Visible = false;
+            }
+            
+            // mark all other buttons as not pressed
+            for (var i = 0; i < ControlButtons.Count; i++)
+            {
+                if (i == index)
+                {
+                    continue;
+                }
+                GetNode<Button>(ControlButtons[i]).Pressed = false;
             }
         }
 
@@ -58,6 +92,7 @@ namespace OpenScadGraphEditor.Widgets
 
             // if no child is visible hide the whole foldout
             Visible = this.GetChildNodes<Control>().Any(child => child.Visible);
+            OnFoldoutChanged?.Invoke(Visible);
         }
 
 
