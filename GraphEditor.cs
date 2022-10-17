@@ -34,11 +34,8 @@ namespace OpenScadGraphEditor
     [UsedImplicitly]
     public class GraphEditor : Control, ICanPerformRefactorings
     {
-        // TODO: this class gets _really_ big.
-
         private AddDialog _addDialog;
         private QuickActionsPopup _quickActionsPopup;
-        private Control _editingInterface;
         private TextEdit _textEdit;
         private FileDialog _fileDialog;
         private ProjectTree _projectTree;
@@ -65,6 +62,8 @@ namespace OpenScadGraphEditor
         private UsageDialog _usageDialog;
         private DocumentationDialog _documentationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
+        private Foldout _leftFoldout;
+        private SplitContainer _editingInterface;
 
         private readonly List<IAddDialogEntryFactory> _addDialogEntryFactories =
             typeof(IAddDialogEntryFactory)
@@ -73,9 +72,8 @@ namespace OpenScadGraphEditor
                 .ToList();
 
         private ScadGraph _copyBuffer;
-        private Button _consoleButton;
-        private Button _usageButton;
         private LogConsole _logConsole;
+        private Foldout _lowerFoldout;
 
         private bool _codeChanged;
         private bool _refactoringInProgress;
@@ -88,6 +86,7 @@ namespace OpenScadGraphEditor
         public override void _Ready()
         {
             _logConsole = this.WithName<LogConsole>("LogConsole");
+            _lowerFoldout = this.WithName<Foldout>("LowerFoldout");
             var logFile = OS.GetUserDataDir() + "/log.txt";
             
             OS.SetWindowTitle($"OpenSCAD Graph Editor ({AppVersion.Version})");
@@ -131,16 +130,6 @@ namespace OpenScadGraphEditor
             _settingsDialog = this.WithName<SettingsDialog>("SettingsDialog");
             _stylusDebugDialog = this.WithName<StylusDebugDialog>("StylusDebugDialog");
             
-            _consoleButton = this.WithName<Button>("ConsoleButton");
-            _consoleButton
-                .Connect("pressed")
-                .To(this, nameof(OnConsoleButtonToggled));
-            
-            _usageButton = this.WithName<Button>("UsageButton");
-            _usageButton
-                .Connect("pressed")
-                .To(this, nameof(OnUsageButtonToggled));
-            
             _helpDialog = this.WithName<HelpDialog>("HelpDialog");
 
             _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
@@ -171,7 +160,7 @@ namespace OpenScadGraphEditor
             _variableRefactorDialog.RefactoringsRequested +=
                 (refactorings) => PerformRefactorings("Rename variable", refactorings);
 
-            _editingInterface = this.WithName<Control>("EditingInterface");
+            _editingInterface = this.WithName<SplitContainer>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");
             _fileDialog = this.WithName<FileDialog>("FileDialog");
             _fileNameLabel = this.WithName<Label>("FileNameLabel");
@@ -214,6 +203,12 @@ namespace OpenScadGraphEditor
             openButton.OpenFileRequested += OnOpenFile;
             openButton.OpenFileDialogRequested += OnOpenFileDialogRequested;
             openButton.Init(_configuration);
+            
+            _leftFoldout = this.WithName<Foldout>("LeftFoldout");
+            _leftFoldout.OnFoldoutChanged += (visible) =>
+            {
+                _editingInterface.Collapsed = !visible;
+            };
 
             this.WithName<Button>("SaveAsButton")
                 .Connect("pressed")
@@ -257,32 +252,7 @@ namespace OpenScadGraphEditor
         {
             _settingsDialog.Open(_configuration);
         }
-        
-        private void OnConsoleButtonToggled()
-        {
-            if (!_logConsole.Visible)
-            {
-                _logConsole.Open();
-                _usageDialog.Hide();
-            }
-            else
-            {
-                _logConsole.Hide();
-            }
-        }
-        
-        private void OnUsageButtonToggled()
-        {
-            if (!_usageDialog.Visible)
-            {
-                _usageDialog.Show();
-                _logConsole.Hide();
-            }
-            else
-            {
-                _usageDialog.Hide();
-            }
-        }
+
 
         private void OnTabChanged(int index)
         {
@@ -468,26 +438,8 @@ namespace OpenScadGraphEditor
             _addDialogEntries.AddRange(
                 _addDialogEntryFactories.SelectMany(it => it.BuildEntries(_currentProject, this))
             );
-
-
-
-            // add an entry for creating a comment
-            // TODO: fix this
-        /*    _addDialogEntries.Add(
-                new SingleNodeBasedEntry(
-                    Resources.ScadBuiltinIcon,
-                    NodeFactory.Build<Comment>,
-                    AddComment
-                )
-            ); */
-
         }
-        
-        
-        private void AddComment(RequestContext context, SingleNodeBasedEntry entry)
-        {
-            _commentEditingDialog.Open(RequestContext.ForPosition(context.Source, context.Position));
-        }
+
 
         private void Undo()
         {
@@ -1312,7 +1264,7 @@ namespace OpenScadGraphEditor
             }
 
             _usageDialog.Open($"Usages of variable {variableDescription.Name}", usagePoints);
-            _usageButton.Show();
+            _lowerFoldout.ShowChild(_usageDialog);
         }
 
         private void FindAndShowUsages(InvokableDescription invokableDescription)
@@ -1330,7 +1282,7 @@ namespace OpenScadGraphEditor
 
             var type = invokableDescription is FunctionDescription ? "function" : "module";
             _usageDialog.Open($"Usages of {type} {invokableDescription.Name}", usagePoints);
-            _usageButton.Show();
+            _lowerFoldout.ShowChild(_usageDialog);
         }
 
         public override void _Notification(int what)

@@ -42,8 +42,6 @@ namespace OpenScadGraphEditor.Widgets.UsageDialog
             {
                 _usageList.AddItem($"{usage.Label}");
             }
-
-            Visible = true;
         }
     }
 }
