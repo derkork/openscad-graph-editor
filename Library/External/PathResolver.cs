@@ -235,7 +235,7 @@ namespace OpenScadGraphEditor.Library.External
 
         private static IEnumerable<string> GetWindowsLibraryPaths()
         {
-            var osSpecificLibraryPath = NormalizePath(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            var osSpecificLibraryPath = NormalizePath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "OpenSCAD", "libraries"));
             return Enumerable.Empty<string>().Append(osSpecificLibraryPath).Concat(GetUserLibraryPaths());
         }
 
