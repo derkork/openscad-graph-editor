@@ -38,6 +38,8 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             _libraryFileBox = this.WithName<Control>("LibraryFileBox");
 
             _libraryFileOptionButton = this.WithName<OptionButton>("LibraryFileOptionButton");
+            _libraryFileOptionButton.Connect("item_selected")
+                .To(this, nameof(OnLibraryFileChanged));
             _importModeOptionButton = this.WithName<OptionButton>("ImportModeOptionButton");
             _pathModeOptionButton = this.WithName<OptionButton>("PathModeOptionButton");
 
@@ -97,6 +99,11 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         }
 
 
+        private void OnLibraryFileChanged([UsedImplicitly] int _)
+        {
+            RefreshUi();
+        }
+        
         private void RefreshUi()
         {
             var pathMode = (ExternalFilePathMode) _pathModeOptionButton.GetSelectedId();
