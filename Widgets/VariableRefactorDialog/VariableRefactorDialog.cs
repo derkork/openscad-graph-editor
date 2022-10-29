@@ -35,10 +35,15 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private Label _constraintsLabel;
         private Control _constraintSpacer;
         private Control _minStepMaxContainer;
-        private LineEdit _minEdit;
-        private LineEdit _stepEdit;
-        private LineEdit _maxEdit;
+        private LineEdit _minStepMaxMinEdit;
+        private LineEdit _minStepMaxStepEdit;
+        private LineEdit _minStepMaxMaxEdit;
         private Control _maxLengthContainer;
+        private Control _maxContainer;
+        private LineEdit _maxEdit;
+        
+        private Control _stepContainer;
+        private LineEdit _stepEdit;
         private LineEdit _maxLengthEdit;
         private Control _keyValuePairContainer;
         private IconButton.IconButton _keyValuePairAddButton;
@@ -90,30 +95,41 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _constraintSpacer = this.WithName<Control>("ConstraintSpacer");
 
             _minStepMaxContainer = this.WithName<Control>("MinStepMaxContainer");
-            _minEdit = this.WithName<LineEdit>("MinEdit");
-            _stepEdit = this.WithName<LineEdit>("StepEdit");
-            _maxEdit = this.WithName<LineEdit>("MaxEdit");
+            _minStepMaxMinEdit = _minStepMaxContainer.WithName<LineEdit>("MinEdit");
+            _minStepMaxStepEdit = _minStepMaxContainer.WithName<LineEdit>("StepEdit");
+            _minStepMaxMaxEdit = _minStepMaxContainer.WithName<LineEdit>("MaxEdit");
 
-            _minEdit.Connect("focus_exited")
-                .WithBinds(_minEdit, true)
+            _minStepMaxMinEdit.Connect("focus_exited")
+                .WithBinds(_minStepMaxMinEdit, false, false)
                 .To(this, nameof(OnNumericFieldChanged));
 
-            _stepEdit.Connect("focus_exited")
-                .WithBinds(_stepEdit, true)
+            _minStepMaxStepEdit.Connect("focus_exited")
+                .WithBinds(_minStepMaxStepEdit, false, true)
                 .To(this, nameof(OnNumericFieldChanged));
-
-            _maxEdit.Connect("focus_exited")
-                .WithBinds(_stepEdit, true)
+            
+            _minStepMaxMaxEdit.Connect("focus_exited")
+                .WithBinds(_minStepMaxMaxEdit, false, false)
                 .To(this, nameof(OnNumericFieldChanged));
 
 
             _maxLengthContainer = this.WithName<Control>("MaxLengthContainer");
             _maxLengthEdit = this.WithName<LineEdit>("MaxLengthEdit");
-
             _maxLengthEdit.Connect("focus_exited")
-                .WithBinds(_maxLengthEdit, false)
+                .WithBinds(_maxLengthEdit, false, false)
                 .To(this, nameof(OnNumericFieldChanged));
 
+            _maxContainer = this.WithName<Control>("MaxContainer");
+            _maxEdit = _maxContainer.WithName<LineEdit>("MaxEdit");
+            _maxEdit.Connect("focus_exited")
+                .WithBinds(_maxEdit, false, false)
+                .To(this, nameof(OnNumericFieldChanged));
+            
+            _stepContainer = this.WithName<Control>("StepContainer");
+            _stepEdit = _stepContainer.WithName<LineEdit>("StepEdit");
+            _stepEdit.Connect("focus_exited")
+                .WithBinds(_stepEdit, false, false)
+                .To(this, nameof(OnNumericFieldChanged));
+            
             _keyValuePairContainer = this.WithName<Control>("KeyValuePairContainer");
             _keyValuePairAddButton = this.WithName<IconButton.IconButton>("KeyValuePairAddButton");
             _keyValuePairAddButton.ButtonPressed += OnAddKeyValuePairPressed;
@@ -200,10 +216,16 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     case VariableCustomizerConstraintType.None:
                         break;
                     case VariableCustomizerConstraintType.MinStepMax:
-                        _minEdit.Text = description.CustomizerDescription.Min;
-                        _stepEdit.Text = description.CustomizerDescription.Step;
+                        _minStepMaxMinEdit.Text = description.CustomizerDescription.Min;
+                        _minStepMaxStepEdit.Text = description.CustomizerDescription.Step;
+                        _minStepMaxMaxEdit.Text = description.CustomizerDescription.Max;
+                        break;
+                    case VariableCustomizerConstraintType.Max:
                         _maxEdit.Text = description.CustomizerDescription.Max;
                         break;
+                    case VariableCustomizerConstraintType.Step:
+                        _stepEdit.Text = description.CustomizerDescription.Step;
+                        break;                    
                     case VariableCustomizerConstraintType.MaxLength:
                         _maxLengthEdit.Text = description.CustomizerDescription.MaxLength;
                         break;
@@ -245,6 +267,12 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _customizerTabEdit.Text = "";
             _baseDescription = null;
             _currentProject = null;
+            _minStepMaxMinEdit.Text = "0";
+            _minStepMaxStepEdit.Text = "1";
+            _minStepMaxMaxEdit.Text = "1";
+            _maxEdit.Text = "0";
+            _stepEdit.Text = "1";
+            _maxLengthEdit.Text = "100";
 
             _valueLabelLines.ForAll(it => it.Discard());
             _valueLabelLines.Clear();
@@ -267,12 +295,18 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 case VariableCustomizerConstraintType.None:
                     break;
                 case VariableCustomizerConstraintType.MinStepMax:
-                    customizerDescription.Min = _minEdit.Text;
-                    customizerDescription.Step = _stepEdit.Text;
-                    customizerDescription.Max = _maxEdit.Text;
+                    customizerDescription.Min = _minStepMaxMinEdit.Text;
+                    customizerDescription.Step = _minStepMaxStepEdit.Text;
+                    customizerDescription.Max = _minStepMaxMaxEdit.Text;
                     break;
                 case VariableCustomizerConstraintType.MaxLength:
                     customizerDescription.MaxLength = _maxLengthEdit.Text;
+                    break;
+                case VariableCustomizerConstraintType.Max:
+                    customizerDescription.Max = _maxEdit.Text;
+                    break;
+                case VariableCustomizerConstraintType.Step:
+                    customizerDescription.Step = _stepEdit.Text;
                     break;
                 case VariableCustomizerConstraintType.Options:
                     // convert the options into literals
@@ -497,6 +531,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 case PortType.Number:
                     _constraintTypeOptionButton.AddItem("Min / Step / Max",
                         (int) VariableCustomizerConstraintType.MinStepMax);
+                    _constraintTypeOptionButton.AddItem("Max", (int) VariableCustomizerConstraintType.Max);
+                    _constraintTypeOptionButton.AddItem("Step", (int) VariableCustomizerConstraintType.Step);
                     _constraintTypeOptionButton.AddItem("Fixed values", (int) VariableCustomizerConstraintType.Options);
                     break;
                 case PortType.Vector2:
@@ -546,6 +582,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     // hide all constraint parts
                     _constraintSpacer.Visible = false;
                     _minStepMaxContainer.Visible = false;
+                    _maxContainer.Visible = false;
+                    _stepContainer.Visible = false;
                     _maxLengthContainer.Visible = false;
                     _keyValuePairContainer.Visible = false;
                     break;
@@ -553,6 +591,26 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     // show the min step max parts + the spacer, hide the rest
                     _constraintSpacer.Visible = true;
                     _minStepMaxContainer.Visible = true;
+                    _maxContainer.Visible = false;
+                    _stepContainer.Visible = false;
+                    _maxLengthContainer.Visible = false;
+                    _keyValuePairContainer.Visible = false;
+                    break;
+                case VariableCustomizerConstraintType.Max:
+                    // show the max parts + the spacer, hide the rest
+                    _constraintSpacer.Visible = true;
+                    _minStepMaxContainer.Visible = false;
+                    _maxContainer.Visible = true;
+                    _stepContainer.Visible = false;
+                    _maxLengthContainer.Visible = false;
+                    _keyValuePairContainer.Visible = false;
+                    break;
+                case VariableCustomizerConstraintType.Step:
+                    // show the step parts + the spacer, hide the rest
+                    _constraintSpacer.Visible = true;
+                    _minStepMaxContainer.Visible = false;
+                    _maxContainer.Visible = false;
+                    _stepContainer.Visible = true;
                     _maxLengthContainer.Visible = false;
                     _keyValuePairContainer.Visible = false;
                     break;
@@ -560,6 +618,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     // show the max length parts + the spacer, hide the rest
                     _constraintSpacer.Visible = true;
                     _minStepMaxContainer.Visible = false;
+                    _maxContainer.Visible = false;
+                    _stepContainer.Visible = false;
                     _maxLengthContainer.Visible = true;
                     _keyValuePairContainer.Visible = false;
                     break;
@@ -567,6 +627,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     // show the key value pair parts + the spacer, hide the rest
                     _constraintSpacer.Visible = true;
                     _minStepMaxContainer.Visible = false;
+                    _maxContainer.Visible = false;
+                    _stepContainer.Visible = false;
                     _maxLengthContainer.Visible = false;
                     _keyValuePairContainer.Visible = true;
                     break;
@@ -624,7 +686,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             {
                 // add a numeric constraint on the values
                 valueEdit.Connect("focus_exited")
-                    .WithBinds(valueEdit, false)
+                    .WithBinds(valueEdit, false, false)
                     .To(this, nameof(OnNumericFieldChanged));
             }
 
@@ -664,7 +726,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     {
                         // add a numeric constraint on the values
                         line.ValueEdit.Connect("focus_exited")
-                            .WithBinds(line.ValueEdit, false)
+                            .WithBinds(line.ValueEdit, false, false)
                             .To(this, nameof(OnNumericFieldChanged));
                     }
 
@@ -737,22 +799,23 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         }
 
 
-        private void OnNumericFieldChanged(LineEdit lineEdit, bool allowEmpty)
+        private void OnNumericFieldChanged(LineEdit lineEdit, bool intOnly, bool allowEmpty)
         {
-            if (allowEmpty && lineEdit.Text == "")
+            if(allowEmpty && string.IsNullOrWhiteSpace(lineEdit.Text))
             {
-                return;
+                lineEdit.Text = "";
             }
-
+            
             if (lineEdit.Text.SafeTryParse(out var result))
             {
                 // text is numeric, allow it.
-                lineEdit.Text = result.SafeToString();
+                // round to nearest int if intOnly is true
+                lineEdit.Text = intOnly ? ((int) Math.Round(result)).ToString() : result.SafeToString();
             }
             else
             {
                 // revert to a good default value
-                lineEdit.Text = allowEmpty ? "" : "0";
+                lineEdit.Text = "0";
             }
         }
 

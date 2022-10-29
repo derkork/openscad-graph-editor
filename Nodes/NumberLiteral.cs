@@ -18,5 +18,7 @@ namespace OpenScadGraphEditor.Nodes
             get => Value.SafeToString();
             set => Value = value.SafeParse();
         }
+
+        public override LiteralType LiteralType => LiteralType.Number;
     }
 }

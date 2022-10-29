@@ -16,5 +16,7 @@ namespace OpenScadGraphEditor.Nodes
             get => Value;
             set => Value = value;
         }
+
+        public override LiteralType LiteralType => LiteralType.Name;
     }
 }

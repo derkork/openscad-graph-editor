@@ -1,0 +1,97 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://ui_theme.tres" type="Theme" id=1]
+[ext_resource path="res://Widgets/IconButton/IconButton.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Icons/down0000.png" type="Texture" id=3]
+[ext_resource path="res://Widgets/VariableCustomizer/VariableCustomizer.cs" type="Script" id=4]
+
+[node name="VariableCustomizer" type="MarginContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 1 )
+script = ExtResource( 4 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_right = 1920.0
+margin_bottom = 1080.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer"]
+margin_right = 1920.0
+margin_bottom = 1080.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+scroll_horizontal_enabled = false
+
+[node name="Sections" type="VBoxContainer" parent="VBoxContainer/ScrollContainer"]
+margin_right = 1920.0
+margin_bottom = 136.0
+size_flags_horizontal = 3
+
+[node name="SectionTemplate" type="PanelContainer" parent="VBoxContainer/ScrollContainer/Sections"]
+margin_right = 1920.0
+margin_bottom = 136.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate"]
+margin_left = 14.0
+margin_top = 14.0
+margin_right = 1906.0
+margin_bottom = 122.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer"]
+margin_right = 1892.0
+margin_bottom = 32.0
+
+[node name="SectionToggle" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/HBoxContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 24.0
+margin_bottom = 32.0
+Icon = ExtResource( 3 )
+ToggleMode = true
+Pressed = true
+Padding = Vector2( 2, 2 )
+
+[node name="SectionName" type="Label" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/HBoxContainer"]
+margin_left = 32.0
+margin_top = 6.0
+margin_right = 161.0
+margin_bottom = 26.0
+text = "Lorem ipsum dolor"
+
+[node name="SectionContents" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer"]
+margin_top = 40.0
+margin_right = 1892.0
+margin_bottom = 108.0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/SectionContents"]
+margin_right = 1892.0
+margin_bottom = 68.0
+custom_constants/margin_bottom = 10
+
+[node name="VariableTemplate" type="VBoxContainer" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/SectionContents/MarginContainer"]
+margin_right = 1892.0
+margin_bottom = 58.0
+
+[node name="VariableName" type="RichTextLabel" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/SectionContents/MarginContainer/VariableTemplate"]
+margin_right = 1892.0
+margin_bottom = 22.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+bbcode_text = "[url]Variable name[/url]"
+text = "Variable name"
+fit_content_height = true
+scroll_active = false
+
+[node name="VariableDescription" type="Label" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/SectionContents/MarginContainer/VariableTemplate"]
+margin_top = 30.0
+margin_right = 1892.0
+margin_bottom = 50.0
+size_flags_horizontal = 3
+text = "Variable description"
+autowrap = true
+
+[node name="VariableControl" type="Control" parent="VBoxContainer/ScrollContainer/Sections/SectionTemplate/VBoxContainer/SectionContents/MarginContainer/VariableTemplate"]
+margin_top = 58.0
+margin_right = 1892.0
+margin_bottom = 58.0

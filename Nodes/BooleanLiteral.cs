@@ -16,5 +16,7 @@ namespace OpenScadGraphEditor.Nodes
             get => Value ? "true" : "false";
             set => Value = value == "true";
         }
+
+        public override LiteralType LiteralType => LiteralType.Boolean;
     }
 }

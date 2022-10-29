@@ -5,5 +5,6 @@ namespace OpenScadGraphEditor.Nodes
         public virtual bool IsSet { get; set; }
         public abstract string RenderedValue { get; }
         public abstract string SerializedValue { get; set; }
+        public abstract LiteralType LiteralType { get; }
     }
 }

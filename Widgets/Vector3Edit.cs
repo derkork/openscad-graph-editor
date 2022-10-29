@@ -10,6 +10,8 @@ namespace OpenScadGraphEditor.Widgets
         private LineEdit _x;
         private LineEdit _y;
         private LineEdit _z;
+        
+        
 
         protected override GridContainer CreateControl()
         {

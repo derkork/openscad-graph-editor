@@ -26,6 +26,7 @@ using OpenScadGraphEditor.Widgets.ProjectTree;
 using OpenScadGraphEditor.Widgets.SettingsDialog;
 using OpenScadGraphEditor.Widgets.StylusDebugDialog;
 using OpenScadGraphEditor.Widgets.UsageDialog;
+using OpenScadGraphEditor.Widgets.VariableCustomizer;
 using OpenScadGraphEditor.Widgets.VariableRefactorDialog;
 using Serilog;
 
@@ -63,6 +64,7 @@ namespace OpenScadGraphEditor
         private DocumentationDialog _documentationDialog;
         private readonly List<IAddDialogEntry> _addDialogEntries = new List<IAddDialogEntry>();
         private Foldout _leftFoldout;
+        private VariableCustomizer _variableCustomizer;
         private SplitContainer _editingInterface;
 
         private readonly List<IAddDialogEntryFactory> _addDialogEntryFactories =
@@ -209,6 +211,11 @@ namespace OpenScadGraphEditor
             {
                 _editingInterface.Collapsed = !visible;
             };
+            
+            _variableCustomizer = this.WithName<VariableCustomizer>("VariableCustomizer");
+            _variableCustomizer.RefactoringRequested += OnRefactoringRequested;
+            _variableCustomizer.VariableEditingRequested +=
+                (variable) => _variableRefactorDialog.Open(variable, _currentProject);
 
             this.WithName<Button>("SaveAsButton")
                 .Connect("pressed")
@@ -431,7 +438,8 @@ namespace OpenScadGraphEditor
 
             _projectTree.Setup(new List<ProjectTreeEntry>() {new RootProjectTreeEntry(_currentProject)});
 
-
+            _variableCustomizer.Setup(_currentProject.Variables.ToList());
+            
             // Re-Build the list of entries for the add dialog.
 
             _addDialogEntries.Clear();

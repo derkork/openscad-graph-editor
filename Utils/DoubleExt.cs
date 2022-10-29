@@ -15,9 +15,14 @@ namespace OpenScadGraphEditor.Utils
         /// <summary>
         /// Parses a double in a safe, culture-invariant way.
         /// </summary>
-        public static double SafeParse(this string number)
+        public static double SafeParse(this string number, double defaultValue = 0)
         {
-            return double.Parse(number, NumberStyles.Any, CultureInfo.InvariantCulture);
+            if (!number.SafeTryParse(out var result))
+            {
+                result = defaultValue;
+            }
+
+            return result;
         }
 
         /// <summary>
