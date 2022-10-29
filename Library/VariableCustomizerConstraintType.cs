@@ -10,12 +10,22 @@
         None = 0,
         
         /// <summary>
-        /// A constraint for a number variable/vector which limits its minimum, maximum and step size.
+        /// A constraint for a number/vector variable which limits its minimum, maximum and step size.
         /// </summary>
         MinStepMax = 1,
         
         /// <summary>
-        /// A constraint for a string variable which limits its maximum size.
+        /// A constraint for a number/vector variable which limits the step size.
+        /// </summary>
+        Step = 4,
+        
+        /// <summary>
+        /// A constraint for a number variable which limits its maximum.
+        /// </summary>
+        Max = 5,
+        
+        /// <summary>
+        /// A constraint for a number/string variable which limits its maximum size/length.
         /// </summary>
         MaxLength = 2,
         

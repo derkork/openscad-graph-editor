@@ -236,50 +236,9 @@ namespace OpenScadGraphEditor.Library
                 case VariableCustomizerConstraintType.None:
                     return "";
                 case VariableCustomizerConstraintType.MinStepMax:
-                    // if everything is empty we render nothing
-                    if (customizerDescription.Min.Length == 0 &&
-                        customizerDescription.Max.Length == 0 &&
-                        customizerDescription.Step.Length == 0)
-                    {
-                        return "";
-                    }
-                    
                     var min =  customizerDescription.Min;
                     var max = customizerDescription.Max;
                     var step = customizerDescription.Step;
-                    
-                    // if min and max are empty we render step, only
-                    if (min.Length == 0 && max.Length == 0)
-                    {
-                        // for number types there is a simplified rendering and we use that
-                        if (variableDescription.TypeHint == PortType.Number)
-                        {
-                            return $"// {step}";
-                        }
-                        // for other types (vectors) we need to render the full constraint and 
-                        // we put in a default min and max
-
-                        return $"// [-1e307:{step}:1e307]";
-                    }
-                    
-                    // if min and step are empty we render max, only
-                    if (min.Length == 0 && step.Length == 0)
-                    {
-                        // again we have a simplified rendering for number types
-                        if (variableDescription.TypeHint == PortType.Number)
-                        {
-                            return $"// [{max}]";
-                        }
-                        // for other types we need to render the full constraint and assume a step of 1
-
-                        return $"// [-1e307:1:{max}]";
-                    }
-                    
-                    // if at this point max is not set, we set it to 1e307
-                    if (max.Length == 0)
-                    {
-                        max = "1e307";
-                    }
                     
                     // then either render a min/max
                     if (step.Length > 0)
@@ -290,12 +249,14 @@ namespace OpenScadGraphEditor.Library
                     
                     // render a min/max
                     return $"// [{min}:{max}]";
+                case VariableCustomizerConstraintType.Max:
+                    // render a simplified max
+                    return $"// [{customizerDescription.Max}]";
+                case VariableCustomizerConstraintType.Step:
+                    // render a step, only
+                    return $"// {customizerDescription.Step}";
                 case VariableCustomizerConstraintType.MaxLength:
                     // max length is very easy.
-                    if (customizerDescription.MaxLength.Length == 0)
-                    {
-                        return "";
-                    }
                     return $"// {customizerDescription.MaxLength}";
                 case VariableCustomizerConstraintType.Options:
                     // and finally the value-label-pairs. we always render both value and label. if the label is empty

@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=2]
+[gd_scene load_steps=31 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -29,6 +29,7 @@
 [ext_resource path="res://Widgets/StylusDebugDialog/StylusDebugDialog.tscn" type="PackedScene" id=27]
 [ext_resource path="res://Widgets/RotateContainer.cs" type="Script" id=28]
 [ext_resource path="res://Widgets/Foldout.cs" type="Script" id=29]
+[ext_resource path="res://Widgets/VariableCustomizer/VariableCustomizer.tscn" type="PackedScene" id=30]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -66,7 +67,6 @@ margin_bottom = 250.0
 [node name="StylusDebugDialog" parent="." instance=ExtResource( 27 )]
 
 [node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
-visible = false
 
 [node name="FileDialog" type="FileDialog" parent="."]
 anchor_left = 0.5
@@ -339,12 +339,16 @@ size_flags_vertical = 3
 allow_rmb_select = true
 script = ExtResource( 11 )
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/HBoxContainer/LeftFoldout"]
+[node name="VariableCustomizer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface/HBoxContainer/LeftFoldout" instance=ExtResource( 30 )]
 visible = false
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_left = 10.0
-margin_right = 210.0
+margin_right = 310.0
 margin_bottom = 962.0
-rect_min_size = Vector2( 200, 0 )
+rect_min_size = Vector2( 300, 0 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/VBoxContainer/MarginContainer/EditingInterface"]
 margin_left = 270.0

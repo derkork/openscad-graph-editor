@@ -31,6 +31,7 @@ namespace OpenScadGraphEditor.Widgets
                 {
                     Control = CreateControl();
                     Control.MoveToNewParent(this);
+                    Control.SizeFlagsHorizontal = (int)SizeFlags.ExpandFill;
                 }
             }
 

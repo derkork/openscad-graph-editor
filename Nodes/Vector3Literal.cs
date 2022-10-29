@@ -28,8 +28,7 @@ namespace OpenScadGraphEditor.Nodes
                 Z = parts[2].SafeParse();
             }
         }
-        
-        
 
+        public override LiteralType LiteralType => LiteralType.Vector3;
     }
 }

@@ -8,5 +8,7 @@ namespace OpenScadGraphEditor.Nodes
         bool IsSet { get; set; }
         string RenderedValue { get; }
         string SerializedValue { get; set; }
+        LiteralType LiteralType { get; }
+
     }
 }
