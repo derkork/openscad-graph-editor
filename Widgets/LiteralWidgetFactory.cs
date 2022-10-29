@@ -142,6 +142,24 @@ namespace OpenScadGraphEditor.Widgets
                     break;
 
                 case Vector2Literal vector2Literal:
+                    if (customizerDescription != null)
+                    {
+                        if (customizerDescription.ConstraintType == VariableCustomizerConstraintType.MinStepMax)
+                        {
+                            // render a Vector2SpinEdit
+                            if (!(existing is Vector2SpinEdit vector2SpinEdit))
+                            {
+                                vector2SpinEdit = Prefabs.New<Vector2SpinEdit>();
+                            }
+
+                            vector2SpinEdit.Min = customizerDescription.Min.SafeParse(0);
+                            vector2SpinEdit.Max = customizerDescription.Max.SafeParse(1);
+                            vector2SpinEdit.Step = customizerDescription.Step.SafeParse(1);
+                            vector2SpinEdit.BindTo(vector2Literal, isOutput, isAutoSet, isConnected);
+                            result = vector2SpinEdit;
+                            break;
+                        }
+                    }
                     if (!(existing is Vector2Edit vector2Edit))
                     {
                         vector2Edit = Prefabs.New<Vector2Edit>();
