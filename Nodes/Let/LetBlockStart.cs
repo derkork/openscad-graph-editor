@@ -62,14 +62,14 @@ namespace OpenScadGraphEditor.Nodes.Let
             RebuildPorts();
             
             // add a port literal for the new variable
-            BuildPortLiteral(PortId.Output(CurrentInputSize));
+            BuildPortLiteral(PortId.Output(CurrentInputSize-1));
         }
 
         public void RemoveVariableInputPort()
         {
             GdAssert.That(CurrentInputSize > 1, "Cannot decrease nest level any further.");
             // remove the port literal for the removed variable
-            DropPortLiteral(PortId.Output(CurrentInputSize));
+            DropPortLiteral(PortId.Output(CurrentInputSize-1));
             CurrentInputSize -= 1;
             RebuildPorts();
         }
