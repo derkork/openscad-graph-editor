@@ -107,6 +107,20 @@ namespace OpenScadGraphEditor.Widgets
                     break;
 
                 case StringLiteral stringLiteral:
+                    if (customizerDescription is {ConstraintType: VariableCustomizerConstraintType.Options})
+                    {
+                        // render a select box
+                        if (!(existing is SelectBox selectBox))
+                        {
+                            selectBox = Prefabs.New<SelectBox>();
+                        }
+                            
+                        selectBox.Options = customizerDescription.ValueLabelPairs;
+                        selectBox.BindTo(stringLiteral, isOutput, isAutoSet, isConnected);
+                        result = selectBox;
+                        break;
+                    }
+
                     if (!(existing is StringEdit stringEdit))
                     {
                         stringEdit = Prefabs.New<StringEdit>();
@@ -132,6 +146,24 @@ namespace OpenScadGraphEditor.Widgets
                     break;
 
                 case Vector3Literal vector3Literal:
+                    if (customizerDescription != null)
+                    {
+                        if (customizerDescription.ConstraintType == VariableCustomizerConstraintType.MinStepMax)
+                        {
+                            // render a Vector3SpinEdit
+                            if (!(existing is Vector3SpinEdit vector3SpinEdit))
+                            {
+                                vector3SpinEdit = Prefabs.New<Vector3SpinEdit>();
+                            }
+
+                            vector3SpinEdit.Min = customizerDescription.Min.SafeParse(0);
+                            vector3SpinEdit.Max = customizerDescription.Max.SafeParse(1);
+                            vector3SpinEdit.Step = customizerDescription.Step.SafeParse(1);
+                            vector3SpinEdit.BindTo(vector3Literal, isOutput, isAutoSet, isConnected);
+                            result = vector3SpinEdit;
+                            break;
+                        }
+                    }
                     if (!(existing is Vector3Edit vector3Edit))
                     {
                         vector3Edit = Prefabs.New<Vector3Edit>();

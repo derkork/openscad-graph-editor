@@ -4,6 +4,7 @@ using Godot;
 using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets
 {
@@ -45,9 +46,20 @@ namespace OpenScadGraphEditor.Widgets
 
             _optionButton.Clear();
             // add options
-            foreach (var (_, label) in _options)
+            foreach (var (value, label) in _options)
             {
-                _optionButton.AddItem(label.Value);
+                // if the label is empty, use the value as label
+                var labelString = label.Value;
+                if (string.IsNullOrWhiteSpace(labelString))
+                {
+                    labelString = value switch
+                    {
+                        StringLiteral stringLiteral => stringLiteral.Value,
+                        NumberLiteral numberLiteral => numberLiteral.Value.SafeToString(),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                }
+                _optionButton.AddItem(labelString);
             }
         }
 

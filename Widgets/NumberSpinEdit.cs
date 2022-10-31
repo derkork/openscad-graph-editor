@@ -6,7 +6,7 @@ using OpenScadGraphEditor.Nodes;
 namespace OpenScadGraphEditor.Widgets
 {
     [UsedImplicitly]
-    public class NumberSpinEdit : NumericRangeLiteralWidget<SpinBox,NumberLiteral>
+    public class NumberSpinEdit : SpinEditLiteralWidgetBase<SpinBox,NumberLiteral>
     {
         private SpinBox _spinBox;
 
