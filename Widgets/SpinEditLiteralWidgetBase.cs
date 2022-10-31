@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {
-    public abstract class NumericRangeLiteralWidget<TControl, TLiteral> : LiteralWidgetBase<TControl, TLiteral>
+    public abstract class SpinEditLiteralWidgetBase<TControl, TLiteral> : LiteralWidgetBase<TControl, TLiteral>
         where TControl : Control where TLiteral : IScadLiteral
     {
         private double? _min;

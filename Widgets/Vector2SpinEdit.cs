@@ -4,7 +4,7 @@ using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Widgets
 {
-    public class Vector2SpinEdit : NumericRangeLiteralWidget<GridContainer, Vector2Literal>
+    public class Vector2SpinEdit : SpinEditLiteralWidgetBase<GridContainer, Vector2Literal>
     {
         private SpinBox _x;
         private SpinBox _y;
