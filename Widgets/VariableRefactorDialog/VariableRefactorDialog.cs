@@ -25,8 +25,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private PortTypeSelector _typeHintOptionButton;
         private Label _defaultValueLabel;
         private Control _defaultValueControl;
-        [CanBeNull]
-        private IScadLiteral _defaultValueLiteral;
+        [CanBeNull] private IScadLiteral _defaultValueLiteral;
 
         private OptionButton _constraintTypeOptionButton;
         private CheckBox _showInCustomizerCheckBox;
@@ -41,7 +40,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private Control _maxLengthContainer;
         private Control _maxContainer;
         private LineEdit _maxEdit;
-        
+
         private Control _stepContainer;
         private LineEdit _stepEdit;
         private LineEdit _maxLengthEdit;
@@ -106,7 +105,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _minStepMaxStepEdit.Connect("focus_exited")
                 .WithBinds(_minStepMaxStepEdit, false, true)
                 .To(this, nameof(OnNumericFieldChanged));
-            
+
             _minStepMaxMaxEdit.Connect("focus_exited")
                 .WithBinds(_minStepMaxMaxEdit, false, false)
                 .To(this, nameof(OnNumericFieldChanged));
@@ -123,13 +122,13 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _maxEdit.Connect("focus_exited")
                 .WithBinds(_maxEdit, false, false)
                 .To(this, nameof(OnNumericFieldChanged));
-            
+
             _stepContainer = this.WithName<Control>("StepContainer");
             _stepEdit = _stepContainer.WithName<LineEdit>("StepEdit");
             _stepEdit.Connect("focus_exited")
                 .WithBinds(_stepEdit, false, false)
                 .To(this, nameof(OnNumericFieldChanged));
-            
+
             _keyValuePairContainer = this.WithName<Control>("KeyValuePairContainer");
             _keyValuePairAddButton = this.WithName<IconButton.IconButton>("KeyValuePairAddButton");
             _keyValuePairAddButton.ButtonPressed += OnAddKeyValuePairPressed;
@@ -191,9 +190,9 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _typeHintOptionButton.SelectedPortType = description.TypeHint;
             // ensure everything is set up for the given type
             OnVariableTypeChanged(0);
-            
+
             _showInCustomizerCheckBox.Pressed = description.ShowInCustomizer;
-            
+
             // ensure the customizer option button has all values filled in.
             OnShowInCustomizerChanged(description.ShowInCustomizer);
 
@@ -225,7 +224,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                         break;
                     case VariableCustomizerConstraintType.Step:
                         _stepEdit.Text = description.CustomizerDescription.Step;
-                        break;                    
+                        break;
                     case VariableCustomizerConstraintType.MaxLength:
                         _maxLengthEdit.Text = description.CustomizerDescription.MaxLength;
                         break;
@@ -251,7 +250,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 }
 
                 _customizerTabEdit.Text = description.CustomizerDescription.Tab;
-                
+
                 // and then refresh the ui
                 OnConstraintTypeChanged(0);
             }
@@ -283,50 +282,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         private void OnOkPressed()
         {
             // build new customizer settings
-            var customizerDescription = new VariableCustomizerDescription
-            {
-                ConstraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId(),
-                Tab = _customizerTabEdit.Text
-                
-            };
-
-            switch (customizerDescription.ConstraintType)
-            {
-                case VariableCustomizerConstraintType.None:
-                    break;
-                case VariableCustomizerConstraintType.MinStepMax:
-                    customizerDescription.Min = _minStepMaxMinEdit.Text;
-                    customizerDescription.Step = _minStepMaxStepEdit.Text;
-                    customizerDescription.Max = _minStepMaxMaxEdit.Text;
-                    break;
-                case VariableCustomizerConstraintType.MaxLength:
-                    customizerDescription.MaxLength = _maxLengthEdit.Text;
-                    break;
-                case VariableCustomizerConstraintType.Max:
-                    customizerDescription.Max = _maxEdit.Text;
-                    break;
-                case VariableCustomizerConstraintType.Step:
-                    customizerDescription.Step = _stepEdit.Text;
-                    break;
-                case VariableCustomizerConstraintType.Options:
-                    // convert the options into literals
-                    foreach (var valueLabelLine in _valueLabelLines)
-                    {
-                        if (_typeHintOptionButton.SelectedPortType.IsNumericInCustomizer())
-                        {
-                            customizerDescription.ValueLabelPairs.Add((new NumberLiteral(valueLabelLine.ValueEdit.Text.SafeParse()),
-                                new StringLiteral(valueLabelLine.LabelEdit.Text)));
-                        }
-                        else
-                        {
-                            customizerDescription.ValueLabelPairs.Add((new StringLiteral(valueLabelLine.ValueEdit.Text),
-                                new StringLiteral(valueLabelLine.LabelEdit.Text)));
-                        }
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            var customizerDescription = BuildVariableCustomizerDescription();
 
             switch (_mode)
             {
@@ -357,8 +313,8 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     refactorings.Add(
                         new ChangeVariableCustomizerSettingsRefactoring(
                             _baseDescription, _showInCustomizerCheckBox.Pressed, customizerDescription));
-                    
-                    // set the new default value
+
+                    // set the new default value (we also do this every time since it is cheap)
                     refactorings.Add(
                         new ChangeVariableDefaultValueRefactoring(_baseDescription, _defaultValueLiteral));
 
@@ -387,6 +343,60 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             Hide();
         }
 
+        /// <summary>
+        /// Builds a new <see cref="VariableCustomizerDescription"/> based on the current state of the dialog.
+        /// </summary>
+        private VariableCustomizerDescription BuildVariableCustomizerDescription()
+        {
+            var customizerDescription = new VariableCustomizerDescription
+            {
+                ConstraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId(),
+                Tab = _customizerTabEdit.Text
+            };
+
+            switch (customizerDescription.ConstraintType)
+            {
+                case VariableCustomizerConstraintType.None:
+                    break;
+                case VariableCustomizerConstraintType.MinStepMax:
+                    customizerDescription.Min = _minStepMaxMinEdit.Text;
+                    customizerDescription.Step = _minStepMaxStepEdit.Text;
+                    customizerDescription.Max = _minStepMaxMaxEdit.Text;
+                    break;
+                case VariableCustomizerConstraintType.MaxLength:
+                    customizerDescription.MaxLength = _maxLengthEdit.Text;
+                    break;
+                case VariableCustomizerConstraintType.Max:
+                    customizerDescription.Max = _maxEdit.Text;
+                    break;
+                case VariableCustomizerConstraintType.Step:
+                    customizerDescription.Step = _stepEdit.Text;
+                    break;
+                case VariableCustomizerConstraintType.Options:
+                    // convert the options into literals
+                    foreach (var valueLabelLine in _valueLabelLines)
+                    {
+                        if (_typeHintOptionButton.SelectedPortType.IsNumericInCustomizer())
+                        {
+                            customizerDescription.ValueLabelPairs.Add((
+                                new NumberLiteral(valueLabelLine.ValueEdit.Text.SafeParse()),
+                                new StringLiteral(valueLabelLine.LabelEdit.Text)));
+                        }
+                        else
+                        {
+                            customizerDescription.ValueLabelPairs.Add((new StringLiteral(valueLabelLine.ValueEdit.Text),
+                                new StringLiteral(valueLabelLine.LabelEdit.Text)));
+                        }
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return customizerDescription;
+        }
+
         private void OnCancelPressed()
         {
             Hide();
@@ -402,7 +412,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             var usesLabelValuePairsConstraint = _showInCustomizerCheckBox.Pressed
                                                 && _constraintTypeOptionButton.GetSelectedId() ==
                                                 (int) VariableCustomizerConstraintType.Options;
-            
+
             ValidityChecker.For(_errorLabel, _okButton)
                 .Check(
                     // we create a variable, then the name must be different from all other variables in the project
@@ -418,10 +428,10 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 )
                 .Check(
                     // the values in the value label pairs must be unique
-                    !usesLabelValuePairsConstraint 
+                    !usesLabelValuePairsConstraint
                     || _valueLabelLines.Select(it => it.ValueEdit.Text).Distinct().Count() == _valueLabelLines.Count,
                     "Every fixed value must be unique."
-                    )
+                )
                 .Check(
                     // the labels in the value label pairs must be unique
                     !usesLabelValuePairsConstraint
@@ -432,13 +442,13 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                         .Distinct()
                         .Count() == _valueLabelLines.Count,
                     "Every label of the fixed values must be unique."
-                    )
+                )
                 .Check(
                     // at least one value label pair must be set
                     !usesLabelValuePairsConstraint
                     || _valueLabelLines.Count > 0,
                     "At least one fixed value must be set."
-                    )
+                )
                 .UpdateUserInterface();
             SetAsMinsize();
         }
@@ -473,6 +483,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 _constraintSpacer.Visible = false;
                 _minStepMaxContainer.Visible = false;
                 _maxLengthContainer.Visible = false;
+                _maxContainer.Visible = false;
                 _keyValuePairContainer.Visible = false;
             }
 
@@ -481,43 +492,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private void OnVariableTypeChanged([UsedImplicitly] int _)
         {
-            // change the widget to match the type
-            var newLiteral = _typeHintOptionButton.SelectedPortType.GetMatchingLiteralType().BuildLiteral();
-
-            // if the type has changed, then use the new type, otherwise keep the existing literal to not overwrite
-            // the value with an empty one
-            if (newLiteral?.GetType() != _defaultValueLiteral?.GetType())
-            {
-                _defaultValueLiteral = newLiteral; 
-            }
-            
-            
-            var newLiteralWidget =
-                _defaultValueLiteral.BuildWidget(false, true, false, _defaultValueControl as IScadLiteralWidget);
-
-            if (newLiteralWidget != null)
-            {
-                // check if we re-used the old widget and if not, replace the old widget with the new one
-                if (newLiteralWidget != _defaultValueControl)
-                {
-                    newLiteralWidget.LiteralValueChanged += literal => _defaultValueLiteral = literal;
-                    _defaultValueControl.GetParent()
-                        .AddChildBelowNode(_defaultValueControl, (Control) newLiteralWidget);
-                    _defaultValueControl.RemoveAndFree();
-                    _defaultValueControl = (Control) newLiteralWidget;
-                    
-                }
-
-                // make sure the default value line is visible
-                _defaultValueControl.Visible = true;
-                _defaultValueLabel.Visible = true;
-            }
-            else
-            {
-                // keep the old widget but hide the whole default value line
-                _defaultValueControl.Visible = false;
-                _defaultValueLabel.Visible = false;
-            }
+            RebuildLiteralWidget();
 
             // save the currently selected constraint type, so we keep it if it is compatible
             var currentConstraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId();
@@ -571,6 +546,47 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             FixKeyValuePairs();
 
             ValidateAll();
+        }
+
+        private void RebuildLiteralWidget()
+        {
+            // change the widget to match the type
+            var newLiteral = _typeHintOptionButton.SelectedPortType.GetMatchingLiteralType().BuildLiteral();
+
+            // if the type has changed, then use the new type, otherwise keep the existing literal to not overwrite
+            // the value with an empty one
+            if (newLiteral?.GetType() != _defaultValueLiteral?.GetType())
+            {
+                _defaultValueLiteral = newLiteral;
+            }
+
+
+            var newLiteralWidget =
+                _defaultValueLiteral.BuildWidget(false, true, false, _defaultValueControl as IScadLiteralWidget,
+                    BuildVariableCustomizerDescription());
+
+            if (newLiteralWidget != null)
+            {
+                // check if we re-used the old widget and if not, replace the old widget with the new one
+                if (newLiteralWidget != _defaultValueControl)
+                {
+                    newLiteralWidget.LiteralValueChanged += literal => _defaultValueLiteral = literal;
+                    _defaultValueControl.GetParent()
+                        .AddChildBelowNode(_defaultValueControl, (Control) newLiteralWidget);
+                    _defaultValueControl.RemoveAndFree();
+                    _defaultValueControl = (Control) newLiteralWidget;
+                }
+
+                // make sure the default value line is visible
+                _defaultValueControl.Visible = true;
+                _defaultValueLabel.Visible = true;
+            }
+            else
+            {
+                // keep the old widget but hide the whole default value line
+                _defaultValueControl.Visible = false;
+                _defaultValueLabel.Visible = false;
+            }
         }
 
         private void OnConstraintTypeChanged([UsedImplicitly] int _)
@@ -636,6 +652,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     throw new ArgumentOutOfRangeException();
             }
 
+            RebuildLiteralWidget();
             ValidateAll();
         }
 
@@ -695,7 +712,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 .To(this, nameof(OnLabelValueChanged));
             labelEdit.Connect("text_changed")
                 .To(this, nameof(OnLabelValueChanged));
-            
+
             deleteButton.ButtonPressed += () => OnRemoveParameterPressed(line);
             upButton.ButtonPressed += () => OnParameterUpPressed(line);
             downButton.ButtonPressed += () => OnParameterDownPressed(line);
@@ -708,9 +725,10 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private void OnLabelValueChanged([UsedImplicitly] string _)
         {
+            RebuildLiteralWidget();
             ValidateAll();
         }
-        
+
         private void FixKeyValuePairs()
         {
             // if the variable type is switched from something numeric to something non-numeric or vice versa
@@ -801,11 +819,11 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private void OnNumericFieldChanged(LineEdit lineEdit, bool intOnly, bool allowEmpty)
         {
-            if(allowEmpty && string.IsNullOrWhiteSpace(lineEdit.Text))
+            if (allowEmpty && string.IsNullOrWhiteSpace(lineEdit.Text))
             {
                 lineEdit.Text = "";
             }
-            
+
             if (lineEdit.Text.SafeTryParse(out var result))
             {
                 // text is numeric, allow it.
@@ -817,6 +835,10 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 // revert to a good default value
                 lineEdit.Text = "0";
             }
+
+            // all input fields change some constraint setting so we need to rebuild the literal widget
+            // to reflect the new constraints.
+            RebuildLiteralWidget();
         }
 
 

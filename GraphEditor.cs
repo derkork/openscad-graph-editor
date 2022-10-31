@@ -160,7 +160,7 @@ namespace OpenScadGraphEditor
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested +=
-                (refactorings) => PerformRefactorings("Rename variable", refactorings);
+                (refactorings) => PerformRefactorings("Change variable settings", refactorings);
 
             _editingInterface = this.WithName<SplitContainer>("EditingInterface");
             _textEdit = this.WithName<TextEdit>("TextEdit");

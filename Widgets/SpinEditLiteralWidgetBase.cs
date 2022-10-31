@@ -79,11 +79,7 @@ namespace OpenScadGraphEditor.Widgets
                 clamped = true;
             }
 
-            if (clamped)
-            {
-                // overwrite value
-                spinBox.Value = value;
-            }
+            spinBox.Value = value;
 
             clampedValue = value;
             return clamped;
