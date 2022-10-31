@@ -1,5 +1,5 @@
-﻿using Godot;
-using Godot.Collections;
+﻿using System.Collections.Generic;
+using Godot;
 
 namespace OpenScadGraphEditor.Library.IO
 {
@@ -51,9 +51,17 @@ namespace OpenScadGraphEditor.Library.IO
 
         /// <summary>
         /// When the constraint type is <see cref="VariableCustomizerConstraintType.Options"/>, this property contains
-        /// the value and display name of the options.
+        /// the serialized values of the options.
         /// </summary>
         [Export]
-        public Dictionary<string, string> ValueLabelPairs { get; set; } = new Dictionary<string, string>();    
+        public List<string> OptionValues { get; set; } = new List<string>();
+        
+        /// <summary>
+        /// When the constraint type is <see cref="VariableCustomizerConstraintType.Options"/>, this property contains
+        /// the labels of the options.
+        /// </summary>
+        [Export]
+        public List<string> OptionLabels { get; set; } = new List<string>();
+
     }
 }

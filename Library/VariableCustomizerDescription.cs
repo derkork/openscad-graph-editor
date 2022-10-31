@@ -63,31 +63,33 @@ namespace OpenScadGraphEditor.Library
             Step = saved.Step;
             Max = saved.Max;
             MaxLength = saved.MaxLength;
-            ValueLabelPairs.Clear(); 
-            foreach (var pair in saved.ValueLabelPairs)
+            ValueLabelPairs.Clear();
+            for (var i = 0; i < saved.OptionValues.Count; i++)
             {
+                var optionValue = saved.OptionValues[i];
+                var optionLabel = saved.OptionLabels[i];
                 try
                 {
                     // depending on the variable type the value is either a string or a number
                     IScadLiteral value;
                     if (owner.TypeHint == PortType.String)
                     {
-                        value = new StringLiteral(pair.Key);
+                        value = new StringLiteral(optionValue);
                     }
                     else
                     {
-                        value = new NumberLiteral(pair.Key.SafeParse());
+                        value = new NumberLiteral(optionValue.SafeParse());
                     }
 
                     // the label is always a string
-                    var label = new StringLiteral(pair.Value);
+                    var label = new StringLiteral(optionLabel);
 
                     ValueLabelPairs.Add((value, label));
                 }
                 catch (Exception e)
                 {
                     throw new BrokenFileException(
-                        $"Broken literal value for variable {owner.Name} ({pair.Key} -> {pair.Value})", e);
+                        $"Broken literal value for variable {owner.Name} ({optionValue} -> {optionLabel})", e);
                 }
             }
         }
@@ -104,11 +106,10 @@ namespace OpenScadGraphEditor.Library
             saved.Step = Step;
             saved.Max = Max;
             saved.MaxLength = MaxLength;
-            // godot dictionaries preserve insert order, so we can use them here
-            saved.ValueLabelPairs = new Godot.Collections.Dictionary<string, string>();
             foreach (var pair in ValueLabelPairs)
             {
-                saved.ValueLabelPairs.Add(pair.Value.SerializedValue, pair.Label.SerializedValue);
+                saved.OptionValues.Add(pair.Value.SerializedValue);
+                saved.OptionLabels.Add(pair.Label.SerializedValue);
             }
             
         }
