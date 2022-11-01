@@ -47,6 +47,9 @@ namespace OpenScadGraphEditor.Utils
         public static bool IsPaste(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.V);
         public static bool IsCut(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.X);
         
+        // duplicate
+        public static bool IsDuplicate(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.D);
+        
         // undo/redo
         public static bool IsUndo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z);
         public static bool IsRedo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z) && inputEvent.IsShiftPressed();
@@ -56,7 +59,7 @@ namespace OpenScadGraphEditor.Utils
         
         // align
         public static bool IsAlignLeft(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.A);
-        public static bool IsAlignRight(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.D);
+        public static bool IsAlignRight(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.D) && !inputEvent.IsCmdOrControlPressed();
         public static bool IsAlignTop(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.W);
         public static bool IsAlignBottom(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.S);
         

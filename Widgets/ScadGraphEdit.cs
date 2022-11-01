@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
@@ -32,6 +33,11 @@ namespace OpenScadGraphEditor.Widgets
         /// Emitted when the user requested copying nodes.
         /// </summary>
         public event Action<ScadGraphEdit, List<ScadNode>> CopyRequested;
+        
+        /// <summary>
+        /// Emitted when the user requested duplicating nodes.
+        /// </summary>
+        public event Action<ScadGraphEdit, List<ScadNode>, Vector2> DuplicateRequested;
 
         /// <summary>
         /// Emitted when the user requested cutting nodes.
@@ -289,8 +295,14 @@ namespace OpenScadGraphEditor.Widgets
                 CopyRequested?.Invoke(this, GetSelectedNodes().ToList());
                 return;
             }
-            
 
+            if (evt.IsDuplicate())
+            {
+                var pastePosition = GetPastePosition();
+
+                DuplicateRequested?.Invoke(this, GetSelectedNodes().ToList(), pastePosition);
+            }
+            
             if (evt.IsCut())
             {
                 CutRequested?.Invoke(this, GetSelectedNodes().ToList());
@@ -299,20 +311,8 @@ namespace OpenScadGraphEditor.Widgets
             
             if (evt.IsPaste())
             {
-                // get the offset over the mouse position
-                var globalRect = GetGlobalRect();
-                var globalMousePosition = GetGlobalMousePosition();
+                var pastePosition = GetPastePosition();
 
-                // default paste position
-                var pastePosition = ScrollOffset + new Vector2(100, 100);
-                
-                if (globalRect.HasPoint(globalMousePosition))
-                {
-                    // if the mouse is inside the graph, paste the nodes at the mouse position
-                    pastePosition = GlobalToGraphRelative(globalMousePosition);
-
-                }
-                
                 PasteRequested?.Invoke(this, pastePosition);
                 return;
             }
@@ -355,6 +355,24 @@ namespace OpenScadGraphEditor.Widgets
             {
                 AlignSelectionBottom();
             }
+        }
+
+        private Vector2 GetPastePosition()
+        {
+            // get the offset over the mouse position
+            var globalRect = GetGlobalRect();
+            var globalMousePosition = GetGlobalMousePosition();
+
+            // default paste position
+            var pastePosition = ScrollOffset + new Vector2(100, 100);
+
+            if (globalRect.HasPoint(globalMousePosition))
+            {
+                // if the mouse is inside the graph, paste the nodes at the mouse position
+                pastePosition = GlobalToGraphRelative(globalMousePosition);
+            }
+
+            return pastePosition;
         }
 
         private void StraightenSelection()
@@ -609,7 +627,7 @@ namespace OpenScadGraphEditor.Widgets
         }
 
         // Godot 3.5
-        private void OnDeleteSelection(Node[] _)
+        private void OnDeleteSelection([UsedImplicitly] Node[] _)
         {
             OnDeleteSelection();
         }
