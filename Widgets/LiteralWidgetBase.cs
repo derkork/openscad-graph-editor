@@ -95,6 +95,9 @@ namespace OpenScadGraphEditor.Widgets
                 Control.Visible = !isConnected && (isAutoSet || literal.IsSet);
             }
             
+            // set the separation to 0 if either the button or the control is not visible
+            Set("custom_constants/separation", _toggleButton.Visible && Control.Visible ? 5 : 0);
+            
             ApplyControlValue();
 
             _silenceEvents = false;

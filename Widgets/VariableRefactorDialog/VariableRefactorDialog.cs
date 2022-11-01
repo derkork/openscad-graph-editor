@@ -348,11 +348,18 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         /// </summary>
         private VariableCustomizerDescription BuildVariableCustomizerDescription()
         {
+            // if the customizer is not shown, we don't need to build anything, and return the default value.
+            if (!_showInCustomizerCheckBox.Pressed)
+            {
+                return new VariableCustomizerDescription();
+            }
+            
             var customizerDescription = new VariableCustomizerDescription
             {
                 ConstraintType = (VariableCustomizerConstraintType) _constraintTypeOptionButton.GetSelectedId(),
                 Tab = _customizerTabEdit.Text
             };
+            
 
             switch (customizerDescription.ConstraintType)
             {
@@ -486,7 +493,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 _maxContainer.Visible = false;
                 _keyValuePairContainer.Visible = false;
             }
-
+            RebuildLiteralWidget();
             ValidateAll();
         }
 
