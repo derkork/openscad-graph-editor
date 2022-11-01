@@ -196,6 +196,9 @@ namespace OpenScadGraphEditor.Library
         {
             return string.Join("\n",
                 Variables.Select(RenderCustomizedVariable)
+                    // render a dummy module to prevent non customizer variables
+                    // from appearing in the customizer
+                    .Concat(new[] {"module __Customizer_Limit__ () {}"})
                     .Concat(_externalReferences.Select(it => it.Value.Render()))
                     .Concat(_modules.Select(it => it.Render()))
                     .Concat(_functions.Select(it => it.Render()))

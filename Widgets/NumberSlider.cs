@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Nodes;
 using GodotExt;
+using Serilog;
 
 
 namespace OpenScadGraphEditor.Widgets
