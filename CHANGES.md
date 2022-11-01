@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Support for OpenSCAD's customizer. You can now set up if and how variables should appear in the customizer. A new panel has been added that allows you to quickly set initial values for all variables ([#23](https://github.com/derkork/openscad-graph-editor/issues/23)).
 - Binary operators now have a context menu option that allows to quickly flip their inputs (fixes [#24](https://github.com/derkork/openscad-graph-editor/issues/24))
-
+- You can now duplicate nodes by pressing `Ctrl+D`/`Cmd+D`.
 
 ## [0.4.1] - 2022-09-05
 ### Fixed
