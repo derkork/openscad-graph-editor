@@ -498,6 +498,7 @@ namespace OpenScadGraphEditor
             editor.ItemDataDropped += OnItemDataDropped;
             editor.AddDialogRequested += OnAddDialogRequested;
             editor.CopyRequested += OnCopyRequested;
+            editor.DuplicateRequested += OnDuplicateRequested;
             editor.PasteRequested += OnPasteRequested;
             editor.CutRequested += OnCutRequested;
             editor.EditCommentRequested += OnEditCommentRequested;
@@ -605,26 +606,34 @@ namespace OpenScadGraphEditor
                 }
             }
             
-            
-
             return result;
         }
 
         private void OnCopyRequested(ScadGraphEdit source, List<ScadNode> selection)
+        {
+            _copyBuffer = SelectionToBuffer(source, selection);
+        }
+        private void OnDuplicateRequested(ScadGraphEdit source, List<ScadNode> selection, Vector2 position)
+        {
+        var copies = SelectionToBuffer(source, selection);
+        PasteNodes(source, position, copies,"Duplicate nodes");
+        }
+
+        private ScadGraph SelectionToBuffer(ScadGraphEdit source, List<ScadNode> selection)
         {
             // when we make a copy we need to take special care about bound nodes
             // each bound node needs to have its partner within the copy even if it was not originally selected.
             // so we look up all bound nodes in the selection and if its partner is not in the
             // selection we silently add it.
 
-            var correctedSelection = new List<ScadNode>(selection); 
+            var correctedSelection = new List<ScadNode>(selection);
 
             var boundNodes = selection.Where(it => it is IAmBoundToOtherNode).ToList();
-            foreach(var boundNode in boundNodes)
+            foreach (var boundNode in boundNodes)
             {
-                var boundTo = (IAmBoundToOtherNode)boundNode;
+                var boundTo = (IAmBoundToOtherNode) boundNode;
                 var partner = source.Graph.ById(boundTo.OtherNodeId);
-                
+
                 if (!selection.Contains(partner))
                 {
                     correctedSelection.Add(partner);
@@ -632,7 +641,7 @@ namespace OpenScadGraphEditor
             }
 
             // now we can be sure that we have no bound nodes without their partner in the corrected selection.
-            _copyBuffer = MakeCopyBuffer(source.Graph, correctedSelection);
+            return MakeCopyBuffer(source.Graph, correctedSelection);
         }
 
         private void OnPasteRequested(ScadGraphEdit target, Vector2 position)
@@ -641,6 +650,11 @@ namespace OpenScadGraphEditor
             // nodes need unique Ids so for each pasting we need to make a new copy.
             var copy = MakeCopyBuffer(_copyBuffer, _copyBuffer.GetAllNodes());
 
+            PasteNodes(target, position, copy, "Paste nodes");
+        }
+
+        private void PasteNodes(ScadGraphEdit target, Vector2 position, ScadGraph copy, string refactoringTitle)
+        {
             // now the clipboard may contain nodes that are not allowed in the given target graph. So we need
             // to filter these out here and also delete all connections to these nodes.
             var disallowedNodes = copy.GetAllNodes()
@@ -651,15 +665,15 @@ namespace OpenScadGraphEditor
             copy.GetAllConnections()
                 .Where(it => disallowedNodes.Any(it.InvolvesNode))
                 .ToList() // avoid concurrent modification
-                .ForAll(it => copy.RemoveConnection(it));
+                .ForAll(copy.RemoveConnection);
 
             // and the nodes themselves
-            disallowedNodes.ForAll(it => copy.RemoveNode(it));
+            disallowedNodes.ForAll(copy.RemoveNode);
 
             var scadNodes = copy.GetAllNodes().ToList();
             if (scadNodes.Count == 0)
             {
-                return; // nothing to paste
+                return;
             }
 
             // we now need to normalize the position of the nodes so they are pasted in the correct position
@@ -694,7 +708,7 @@ namespace OpenScadGraphEditor
                 );
             }
 
-            PerformRefactorings("Paste nodes", refactorings, () => target.SelectNodes(scadNodes));
+            PerformRefactorings(refactoringTitle, refactorings, () => target.SelectNodes(scadNodes));
         }
 
         private void OnAddFunctionPressed()
