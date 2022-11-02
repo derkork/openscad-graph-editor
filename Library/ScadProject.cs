@@ -199,6 +199,7 @@ namespace OpenScadGraphEditor.Library
                     // render a dummy module to prevent non customizer variables
                     // from appearing in the customizer
                     .Concat(new[] {"module __Customizer_Limit__ () {}"})
+                    .Concat(Variables.Select(RenderNonCustomizedVariableInitializer))
                     .Concat(_externalReferences.Select(it => it.Value.Render()))
                     .Concat(_modules.Select(it => it.Render()))
                     .Concat(_functions.Select(it => it.Render()))
@@ -206,6 +207,8 @@ namespace OpenScadGraphEditor.Library
                     .Where(it => it.Length > 0)
             );
         }
+
+  
 
         private string RenderCustomizedVariable(VariableDescription variableDescription)
         {
@@ -282,6 +285,16 @@ namespace OpenScadGraphEditor.Library
             }
         }
 
+        private string RenderNonCustomizedVariableInitializer(VariableDescription variable)
+        {
+            // we only render non-customized variables that have a default value
+            if (variable.ShowInCustomizer || variable.DefaultValue == null)
+            {
+                return "";
+            }
+            
+            return $"{variable.Name} = {variable.DefaultValue.RenderedValue};";
+        }
 
         public ScadGraph AddInvokable(InvokableDescription invokableDescription)
         {
