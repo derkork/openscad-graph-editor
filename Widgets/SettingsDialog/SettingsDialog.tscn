@@ -5,8 +5,9 @@
 [ext_resource path="res://Widgets/FileSelectBox/FileSelectBox.tscn" type="PackedScene" id=3]
 
 [node name="SettingsDialog" type="WindowDialog"]
+visible = true
 margin_right = 786.0
-margin_bottom = 193.0
+margin_bottom = 247.0
 rect_min_size = Vector2( 786, 193 )
 theme = ExtResource( 2 )
 window_title = "Settings"
@@ -24,12 +25,12 @@ custom_constants/margin_bottom = 10
 margin_left = 10.0
 margin_top = 10.0
 margin_right = 776.0
-margin_bottom = 184.0
+margin_bottom = 237.0
 custom_constants/separation = 10
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
 margin_right = 766.0
-margin_bottom = 112.0
+margin_bottom = 160.0
 columns = 2
 
 [node name="UiScalingLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
@@ -73,17 +74,31 @@ margin_top = 72.0
 margin_right = 766.0
 margin_bottom = 112.0
 
-[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
-margin_top = 122.0
+[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_top = 130.0
+margin_right = 151.0
+margin_bottom = 150.0
+text = "Number of Backups"
+
+[node name="BackupsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+margin_left = 159.0
+margin_top = 120.0
 margin_right = 766.0
-margin_bottom = 132.0
+margin_bottom = 160.0
+max_value = 10.0
+rounded = true
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer"]
+margin_top = 170.0
+margin_right = 766.0
+margin_bottom = 185.0
 rect_min_size = Vector2( 0, 10 )
 size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 142.0
+margin_top = 195.0
 margin_right = 766.0
-margin_bottom = 174.0
+margin_bottom = 227.0
 alignment = 2
 
 [node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
