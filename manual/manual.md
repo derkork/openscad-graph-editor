@@ -640,7 +640,10 @@ You may have noticed that there is no functionality for supporting renames. This
 - `D` - align selected nodes to the right.
 - `W` - align selected nodes to the top.
 - `S` - align selected nodes to the bottom.
+- `Delete` - delete selected nodes.
+- `Shift` + `Delete` - delete selected nodes, retaining connections if possible.
 - `Ctrl+C` / `Cmd+C` - Copy the selected nodes.
+- `Ctrl+D` / `Cmd+D` - Duplicate the selected nodes.
 - `Ctrl+V` / `Cmd+V` - Paste the copied nodes.
 - `Ctrl+X` / `Cmd+X` - Cut the selected nodes.
 - `Ctrl+Z` / `Cmd+Z` - Undo the last action.

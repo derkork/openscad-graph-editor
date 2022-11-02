@@ -1,6 +1,7 @@
 using System.Linq;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Utils;
 using Serilog;
 
@@ -13,8 +14,11 @@ namespace OpenScadGraphEditor.Refactorings
     /// </summary>
     internal class DeleteNodeRefactoring : NodeRefactoring
     {
-        public DeleteNodeRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
+        private readonly bool _retainConnectionsIfPossible;
+
+        public DeleteNodeRefactoring(ScadGraph holder, ScadNode node, bool retainConnectionsIfPossible = false) : base(holder, node)
         {
+            _retainConnectionsIfPossible = retainConnectionsIfPossible;
         }
 
         public override void PerformRefactoring(RefactoringContext context)
@@ -46,6 +50,31 @@ namespace OpenScadGraphEditor.Refactorings
             connections.Select(it => new DeleteConnectionRefactoring(it)).ForAll(context.PerformRefactoring);
             // and finally the node
             Holder.RemoveNode(Node);
+            
+            // if the deleted node was a reroute node, and we should retain connections, connect the source and target(s)
+            // of the reroute node
+            
+            if (_retainConnectionsIfPossible && Node is RerouteNode)
+            {
+               var sourceConnection = connections
+                   .FirstOrDefault(it => it.To == Node);
+               
+                var targetsConnections = connections
+                    .Where(it => it.From == Node)
+                    .ToList();
+                
+                if (sourceConnection != null && targetsConnections.Any())
+                {
+                    // Create new direct connections between the source and the targets
+                    foreach (var targetsConnection in targetsConnections)
+                    {
+                        var newConnection = 
+                            new ScadConnection(Holder, sourceConnection.From,sourceConnection.FromPort, targetsConnection.To, targetsConnection.ToPort);
+                        context.PerformRefactoring(new AddConnectionRefactoring(newConnection));
+                    }
+                    
+                }
+            }
             
             // if the node implied children, check if the graph still has any node that implies children. If not unset
             // the "SupportsChildren" property.
