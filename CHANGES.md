@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Support for OpenSCAD's customizer. You can now set up if and how variables should appear in the customizer. A new panel has been added that allows you to quickly set initial values for all variables ([#23](https://github.com/derkork/openscad-graph-editor/issues/23)).
+- Support for OpenSCAD's customizer. You can now set up if and how variables should appear in the customizer. 
+- Variables now have default values. A new panel has been added that allows you to quickly set initial values for all variables ([#23](https://github.com/derkork/openscad-graph-editor/issues/23)). This largely alleviates the need to create a _Set Variable_ node to initialize each variable.
 - Binary operators now have a context menu option that allows to quickly flip their inputs (fixes [#24](https://github.com/derkork/openscad-graph-editor/issues/24))
 - You can now duplicate nodes by pressing `Ctrl+D`/`Cmd+D`.
 - When you open a file, the editor will create a backup of the file in the same directory with the extension `.1`. Older backups will be renamed to `.2`, `.3`, etc. You can change the number of backups that are kept in the settings (set to 0 to disable backups).
+
+### Changed
+- The project tree is now expanded by default.
 
 ## [0.4.1] - 2022-09-05
 ### Fixed

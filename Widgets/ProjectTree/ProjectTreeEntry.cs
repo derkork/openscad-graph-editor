@@ -9,6 +9,8 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
         public abstract bool CanBeDragged { get; }
         public abstract bool CanBeActivated { get; }
         
+        public virtual bool CanBeCollapsed => true;
+
         public abstract Texture Icon { get; }
         
         public abstract string Id { get; }
