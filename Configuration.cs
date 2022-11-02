@@ -44,6 +44,16 @@ namespace OpenScadGraphEditor
             return (string) _configFile.GetValue("editor", "open_scad_path", "");
         }
         
+        public void SetNumberOfBackups(int numberOfBackups)
+        {
+            _configFile.SetValue("editor", "number_of_backups", numberOfBackups);
+            Save();
+        }
+        
+        public int GetNumberOfBackups()
+        {
+            return (int) _configFile.GetValue("editor", "number_of_backups", 5);
+        }
         
         private void Save()
         {

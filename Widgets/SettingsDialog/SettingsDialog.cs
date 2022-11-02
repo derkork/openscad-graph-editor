@@ -1,14 +1,17 @@
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library.External;
 
 namespace OpenScadGraphEditor.Widgets.SettingsDialog
 {
+    [UsedImplicitly]
     public class SettingsDialog : WindowDialog
     {
         private OptionButton _editorScaleOptionButton;
         private Configuration _configuration;
         private FileSelectBox.FileSelectBox _fileSelectBox;
+        private SpinBox _backupsSpinBox;
 
         public override void _Ready()
         {
@@ -17,6 +20,7 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
             _fileSelectBox = this.WithName<FileSelectBox.FileSelectBox>("FileSelectBox");
             _fileSelectBox.Filters = new[] {$"{PathResolver.GetOpenScadExecutableName()};OpenSCAD"};
             _fileSelectBox.OnSelectPressed += () => _fileSelectBox.OpenSelectionDialog();
+            _backupsSpinBox = this.WithName<SpinBox>("BackupsSpinBox");
             
             this.WithName<Button>("OKButton")
                 .Connect("pressed")
@@ -39,6 +43,7 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
             };
 
             _fileSelectBox.CurrentPath = _configuration.GetOpenScadPath();
+            _backupsSpinBox.Value = _configuration.GetNumberOfBackups();
             SetAsMinsize();
             PopupCentered();
         }
@@ -54,6 +59,7 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
             };
             _configuration.SetEditorScalePercent(editorScale);
             _configuration.SetOpenScadPath(_fileSelectBox.CurrentPath);
+            _configuration.SetNumberOfBackups((int)_backupsSpinBox.Value);
             Hide();
         }
         

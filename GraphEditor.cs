@@ -1124,6 +1124,10 @@ namespace OpenScadGraphEditor
                 return;
             }
             
+            // make backup
+            FileBackups.BackupFile(filename, _configuration.GetNumberOfBackups());
+            
+            
             // workaround for https://github.com/godotengine/godot/issues/59686
             // as the "noCache" flag currently isn't working properly
             savedProject.ResourcePath = "";
