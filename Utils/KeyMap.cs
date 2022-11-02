@@ -1,3 +1,4 @@
+using System.Security.Policy;
 using Godot;
 
 namespace OpenScadGraphEditor.Utils
@@ -74,6 +75,7 @@ namespace OpenScadGraphEditor.Utils
         
         // stylus debug (Ctrl+Shift+S)
         public static bool IsStylusDebug(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.T) && inputEvent.IsCmdOrControlPressed() && inputEvent.IsShiftPressed();
-        
+
+        public static bool IsKeepConnectionsPressed()=> Input.IsKeyPressed((int)KeyList.Shift);
     }
 }

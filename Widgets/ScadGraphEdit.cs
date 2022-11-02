@@ -620,7 +620,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             var refactorings = 
                 GetSelectedNodes()
-                    .Select(it => new DeleteNodeRefactoring(Graph, it))
+                    .Select(it => new DeleteNodeRefactoring(Graph, it, KeyMap.IsKeepConnectionsPressed()))
                     .ToList();
             _selection.Clear();
             PerformRefactorings("Delete selection",  refactorings);
