@@ -10,6 +10,9 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
         public override string Title => "Project";
         public override bool CanBeDragged => false;
         public override bool CanBeActivated => false;
+
+        public override bool CanBeCollapsed => false;
+
         public override Texture Icon => null;
         public override string Id => "e954fea078764fb9b7c95b8db62a0f56"; // we will only have one of these, so it can have a static id
         public override ScadProject Description { get; }

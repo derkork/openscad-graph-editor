@@ -71,17 +71,18 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
             {
                 _entries[entry.Id] = entry;
                 var newItem = CreateItem(root);
+                newItem.DisableFolding = !entry.CanBeCollapsed;
                 newItem.SetMetadata(0, entry.Id);
                 newItem.SetText(0, entry.Title);
                 newItem.SetIcon(0, entry.Icon);
                 newItem.SetIconMaxWidth(0, 32);
                 if (_expanded.TryGetValue(entry.Id, out var expanded))
                 {
-                    newItem.Collapsed = !expanded;
+                    newItem.Collapsed = !expanded && entry.CanBeCollapsed;
                 }
                 else
                 {
-                    newItem.Collapsed = true;
+                    newItem.Collapsed = entry.CanBeCollapsed;
                 }
                 
                 // recurse
