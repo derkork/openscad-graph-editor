@@ -1,79 +1,81 @@
 # OpenSCAD Graph Editor Manual
 
 ## Table of Contents
-<!--ts-->
-* [OpenSCAD Graph Editor Manual](#openscad-graph-editor-manual)
-   * [Table of Contents](#table-of-contents)
-   * [Introduction](#introduction)
-   * [Installation &amp; Setup](#installation--setup)
-      * [Prerequisites for live preview](#prerequisites-for-live-preview)
-   * [The basics](#the-basics)
-      * [Starting a new project](#starting-a-new-project)
-      * [Nodes](#nodes)
-      * [Adding nodes](#adding-nodes)
-      * [Getting help for a node](#getting-help-for-a-node)
-      * [Connecting nodes](#connecting-nodes)
-         * [Port types](#port-types)
-         * [Connecting geometry ports](#connecting-geometry-ports)
-         * [Unconnected geometry output ports](#unconnected-geometry-output-ports)
-         * [Literals for unconnected input ports](#literals-for-unconnected-input-ports)
-   * [Overview of built-in nodes](#overview-of-built-in-nodes)
-      * [Flow control nodes](#flow-control-nodes)
-         * [Branch (if/else)](#branch-ifelse)
-         * [For-Loop](#for-loop)
-            * [Nested loops](#nested-loops)
-         * [Intersection loops](#intersection-loops)
-      * [Vector nodes](#vector-nodes)
-         * [Construct vector2 / vector3](#construct-vector2--vector3)
-         * [Split vector2 / vector3](#split-vector2--vector3)
-         * [Construct vector any/number/string/boolean/vector2/vector3](#construct-vector-anynumberstringbooleanvector2vector3)
-         * [Index vector / string](#index-vector--string)
-         * [Pairwise vector multiplication vector2 / vector3 / vector](#pairwise-vector-multiplication-vector2--vector3--vector)
-      * [Miscellaneous nodes](#miscellaneous-nodes)
-         * [Cast](#cast)
-   * [Keeping the graph neat and tidy](#keeping-the-graph-neat-and-tidy)
-      * [Comments](#comments)
-      * [Reroute nodes](#reroute-nodes)
-         * [Wireless reroute nodes](#wireless-reroute-nodes)
-      * [Straighten connections](#straighten-connections)
-      * [Align nodes](#align-nodes)
-   * [Debugging aids](#debugging-aids)
-      * [Changing the color of the output](#changing-the-color-of-the-output)
-      * [Debug modifiers](#debug-modifiers)
-         * [Debug subtree](#debug-subtree)
-         * [Background subtree](#background-subtree)
-         * [Disable subtree](#disable-subtree)
-         * [Make root modifiers](#make-root-modifiers)
-      * [Inspecting expressions](#inspecting-expressions)
-      * [Inspecting the generated code](#inspecting-the-generated-code)
-   * [Reusable code with variables, functions and modules](#reusable-code-with-variables-functions-and-modules)
-      * [Variables](#variables)
-         * [Creating a new variable](#creating-a-new-variable)
-         * [Using a variable](#using-a-variable)
-         * [Things to keep in mind when using variables](#things-to-keep-in-mind-when-using-variables)
-      * [Modules](#modules)
-         * [Creating a new module](#creating-a-new-module)
-         * [Using a module](#using-a-module)
-         * [Default values for module parameters](#default-values-for-module-parameters)
-         * [Building operator modules](#building-operator-modules)
-         * [Changing the module's name and parameters](#changing-the-modules-name-and-parameters)
-         * [Finding usages of modules](#finding-usages-of-modules)
-         * [Adding documentation to modules](#adding-documentation-to-modules)
-      * [Functions](#functions)
-         * [Making a function return a value](#making-a-function-return-a-value)
-   * [Using functions and modules from text-based libraries](#using-functions-and-modules-from-text-based-libraries)
-      * [Adding a reference to a library](#adding-a-reference-to-a-library)
-      * [Using functions and modules from the library](#using-functions-and-modules-from-the-library)
-      * [Refreshing external libraries](#refreshing-external-libraries)
-   * [Reference](#reference)
-      * [Keyboard shortcuts](#keyboard-shortcuts)
-      * [Documentation comment format](#documentation-comment-format)
-         * [An example](#an-example)
-         * [Supported data types](#supported-data-types)
-         * [Parsing Rules](#parsing-rules)
-            * [For parameters](#for-parameters)
-            * [For return values](#for-return-values)
-<!--te-->
+<!-- TOC start -->
+- [Introduction](#introduction)
+- [Installation & Setup](#installation--setup)
+  * [Prerequisites for live preview](#prerequisites-for-live-preview)
+- [The basics](#the-basics)
+  * [Starting a new project](#starting-a-new-project)
+  * [Opening an existing project](#opening-an-existing-project)
+    + [Project backups](#project-backups)
+  * [Nodes](#nodes)
+  * [Adding nodes](#adding-nodes)
+  * [Getting help for a node](#getting-help-for-a-node)
+  * [Connecting nodes](#connecting-nodes)
+    + [Port types](#port-types)
+    + [Connecting geometry ports](#connecting-geometry-ports)
+    + [Unconnected geometry output ports](#unconnected-geometry-output-ports)
+    + [Literals for unconnected input ports](#literals-for-unconnected-input-ports)
+- [Overview of built-in nodes](#overview-of-built-in-nodes)
+  * [Flow control nodes](#flow-control-nodes)
+    + [Branch (if/else)](#branch-ifelse)
+    + [For-Loop](#for-loop)
+      - [Nested loops](#nested-loops)
+    + [Intersection loops](#intersection-loops)
+  * [Operator nodes](#operator-nodes)
+  * [Vector nodes](#vector-nodes)
+    + [Construct `vector2` / `vector3`](#construct-vector2--vector3)
+    + [Split `vector2` / `vector3`](#split-vector2--vector3)
+    + [Construct vector `any`/`number`/`string`/`boolean`/`vector2`/`vector3`](#construct-vector-anynumberstringbooleanvector2vector3)
+    + [Index `vector` / `string`](#index-vector--string)
+    + [Pairwise vector multiplication `vector2` / `vector3` / `vector`](#pairwise-vector-multiplication-vector2--vector3--vector)
+  * [Miscellaneous nodes](#miscellaneous-nodes)
+    + [Cast](#cast)
+- [Keeping the graph neat and tidy](#keeping-the-graph-neat-and-tidy)
+  * [Comments](#comments)
+  * [Reroute nodes](#reroute-nodes)
+    + [Wireless reroute nodes](#wireless-reroute-nodes)
+  * [Straighten connections](#straighten-connections)
+  * [Align nodes](#align-nodes)
+- [Debugging aids](#debugging-aids)
+  * [Changing the color of the output](#changing-the-color-of-the-output)
+  * [Debug modifiers](#debug-modifiers)
+    + [Debug subtree](#debug-subtree)
+    + [Background subtree](#background-subtree)
+    + [Disable subtree](#disable-subtree)
+    + [Make root modifiers](#make-root-modifiers)
+  * [Inspecting expressions](#inspecting-expressions)
+  * [Inspecting the generated code](#inspecting-the-generated-code)
+- [Reusable code with variables, functions and modules](#reusable-code-with-variables-functions-and-modules)
+  * [Variables](#variables)
+    + [Creating a new variable](#creating-a-new-variable)
+    + [Using a variable](#using-a-variable)
+    + [The _Variables_ panel](#the-_variables_-panel)
+    + [Things to keep in mind when using variables](#things-to-keep-in-mind-when-using-variables)
+  * [Modules](#modules)
+    + [Creating a new module](#creating-a-new-module)
+    + [Using a module](#using-a-module)
+    + [Default values for module parameters](#default-values-for-module-parameters)
+    + [Building operator modules](#building-operator-modules)
+    + [Changing the module's name and parameters](#changing-the-modules-name-and-parameters)
+    + [Finding usages of modules](#finding-usages-of-modules)
+    + [Adding documentation to modules](#adding-documentation-to-modules)
+  * [Functions](#functions)
+    + [Making a function return a value](#making-a-function-return-a-value)
+- [Using functions and modules from text-based libraries](#using-functions-and-modules-from-text-based-libraries)
+  * [Adding a reference to a library](#adding-a-reference-to-a-library)
+  * [Using functions and modules from the library](#using-functions-and-modules-from-the-library)
+  * [Refreshing external libraries](#refreshing-external-libraries)
+- [Reference](#reference)
+  * [Keyboard shortcuts](#keyboard-shortcuts)
+  * [Documentation comment format](#documentation-comment-format)
+    + [An example](#an-example)
+    + [Supported data types](#supported-data-types)
+    + [Parsing Rules](#parsing-rules)
+      - [For parameters](#for-parameters)
+      - [For return values](#for-return-values)
+<!-- TOC end -->
 
 ## Introduction
 OpenSCAD is a 3D CAD program that can be used to create 3D models through scripting. The OpenSCAD Graph Editor is a graphical user interface for OpenSCAD that allows you to create 3D models by connecting nodes in a graph. The editor will automatically generate OpenSCAD code for you.
@@ -98,12 +100,23 @@ You are now ready to use the OpenSCAD Graph Editor.
 
 ## The basics
 ### Starting a new project
-
 When you start OpenSCAD Graph Editor, it will show a blank graph. You can already add nodes to the graph but live preview is not enabled until you actually save the project somewhere. This is because live preview requires that OpenSCAD code is generated and written to a file so that the OpenSCAD executable can read it and produce a live preview. So you should immediately save the project somewhere. You can save it by pressing the _Save as..._ button.  After the project is saved you can start live preview by pressing the OpenSCAD icon in the top right corner of the editor, provided that you have set it up correctly. If you haven't set this up yet, check the previous section.
 
 ![](images/starting_live_preview.png)
 
 From now on you will no longer need to manually save the project. The editor will automatically save the project when you change something in the graph. This will also trigger a refresh in the live preview.
+
+### Opening an existing project
+To open an existing project, press the _Open_ button. A popup menu will appear where you can either select project that you have recently opened or select the _Open file_ option to open a project from a file.
+
+![](images/open_file.png)
+
+#### Project backups
+Whenever you open a project, the editor will automatically create a backup of the project. This backup is stored in the same directory as the project file. The backup file will have the same name as the project file but with the extension `.1`, `.2`, `.3` etc. appended to it. The backup file with the highest number is the oldest backup. The editor will automatically delete old backups when it creates a new backup. The number of backups that are kept is configurable in the settings menu.
+
+![](images/backup_configuration.png)
+
+You can set this to 0 to disable backups.  If you want to restore a backup, delete the project file and rename the backup file to the original project file name (e.g. remove the `.1`, `.2`, `.3` etc. extension). The backup functionality is mainly intended to prevent data loss in case of a crash or a bug corrupting your file. If you want to keep multiple versions of your project, you will want to use a version control system like [Git](https://git-scm.com/).
 
 ### Nodes
 The editor is a graph editor. It allows you to create 3D models by connecting nodes in a graph. Nodes are connected through ports (these are the colored circles left and right of the node). A node can have input ports - the ones on the left - and output ports - the ones on the right. This, for example is a _Cube_ node:
@@ -252,6 +265,20 @@ A _For loop_ by defaults returns the union of all iterations. Sometimes you want
 
 In the example we have three spheres which are created by a _For loop_. You can see the three spheres in the output geometry. Now we switch the _For loop_ to an _Intersection-for loop_ and we get only the intersection of all spheres.
 
+### Operator nodes
+
+Operator nodes are used to calculate values from other values. A simple example is the _Add_ node which adds two values together:
+
+![](images/add_operator.png)
+
+Operator nodes have some useful functionality built into their right-click menu. For example, you can right-click on the _Add_ node and select the _Change operator_ option to change the operator to something else while keeping all the connections intact. This is useful if you want to change to a different operator without having to create a new operator node and reconnecting all the inputs.
+
+![](images/change_operator.gif)
+
+You can also right-click on an operator node and select the _Flip inputs_ option. This will quickly swap the inputs of the node. This is useful if you want to change the operands without having to reconnect them manually.
+
+![](images/flip_inputs.gif)
+
 ### Vector nodes
 
 Vectors play a large role in OpenSCAD. They are used to represent positions and directions and are also a generic way of grouping data. The following nodes are used to create and manipulate vectors:
@@ -283,7 +310,7 @@ These nodes are useful if for example you want to create a list of points as inp
 
 ![](images/add_item.png)
 
-Similarly you can remove items from the vector by right-clicking it and selecting _Remove item_.
+Similarly you can remove the last item from the vector by right-clicking the node and selecting _Remove item_.
 
 ![](images/remove_item.png)
 
@@ -302,6 +329,8 @@ This special node takes two `vector2`, `vector3` or `vector` values. It multiply
 ![](images/pairwise_multiply.png)
 
 This functionality is not actually built into OpenSCAD (e.g. using the normal multiplication operator `*` will return the dot product of the vectors). Under the hood this will build a loop that walks over the vectors and multiplies the values pairwise. This was added as this operation is quite useful and would otherwise require you to build a lot more nodes.
+
+
 
 ### Miscellaneous nodes
 #### Cast
@@ -338,6 +367,10 @@ You can also turn a _Wireless reroute_ node back into a normal _Reroute node_ by
 The following image shows how you can clean up a cluttered node graph with reroute nodes:
 
 ![](images/using_reroute_nodes.gif)
+
+When you delete a reroute node all connections that were routed through it will be deleted as well. If you want to keep the connections you can hold `Shift` while deleting the reroute node. This will delete the reroute node but keep the connections.
+
+![](images/reroute_delete_keep_connections.gif)
 
 ### Straighten connections
 
@@ -425,7 +458,9 @@ To create a variable, click the _V_ icon above the project tree. This will open 
 
 ![](images/create_variable.gif)
 
-You can give the variable a name and then press _OK_. Now the variable will be visible in your project tree.
+Variables need a name. You should also give your new variable a type, so you (and the editor) know what kind of value you can to assign to it. You can also give your variable a default value. This is the value the variable will have by default, unless you change it later with a _Set variable_ node. Finally, you can decide whether the variable should appear in OpenSCAD's [customizer panel](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Customizer). This allows users to quickly change the value of a variable without changing the OpenSCAD code. Depending on the type of variable you create, the customizer panel will show a slider, a checkbox, a vector edit or a text field. You can also add constraints to your variable. This will make sure that the value of the variable is always within the specified range. Which constraints are available, depends on the type of variable you create.
+
+Now the variable will be visible in your project tree.
 
 #### Using a variable
 
@@ -437,6 +472,18 @@ To use a variable, you can simply drag it into the graph from your project tree.
 The next image shows you to set a variable's value to 10 and then using an `echo` node to print the value of the variable:
 
 ![](images/getting_setting_variables.gif)
+
+#### The _Variables_ panel
+
+On the left side of the editor, you can see the _Variables_ panel. This panel shows you all the variables in your project. You can also use this panel to change the default value of a variable. The variables panel works similar to OpenSCAD's [customizer panel](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Customizer), however it can also be used to change the default value of variables which are not shown in the customizer panel. Changes in the variables panel will be immediately reflected in the generated OpenSCAD code, so you can use it to quickly test your variables.
+
+![](images/variables_panel.gif)
+
+You can click on a variable name to edit the variable. You can change the name, type, default value and constraints. You can also change whether and how the variable should appear in the customizer panel. All usage points of the variable will be updated to reflect the changes you made.
+
+![](images/edit_variable.gif)
+
+If you want to delete a variable, you can right-click it in the project tree and select _Delete variable_.
 
 #### Things to keep in mind when using variables
 
