@@ -4,8 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
+## [0.5.0] - 2022-11-07
 ### Added
 - Support for OpenSCAD's customizer. You can now set up if and how variables should appear in the customizer ([#23](https://github.com/derkork/openscad-graph-editor/issues/23)). 
 - Variables now have default values. A new panel has been added that allows you to quickly set initial values for all variables. This largely alleviates the need to create a _Set Variable_ node to initialize each variable.
@@ -16,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The project tree is now expanded by default.
-
 
 ## [0.4.1] - 2022-09-05
 ### Fixed

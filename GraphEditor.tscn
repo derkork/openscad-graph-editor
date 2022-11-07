@@ -63,6 +63,7 @@ margin_bottom = 250.0
 [node name="NodeColorDialog" parent="." instance=ExtResource( 16 )]
 
 [node name="SettingsDialog" parent="." instance=ExtResource( 25 )]
+visible = false
 
 [node name="StylusDebugDialog" parent="." instance=ExtResource( 27 )]
 
