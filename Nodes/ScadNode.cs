@@ -274,6 +274,12 @@ namespace OpenScadGraphEditor.Nodes
                 if (connectedNodes.Count > 0)
                 {
                     return connectedNodes
+                        // sort the candidates by their position in the graph
+                        // top to bottom, then left to right; e.g.
+                        // nodes with a lower y value will be rendered first
+                        // nodes with the same y value will be sorted by their x value
+                        .OrderBy(it => it.From.Offset.y)
+                        .ThenBy(it => it.From.Offset.x)
                         .Select(it =>
                         {
                             var rendered = it.From.Render(context, it.FromPort);

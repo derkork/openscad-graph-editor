@@ -55,6 +55,7 @@ namespace OpenScadGraphEditor.Library
             });
             
             // sort the candidates by their position in the graph
+            // top to bottom, then left to right; e.g.
             // nodes with a lower y value will be rendered first
             // nodes with the same y value will be sorted by their x value
             var sortedCandidates = candidates
