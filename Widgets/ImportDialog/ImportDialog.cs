@@ -22,8 +22,11 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         private string[] _allLibraryFiles;
         private Button _okButton;
 
+        [CanBeNull] private ExternalReference _currentExternalReference;
+
 
         public event Action<string, IncludeMode> OnNewImportRequested;
+        public event Action<ExternalReference, string, IncludeMode> OnUpdateImportRequested;
 
 
         public override void _Ready()
@@ -32,7 +35,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             _fileSelectBox.OnFileSelected += OnFileSelected;
             _fileSelectBox.OnSelectPressed += OnSelectButtonPressed;
             _fileSelectBox.Filters = new[] {"*.scad;OpenSCAD files"};
-            
+
             _fileLabel = this.WithName<Control>("FileLabel");
             _libraryFileLabel = this.WithName<Control>("LibraryFileLabel");
             _libraryFileBox = this.WithName<Control>("LibraryFileBox");
@@ -74,8 +77,9 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         }
 
 
-        public void OpenForNewImport([CanBeNull] string currentProjectPath)
+        private void Clear(string currentProjectPath)
         {
+            _currentExternalReference = null;
             _currentProjectPath = currentProjectPath;
             _importModeOptionButton.Selected = 0;
             _pathModeOptionButton.Selected = 0;
@@ -94,6 +98,46 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             }
 
             RefreshLibraryFiles();
+        }
+
+        public void OpenForNewImport([CanBeNull] string currentProjectPath)
+        {
+            Clear(currentProjectPath);
+            RefreshUi();
+            PopupCentered();
+        }
+
+        public void OpenForExistingImport(ExternalReference externalReference, [CanBeNull] string currentProjectPath)
+        {
+            Clear(currentProjectPath);
+            _currentExternalReference = externalReference;
+            _importModeOptionButton.Selected = (int) externalReference.Mode;
+
+            // check if the path is relative or absolute
+            var isRelative = Path.IsPathRooted(externalReference.IncludePath) == false;
+
+            // if the path is relative it could either be relative to the project or be a library path
+            if (isRelative &&
+                PathResolver.TryResolve(currentProjectPath, externalReference.IncludePath, out var resolvedPath))
+            {
+                if (PathResolver.IsLibraryFile(resolvedPath))
+                {
+                    SetPathMode(ExternalFilePathMode.Library);
+                    var index = Array.IndexOf(_allLibraryFiles, externalReference.IncludePath);
+                    _libraryFileOptionButton.Selected = index;
+                }
+                else
+                {
+                    SetPathMode(ExternalFilePathMode.Relative);
+                    _fileSelectBox.CurrentPath = resolvedPath;
+                }
+            }
+            else
+            {
+                SetPathMode(ExternalFilePathMode.Absolute);
+                _fileSelectBox.CurrentPath = externalReference.IncludePath;
+            }
+
             RefreshUi();
             PopupCentered();
         }
@@ -103,7 +147,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         {
             RefreshUi();
         }
-        
+
         private void RefreshUi()
         {
             var pathMode = (ExternalFilePathMode) _pathModeOptionButton.GetSelectedId();
@@ -136,7 +180,8 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                     if (pathMode == ExternalFilePathMode.Relative)
                     {
                         var canResolve =
-                            PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath, Path.GetDirectoryName(_currentProjectPath), out _);
+                            PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath,
+                                Path.GetDirectoryName(_currentProjectPath), out _);
                         _okButton.Disabled = !canResolve;
                     }
                     else
@@ -149,29 +194,58 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
 
         private void OnOkButtonPressed()
         {
-                // new import
-                var pathMode = (ExternalFilePathMode) _pathModeOptionButton.GetSelectedId();
-                var includeMode = (IncludeMode) _importModeOptionButton.GetSelectedId();
-                
-                // build the external reference
-                switch (pathMode)
-                {
-                    case ExternalFilePathMode.Library:
-                        OnNewImportRequested?.Invoke(_allLibraryFiles[_libraryFileOptionButton.GetSelectedId()], includeMode);
-                        break;
-                    case ExternalFilePathMode.Relative:
-                        var canResolve =
-                            PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath, Path.GetDirectoryName(_currentProjectPath), out var path);
-                        GdAssert.That(canResolve, "Could not resolve path");
+            // new import
+            var pathMode = (ExternalFilePathMode) _pathModeOptionButton.GetSelectedId();
+            var includeMode = (IncludeMode) _importModeOptionButton.GetSelectedId();
+
+            // build the external reference
+            switch (pathMode)
+            {
+                case ExternalFilePathMode.Library:
+                    if (_currentExternalReference != null)
+                    {
+                        OnUpdateImportRequested?.Invoke(_currentExternalReference,
+                            _allLibraryFiles[_libraryFileOptionButton.Selected], includeMode);
+                    }
+                    else
+                    {
+                        OnNewImportRequested?.Invoke(_allLibraryFiles[_libraryFileOptionButton.GetSelectedId()],
+                            includeMode);
+                    }
+
+                    break;
+                case ExternalFilePathMode.Relative:
+                    var canResolve =
+                        PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath,
+                            Path.GetDirectoryName(_currentProjectPath), out var path);
+                    GdAssert.That(canResolve, "Could not resolve path");
+                    if (_currentExternalReference != null)
+                    {
+                        OnUpdateImportRequested?.Invoke(_currentExternalReference, path, includeMode);
+                    }
+                    else
+                    {
                         OnNewImportRequested?.Invoke(path, includeMode);
-                        break;
-                    case ExternalFilePathMode.Absolute:
+                    }
+
+                    break;
+                case ExternalFilePathMode.Absolute:
+                    if (_currentExternalReference != null)
+                    {
+                        OnUpdateImportRequested?.Invoke(_currentExternalReference, _fileSelectBox.CurrentPath,
+                            includeMode);
+                    }
+                    else
+                    {
                         OnNewImportRequested?.Invoke(_fileSelectBox.CurrentPath, includeMode);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                Hide();
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            Hide();
         }
 
         private void OnPathModeSelected([UsedImplicitly] int _)
@@ -230,6 +304,20 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
         private void OnCancelButtonPressed()
         {
             Hide();
+        }
+
+        private void SetPathMode(ExternalFilePathMode mode)
+        {
+            // walk the items in the path mode until you find the id
+            for (var i = 0; i < _pathModeOptionButton.GetItemCount(); i++)
+            {
+                if (_pathModeOptionButton.GetItemId(i) != (int) mode)
+                {
+                    continue;
+                }
+                _pathModeOptionButton.Selected = i;
+                return;
+            }
         }
     }
 }

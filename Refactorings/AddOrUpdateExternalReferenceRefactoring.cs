@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets;
 using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -10,29 +12,102 @@ namespace OpenScadGraphEditor.Refactorings
     /// <summary>
     /// Refactoring which refreshes code from an external reference.
     /// </summary>
-    public class RefreshExternalReferenceRefactoring : Refactoring
+    public class AddOrUpdateExternalReferenceRefactoring : Refactoring
     {
-        private readonly ExternalReference _reference;
+        private readonly string _includePath;
+        private readonly IncludeMode _includeMode;
+        private readonly ExternalReference _replaces;
 
-        public RefreshExternalReferenceRefactoring(ExternalReference reference)
+        public AddOrUpdateExternalReferenceRefactoring(string includePath, IncludeMode includeMode, [CanBeNull] ExternalReference replaces = null)
         {
-            _reference = reference;
+            _includePath = includePath;
+            _includeMode = includeMode;
+            _replaces = replaces;
         }
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            // make a new copy of the reference and then load the current file contents into it.
-            var referenceCopy = ExternalReferenceBuilder.BuildEmptyCopy(_reference);
-            if (!_reference.TryResolveFullPath(context.Project, out var fullPath))
+            var toReplace = _replaces;
+            if (!PathResolver.TryResolve(context.Project.ProjectPath, _includePath, out var fullIncludePath))
             {
-                Log.Warning("Could not resolve full path for external reference");
+                NotificationService.ShowError("Cannot find file to include at " + _includePath);
                 return;
             }
-
-            if (!referenceCopy.ParseFile(fullPath))
+            
+            // step 1: find all references that are dirtied by this refactoring
+            var dirtyReferences = new HashSet<ExternalReference>();
+            // if we replace an existing reference this is dirty
+            if (_replaces != null)
             {
-                Log.Warning("Could not parse file at path {Path}", fullPath);
-                return;
+                toReplace = _replaces;
+            }
+            else
+            {
+                // also if the user has included a file that is already in the project (either directly or as transitive dependency)
+                // this is dirty
+                toReplace = context.Project.ExternalReferences
+                    .FirstOrDefault(r => r.TryResolveFullPath(context.Project.ProjectPath, context.Project.ResolveExternalReference, out var existingPath) 
+                                         && PathResolver.IsSamePath(fullIncludePath, existingPath));
+     
+            }
+          
+            if (toReplace != null)
+            {
+                dirtyReferences.Add(toReplace);
+            }
+            
+            // also mark all transitive dependencies as dirty that are referenced by the dirty references
+            dirtyReferences.UnionWith(dirtyReferences.SelectMany(it => context.Project.GetTransitiveReferences(it)));
+            
+            // now load the reference and all transitive dependencies
+            var newReferences = new HashSet<ExternalReference>();
+            DependencyExt.LoadReference(context.Project.ProjectPath, _includePath, _includeMode, newReferences);
+            
+            // now we need to compare the old and the new references.
+            // we will delete all references that are not required by another reference in the project
+            var keptReferences = new HashSet<ExternalReference>();
+            foreach (var dirtyReference in dirtyReferences)
+            {
+                // toReplace must be != null here, otherwise there would not be any dirty references
+                if (context.Project.IsThisReferenceUsedByOtherReferenceThan(dirtyReference, toReplace))
+                {
+                    keptReferences.Add(dirtyReference);
+                }
+                else
+                {
+                    // remove the reference from the project
+                    context.Project.RemoveExternalReference(dirtyReference);
+                }
+            }
+            
+            // if we have remaining references, we need to check if they refer to the same file as a reference
+            // in the new set. If so, we need to replace the old reference with the new one
+            foreach (var keptReference in keptReferences)
+            {
+                // get the full path of the kept reference
+                if (context.Project.TryResolveFullPath(keptReference, out var keptFullPath))
+                {
+                    // check if there is a new reference that refers to the same file
+                    foreach (var newReference in newReferences)
+                    {
+                        // since the new references are not part of the project yet, we need to resolve the full path
+                        // differently
+                        if (newReference.TryResolveFullPath(context.Project.ProjectPath,
+                                it => newReferences.FirstOrDefault(re => re.Id == it), out var newFullPath))
+                        {
+                            // if the paths are the same, we need to replace the kept reference with the new one
+                            if (PathResolver.IsSamePath(keptFullPath, newFullPath))
+                            {
+                                // replace the kept reference with the new one
+                                context.Project.Remov(keptReference, newReference);
+                                // remove the new reference from the new references set
+                                newReferences.Remove(newReference);
+                                // we can stop searching for a replacement
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
 
@@ -145,6 +220,15 @@ namespace OpenScadGraphEditor.Refactorings
 
                 // we can ignore function return types for now as all types for external references are ANY right now.
             }
+            
+            // finally we need to update the transitive references of this file.
+            // todo, this doesnt handle the case where new imports are added or imports are removed.
+            // or files are reorganized in general.
+            context.Project.ExternalReferences.Where(it => it.IncludedBy == _reference.Id)
+                .Select(it => new AddOrUpdateExternalReferenceRefactoring(it))
+                .ToList()
+                .ForAll(context.PerformRefactoring);
         }
+        
     }
 }

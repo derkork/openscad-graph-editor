@@ -126,6 +126,7 @@ namespace OpenScadGraphEditor
             _quickActionsPopup = this.WithName<QuickActionsPopup>("QuickActionsPopup");
             _importDialog = this.WithName<ImportDialog>("ImportDialog");
             _importDialog.OnNewImportRequested += OnNewImportRequested;
+            _importDialog.OnUpdateImportRequested += OnUpdateImportRequested;
             _usageDialog = this.WithName<UsageDialog>("UsageDialog");
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
             
@@ -324,6 +325,11 @@ namespace OpenScadGraphEditor
         {
             OnRefactoringRequested($"Add reference to {path}", new AddExternalReferenceRefactoring(path, includeMode));
         }
+        
+        private void OnUpdateImportRequested(ExternalReference reference, string path, IncludeMode includeMode)
+        {
+            OnRefactoringRequested($"Update reference to {path}", new UpdateExternalReferenceRefactoring(reference, path, includeMode));
+        }
 
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
         {
@@ -379,6 +385,11 @@ namespace OpenScadGraphEditor
             if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry &&
                 !externalReferenceTreeEntry.Description.IsTransitive)
             {
+                var editReferenceTitle = $"Edit reference to {entry.Title}";
+                actions.Add(new QuickAction(editReferenceTitle,
+                    () => _importDialog.OpenForExistingImport(externalReferenceTreeEntry.Description, _currentProject.ProjectPath)));
+                
+                
                 var removeReferenceTitle = $"Remove reference to {entry.Title}";
                 actions.Add(new QuickAction(removeReferenceTitle,
                     () => OnRefactoringRequested(
@@ -390,14 +401,14 @@ namespace OpenScadGraphEditor
                 actions.Add(new QuickAction(refreshReferenceTitle,
                     () => OnRefactoringRequested(
                         refreshReferenceTitle,
-                        new RefreshExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
+                        new AddOrUpdateExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
             }
 
             _quickActionsPopup.Open(mousePosition, actions);
         }
 
         /// <summary>
-        /// Opens the given project tree entry for editing.
+        /// Called when an entry is double clicked in the project tree.
         /// </summary>
         private void Open(ProjectTreeEntry entry)
         {
@@ -411,6 +422,13 @@ namespace OpenScadGraphEditor
                 && _currentProject.IsDefinedInThisProject(variableTreeEntry.Description))
             {
                 _variableRefactorDialog.Open(variableTreeEntry.Description, _currentProject);
+            }
+            
+            if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry &&
+                // we dont want to open the import dialog for transitive imports
+                !externalReferenceTreeEntry.Description.IsTransitive)
+            {
+                _importDialog.OpenForExistingImport(externalReferenceTreeEntry.Description, _currentProject.ProjectPath);
             }
         }
 

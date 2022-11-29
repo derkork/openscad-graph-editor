@@ -232,6 +232,15 @@ namespace OpenScadGraphEditor.Library.External
                 })
                 .ToArray();
         }
+        
+        /// <summary>
+        /// Checks, if the given path points to a file that is inside of any library folder.
+        /// </summary>
+        public static bool IsLibraryFile(string path)
+        {
+            var normalizedPath = NormalizePath(path);
+            return GetLibraryPaths().Any(normalizedPath.StartsWith);
+        }
 
         private static IEnumerable<string> GetWindowsLibraryPaths()
         {
