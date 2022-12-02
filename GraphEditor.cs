@@ -277,15 +277,12 @@ namespace OpenScadGraphEditor
         {
             var graph = _currentProject.AllDeclaredInvokables.FirstOrDefault(it =>
                 it.Description.Id == information.GraphId);
-            if (graph != null)
+            var node = graph?.GetAllNodes().FirstOrDefault(it => it.Id == information.NodeId);
+            if (node != null)
             {
-                var node = graph.GetAllNodes().FirstOrDefault(it => it.Id == information.NodeId);
-                if (node != null)
-                {
-                    var edit = Open(graph);
-                    edit.FocusNode(node);
-                    return;
-                }
+                var edit = Open(graph);
+                edit.FocusNode(node);
+                return;
             }
 
             NotificationService.ShowNotification("This usage no longer exists");
@@ -323,12 +320,12 @@ namespace OpenScadGraphEditor
 
         private void OnNewImportRequested(string path, IncludeMode includeMode)
         {
-            OnRefactoringRequested($"Add reference to {path}", new AddExternalReferenceRefactoring(path, includeMode));
+            OnRefactoringRequested($"Add reference to {path}", new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
         }
         
         private void OnUpdateImportRequested(ExternalReference reference, string path, IncludeMode includeMode)
         {
-            OnRefactoringRequested($"Update reference to {path}", new UpdateExternalReferenceRefactoring(reference, path, includeMode));
+            OnRefactoringRequested($"Update reference to {path}", new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
         }
 
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
@@ -397,11 +394,11 @@ namespace OpenScadGraphEditor
                         new DeleteExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
 
 
-                var refreshReferenceTitle = $"Refresh reference to {entry.Title}";
+                var refreshReferenceTitle = $"Refresh external references";
                 actions.Add(new QuickAction(refreshReferenceTitle,
                     () => OnRefactoringRequested(
                         refreshReferenceTitle,
-                        new AddOrUpdateExternalReferenceRefactoring(externalReferenceTreeEntry.Description))));
+                        new RefreshExternalReferencesRefactoring())));
             }
 
             _quickActionsPopup.Open(mousePosition, actions);

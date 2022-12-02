@@ -87,5 +87,40 @@ namespace OpenScadGraphEditor.Nodes
                     throw new ArgumentOutOfRangeException(nameof(self), self, null);
             }
         }
+
+        // todo: use this function in the connection rules
+        public static bool CanBeAssignedTo(this PortType self, PortType other)
+        {
+            // if port types are the same, it's always possible
+            if (self == other)
+            {
+                return true;
+            }
+            
+            // vector2 and 3 can be assigned to Vector
+            if (self == PortType.Vector2 && other == PortType.Vector)
+            {
+                return true;
+            }
+            if (self == PortType.Vector3 && other == PortType.Vector)
+            {
+                return true;
+            }
+            
+            // any can be assigned to any expression type
+            if (self == PortType.Any && other.IsExpressionType())
+            {
+                return true;
+            }
+            
+            // any expression type can be assigned to any
+            if (self.IsExpressionType() && other == PortType.Any)
+            {
+                return true;
+            }
+            
+            // anything else - nope
+            return false;
+        }
     }
 }

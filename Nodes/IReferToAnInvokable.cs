@@ -9,6 +9,9 @@ namespace OpenScadGraphEditor.Nodes
     {
         InvokableDescription InvokableDescription { get; }
         
+        /// <summary>
+        /// Makes the nodes ports match the invokable description and connects the node to this invokable.
+        /// </summary>
         void SetupPorts(InvokableDescription description);
 
         /// <summary>
