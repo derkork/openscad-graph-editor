@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2022-12-07
+### Added
+- You can now delete connections by right-clicking them. This is especially useful when multiple connections go into the same node, where until now you had to one by one drag them out of the node until you had the correct one ([#28](https://github.com/derkork/openscad-graph-editor/issues/28)).
+- You can now quickly insert a reroute node on a connection by moving the mouse over a connection and then `Shift`+`Right-Click`. If you additionally hold `Ctrl`/`Cmd` while doing this a wireless reroute node is inserted. This complements the already existing functionality of deleting a reroute node with `Shift`+`Delete`, which will delete the reroute node but keep the connection.
+
 ## [0.5.2] - 2022-12-02
 ### Added
 - It is now possible to modify references to external files (until now you could only delete and add them again).

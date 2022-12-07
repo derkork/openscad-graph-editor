@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using KdTree;
+using KdTree.Math;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
@@ -76,8 +79,18 @@ namespace OpenScadGraphEditor.Widgets
         
         private readonly HashSet<string> _selection = new HashSet<string>();
         private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
+        /// <summary>
+        /// Lookup tree for finding the closest connection to a given point.
+        /// </summary>
+        private  KdTree<float, (ScadConnection Connection,List<Vector2> BezierPoints)> _connectionTree = 
+            new KdTree<float, (ScadConnection Connection,List<Vector2> BezierPoints)>(2, new FloatMath());
         private ScadConnection _pendingDisconnect;
         public ScadGraph Graph { get; private set; }
+        
+        private Control _connectionHighlightLayer;
+        
+        private List<Vector2> _connectionHighlightPoints;
+        private ScadConnection _highlightedConnection;
 
 
         public void SelectNodes(List<ScadNode> nodes)
@@ -123,7 +136,21 @@ namespace OpenScadGraphEditor.Widgets
 
             this.Connect("_end_node_move")
                 .To(this, nameof(OnEndNodeMove));
+            
+            this.Connect("draw")
+                .To(this, nameof(BuildConnectionLookupTree));
+
+
+            _connectionHighlightLayer = this.WithName<Control>("CLAYER");
+            _connectionHighlightLayer
+                .Connect("draw")
+                .To(this, nameof(OnConnectionHighlightLayerDraw));
+            
+            this.Connect("scroll_offset_changed")
+                .To(this, nameof(OnScrollOffsetChanged));
         }
+        
+
 
         public override bool CanDropData(Vector2 position, object data)
         {
@@ -220,6 +247,9 @@ namespace OpenScadGraphEditor.Widgets
                 ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
             }
             
+            // build the lookup tree
+            BuildConnectionLookupTree();
+
             // highlight any bound nodes
             HighlightBoundNodes();
             
@@ -239,7 +269,22 @@ namespace OpenScadGraphEditor.Widgets
                 _selection.Remove(id);
             }
         }
-        
+
+        private void BuildConnectionLookupTree()
+        {
+            _connectionTree =
+                new KdTree<float, (ScadConnection Connection, List<Vector2> BezierPoints)>(2, new FloatMath());
+            foreach (var connection in Graph.GetAllConnections())
+            {
+                var connectionPoints = GetConnectionPoints(connection);
+                var bezierPoints = BakeBezierLine(connectionPoints.Start, connectionPoints.End, 1);
+                foreach (var bezierPoint in bezierPoints)
+                {
+                    _connectionTree.Add(new[] {bezierPoint.x, bezierPoint.y}, (connection, bezierPoints));
+                }
+            }
+        }
+
         /// <summary>
         /// Calculates the graph relative position for any global coordinate taking zoom and scroll offset into account.
         /// </summary>
@@ -264,19 +309,62 @@ namespace OpenScadGraphEditor.Widgets
         private void OnPopupRequest(Vector2 position)
         {
             var relativePosition = GlobalToGraphRelative(position);
+            
+            if (_highlightedConnection != null)
+            {
+                // a right click on a connection will in every case delete the connection, so first
+                // make it no longer highlighted but keep the reference.
+                var toDelete = _highlightedConnection;
+                _highlightedConnection = null;
+                _connectionHighlightPoints = null;
+                
+                // if shift is pressed we want to break the connection and insert a reroute node
+                // if additionally ctrl is pressed we want to break the connection and insert a wireless reroute node
+                if (KeyMap.IsShiftPressed())
+                {
+                    var rerouteNode = NodeFactory.Build<RerouteNode>();
+                    if (KeyMap.IsCmdOrControlPressed())
+                    {
+                        rerouteNode.IsWireless = true;
+                    }
+                    rerouteNode.Offset = relativePosition;
+                    
+                    PerformRefactorings("Insert reroute node",
+                            // first, delete the connection
+                            new DeleteConnectionRefactoring( toDelete),
+                            // then insert the reroute node and connect it to the old connection's target
+                            new AddNodeRefactoring(Graph, rerouteNode, toDelete.To, PortId.Input(toDelete.ToPort)),
+                            // and add a new connection from the old connection's source to the reroute node
+                            new AddConnectionRefactoring(new ScadConnection(Graph, toDelete.From, toDelete.FromPort, rerouteNode, 0))
+                            );
+                    return;
+                }
+ 
+                // otherwise we want to delete the connection
+                PerformRefactorings("Delete connection", new DeleteConnectionRefactoring(toDelete));
+                return;
+            }
 
-            var matchingWidgets = _widgets.Values
-                .FirstOrDefault(it => new Rect2(it.Offset, it.RectSize).HasPoint(relativePosition));
+            
 
-            if (matchingWidgets == null)
+            if (!TryGetNodeAtPosition(relativePosition, out var node))
             {
                 // right-click in empty space yields you the add dialog
                 AddDialogRequested?.Invoke(RequestContext.ForPosition(Graph, relativePosition));
                 return;
             }
 
-            NodePopupRequested?.Invoke(RequestContext.ForNode(Graph, position, matchingWidgets.BoundNode));
+            NodePopupRequested?.Invoke(RequestContext.ForNode(Graph, position, node));
             
+        }
+
+        private bool TryGetNodeAtPosition(Vector2 relativePosition, out ScadNode node)
+        {
+            var firstMatchingWidget = _widgets.Values
+                .FirstOrDefault(it => new Rect2(it.Offset, it.RectSize).HasPoint(relativePosition));
+
+            node = firstMatchingWidget?.BoundNode;
+            return node != null;
         }
 
 
@@ -288,6 +376,48 @@ namespace OpenScadGraphEditor.Widgets
                 PerformRefactorings("Remove connection", new DeleteConnectionRefactoring(_pendingDisconnect));
                 _pendingDisconnect = null;
                 return;
+            }
+
+            if (evt is InputEventMouseMotion mouseMotionEvent)
+            {
+                // if the mouse is over a node, don't do anything
+                var mousePositionRelativeToTheGraph = GlobalToGraphRelative(mouseMotionEvent.GlobalPosition);
+                if (TryGetNodeAtPosition(mousePositionRelativeToTheGraph, out _))
+                {
+                    ClearHighlightedConnection();
+                    return;
+                }
+                
+                // find the closest connection to the mouse
+                // we use * zoom because GlobalToGraphRelative will give us the coordinates in graph space and 
+                // we need to convert them to screen space but relative to the graph widget.
+                var mousePosition = mousePositionRelativeToTheGraph * Zoom;
+                
+                var closest = _connectionTree.GetNearestNeighbours(new []{mousePosition.x, mousePosition.y}, 1);
+                if (closest.Length <= 0)
+                {
+                    ClearHighlightedConnection();
+                    return;
+                } 
+                
+                
+                // are we close enough to the connection?
+                var distance = new Vector2(closest[0].Point[0], closest[0].Point[1]).DistanceTo(mousePosition);
+                if (distance > 20)
+                {
+                    ClearHighlightedConnection();
+                    return;
+                }
+                
+                // no need to redraw, if the connection is the same
+                if (_highlightedConnection == closest[0].Value.Connection)
+                {
+                    return;
+                }
+                
+                _highlightedConnection = closest[0].Value.Connection;
+                _connectionHighlightPoints = closest[0].Value.BezierPoints;
+                _connectionHighlightLayer.Update();
             }
 
             if (evt.IsCopy())
@@ -355,6 +485,17 @@ namespace OpenScadGraphEditor.Widgets
             {
                 AlignSelectionBottom();
             }
+        }
+
+        private void ClearHighlightedConnection()
+        {
+            if (_highlightedConnection == null)
+            {
+                return;
+            }
+            _highlightedConnection = null;
+            _connectionHighlightPoints = null;
+            _connectionHighlightLayer.Update();
         }
 
         private Vector2 GetPastePosition()
@@ -674,6 +815,107 @@ namespace OpenScadGraphEditor.Widgets
             }
             
             RefactoringsRequested?.Invoke(description, refactoringsAsArray);
+        }
+
+        private (Vector2 Start, Vector2 End) GetConnectionPoints(ScadConnection connection)
+        {
+            var fromNode = _widgets[connection.From.Id];
+            var toNode = _widgets[connection.To.Id];
+            var fromPort = fromNode.GetConnectionOutputPosition(connection.FromPort) + fromNode.Offset * Zoom;
+            var toPort = toNode.GetConnectionInputPosition(connection.ToPort) + toNode.Offset * Zoom;
+            return (fromPort, toPort);
+        }
+        
+        
+        /// <summary>
+        /// Bezier interpolation function for the connection lines. This is copied straight from the Godot source code.
+        /// </summary>
+        private static Vector2 BezierInterpolate(float t, Vector2 start, Vector2 control1, Vector2 control2, Vector2 end)
+        {
+            var omt = 1.0f - t;
+            var omt2 = omt * omt;
+            var omt3 = omt2 * omt;
+            var t2 = t * t;
+            var t3 = t2 * t;
+
+            return start * omt3 + control1 * omt2 * t * 3.0f + control2 * omt * t2 * 3.0f + end * t3;
+        }
+   
+        /// <summary>
+        /// Segment baking function for the connection lines. This is copied straight from the Godot source code + some modifications.
+        /// </summary>
+        private static void BakeSegment2D(List<Vector2> points, float pBegin, float pEnd,
+            Vector2 pA, Vector2 pOut, Vector2 pB, Vector2 pIn, int pDepth, int pMinDepth, int pMaxDepth,
+            float pTol, float pMaxLength, ref int lines)
+        {
+            var mp = pBegin + (pEnd - pBegin) * 0.5f;
+            var beg = BezierInterpolate(pBegin, pA, pA + pOut, pB + pIn, pB);
+            var mid = BezierInterpolate(mp, pA, pA + pOut, pB + pIn, pB);
+            var end = BezierInterpolate(pEnd, pA, pA + pOut, pB + pIn, pB);
+            
+            var na = (mid - beg).Normalized();
+            var nb = (end - mid).Normalized();
+            var dp = Mathf.Rad2Deg(Mathf.Acos(na.Dot(nb)));
+            
+            // the maxLength check is to ensure we don't get longer straight segments of lines because we want 
+            // to keep the points that make up the lines evenly spaced, so our KDTree can find the closest point
+            // to the mouse cursor and we don't get "holes" in the detection when the mouse is over a straight line
+            // that technically only needs two points to be drawn. We insert additional points this way so
+            // if the line is longer the algorithm can still detect it if the mouse cursor is in the middle of it.
+            if (pDepth >= pMinDepth && (dp < pTol || pDepth >= pMaxDepth) && (beg - end).Length() < pMaxLength)
+            {
+                points.Add(end);
+                lines++;
+            }
+            else
+            {
+                BakeSegment2D(points, pBegin, mp, pA, pOut, pB, pIn, pDepth + 1, pMinDepth, pMaxDepth, pTol, pMaxLength, ref lines);
+                BakeSegment2D(points, mp, pEnd, pA, pOut, pB, pIn, pDepth + 1, pMinDepth, pMaxDepth, pTol, pMaxLength, ref lines);
+            }
+        }
+
+        /// <summary>
+        /// Builds a bezier curve from the given points and returns a list of points that make up the curve.
+        /// </summary>
+        private List<Vector2> BakeBezierLine(Vector2 fromPoint, Vector2 toPoint, float bezierRatio)
+        {
+            //cubic bezier code
+            var diff = toPoint.x - fromPoint.x;
+            var cpLen = GetConstant("bezier_len_pos") * bezierRatio;
+            var cpNegLen = GetConstant("bezier_len_neg") * bezierRatio;
+
+            var cpOffset = diff > 0 
+                ? Mathf.Min(cpLen, diff * 0.5f) 
+                : Mathf.Max(Mathf.Min(cpLen - diff, cpNegLen), -diff * 0.5f);
+
+            var c1 = new Vector2(cpOffset * Zoom, 0);
+            var c2 = new Vector2(-cpOffset * Zoom, 0);
+
+            var lines = 0;
+
+            var points = new List<Vector2> {fromPoint};
+            BakeSegment2D(points, 0, 1, fromPoint, c1, toPoint, c2, 0, 3, 9, 3, 20, ref lines);
+            points.Add(toPoint);
+            
+            return points;
+        }
+        
+        private void OnScrollOffsetChanged([UsedImplicitly] Vector2 _)
+        {
+            // when the scroll offset/zoom is changed our previously highlighted connection is no longer valid
+            // so we need to clear it, otherwise we'll get an artifact where the connection is still highlighted
+            // in its old position and scale
+            _highlightedConnection = null;
+            _connectionHighlightPoints = null;
+        }
+
+        private void OnConnectionHighlightLayerDraw()
+        {
+            if (_highlightedConnection == null)
+            {
+                return;
+            }
+            _connectionHighlightLayer.DrawPolyline(_connectionHighlightPoints.ToArray(), new Color(1,1,1, 0.5f), 5, true);
         }
 
     }

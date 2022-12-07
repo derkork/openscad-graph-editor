@@ -41,7 +41,21 @@ namespace OpenScadGraphEditor.Utils
 
             return inputEventKey.Control;
         }
+
+        public static bool IsShiftPressed()
+        {
+            return Input.IsKeyPressed((int) KeyList.Shift);
+        }
         
+        public static bool IsCmdOrControlPressed()
+        {
+            if (OS.GetName() == "OSX")
+            {
+                return Input.IsKeyPressed((int) KeyList.Meta);
+            }
+
+            return Input.IsKeyPressed((int) KeyList.Control);
+        }
         
         // copy+paste
         public static bool IsCopy(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.C);

@@ -12,6 +12,7 @@
     <PackageReference Include="GodotExt" Version="0.2.0" />
     <PackageReference Include="GodotTestDriver" Version="1.0.0-pre1" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
+    <PackageReference Include="KdTree" Version="1.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
@@ -47,12 +48,6 @@
       <Listener>false</Listener>
       <CustomToolNamespace>OpenScadGraphEditor.Library.External</CustomToolNamespace>
     </Antlr4>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Library\LightWeightGraph.cs" />
-    <Compile Remove="Library\ICanBeRendered.cs" />
-    <Compile Remove="Library\IScadGraph.cs" />
-    <Compile Remove="Nodes\MainEntryPoint.cs" />
   </ItemGroup>
 
   <PropertyGroup>

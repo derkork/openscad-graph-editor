@@ -695,6 +695,9 @@ You may have noticed that there is no functionality for supporting renames. This
 - `Ctrl+X` / `Cmd+X` - Cut the selected nodes.
 - `Ctrl+Z` / `Cmd+Z` - Undo the last action.
 - `Ctrl+Shift+Z` / `Cmd+Shift+Z` - Redo the last action.
+- `Right Click` over a connection - Delete the connection.
+- `Shift` + `Right Click` over a connection - Insert a reroute node on the connection.
+- `Shift` + `Ctrl` + `Right Click` / `Shift` + `Cmd` + `Right Click` - over a connection - Insert a wireless reroute node on the connection.
 - Holding `Shift` while dragging a connection to an empty space - Create a reroute node.
 - Holding `Ctrl+Shift` while dragging a connection to an empty space - Create a wireless node.
 
