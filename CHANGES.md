@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [0.6.1] - 2022-12-12
+### Fixed
+- You can now create [special variables](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Other_Language_Features#Special_variables) starting with `$`. This was not allowed before, but should have.
+
 
 ## [0.6.0] - 2022-12-07
 ### Added
