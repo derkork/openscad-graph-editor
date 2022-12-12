@@ -8,17 +8,18 @@ namespace OpenScadGraphEditor.Utils
 {
     public static class StringExt
     {
-        private const string IndentString = "    ";
+        private const string INDENT_STRING = "    ";
 
-        public static string Indent(this string source)
+        private static string Indent(this string source)
         {
             while (true)
             {
                 // do not indent trailing newlines
                 if (!source.EndsWith("\n"))
                 {
-                    return IndentString + source.Replace("\n", "\n" + IndentString);
+                    return INDENT_STRING + source.Replace("\n", "\n" + INDENT_STRING);
                 }
+
                 source = source.Substring(0, source.Length - 1);
             }
         }
@@ -49,22 +50,22 @@ namespace OpenScadGraphEditor.Utils
             {
                 return input;
             }
-            
+
             if (maxLength < 3)
             {
                 // maxLenght is super short, return maxLength dots
                 return new string('.', maxLength);
             }
-            
+
             return input.Substring(0, maxLength - 3) + "...";
         }
-        
+
         public static string UniqueStableVariableName(this string id, int index)
         {
             GdAssert.That(index >= 0, "index must be >= 0");
             return $"var{index}__{Regex.Replace(Convert.ToBase64String(Guid.Parse(id).ToByteArray()), "[/+=]", "")}";
         }
-        
+
         public static string OrUndef(this string input)
         {
             return input.Length == 0 ? "undef" : input;
@@ -74,9 +75,9 @@ namespace OpenScadGraphEditor.Utils
         {
             return input.Length == 0 ? defaultValue : input;
         }
-        
+
         public static string WordWrap(this string input, int maxCharactersPerLine)
-        {            
+        {
             var lines = input.Split('\n');
             var output = "";
             foreach (var line in lines)
@@ -105,6 +106,7 @@ namespace OpenScadGraphEditor.Utils
 
                 output += currentLine + "\n";
             }
+
             return output;
         }
 
@@ -118,5 +120,16 @@ namespace OpenScadGraphEditor.Utils
                 .JoinToString("\n");
         }
 
+
+        /// <summary>
+        /// Checks if the given string is a valid identifier for an OpenSCAD variable.
+        /// </summary>
+        public static bool IsValidVariableIdentifier(this string input)
+        {
+            return !string.IsNullOrEmpty(input) &&
+                   // variables can only contain letters, numbers and underscores, they may optionally start with $
+                   // and the first character must not be a number
+                   Regex.IsMatch(input, @"^\$?[a-zA-Z_][a-zA-Z0-9_]*$");
+        }
     }
 }

@@ -421,6 +421,11 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                                                 (int) VariableCustomizerConstraintType.Options;
 
             ValidityChecker.For(_errorLabel, _okButton)
+ 
+       
+                .Check(_nameEdit.Text.IsValidVariableIdentifier(),
+                    "Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
+                )
                 .Check(
                     // we create a variable, then the name must be different from all other variables in the project
                     (_mode == DialogMode.Create &&
@@ -430,8 +435,10 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                         .Select(it => it.Name).All(it => it != _nameEdit.Text))
                     , "The name is already used in this project."
                 )
-                .Check(_nameEdit.Text.IsValidIdentifier(),
-                    "Name must not be blank and must be only letters, numbers, and underscores and must not start with a number."
+                .Check(
+                    // it must also not match the name of any built-in variable
+                    BuiltIns.Variables.All(it => it.Name != _nameEdit.Text),
+                    "The name is already used by an OpenSCAD built-in variable."
                 )
                 .Check(
                     // the values in the value label pairs must be unique

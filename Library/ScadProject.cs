@@ -4,7 +4,6 @@ using System.Linq;
 using GodotExt;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Library.IO;
-using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Library
