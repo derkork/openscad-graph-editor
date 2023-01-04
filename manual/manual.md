@@ -67,6 +67,8 @@
   * [Adding a reference to a library](#adding-a-reference-to-a-library)
   * [Using functions and modules from the library](#using-functions-and-modules-from-the-library)
   * [Refreshing external libraries](#refreshing-external-libraries)
+- [Miscellaneous features](#miscellaneous-features)
+  * [Preamble for the generated OpenSCAD code](#preamble-for-the-generated-openscad-code)
 - [Reference](#reference)
   * [Keyboard shortcuts](#keyboard-shortcuts)
   * [Documentation comment format](#documentation-comment-format)
@@ -676,6 +678,17 @@ Refreshing a library will re-parse the library sources and then update any refer
 
 You may have noticed that there is no functionality for supporting renames. This is simply because a rename operation looks like the combination of a delete and an add operation. There is no reliable way of telling these operations apart. If you would like to rename something it is recommended that you first add a copy of the item with the new name, then use the built-in usage-search to find all places where the old name is used and replace it with the new name. Then you can delete the original item.
 
+## Miscellaneous features
+### Preamble for the generated OpenSCAD code
+Sometimes you may want to add some code to the head of the generated OpenSCAD code. For example, you may want to add a license header or some preprocessing statements for third party software like RapCAD. You can set up a preamble in the _Settings_ dialog in the _Default Preamble_ setting. 
+
+![](images/default_preamble.png)
+
+This preamble will be used for new projects.You can also set the preamble for the currently open project in the _Current Project Settings_ tab:
+
+![](images/current_project_preamble.png)
+
+OpenSCAD graph editor will render the code in the preamble verbatim, so make sure that it is valid OpenSCAD code.
 
 ## Reference
 ### Keyboard shortcuts

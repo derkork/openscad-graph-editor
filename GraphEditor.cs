@@ -131,6 +131,7 @@ namespace OpenScadGraphEditor
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
             
             _settingsDialog = this.WithName<SettingsDialog>("SettingsDialog");
+            _settingsDialog.RefactoringRequested += OnRefactoringRequested;
             _stylusDebugDialog = this.WithName<StylusDebugDialog>("StylusDebugDialog");
             
             _helpDialog = this.WithName<HelpDialog>("HelpDialog");
@@ -252,13 +253,14 @@ namespace OpenScadGraphEditor
             }
 
             NotificationService.ShowNotification("Opening OpenSCAD. Please wait a few seconds for it to open.");
+            // ReSharper disable once StringLiteralTypo
             OS.Execute(path, new[] {"--viewall", _currentFile + ".scad"}, blocking: false);
         }
 
 
         private void OnSettingsButtonPressed()
         {
-            _settingsDialog.Open(_configuration);
+            _settingsDialog.Open(_configuration, _currentProject);
         }
 
 
@@ -819,11 +821,15 @@ namespace OpenScadGraphEditor
         private void OnNewButtonPressed()
         {
             Clear();
-            _currentProject = new ScadProject(_rootResolver);
+            _currentProject = new ScadProject(_rootResolver)
+            {
+                Preamble = _configuration.GetDefaultPreamble()
+            };
             Open(_currentProject.MainModule);
             // important, this needs to be done after the main module is opened, so we get correct editor state
             _currentHistoryStack = new HistoryStack(_currentProject, GetEditorState());
             RefreshControls();
+            RenderScadOutput();
         }
 
         private EditorState GetEditorState()
@@ -1129,9 +1135,13 @@ namespace OpenScadGraphEditor
             var file = new File();
             if (!file.FileExists(filename))
             {
+                NotificationService.ShowError($"File {filename} does not exist anymore.");
                 return;
             }
 
+            // set the directory of the file the current directory in the file open dialog
+            _fileDialog.CurrentDir = PathResolver.GetDirectoryFromFile(filename);
+            
             var savedProject = ResourceLoader.Load<SavedProject>(filename, "", noCache: true);
             if (savedProject == null)
             {
@@ -1207,14 +1217,7 @@ namespace OpenScadGraphEditor
         {
             _dirty = true;
             _codeChanged = codeChange;
-            if (_codeChanged)
-            {
-                _forceSaveButton.Text = "[.!.]";
-            }
-            else
-            {
-                _forceSaveButton.Text = "[...]";
-            }
+            _forceSaveButton.Text = _codeChanged ? "[.!.]" : "[...]";
         }
 
         private void SaveChanges()

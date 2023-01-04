@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://GraphEditor.cs" type="Script" id=1]
 [ext_resource path="res://Icons/module0000.png" type="Texture" id=2]
@@ -30,6 +30,7 @@
 [ext_resource path="res://Widgets/RotateContainer.cs" type="Script" id=28]
 [ext_resource path="res://Widgets/Foldout.cs" type="Script" id=29]
 [ext_resource path="res://Widgets/VariableCustomizer/VariableCustomizer.tscn" type="PackedScene" id=30]
+[ext_resource path="res://editor_font.tres" type="DynamicFont" id=31]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -220,6 +221,7 @@ margin_top = 10.0
 margin_right = 1920.0
 margin_bottom = 972.0
 rect_min_size = Vector2( 0, 200 )
+custom_fonts/font = ExtResource( 31 )
 readonly = true
 syntax_highlighting = true
 show_line_numbers = true

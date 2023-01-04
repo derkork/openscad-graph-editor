@@ -122,9 +122,9 @@ namespace OpenScadGraphEditor.Library.External
             switch (Mode)
             {
                 case IncludeMode.Include:
-                    return $"include <{IncludePath}>;\n";
+                    return $"include <{IncludePath}>\n";
                 case IncludeMode.Use:
-                    return $"use <{IncludePath}>;\n";
+                    return $"use <{IncludePath}>\n";
                 default:
                     throw new ArgumentOutOfRangeException();
             }

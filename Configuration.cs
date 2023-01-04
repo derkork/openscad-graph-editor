@@ -55,6 +55,18 @@ namespace OpenScadGraphEditor
             return (int) _configFile.GetValue("editor", "number_of_backups", 5);
         }
         
+        public string SetDefaultPreamble(string defaultPreamble)
+        {
+            _configFile.SetValue("editor", "default_preamble", defaultPreamble);
+            Save();
+            return defaultPreamble;
+        }
+        
+        public string GetDefaultPreamble()
+        {
+            return (string) _configFile.GetValue("editor", "default_preamble", "");
+        }
+        
         private void Save()
         {
             var directory = new Directory();

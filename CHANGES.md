@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.7.0] - 2023-01-04
+### Added
+- You can now set up a preamble which will be rendered on top of the generated OpenSCAD code. This is useful if you want to add a license header or other comments to the generated code ([#39](https://github.com/derkork/openscad-graph-editor/issues/39)).
+
+### Changed
+- The code preview now uses a monospace font. This makes it easier to read the generated code.
+- Includes are now rendered before variable declarations. This allows overwriting variables in included files.
+- When you try to load a file that no longer exists the editor will now show an error message instead of silently failing.
+
+### Fixed
+- `include` and `use` statements are now correctly generated without a terminating semicolon ([#39](https://github.com/derkork/openscad-graph-editor/issues/39)).
+- The directory of the currently open file is now remembered correctly no matter whether you use the file dialog or the recent file list to open a file ([#40](https://github.com/derkork/openscad-graph-editor/issues/40)).
+
+
 ## [0.6.1] - 2022-12-12
 ### Fixed
 - You can now create [special variables](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Other_Language_Features#Special_variables) starting with `$`. This was not allowed before, but should have.

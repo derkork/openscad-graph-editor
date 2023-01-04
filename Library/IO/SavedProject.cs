@@ -35,5 +35,10 @@ namespace OpenScadGraphEditor.Library.IO
         [Export]
         public Array<SavedExternalReference> ExternalReferences = new Array<SavedExternalReference>();
 
+        
+        /// <summary>
+        /// The preamble to use for the project.
+        /// </summary>
+        [Export] public string Preamble = "";
     }
 }

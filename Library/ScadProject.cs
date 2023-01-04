@@ -37,6 +37,7 @@ namespace OpenScadGraphEditor.Library
         public ScadGraph MainModule { get; private set; }
 
         public string ProjectPath { get; private set; }
+        public string Preamble { get; set; } = "";
 
         public ScadProject(IReferenceResolver parentResolver)
         {
@@ -159,13 +160,19 @@ namespace OpenScadGraphEditor.Library
                 _modules.Add(moduleContext);
             }
 
+            // Step 5: load the main module
             MainModule = new ScadGraph();
             MainModule.LoadFrom(project.MainModule, project.MainModule.Description.FromSavedState(), this);
+            
+            // Step 6: load preamble
+            Preamble = project.Preamble;
         }
 
         public SavedProject Save()
         {
             var result = Prefabs.New<SavedProject>();
+            
+            result.Preamble = Preamble;
 
             _externalReferences.ForAll(it => result.ExternalReferences.Add(it.Value.ToSavedState()));
 
@@ -194,14 +201,21 @@ namespace OpenScadGraphEditor.Library
         public string Render()
         {
             return string.Join("\n",
-                Variables.Select(RenderCustomizedVariable)
+                // first the preamble
+                new [] {Preamble}
+                    // then any include statements
+                    .Concat(_externalReferences.Select(it => it.Value.Render()))
+                    // then customized variables
+                    .Concat(Variables.Select(RenderCustomizedVariable))
                     // render a dummy module to prevent non customizer variables
                     // from appearing in the customizer
                     .Concat(new[] {"module __Customizer_Limit__ () {}"})
+                    // then non-customized variables
                     .Concat(Variables.Select(RenderNonCustomizedVariableInitializer))
-                    .Concat(_externalReferences.Select(it => it.Value.Render()))
+                    // modules and functions
                     .Concat(_modules.Select(it => it.Render()))
                     .Concat(_functions.Select(it => it.Render()))
+                    // finally the main module
                     .Append(MainModule.Render())
                     .Where(it => it.Length > 0)
             );

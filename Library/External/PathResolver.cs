@@ -270,5 +270,11 @@ namespace OpenScadGraphEditor.Library.External
                 ? Enumerable.Empty<string>()
                 : environmentVariable.Split(Path.PathSeparator).Select(NormalizePath);
         }
+
+        
+        public static string GetDirectoryFromFile(string filename)
+        {
+            return Path.GetDirectoryName(filename);
+        }
     }
 }
