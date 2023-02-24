@@ -324,16 +324,6 @@ This node allows you to extract a value from a `vector` or `string` value.
 
 In this example we have a `vector` with three values (`7`, `6`, `2`). The node is configured to extract the value at index 1. So the output port will contain `6` (indices are zero-based, so an index of `0` will return the first value, `1` will return the second value and so on). For strings this will return the character at the given index.
 
-#### Pairwise vector multiplication `vector2` / `vector3` / `vector`
-
-This special node takes two `vector2`, `vector3` or `vector` values. It multiply the values of the given vectors pairwise and returns a new `vector2`, `vector3` or `vector` with the result. 
-
-![](images/pairwise_multiply.png)
-
-This functionality is not actually built into OpenSCAD (e.g. using the normal multiplication operator `*` will return the dot product of the vectors). Under the hood this will build a loop that walks over the vectors and multiplies the values pairwise. This was added as this operation is quite useful and would otherwise require you to build a lot more nodes.
-
-
-
 ### Miscellaneous nodes
 #### Cast
 
@@ -342,6 +332,44 @@ Sometimes a node needs an input value that doesn't match the type of the output 
 ![](images/cast.png)
 
 The _Cast_ node will not magically convert a node to a different type. It is simply a way of telling the editor: _"I know what I am doing, trust me that this is the correct type."_ If you connect ports that actually do not match the OpenSCAD compiler will show you an error when you try to run the program.
+
+
+### Utility nodes
+
+The following nodes have been added to simplify often-used operations. They can all be replicated with one or more other nodes but are included for convenience as they require less nodes to achieve the same result or reduce visual clutter.
+
+#### Double
+ 
+ This node calculates the double of the given input number or vector. It is equivalent to using the multiply node with a factor of 2.
+
+![](images/double_node.png)
+
+#### Half
+
+This node calculates the half of the given input number. It is equivalent to using the divide node with a divisor of 2.
+
+![](images/half_node.png)
+
+#### PlusOne
+
+This node calculates the given input number plus one. It is equivalent to using the add node with an addend of 1.
+
+![](images/add_one_node.png)
+
+#### MinusOne
+
+This node calculates the given input number minus one. It is equivalent to using the subtract node with a subtrahend of 1.
+
+![](images/subtract_one_node.png)
+
+
+#### Pairwise vector multiplication `vector2` / `vector3` / `vector`
+
+This node takes two `vector2`, `vector3` or `vector` values. It multiplies the values of the given vectors pairwise and returns a new `vector2`, `vector3` or `vector` with the result.
+
+![](images/pairwise_multiply.png)
+
+This functionality is not actually built into OpenSCAD (e.g. using the normal multiplication operator `*` will return the dot product of the vectors). Under the hood this will build a loop that walks over the vectors and multiplies the values pairwise.
 
 ## Keeping the graph neat and tidy
 

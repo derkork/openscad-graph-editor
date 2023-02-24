@@ -44,7 +44,11 @@ namespace OpenScadGraphEditor.Utils
         public static readonly Texture OrIcon = GD.Load<Texture>("res://Icons/or0000.png");
         public static readonly Texture NotIcon = GD.Load<Texture>("res://Icons/not0000.png");
         
-
+        public static readonly Texture NegateIcon = GD.Load<Texture>("res://Icons/negate0000.png");
+        public static readonly Texture MinusOneIcon = GD.Load<Texture>("res://Icons/minus_one0000.png");
+        public static readonly Texture PlusOneIcon = GD.Load<Texture>("res://Icons/plus_one0000.png");
+        public static readonly Texture HalfIcon = GD.Load<Texture>("res://Icons/half0000.png");
+        public static readonly Texture DoubleIcon = GD.Load<Texture>("res://Icons/double0000.png");
         
         public static readonly Theme SimpleNodeWidgetTheme = GD.Load<Theme>("res://Widgets/SimpleNodeWidgetTheme.tres");
         public static readonly Theme StandardNodeWidgetTheme = GD.Load<Theme>("res://Widgets/StandardNodeWidgetTheme.tres");

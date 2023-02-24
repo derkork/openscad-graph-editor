@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
@@ -7,23 +7,23 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Nodes
 {
     /// <summary>
-    /// Operator for negating a value.
+    /// Operation for calculating the value minus 1.
     /// </summary>
     [UsedImplicitly]
-    public class NegateOperator : ScadNode, IAmAnExpression, IHaveNodeBackground, IHaveCustomWidget
+    public class MinusOne : ScadNode, IAmAnExpression, IHaveNodeBackground, IHaveCustomWidget
     {
-        public override string NodeTitle => "Negate";
-        public override string NodeQuickLookup => "Negg";
-        public override string NodeDescription => "Returns the negative of the input.";
+        public override string NodeTitle => "-1";
+        public override string NodeQuickLookup => "-1";
+        public override string NodeDescription => "Returns the input minus 1.";
 
 
-        public NegateOperator()
+        public MinusOne()
         {
             InputPorts
-                .Any();
+                .Number();
 
             OutputPorts
-                .Any();
+                .Number(allowLiteral: false);
         }
 
         public override string GetPortDocumentation(PortId portId)
@@ -31,9 +31,9 @@ namespace OpenScadGraphEditor.Nodes
             switch (portId.Port)
             {
                 case 0 when portId.IsInput:
-                    return "The value to negate.";
+                    return "The input value.";
                 case 0 when portId.IsOutput:
-                    return "The negative of the input.";
+                    return "The input value minus 1.";
                 default: 
                     return "";
             }
@@ -42,14 +42,13 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(ScadGraph context, int portIndex)
         {
             var value = RenderInput(context, 0);
-            return value.Empty() ? "" : $"(-{value})";
+            return value.Empty() ? "" : $"({value} - 1)";
         }
 
         public ScadNodeWidget InstantiateCustomWidget()
         {
             return Prefabs.New<SmallNodeWidget>();
         }
-        
-        public Texture NodeBackground => Resources.NegateIcon;
+        public Texture NodeBackground => Resources.MinusOneIcon;
     }
 }

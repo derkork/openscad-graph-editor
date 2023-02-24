@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2023-02-24
+### Added
+- Added missing `intersection` node. This now allows you to generate intersections of multiple objects.
+- Added a range of utility nodes that simplify common use cases ([#42](https://github.com/derkork/openscad-graph-editor/issues/42)):
+  -  `Double` allows you to calculate the double of an input number or vector.
+  - `Half` allows you to calculate the half of an input number.
+  - `MinusOne` allows you to subtract one from an input number.
+  - `PlusOne` allows you to add one to an input number.
+
 ## [0.7.0] - 2023-01-04
 ### Added
 - You can now set up a preamble which will be rendered on top of the generated OpenSCAD code. This is useful if you want to add a license header or other comments to the generated code ([#39](https://github.com/derkork/openscad-graph-editor/issues/39)).

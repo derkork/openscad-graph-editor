@@ -6,7 +6,6 @@
 [ext_resource path="res://editor_font.tres" type="DynamicFont" id=4]
 
 [node name="SettingsDialog" type="WindowDialog"]
-visible = true
 margin_right = 918.0
 margin_bottom = 520.0
 rect_min_size = Vector2( 920, 520 )
@@ -36,7 +35,6 @@ size_flags_vertical = 3
 tab_align = 0
 
 [node name="Current Project Settings" type="GridContainer" parent="MarginContainer/VBoxContainer/SettingsTabContainer"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0
@@ -55,16 +53,16 @@ text = "Preamble"
 
 [node name="ProjectPreambleTextEdit" type="TextEdit" parent="MarginContainer/VBoxContainer/SettingsTabContainer/Current Project Settings"]
 margin_left = 74.0
-margin_right = 882.0
+margin_right = 884.0
 margin_bottom = 396.0
 rect_min_size = Vector2( 650, 200 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_fonts/font = ExtResource( 4 )
 syntax_highlighting = true
 show_line_numbers = true
 
 [node name="Global Settings" type="GridContainer" parent="MarginContainer/VBoxContainer/SettingsTabContainer"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0

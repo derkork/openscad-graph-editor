@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Utils;
@@ -7,17 +7,17 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Nodes
 {
     /// <summary>
-    /// Operator for negating a value.
+    /// Operation for calculating the half of a value.
     /// </summary>
     [UsedImplicitly]
-    public class NegateOperator : ScadNode, IAmAnExpression, IHaveNodeBackground, IHaveCustomWidget
+    public class Half : ScadNode, IAmAnExpression, IHaveNodeBackground, IHaveCustomWidget
     {
-        public override string NodeTitle => "Negate";
-        public override string NodeQuickLookup => "Negg";
-        public override string NodeDescription => "Returns the negative of the input.";
+        public override string NodeTitle => "Half";
+        public override string NodeQuickLookup => "Hlf";
+        public override string NodeDescription => "Returns half of the input.";
 
 
-        public NegateOperator()
+        public Half()
         {
             InputPorts
                 .Any();
@@ -31,9 +31,9 @@ namespace OpenScadGraphEditor.Nodes
             switch (portId.Port)
             {
                 case 0 when portId.IsInput:
-                    return "The value to negate.";
+                    return "The input value.";
                 case 0 when portId.IsOutput:
-                    return "The negative of the input.";
+                    return "Half of the input value.";
                 default: 
                     return "";
             }
@@ -42,14 +42,14 @@ namespace OpenScadGraphEditor.Nodes
         public override string Render(ScadGraph context, int portIndex)
         {
             var value = RenderInput(context, 0);
-            return value.Empty() ? "" : $"(-{value})";
+            return value.Empty() ? "" : $"({value} / 2)";
         }
 
         public ScadNodeWidget InstantiateCustomWidget()
         {
             return Prefabs.New<SmallNodeWidget>();
         }
-        
-        public Texture NodeBackground => Resources.NegateIcon;
+
+        public Texture NodeBackground => Resources.HalfIcon;
     }
 }
