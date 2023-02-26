@@ -329,6 +329,27 @@ namespace OpenScadGraphEditor.Library
 
             return graph;
         }
+        
+        public void AddInvokable(ScadGraph graph)
+        {
+            // ensure we don't have the invokable already
+            GdAssert.That(AllDeclaredInvokables.All(it => it.Description.Id != graph.Description.Id),
+                "Invokable already exists in project.");
+            
+            switch (graph.Description)
+            {
+                case FunctionDescription functionDescription:
+                    _functions.Add(graph);
+                    _projectFunctionDescriptions[functionDescription.Id] = functionDescription;
+                    break;
+                case ModuleDescription moduleDescription:
+                    _modules.Add(graph);
+                    _projectModuleDescriptions[moduleDescription.Id] = moduleDescription;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         public void RemoveInvokable(InvokableDescription description)
         {
@@ -440,5 +461,19 @@ namespace OpenScadGraphEditor.Library
             return _projectVariables.ContainsKey(description.Id);
         }
 
+        /// <summary>
+        /// Checks whether the given name is used by any invokable or variable in this project or any of its external references.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool IsNameUsed(string name)
+        {
+            return AllDeclaredInvokables.Any(it => it.Description.Name == name) ||
+                   Variables.Any(it => it.Name == name) ||
+                   _externalReferences.Values.Any(it => 
+                       it.Functions.Any(f => f.Name == name) ||
+                       it.Modules.Any(m => m.Name == name) ||
+                       it.Variables.Any(v => v.Name == name));
+        }
     }
 }

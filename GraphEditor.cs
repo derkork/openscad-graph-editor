@@ -90,9 +90,9 @@ namespace OpenScadGraphEditor
             _logConsole = this.WithName<LogConsole>("LogConsole");
             _lowerFoldout = this.WithName<Foldout>("LowerFoldout");
             var logFile = OS.GetUserDataDir() + "/log.txt";
-            
+
             OS.SetWindowTitle($"OpenSCAD Graph Editor ({AppVersion.Version})");
-            
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
@@ -101,20 +101,20 @@ namespace OpenScadGraphEditor
                 .CreateLogger();
             GD.Print("OpenSCAD log file is: " + logFile);
             Log.Information("Initializing OpenScad Graph Editor");
-            
+
             OS.LowProcessorUsageMode = true;
 
             _logConsole.OpenLogFileRequested += () => OS.ShellOpen(logFile);
 
             _configuration.Load();
-            
+
             // scale all themes to editor scale
             var percent = _configuration.GetEditorScalePercent();
             foreach (var theme in Resources.AllThemes)
             {
                 theme.Scale(percent);
             }
-            
+
             _rootResolver = new BuiltInLibrary();
 
             _tabContainer = this.WithName<TabContainer>("TabContainer");
@@ -129,11 +129,11 @@ namespace OpenScadGraphEditor
             _importDialog.OnUpdateImportRequested += OnUpdateImportRequested;
             _usageDialog = this.WithName<UsageDialog>("UsageDialog");
             _usageDialog.NodeHighlightRequested += OnNodeHighlightRequested;
-            
+
             _settingsDialog = this.WithName<SettingsDialog>("SettingsDialog");
             _settingsDialog.RefactoringRequested += OnRefactoringRequested;
             _stylusDebugDialog = this.WithName<StylusDebugDialog>("StylusDebugDialog");
-            
+
             _helpDialog = this.WithName<HelpDialog>("HelpDialog");
 
             _commentEditingDialog = this.WithName<CommentEditingDialog>("CommentEditingDialog");
@@ -156,9 +156,10 @@ namespace OpenScadGraphEditor
                 // create the invokable, then open it's graph in a new tab.
                 (description, refactorings) => PerformRefactorings($"Create {description.Name}", refactorings,
                     () => Open(_currentProject.FindDefiningGraph(description)));
-            
+
             _documentationDialog = this.WithName<DocumentationDialog>("DocumentationDialog");
-            _documentationDialog.RefactoringRequested += (refactoring) => PerformRefactorings("Edit documentation", refactoring);
+            _documentationDialog.RefactoringRequested +=
+                (refactoring) => PerformRefactorings("Edit documentation", refactoring);
 
             _variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
             _variableRefactorDialog.RefactoringsRequested +=
@@ -207,13 +208,10 @@ namespace OpenScadGraphEditor
             openButton.OpenFileRequested += OnOpenFile;
             openButton.OpenFileDialogRequested += OnOpenFileDialogRequested;
             openButton.Init(_configuration);
-            
+
             _leftFoldout = this.WithName<Foldout>("LeftFoldout");
-            _leftFoldout.OnFoldoutChanged += (visible) =>
-            {
-                _editingInterface.Collapsed = !visible;
-            };
-            
+            _leftFoldout.OnFoldoutChanged += (visible) => { _editingInterface.Collapsed = !visible; };
+
             _variableCustomizer = this.WithName<VariableCustomizer>("VariableCustomizer");
             _variableCustomizer.RefactoringRequested += OnRefactoringRequested;
             _variableCustomizer.VariableEditingRequested +=
@@ -273,8 +271,8 @@ namespace OpenScadGraphEditor
                 editor.Render(editor.Graph);
             }
         }
-        
-        
+
+
         private void OnNodeHighlightRequested(UsagePointInformation information)
         {
             var graph = _currentProject.AllDeclaredInvokables.FirstOrDefault(it =>
@@ -322,12 +320,14 @@ namespace OpenScadGraphEditor
 
         private void OnNewImportRequested(string path, IncludeMode includeMode)
         {
-            OnRefactoringRequested($"Add reference to {path}", new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
+            OnRefactoringRequested($"Add reference to {path}",
+                new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
         }
-        
+
         private void OnUpdateImportRequested(ExternalReference reference, string path, IncludeMode includeMode)
         {
-            OnRefactoringRequested($"Update reference to {path}", new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
+            OnRefactoringRequested($"Update reference to {path}",
+                new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
         }
 
         private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
@@ -345,7 +345,13 @@ namespace OpenScadGraphEditor
                                 () => _invokableRefactorDialog.Open(invokableDescription, _currentProject)
                             )
                         );
-                        
+
+                        actions.Add(new QuickAction($"Duplicate {invokableDescription.Name}",
+                                () => OnRefactoringRequested($"Duplicate {invokableDescription.Name}",
+                                    new DuplicateInvokableRefactoring(invokableDescription))
+                            )
+                        );
+
                         actions.Add(new QuickAction($"Edit documentation of {invokableDescription.Name}",
                                 () => _documentationDialog.Open(invokableDescription)
                             )
@@ -386,9 +392,10 @@ namespace OpenScadGraphEditor
             {
                 var editReferenceTitle = $"Edit reference to {entry.Title}";
                 actions.Add(new QuickAction(editReferenceTitle,
-                    () => _importDialog.OpenForExistingImport(externalReferenceTreeEntry.Description, _currentProject.ProjectPath)));
-                
-                
+                    () => _importDialog.OpenForExistingImport(externalReferenceTreeEntry.Description,
+                        _currentProject.ProjectPath)));
+
+
                 var removeReferenceTitle = $"Remove reference to {entry.Title}";
                 actions.Add(new QuickAction(removeReferenceTitle,
                     () => OnRefactoringRequested(
@@ -416,18 +423,19 @@ namespace OpenScadGraphEditor
             {
                 Open(_currentProject.FindDefiningGraph(invokableTreeEntry.Description));
             }
-            
+
             if (entry is ScadVariableTreeEntry variableTreeEntry
                 && _currentProject.IsDefinedInThisProject(variableTreeEntry.Description))
             {
                 _variableRefactorDialog.Open(variableTreeEntry.Description, _currentProject);
             }
-            
+
             if (entry is ExternalReferenceTreeEntry externalReferenceTreeEntry &&
                 // we dont want to open the import dialog for transitive imports
                 !externalReferenceTreeEntry.Description.IsTransitive)
             {
-                _importDialog.OpenForExistingImport(externalReferenceTreeEntry.Description, _currentProject.ProjectPath);
+                _importDialog.OpenForExistingImport(externalReferenceTreeEntry.Description,
+                    _currentProject.ProjectPath);
             }
         }
 
@@ -456,7 +464,7 @@ namespace OpenScadGraphEditor
             _projectTree.Setup(new List<ProjectTreeEntry>() {new RootProjectTreeEntry(_currentProject)});
 
             _variableCustomizer.Setup(_currentProject.Variables.ToList());
-            
+
             // Re-Build the list of entries for the add dialog.
 
             _addDialogEntries.Clear();
@@ -568,7 +576,7 @@ namespace OpenScadGraphEditor
         {
             var hasNode = requestContext.TryGetNode(out var node);
             GdAssert.That(hasNode, "No node found");
-            
+
             if (hasNode && node is Comment comment)
             {
                 _commentEditingDialog.Open(requestContext, comment.CommentTitle, comment.CommentDescription);
@@ -576,7 +584,7 @@ namespace OpenScadGraphEditor
             else
             {
                 var hasComment = node.TryGetComment(out var existingComment);
-                _commentEditingDialog.Open(requestContext, hasComment ? existingComment : "", showDescription: false );
+                _commentEditingDialog.Open(requestContext, hasComment ? existingComment : "", showDescription: false);
             }
         }
 
@@ -612,7 +620,7 @@ namespace OpenScadGraphEditor
                 // and set the partner id to the copy id
                 ((IAmBoundToOtherNode) node).OtherNodeId = partnerCopyId;
             }
-            
+
             //  copy all connections which are between the selected nodes
             foreach (var connection in source.GetAllConnections())
             {
@@ -622,7 +630,7 @@ namespace OpenScadGraphEditor
                         idMapping[connection.To.Id], connection.ToPort);
                 }
             }
-            
+
             return result;
         }
 
@@ -630,10 +638,11 @@ namespace OpenScadGraphEditor
         {
             _copyBuffer = SelectionToBuffer(source, selection);
         }
+
         private void OnDuplicateRequested(ScadGraphEdit source, List<ScadNode> selection, Vector2 position)
         {
-        var copies = SelectionToBuffer(source, selection);
-        PasteNodes(source, position, copies,"Duplicate nodes");
+            var copies = SelectionToBuffer(source, selection);
+            PasteNodes(source, position, copies, "Duplicate nodes");
         }
 
         private ScadGraph SelectionToBuffer(ScadGraphEdit source, List<ScadNode> selection)
@@ -789,14 +798,13 @@ namespace OpenScadGraphEditor
                     _tabContainer.CurrentTab = 0;
                 }
 
-                for (var i = 0; i < _tabContainer.GetTabCount();i++)
+                for (var i = 0; i < _tabContainer.GetTabCount(); i++)
                 {
                     var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
                     // update the graph renderings.
                     graphEdit.Render(graphEdit.Graph);
                     // and update the tab title as it might have changed.
                     _tabContainer.SetTabTitle(i, graphEdit.Graph.Description.NodeNameOrFallback);
-                    
                 }
 
                 // important, the snapshot must be made _after_ the changes.
@@ -812,7 +820,8 @@ namespace OpenScadGraphEditor
             }
             catch (Exception e)
             {
-                NotificationService.ShowError("Unexpected exception occurred. Running undo to restore a known working state. See console for details.");
+                NotificationService.ShowError(
+                    "Unexpected exception occurred. Running undo to restore a known working state. See console for details.");
                 Log.Error(e, "Unexpected exception");
                 Undo();
             }
@@ -835,10 +844,11 @@ namespace OpenScadGraphEditor
         private EditorState GetEditorState()
         {
             // create a list of currently open tabs
-            
+
             // order is important here, so we get the child order from the _tabContainer rather than using
             // _openEditors
-            var tabs = _tabContainer.GetChildNodes<ScadGraphEdit>().Select(it => new EditorOpenTab(it.Graph.Description.Id, it.ScrollOffset)).ToList();
+            var tabs = _tabContainer.GetChildNodes<ScadGraphEdit>()
+                .Select(it => new EditorOpenTab(it.Graph.Description.Id, it.ScrollOffset)).ToList();
             return new EditorState(tabs, _tabContainer.CurrentTab);
         }
 
@@ -963,7 +973,8 @@ namespace OpenScadGraphEditor
 
                     // just return the item
                     var refactoring = it.First();
-                    return new QuickAction(refactoring.Title, () => OnRefactoringRequested(refactoring.Title, refactoring));
+                    return new QuickAction(refactoring.Title,
+                        () => OnRefactoringRequested(refactoring.Title, refactoring));
                 });
 
             if (node is Comment comment)
@@ -1028,6 +1039,14 @@ namespace OpenScadGraphEditor
                         )
                     );
 
+
+                    actions = actions.Append(
+                        new QuickAction($"Duplicate {name}",
+                            () => OnRefactoringRequested($"Duplicate {name} ",
+                                new DuplicateInvokableRefactoring(invokableDescription))
+                        )
+                    );
+
                     actions = actions.Append(
                         new QuickAction($"Edit documentation of {name}",
                             () => _documentationDialog.Open(invokableDescription)
@@ -1067,7 +1086,6 @@ namespace OpenScadGraphEditor
                 );
             }
 
-            
 
             if (node is ICanHaveModifier)
             {
@@ -1141,18 +1159,18 @@ namespace OpenScadGraphEditor
 
             // set the directory of the file the current directory in the file open dialog
             _fileDialog.CurrentDir = PathResolver.GetDirectoryFromFile(filename);
-            
+
             var savedProject = ResourceLoader.Load<SavedProject>(filename, "", noCache: true);
             if (savedProject == null)
             {
                 NotificationService.ShowError("Cannot load file " + filename);
                 return;
             }
-            
+
             // make backup
             FileBackups.BackupFile(filename, _configuration.GetNumberOfBackups());
-            
-            
+
+
             // workaround for https://github.com/godotengine/godot/issues/59686
             // as the "noCache" flag currently isn't working properly
             savedProject.ResourcePath = "";
