@@ -341,18 +341,18 @@ namespace OpenScadGraphEditor
                 {
                     if (!(invokableDescription is MainModuleDescription))
                     {
-                        actions.Add(new QuickAction($"Refactor {invokableDescription.Name}",
+                        actions.Add(new QuickAction($"Refactor {entry.Title}",
                                 () => _invokableRefactorDialog.Open(invokableDescription, _currentProject)
                             )
                         );
 
-                        actions.Add(new QuickAction($"Duplicate {invokableDescription.Name}",
-                                () => OnRefactoringRequested($"Duplicate {invokableDescription.Name}",
+                        actions.Add(new QuickAction($"Duplicate {entry.Title}",
+                                () => OnRefactoringRequested($"Duplicate {entry.Title}",
                                     new DuplicateInvokableRefactoring(invokableDescription))
                             )
                         );
 
-                        actions.Add(new QuickAction($"Edit documentation of {invokableDescription.Name}",
+                        actions.Add(new QuickAction($"Edit documentation of {entry.Title}",
                                 () => _documentationDialog.Open(invokableDescription)
                             )
                         );
@@ -365,7 +365,7 @@ namespace OpenScadGraphEditor
 
                 if (!(invokableDescription is MainModuleDescription) && !(invokableDescription.IsBuiltin))
                 {
-                    actions.Add(new QuickAction($"Find usages of {invokableDescription.Name}",
+                    actions.Add(new QuickAction($"Find usages of {entry.Title}",
                         () => FindAndShowUsages(invokableDescription)));
                 }
             }
@@ -374,8 +374,13 @@ namespace OpenScadGraphEditor
             {
                 if (_currentProject.IsDefinedInThisProject(scadVariableTreeEntry.Description))
                 {
-                    actions.Add(new QuickAction($"Refactor {scadVariableTreeEntry.Description.Name}",
+                    actions.Add(new QuickAction($"Refactor {entry.Title}",
                             () => _variableRefactorDialog.Open(scadVariableTreeEntry.Description, _currentProject)
+                        )
+                    );
+                    actions.Add(new QuickAction($"Duplicate {entry.Title}",
+                            () => OnRefactoringRequested($"Duplicate {entry.Title}",
+                                new DuplicateVariableRefactoring(scadVariableTreeEntry.Description))
                         )
                     );
                     actions.Add(new QuickAction(deleteTitle,
@@ -383,7 +388,7 @@ namespace OpenScadGraphEditor
                             deleteTitle, new DeleteVariableRefactoring(scadVariableTreeEntry.Description))));
                 }
 
-                actions.Add(new QuickAction($"Find usages of {scadVariableTreeEntry.Description.Name}",
+                actions.Add(new QuickAction($"Find usages of {entry.Title}",
                     () => FindAndShowUsages(scadVariableTreeEntry.Description)));
             }
 
@@ -1075,6 +1080,13 @@ namespace OpenScadGraphEditor
                     actions = actions.Append(
                         new QuickAction($"Refactor {name}",
                             () => _variableRefactorDialog.Open(variableDescription, _currentProject)
+                        )
+                    );
+                    
+                    actions = actions.Append(
+                        new QuickAction($"Duplicate {name}",
+                            () => OnRefactoringRequested($"Duplicate {name} ",
+                                new DuplicateVariableRefactoring(variableDescription))
                         )
                     );
                 }
