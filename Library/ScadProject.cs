@@ -371,6 +371,7 @@ namespace OpenScadGraphEditor.Library
 
         public void AddVariable(VariableDescription variableDescription)
         {
+            GdAssert.That(!_projectVariables.ContainsKey(variableDescription.Id), "Tried to add a variable twice.");
             _projectVariables[variableDescription.Id] = variableDescription;
         }
 

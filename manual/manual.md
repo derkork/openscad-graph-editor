@@ -503,6 +503,13 @@ The next image shows you to set a variable's value to 10 and then using an `echo
 
 ![](images/getting_setting_variables.gif)
 
+#### Duplicating a variable
+
+If you want to create a new variable with the same name, type, default value and customizer settings as an existing variable, you can right-click the variable in the project tree and select _Duplicate variable_. This will create a new variable with the same name as the original variable, but with a number appended to the name. This number will be incremented until the name is unique. This is much faster than creating a new variable and then manually copying all the settings.
+
+![](images/duplicate_variable.gif)
+
+
 #### The _Variables_ panel
 
 On the left side of the editor, you can see the _Variables_ panel. This panel shows you all the variables in your project. You can also use this panel to change the default value of a variable. The variables panel works similar to OpenSCAD's [customizer panel](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Customizer), however it can also be used to change the default value of variables which are not shown in the customizer panel. Changes in the variables panel will be immediately reflected in the generated OpenSCAD code, so you can use it to quickly test your variables.
@@ -514,6 +521,7 @@ You can click on a variable name to edit the variable. You can change the name, 
 ![](images/edit_variable.gif)
 
 If you want to delete a variable, you can right-click it in the project tree and select _Delete variable_.
+
 
 #### Things to keep in mind when using variables
 
@@ -636,6 +644,14 @@ It will also be rendered out in the generated OpenSCAD code.
 
 ![](images/documentation_in_code.png)
 
+#### Duplicating a module
+
+Sometimes you may want to duplicate a module to serve as a starting point for a new module. To do so, right-click either the module's entry point or any instance where you use the module or right-click the module in the project tree. A popup menu will open. Select the _Duplicate &lt;module&gt;_ entry. This will copy the whole module including its documentation, parameters and node graph. The new module will have the same name as the old one with a number appended to it. You can then rename the module and change its parameters as you see fit. 
+
+![](images/duplicate_module.gif)
+
+If the module calls itself recursively, the recursive call will be replaced with a call to the new module, so that the functionality of the module is preserved.
+
 ### Functions
 
 Functions work very much like modules, except that they have a return value and they cannot create or work with geometry. You can add a new function by pressing the _F_ icon above the project tree. A popup dialog will open. In this dialog you can specify the name of the function, its return type and any parameters and their types. Once you are done press _OK_ to create the function. A new tab will open in which you can edit the graph of the function. It will already contain two nodes:
@@ -653,7 +669,7 @@ Functions have an additional node where you can connect the return value of the 
 
 The two numbers are given as parameters to the function. Then we use an _Add_ node to add the two numbers. The output of the _Add_ node is connected to the _Return_ node's input port, so now the function will return the sum of the two numbers.
 
-From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, find their usages and can edit their documentation in the same way as you do for modules. 
+From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, duplicate them, find their usages and can edit their documentation in the same way as you do for modules. 
 
 ## Using functions and modules from text-based libraries
 

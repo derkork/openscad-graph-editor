@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.0] - 2023-02-24
+## [0.8.0] - 2023-02-26
 ### Added
 - Added missing `intersection` node. This now allows you to generate intersections of multiple objects.
+- You can now easily duplicate modules, functions and variables by right-clicking them and selecting _Duplicate_ ([#41](https://github.com/derkork/openscad-graph-editor/issues/41)).
 - Added a range of utility nodes that simplify common use cases ([#42](https://github.com/derkork/openscad-graph-editor/issues/42)):
   -  `Double` allows you to calculate the double of an input number or vector.
   - `Half` allows you to calculate the half of an input number.
