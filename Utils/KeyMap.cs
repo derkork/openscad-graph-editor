@@ -91,5 +91,11 @@ namespace OpenScadGraphEditor.Utils
         public static bool IsStylusDebug(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.T) && inputEvent.IsCmdOrControlPressed() && inputEvent.IsShiftPressed();
 
         public static bool IsKeepConnectionsPressed()=> Input.IsKeyPressed((int)KeyList.Shift);
+
+        // we allow both backspace and delete to remove nodes
+        public static bool IsRemoveNodePressed(InputEventKey evt)
+        {
+            return evt.IsKeyPressed(KeyList.Backspace) || evt.IsKeyPressed(KeyList.Delete);
+        }
     }
 }

@@ -268,7 +268,7 @@ namespace OpenScadGraphEditor
             if (editor.Graph != null)
             {
                 // re-paint
-                editor.Render(editor.Graph);
+                editor.Render(_currentProject, editor.Graph);
             }
         }
 
@@ -517,7 +517,7 @@ namespace OpenScadGraphEditor
             if (_openEditors.TryGetValue(toOpen.Description.Id, out var existingEditor))
             {
                 _tabContainer.CurrentTab = existingEditor.GetIndex();
-                existingEditor.Render(toOpen);
+                existingEditor.Render(_currentProject, toOpen);
                 return existingEditor;
             }
 
@@ -536,7 +536,7 @@ namespace OpenScadGraphEditor
 
             editor.Name = toOpen.Description.Id;
             editor.MoveToNewParent(_tabContainer);
-            editor.Render(toOpen);
+            editor.Render(_currentProject, toOpen);
             _openEditors[toOpen.Description.Id] = editor;
             _tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
             _tabContainer.SetTabTitle(_tabContainer.CurrentTab, editor.Graph.Description.NodeNameOrFallback);
@@ -548,7 +548,7 @@ namespace OpenScadGraphEditor
         {
             if (obj.TryGetNode(out var node))
             {
-                _helpDialog.Open(obj.Source, node);
+                _helpDialog.Open(_currentProject, obj.Source, node);
             }
         }
 
@@ -807,7 +807,7 @@ namespace OpenScadGraphEditor
                 {
                     var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
                     // update the graph renderings.
-                    graphEdit.Render(graphEdit.Graph);
+                    graphEdit.Render(_currentProject, graphEdit.Graph);
                     // and update the tab title as it might have changed.
                     _tabContainer.SetTabTitle(i, graphEdit.Graph.Description.NodeNameOrFallback);
                 }
@@ -1232,6 +1232,15 @@ namespace OpenScadGraphEditor
             _fileNameLabel.Text = filename;
             _openOpenScadButton.Disabled = false;
             _openOpenScadButton.HintTooltip = "";
+            // repaint all open graphs as the file name is now known and this enables relative paths
+            // in node path references
+            for (var i = 0; i < _tabContainer.GetTabCount(); i++)
+            {
+                var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
+                // update the graph renderings.
+                graphEdit.Render(_currentProject, graphEdit.Graph);
+            }
+            
             MarkDirty(true);
         }
 

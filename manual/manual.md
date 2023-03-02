@@ -751,8 +751,8 @@ OpenSCAD graph editor will render the code in the preamble verbatim, so make sur
 - `D` - align selected nodes to the right.
 - `W` - align selected nodes to the top.
 - `S` - align selected nodes to the bottom.
-- `Delete` - delete selected nodes.
-- `Shift` + `Delete` - delete selected nodes, retaining connections if possible.
+- `Delete` or `Backspace` - delete selected nodes.
+- `Shift` + `Delete` or `Shift` + `Backspace` - delete selected nodes, retaining connections if possible.
 - `Ctrl+C` / `Cmd+C` - Copy the selected nodes.
 - `Ctrl+D` / `Cmd+D` - Duplicate the selected nodes.
 - `Ctrl+V` / `Cmd+V` - Paste the copied nodes.

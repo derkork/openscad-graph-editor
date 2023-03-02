@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - unreleased
+### Added
+- Added support for OpenScad's `surface` and `import` functions. You can now import 3D models and heightmaps into your graph ([#17](https://github.com/derkork/openscad-graph-editor/issues/17))
+
+### Improved
+- You can now also delete nodes by pressing the `Backspace` key, which is more convenient when working with a Macbook keyboard ([#43](https://github.com/derkork/openscad-graph-editor/issues/43)).
+
 ## [0.8.0] - 2023-02-26
 ### Added
 - Added missing `intersection` node. This now allows you to generate intersections of multiple objects.
