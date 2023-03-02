@@ -44,7 +44,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
         }
 
 
-        public void Open(ScadGraph graph, ScadNode node)
+        public void Open(ScadProject project, ScadGraph graph, ScadNode node)
         {
             if (IsInstanceValid(_widget))
             {
@@ -56,7 +56,7 @@ namespace OpenScadGraphEditor.Widgets.HelpDialog
                 : Prefabs.New<ScadNodeWidget>();
 
             _widget.MoveToNewParent(_nodeContainer);
-            _widget.BindTo(graph, node);
+            _widget.BindTo(project, graph, node);
             _widget.HintTooltip = "";
 
             _titleLabel.Text = node.NodeTitle.Trimmed(50);

@@ -21,7 +21,7 @@ namespace OpenScadGraphEditor.Nodes
         {
             VariableDescription = description;
             OutputPorts.Clear();
-            OutputPorts.OfType(description.TypeHint);
+            OutputPorts.PortType(description.TypeHint);
         }
 
         public IEnumerable<PortId> GetPortsReferringToVariable()

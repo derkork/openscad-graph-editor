@@ -50,7 +50,7 @@ namespace OpenScadGraphEditor.Library
         }
 
         public ModuleBuilder WithParameter(string name, PortType typeHint = PortType.Any,
-            string label = "", string description = "", bool optional = false)
+            string label = "", string description = "", bool optional = false, RenderHint renderHint = RenderHint.None)
         {
             GdAssert.That(_currentModuleDescription.Parameters.All(it => it.Name != name), $"Parameter with name '{name}' already exists");
 
@@ -60,7 +60,8 @@ namespace OpenScadGraphEditor.Library
                 Description = description,
                 TypeHint = typeHint,
                 Label = label,
-                IsOptional = optional
+                IsOptional = optional,
+                RenderHint = renderHint 
             };
 
             _currentModuleDescription.Parameters.Add(parameter);

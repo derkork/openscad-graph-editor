@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Godot;
 using GodotExt;
@@ -91,6 +90,7 @@ namespace OpenScadGraphEditor.Widgets
         
         private List<Vector2> _connectionHighlightPoints;
         private ScadConnection _highlightedConnection;
+        private ScadProject _project;
 
 
         public void SelectNodes(List<ScadNode> nodes)
@@ -187,7 +187,7 @@ namespace OpenScadGraphEditor.Widgets
                 widget.MoveToNewParent(this);
             }
             
-            widget.BindTo(Graph, node);
+            widget.BindTo(_project, Graph, node);
         }
 
         private void OnEndNodeMove()
@@ -221,9 +221,10 @@ namespace OpenScadGraphEditor.Widgets
         }
         
 
-        public void Render(ScadGraph graph)
+        public void Render(ScadProject project, ScadGraph graph)
         {
             Graph = graph;
+            _project = project;
             
             // rebuild the nodes
             foreach (var node in Graph.GetAllNodes())
@@ -773,6 +774,14 @@ namespace OpenScadGraphEditor.Widgets
             OnDeleteSelection();
         }
 
+
+        public override void _UnhandledKeyInput(InputEventKey evt)
+        {
+            if (KeyMap.IsRemoveNodePressed(evt))
+            {
+                OnDeleteSelection();
+            }
+        }
 
         private void OnConnectionRequest(string fromWidgetName, int fromPort, string toWidgetName, int toPort)
         {

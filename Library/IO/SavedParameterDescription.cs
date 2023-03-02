@@ -33,10 +33,19 @@ namespace OpenScadGraphEditor.Library.IO
         public PortType TypeHint { get; set; } = PortType.Any;
 
         /// <summary>
+        /// A render hint for the parameter.
+        /// </summary>
+        [Export]
+        public RenderHint RenderHint { get; set; } = RenderHint.None;
+        
+        /// <summary>
         /// Whether the parameter is optional.
         /// </summary>
         [Export]
         public bool IsOptional { get; set; }
+        
+        
+        
         
  
     }

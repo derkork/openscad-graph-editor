@@ -32,13 +32,17 @@ namespace OpenScadGraphEditor.Library
         /// Whether the parameter is optional.
         /// </summary>
         public bool IsOptional { get; set; }
-   
         
         /// <summary>
         /// Returns the label of the parameter if set, otherwise it's name.
         /// </summary>
         public string LabelOrFallback => Label.Length > 0 ? Label : Name;
 
+        /// <summary>
+        /// A render hint for the parameter.
+        /// </summary>
+        public RenderHint RenderHint { get; set; } = RenderHint.None;
+        
         public void LoadFrom(SavedParameterDescription parameter)
         {
             Name = parameter.Name;
@@ -46,6 +50,7 @@ namespace OpenScadGraphEditor.Library
             Description = parameter.Description;
             TypeHint = parameter.TypeHint;
             IsOptional = parameter.IsOptional;
+            RenderHint = parameter.RenderHint;
         }
 
         public void SaveInto(SavedParameterDescription parameter)
@@ -55,6 +60,7 @@ namespace OpenScadGraphEditor.Library
             parameter.Description = Description;
             parameter.TypeHint = TypeHint;
             parameter.IsOptional = IsOptional;
+            parameter.RenderHint = RenderHint;
         }
     }
 }

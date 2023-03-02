@@ -22,9 +22,9 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
-        public override void BindTo(ScadGraph graph, ScadNode node)
+        public override void BindTo(ScadProject project, ScadGraph graph, ScadNode node)
         {
-            base.BindTo(graph, node);
+            base.BindTo(project, graph, node);
             
             // make the background shine through a bit.
             this.GetChildNodes<Control>().ForAll(it => it.Modulate = new Color(1,1,1,0.9f));

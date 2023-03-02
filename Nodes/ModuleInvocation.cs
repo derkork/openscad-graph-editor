@@ -78,7 +78,8 @@ namespace OpenScadGraphEditor.Nodes
             {
                 var type = parameter.TypeHint;
                 InputPorts
-                    .OfType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional);
+                    .PortType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional, 
+                        renderHint: parameter.RenderHint);
             }
 
 

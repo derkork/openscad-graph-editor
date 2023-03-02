@@ -80,11 +80,12 @@ namespace OpenScadGraphEditor.Nodes
             {
                 var type = parameter.TypeHint;
                 InputPorts
-                    .OfType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional);
+                    .PortType(type, parameter.LabelOrFallback, type.GetMatchingLiteralType(), !parameter.IsOptional,
+                        renderHint: parameter.RenderHint);
             }
 
             OutputPorts
-                    .OfType( _description.ReturnTypeHint);
+                    .PortType( _description.ReturnTypeHint);
         }
 
         public override string Render(ScadGraph context, int portIndex)

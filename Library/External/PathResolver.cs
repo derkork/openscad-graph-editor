@@ -79,7 +79,7 @@ namespace OpenScadGraphEditor.Library.External
         public static bool TryResolve([CanBeNull] string pathToSourceFile, string includePath,
             out string resolvedFullPath)
         {
-            var sourceDirectory = pathToSourceFile.Empty() ? "" : Path.GetDirectoryName(pathToSourceFile);
+            var sourceDirectory = pathToSourceFile.Empty() ? "" : GetDirectoryFromFile(pathToSourceFile);
 
             if (!sourceDirectory.Empty())
             {
@@ -276,5 +276,11 @@ namespace OpenScadGraphEditor.Library.External
         {
             return Path.GetDirectoryName(filename);
         }
+
+        public static bool IsRelativePath(string path)
+        {
+            return !Path.IsPathRooted(path);
+        }
+        
     }
 }

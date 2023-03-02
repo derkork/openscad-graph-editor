@@ -17,7 +17,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 .Number();
 
             OutputPorts
-                .OfType(PortType.Any);
+                .PortType(PortType.Any);
         }
 
         public override void SaveInto(SavedNode node)
@@ -35,8 +35,8 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             var secondOperandPortType = (PortType) node.GetDataInt("second_operand_port_type", (int) PortType.Any);
             InputPorts.Clear();
             InputPorts
-                .OfType(firstOperandPortType, literalType: firstOperandPortType.GetMatchingLiteralType())
-                .OfType(secondOperandPortType, literalType: secondOperandPortType.GetMatchingLiteralType());
+                .PortType(firstOperandPortType, literalType: firstOperandPortType.GetMatchingLiteralType())
+                .PortType(secondOperandPortType, literalType: secondOperandPortType.GetMatchingLiteralType());
 
             base.RestorePortDefinitions(node, resolver);
         }
@@ -50,11 +50,8 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             }
             
             var existingDefinition = InputPorts[port.Port];
-            InputPorts[port.Port] = PortDefinition.OfType(
-                newPortType, 
-                existingDefinition.Name, 
-                newPortType.GetMatchingLiteralType(),
-                existingDefinition.LiteralIsAutoSet);
+            InputPorts[port.Port] = new PortDefinition(newPortType, newPortType.GetMatchingLiteralType(), existingDefinition.Name,
+                existingDefinition.LiteralIsAutoSet, existingDefinition.DefaultValue, existingDefinition.RenderHint);
 
             var wasSet = false;
             if (TryGetLiteral(port, out var literal))

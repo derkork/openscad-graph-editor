@@ -67,7 +67,7 @@ namespace OpenScadGraphEditor.Nodes
             VariableDescription = description;
             var portType = description.TypeHint;
             InputPorts.Clear();
-            InputPorts.OfType(portType, literalType: portType.GetMatchingLiteralType());
+            InputPorts.PortType(portType, literalType: portType.GetMatchingLiteralType());
         }
     }
 }

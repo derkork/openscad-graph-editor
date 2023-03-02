@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Widgets
         /// </summary>
         public static IScadLiteralWidget BuildWidget([CanBeNull] this IScadLiteral literal,
             bool isOutput, bool isAutoSet, bool isConnected, IScadLiteralWidget existing = null, 
-            VariableCustomizerDescription customizerDescription = null)
+            VariableCustomizerDescription customizerDescription = null, RenderHint renderHint = RenderHint.None)
         {
             IScadLiteralWidget result = null;
 
@@ -121,6 +121,18 @@ namespace OpenScadGraphEditor.Widgets
                         break;
                     }
 
+
+                    if (renderHint == RenderHint.FileInput)
+                    {
+                        if (!(existing is FileSelector fileSelector))
+                        {
+                            fileSelector = Prefabs.New<FileSelector>();
+                        }
+                        fileSelector.BindTo(stringLiteral, isOutput, isAutoSet, isConnected);
+                        result = fileSelector;
+                        break;
+                    }
+                    
                     if (!(existing is StringEdit stringEdit))
                     {
                         stringEdit = Prefabs.New<StringEdit>();

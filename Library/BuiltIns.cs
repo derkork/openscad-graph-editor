@@ -93,7 +93,7 @@ namespace OpenScadGraphEditor.Library
                         " The generated text has an ascent (height above the baseline) of approximately the given value. Different fonts can vary somewhat and may not fill the size specified exactly, typically they render slightly smaller.")
                     .WithParameter("font", PortType.String, label: "Font", optional: true,
                         description:
-                        "The name of the font that should be used. This is not the name of the font file, but the logical font name (internally handled by the fontconfig library).")
+                        "The name of the font that should be used. This is not the name of the font file, but the logical font name (internally handled by the fontconfig library).", renderHint: RenderHint.FontInput)
                     .WithParameter("halign", PortType.String, label: "Horizontal Alignment", optional: true,
                         description: "The horizontal alignment of the text. Can be 'left', 'center' or 'right'.")
                     .WithParameter("valign", PortType.String, label: "Vertical Alignment", optional: true,
@@ -323,6 +323,22 @@ namespace OpenScadGraphEditor.Library
                 ModuleBuilder.NewBuiltInModule("minkowski", "Mkow", nodeName: "Minkowski")
                     .WithDescription("Displays the minkowski sum of child nodes.")
                     .WithChildren()
+                    .Build(),
+                // import
+                ModuleBuilder.NewBuiltInModule("import", "Imp", "Import")
+                    .WithDescription("Imports a file for use in the current OpenSCAD model. The file extension is used to determine which type.")
+                    .WithParameter("file", PortType.String,"File", "A string containing the path to file. If the given path is not absolute, it is resolved relative to the importing project.", renderHint: RenderHint.FileInput)
+                    .WithParameter("convexity", PortType.Number, "Convexity", "The convexity parameter specifies the maximum number of front sides (or back sides) a ray intersecting the object might penetrate.", true)
+                    .WithParameter("layer", PortType.String, "Layer", "For DXF import only, specify a specific layer to import.", true)
+                    .WithFragmentParameters()
+                    .Build(),
+                // surface
+                ModuleBuilder.NewBuiltInModule("surface", "Srf", "Surface")
+                    .WithDescription("Reads Heightmap information from text or image files. It can read PNG files.")
+                    .WithParameter("file", PortType.String, "File", "A string containing the path to file. If the given path is not absolute, it is resolved relative to the importing project.", renderHint: RenderHint.FileInput)
+                    .WithParameter("center", PortType.Boolean, "Center", "This determines the positioning of the generated object. If true, object is centered in X- and Y-axis. Otherwise, the object is placed in the positive quadrant. Defaults to false.", true)
+                    .WithParameter("invert", PortType.Boolean, "Invert", "Inverts how the color values of imported images are translated into height values. This has no effect when importing text data files. Defaults to false.", true)
+                    .WithParameter("convexity", PortType.Number, "Convexity", "The convexity parameter specifies the maximum number of front sides (or back sides) a ray intersecting the object might penetrate.", true)
                     .Build(),
             };
 

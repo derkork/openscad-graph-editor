@@ -68,7 +68,7 @@ namespace OpenScadGraphEditor.Nodes
             _description = (FunctionDescription) description;
 
             InputPorts
-                .OfType(_description.ReturnTypeHint, "Result");
+                .PortType(_description.ReturnTypeHint, "Result");
         }
 
         public override string Render(ScadGraph context, int portIndex)

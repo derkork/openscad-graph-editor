@@ -63,7 +63,7 @@ namespace OpenScadGraphEditor.Nodes.ListComprehension
             for (var i = 0; i < CurrentInputSize; i++)
             {
                 InputPorts.Array();
-                OutputPorts.OfType(PortType.Any, literalType:   LiteralType.Name);
+                OutputPorts.PortType(PortType.Any, literalType:   LiteralType.Name);
             }
       
         }

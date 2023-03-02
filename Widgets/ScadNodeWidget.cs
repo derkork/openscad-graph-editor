@@ -47,7 +47,7 @@ namespace OpenScadGraphEditor.Widgets
         }
 
         
-        public virtual void BindTo(ScadGraph graph, ScadNode node)
+        public virtual void BindTo(ScadProject project, ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
             Title = ""; // we render the title ourselves, see below
@@ -116,7 +116,7 @@ namespace OpenScadGraphEditor.Widgets
 
                 if (node.InputPortCount > idx)
                 {
-                    BuildPort(left, graph, node, PortId.Input(idx), titleOffset);
+                    BuildPort(left, project, graph, node, PortId.Input(idx), titleOffset);
                 }
                 else
                 {
@@ -126,7 +126,7 @@ namespace OpenScadGraphEditor.Widgets
 
                 if (node.OutputPortCount > idx)
                 {
-                    BuildPort(right, graph, node, PortId.Output(idx), titleOffset);
+                    BuildPort(right, project, graph, node, PortId.Output(idx), titleOffset);
                 }
                 else
                 {
@@ -189,7 +189,8 @@ namespace OpenScadGraphEditor.Widgets
             QueueSort();
         }
 
-        private void BuildPort(PortContainer.PortContainer container, ScadGraph graph, ScadNode node, PortId port, int titleOffset)
+        private void BuildPort(PortContainer.PortContainer container, ScadProject project, ScadGraph graph,
+            ScadNode node, PortId port, int titleOffset)
         {
             var portDefinition = node.GetPortDefinition(port);
             var idx = port.Port;
@@ -219,7 +220,12 @@ namespace OpenScadGraphEditor.Widgets
             if (node.TryGetLiteral(port, out var literal))
             {
                 literalWidget = literal.BuildWidget(port.IsOutput, portDefinition.LiteralIsAutoSet, isConnected,
-                    existingWidget);
+                    existingWidget, renderHint: portDefinition.RenderHint);
+
+                if (literalWidget is FileSelector fileSelector)
+                {
+                    fileSelector.SourceFileForRelativePaths = project.ProjectPath;
+                }
             }
 
             if (existingWidget != null && existingWidget != literalWidget)

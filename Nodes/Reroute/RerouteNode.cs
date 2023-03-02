@@ -56,9 +56,9 @@ namespace OpenScadGraphEditor.Nodes.Reroute
         public RerouteNode()
         {
             InputPorts
-                .OfType(PortType.Reroute);
+                .PortType(PortType.Reroute);
             OutputPorts
-                .OfType(PortType.Reroute);
+                .PortType(PortType.Reroute);
         }
 
         public override string GetPortDocumentation(PortId portId)
@@ -111,9 +111,9 @@ namespace OpenScadGraphEditor.Nodes.Reroute
             InputPorts.Clear();
             OutputPorts.Clear();
             InputPorts
-                .OfType(type);
+                .PortType(type);
             OutputPorts
-                .OfType(type);
+                .PortType(type);
         }
 
         public override string Render(ScadGraph context, int portIndex)

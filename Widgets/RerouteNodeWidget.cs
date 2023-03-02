@@ -26,7 +26,7 @@ namespace OpenScadGraphEditor.Widgets
             QueueSort();
         }
 
-        public override void BindTo(ScadGraph graph, ScadNode node)
+        public override void BindTo(ScadProject project, ScadGraph graph, ScadNode node)
         {
             BoundNode = node;
             Offset = node.Offset;

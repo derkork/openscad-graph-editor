@@ -44,7 +44,7 @@ namespace OpenScadGraphEditor.Library
         }
 
         public FunctionBuilder WithParameter(string name, PortType typeHint = PortType.Any,
-            string label = "", string description = "", bool optional = false)
+            string label = "", string description = "", bool optional = false, RenderHint renderHint = RenderHint.None)
         {
             var parameter = new ParameterDescription
             {
@@ -52,7 +52,8 @@ namespace OpenScadGraphEditor.Library
                 Description = description,
                 TypeHint = typeHint,
                 Label = label,
-                IsOptional = optional
+                IsOptional = optional,
+                RenderHint = renderHint
             };
 
             _currentFunctionDescription.Parameters.Add(parameter);

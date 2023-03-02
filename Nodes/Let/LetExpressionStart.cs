@@ -37,7 +37,7 @@ namespace OpenScadGraphEditor.Nodes.Let
             for (var i = 0; i < CurrentInputSize; i++)
             {
                 InputPorts.Any();
-                OutputPorts.OfType(PortType.Any, literalType: LiteralType.Name, autoSetLiteralWhenPortIsDisconnected: true);
+                OutputPorts.PortType(PortType.Any, literalType: LiteralType.Name, autoSetLiteralWhenPortIsDisconnected: true);
             }
         }
 

@@ -181,7 +181,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                     {
                         var canResolve =
                             PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath,
-                                Path.GetDirectoryName(_currentProjectPath), out _);
+                                PathResolver.GetDirectoryFromFile(_currentProjectPath), out _);
                         _okButton.Disabled = !canResolve;
                     }
                     else
@@ -217,7 +217,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
                 case ExternalFilePathMode.Relative:
                     var canResolve =
                         PathResolver.TryAbsoluteToRelative(_fileSelectBox.CurrentPath,
-                            Path.GetDirectoryName(_currentProjectPath), out var path);
+                            PathResolver.GetDirectoryFromFile(_currentProjectPath), out var path);
                     GdAssert.That(canResolve, "Could not resolve path");
                     if (_currentExternalReference != null)
                     {
@@ -260,7 +260,7 @@ namespace OpenScadGraphEditor.Widgets.ImportDialog
             var file = _fileSelectBox.CurrentPath;
             if (!string.IsNullOrEmpty(file))
             {
-                presetDir = Path.GetDirectoryName(file);
+                presetDir = PathResolver.GetDirectoryFromFile(file);
             }
             // if not, try to run with the current project's path
             else if (!string.IsNullOrEmpty(_currentProjectPath))

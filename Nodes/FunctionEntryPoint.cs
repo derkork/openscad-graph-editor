@@ -72,7 +72,7 @@ namespace OpenScadGraphEditor.Nodes
             foreach (var parameter in description.Parameters)
             {
                 OutputPorts
-                    .OfType(parameter.TypeHint, parameter.Name,  autoSetLiteralWhenPortIsDisconnected: false, literalType: parameter.TypeHint.GetMatchingLiteralType());
+                    .PortType(parameter.TypeHint, parameter.Name,  autoSetLiteralWhenPortIsDisconnected: false, literalType: parameter.TypeHint.GetMatchingLiteralType());
             }
         }
 

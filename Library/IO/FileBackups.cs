@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Widgets;
 using Serilog;
 
@@ -19,7 +20,7 @@ namespace OpenScadGraphEditor.Library.IO
             try
             {
                 // Get the directory of the file
-                var directory = Path.GetDirectoryName(filePath);
+                var directory = PathResolver.GetDirectoryFromFile(filePath);
                 if (string.IsNullOrEmpty(directory))
                 {
                     Log.Error("Could not get directory of file {filePath}", filePath);

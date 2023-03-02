@@ -2,6 +2,7 @@ using System;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Library.External;
 using Path = System.IO.Path;
 
 namespace OpenScadGraphEditor.Widgets.FileSelectBox
@@ -25,13 +26,24 @@ namespace OpenScadGraphEditor.Widgets.FileSelectBox
         private FileDialog _fileDialog;
         private LineEdit _pathLineEdit;
         
+        
+        private string _currentPath = "";
+        
         /// <summary>
         /// The path that is currently selected.
         /// </summary>
         public string CurrentPath
         {
-            get => _pathLineEdit.Text;
-            set => _pathLineEdit.Text = value;
+            get => _currentPath;
+            set
+            {
+                _currentPath = value;
+                if (_pathLineEdit != null)
+                {
+                    _pathLineEdit.Text = value;
+                    _pathLineEdit.HintTooltip = value;
+                }
+            } 
         }
 
 
@@ -47,6 +59,8 @@ namespace OpenScadGraphEditor.Widgets.FileSelectBox
         public override void _Ready()
         {
             _pathLineEdit = this.WithName<LineEdit>("PathLineEdit");
+            _pathLineEdit.Text = _currentPath;
+            _pathLineEdit.HintTooltip = _currentPath;
             
             _fileDialog = this.WithName<FileDialog>("_FileDialog");
             _fileDialog
@@ -74,10 +88,10 @@ namespace OpenScadGraphEditor.Widgets.FileSelectBox
         {
             if (string.IsNullOrEmpty(presetDirectory) && !string.IsNullOrEmpty(CurrentPath))
             {
-                    presetDirectory = Path.GetDirectoryName(CurrentPath);
+                    presetDirectory = PathResolver.GetDirectoryFromFile(CurrentPath);
             }
             
-            if (string.IsNullOrEmpty(presetDirectory))
+            if (!string.IsNullOrEmpty(presetDirectory))
             {
                 _fileDialog.CurrentDir = presetDirectory;
             }

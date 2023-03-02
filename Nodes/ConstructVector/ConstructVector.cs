@@ -84,7 +84,7 @@ namespace OpenScadGraphEditor.Nodes.ConstructVector
             for (var i = 0; i < CurrentInputSize; i++)
             {
                 InputPorts
-                    .OfType(_portType, $"Component {i + 1}", _portType.GetMatchingLiteralType());
+                    .PortType(_portType, $"Component {i + 1}", _portType.GetMatchingLiteralType());
             }
         }
 
