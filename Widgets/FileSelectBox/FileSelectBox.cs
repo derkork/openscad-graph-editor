@@ -75,7 +75,7 @@ namespace OpenScadGraphEditor.Widgets.FileSelectBox
 
         private void RaiseFileSelected(string file)
         {
-            _pathLineEdit.Text = file;
+            CurrentPath = file;
             OnFileSelected?.Invoke(file);
         }
         

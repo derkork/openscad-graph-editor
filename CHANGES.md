@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2023-03-21
+### Fixed
+
+- Selecting the OpenSCAD executable in the settings dialog now again works correctly. This was broken in 0.9.0.
+
 ## [0.9.0] - 2023-03-02
 ### Added
 - Added support for OpenScad's `surface` and `import` functions. You can now import 3D models and heightmaps into your graph ([#17](https://github.com/derkork/openscad-graph-editor/issues/17))
