@@ -91,7 +91,7 @@ OpenSCAD is a 3D CAD program that can be used to create 3D models through script
 
 ## Installation & Setup
 
-You can download the latest release of the OpenSCAD Graph Editor from [GitHub](https://github.com/derkork/openscad-graph-editor/releases). There is a ZIP file for each supported operating system (e.g. `Windows.zip`, `MacOSX.zip`, `Linux.zip`) on each release. Pick the zip file for your operating system and extract it to a convenient location and run the program. No installation procedure is required. Note if you are on MacOSX you may get a warning that the program is damaged. This is because the application is not notarized with Apple. See [this FAQ entry](https://github.com/derkork/openscad-graph-editor/blob/master/manual/faq.md#i-cannot-open-the-app-on-the-mac-it-says-it-is-damaged) for instructions on how to fix this. 
+You can download the latest release of the OpenSCAD Graph Editor from [GitHub](https://github.com/derkork/openscad-graph-editor/releases). There is a ZIP file for each supported operating system (e.g. `Windows.zip`, `MacOSX.zip`, `Linux.zip`) on each release. Pick the zip file for your operating system and extract it to a convenient location and run the program. No installation procedure is required. Note if you are on MacOSX you may get a warning that the program is damaged. This is because the application is not notarized with Apple. See [this FAQ entry](https://github.com/derkork/openscad-graph-editor/blob/master/manual/faq.md#i-cannot-open-the-app-on-the-mac-it-says-it-is-damaged) for instructions on how to fix this.
 
 ### Prerequisites for live preview
 If you want to have a live preview while you are editing, you will also need to download and install [OpenSCAD](https://openscad.org/downloads.html). Then arrange the windows of OpenSCAD Graph Editor and OpenSCAD so that they are next to each other (or place them on different monitors if you happen to have a multi-monitor setup). It is recommended that you hide the editor in the OpenSCAD window (_Window_ -> _Hide Editor_).
@@ -109,14 +109,14 @@ You are now ready to use the OpenSCAD Graph Editor.
 
 ## The basics
 ### Starting a new project
-When you start OpenSCAD Graph Editor, it will show a blank graph. You can already add nodes to the graph but live preview is not enabled until you actually save the project somewhere. This is because live preview requires that OpenSCAD code is generated and written to a file so that the OpenSCAD executable can read it and produce a live preview. So you should immediately save the project somewhere. You can save it by pressing the _Save as..._ button.  After the project is saved you can start live preview by pressing the OpenSCAD icon in the top right corner of the editor, provided that you have set it up correctly. If you haven't set this up yet, check the previous section.
+When you start the OpenSCAD Graph Editor, it will show a blank graph. You can already add nodes to the graph but live preview is not enabled until you actually save the project somewhere. This is because live preview requires that OpenSCAD code is generated and written to a file so that the OpenSCAD executable can read it and produce a live preview. So you should immediately save the project somewhere. You can save it by pressing the _Save as..._ button.  After the project is saved you can start the live preview by pressing the OpenSCAD icon in the top right corner of the editor, provided that you have set it up correctly. If you haven't set this up yet, check the previous section.
 
 ![](images/starting_live_preview.png)
 
 From now on you will no longer need to manually save the project. The editor will automatically save the project when you change something in the graph. This will also trigger a refresh in the live preview.
 
 ### Opening an existing project
-To open an existing project, press the _Open_ button. A popup menu will appear where you can either select project that you have recently opened or select the _Open file_ option to open a project from a file.
+To open an existing project, press the _Open_ button. A popup menu will appear where you can either select a project that you have recently opened or select the _Open file_ option to open a project from a file.
 
 ![](images/open_file.png)
 
@@ -156,7 +156,7 @@ If you already have a node in your graph, you can also drag from one of its port
 
 ![](images/add_node_by_dragging.gif)
 
-After you have selected a node from the list the node will be added to the graph and will automatically be connected to the port you dragged from. 
+After you have selected a node from the list the node will be added to the graph and will automatically be connected to the port you dragged from.
 
 
 ### Getting help for a node
@@ -172,7 +172,7 @@ You can connect nodes by dragging one of the output ports of a node to an input 
 
 ![](images/flow_example_1.png)
 
-Here you have two nodes representing the numbers 7 and 4. Their output goes into the two input ports of an addition node (`+`). This node will output the sum of the two numbers from its input ports. Then its output is connected to one input port of a multiplication node (`*`). This node will output the product of the two numbers from its input ports. You can see that nothing is connected to the second input port of the multiplication node. When you connect nothing to a node's input port, depending on the type of the port you can enter values directly. In this case `2`  was entered, so the multiplication node will now multiple the result from the addition node by 2. You can hover over nodes to see what the node will produce. In this example the whole chain of nodes will produce the expression `((7 + 4) * 2)`.
+Here you have two nodes representing the numbers 7 and 4. Their output goes into the two input ports of an addition node (`+`). This node will output the sum of the two numbers from its input ports. Then its output is connected to one input port of a multiplication node (`*`). This node will output the product of the two numbers from its input ports. You can see that nothing is connected to the second input port of the multiplication node. When you connect nothing to a node's input port, depending on the type of the port you can enter values directly. In this case `2`  was entered, so the multiplication node will now multiply the result from the addition node by 2. You can hover over nodes to see what the node will produce. In this example the whole chain of nodes will produce the expression `((7 + 4) * 2)`.
 
 Lets check another example which involves geometry:
 
@@ -188,7 +188,7 @@ In general you can only connect ports which have the same port type (e.g. the sa
 - A port type of `vector3` (light blue) can be connected to a port type of `vector` (blue) but not the other way around.
 - A port type of `vector2` (very light blue) can be connected to a port type of `vector` (blue) but not the other way around.
 
-Every input port (except geometry, see the next section for details) can only accept a single connection. It is also not allowed to connect nodes in a way that would form a loop. 
+Every input port (except geometry, see the next section for details) can only accept a single connection. It is also not allowed to connect nodes in a way that would form a loop.
 
 #### Connecting geometry ports
 
@@ -198,7 +198,7 @@ Geometry (white) ports are somewhat different from the other ports. They follow 
 
 We first have a 2x2x2 cube and a sphere with 1.2 units radius. Both of them are connected to the _Add_ port of the _Difference_ node. Then we have two cuboids forming a cross-like shape. Both of these are connected to the _Subtract_ port of the _Difference_ node. What will happen now is that the _union_ of everything connected to the _Subtract_ port will be subtracted from the _union_ of everything connected to the _Add_ port. So we get a cube with some parts of the sphere on the outside with two holes made by the two cuboids. Again for visualization purposes a debug modifier was added to the cuboid nodes, so you can see them in translucent red in the 3D view.
 
-The _implicit_ union behaviour simplifies the node graphs as you don't need to add extra nodes when you want to build the union of some geometry.  
+The _implicit_ union behaviour simplifies the node graphs as you don't need to add extra nodes when you want to build the union of some geometry.
 
 #### Unconnected geometry output ports
 
@@ -214,14 +214,14 @@ When you connect something to an input port the port will use the value that was
 
 ![](images/literals_example.png)
 
-Here we have two cube nodes and a translate node. All nodes have nothing connected to their inputs, so their input ports now allow you to specify the value directly. You may notice that the cube node in the top left has two little buttons next to each of its input ports. These buttons are displayed when input port has a default value. Cube's have a default size of `[1,1,1]` and are not centered by default. When the button is not pressed, the built-in default value for that port will be used. If you press the button, you can override the default value with a custom value. This can be seen in the top right cube node where both the _Size_ and the _Center_ value are overridden. 
+Here we have two cube nodes and a translate node. All nodes have nothing connected to their inputs, so their input ports now allow you to specify the value directly. You may notice that the cube node in the top left has two little buttons next to each of its input ports. These buttons are displayed when an input port has a default value. Cube's have a default size of `[1,1,1]` and are not centered by default. When the button is not pressed, the built-in default value for that port will be used. If you press the button, you can override the default value with a custom value. This can be seen in the top right cube node where both the _Size_ and the _Center_ value are overridden.
 
 Some input ports may not have a default value and are therefore required. This is the case for the _Translate_ node. It does not have a default value for the translation _Offset_ so the little button is not displayed. You can still specify the value directly in the node or connect another node to the input.
 
 
 ## Overview of built-in nodes
 
-OpenSCAD graph editor contains nodes for all [functions and modules](https://openscad.org/cheatsheet/) built into OpenSCAD. So if you look for a certain function you can just type its name into the _Add node_ dialog. 
+OpenSCAD graph editor contains nodes for all [functions and modules](https://openscad.org/cheatsheet/) built into OpenSCAD. So if you look for a certain function you can just type its name into the _Add node_ dialog.
 
 There are some nodes which are not directly representing a function in OpenSCAD but are used to achieve the same effects as a built-in language construct in the original OpenSCAD language. These will be described in the following sections.
 
@@ -237,15 +237,15 @@ The node will output the geometry connected to the _true_ port if the condition 
 
 #### For-Loop
 
-The for-loop node allows you to repeatedly create geometry with different inputs. It actually consists of two nodes: _Start loop_ and _End loop_ but you will only need to add a _For loop_ node and the _Loop end_ node will be added automatically. Whenever you select any of the two nodes belonging to a loop the editor will automatically highlight the other so you can keep track of which _Start loop_ and _End loop_ nodes belong together.
+The for-loop node allows you to repeatedly create geometry with different inputs. It actually consists of two nodes: _Start loop_ and _End loop_ but you will only need to add a _For loop_ node and the _Loop end_ node will be added automatically. Whenever you select either of the two nodes belonging to a loop, the editor will automatically highlight the other so you can keep track of which _Start loop_ and _End loop_ nodes belong together.
 
 Consider the following example of a for-loop:
 
 ![](images/loop_example.png)
 
-This will create a circle of spheres offset by 30 degrees from each other. The _Start loop_ node has an input port for any vector-like construct (e.g. a `vector2`, `vector3` or `vector`). The loop will be repeated for each item in the given vector. In this example we use the _Construct Range_ node to build a vector that has the numbers `0` to `360` in it with steps of `30`. 
+This will create a circle of spheres offset by 30 degrees from each other. The _Start loop_ node has an input port for any vector-like construct (e.g. a `vector2`, `vector3` or `vector`). The loop will be repeated for each item in the given vector. In this example we use the _Construct Range_ node to build a vector that has the numbers `0` to `360` in it with steps of `30`.
 
-We can give the loop variable a name (though it is not needed, if you don't give a name then OpenSCAD graph editor will internally generate a unique variable name for you). Now inside the loop we build a sphere, offset it by 10 units on the x-axis and rotate it by the current angle. The result of this will connected to the _End loop_ node. This will generate 12 spheres and because of the _implicit union_ behaviour they will be added to the output geometry one by one. The result is a circle of spheres.
+We can give the loop variable a name (though it is not needed, if you don't give a name then OpenSCAD graph editor will internally generate a unique variable name for you). Now inside the loop we build a sphere, offset it by 10 units on the x-axis and rotate it by the current angle. The result of this will connect to the _End loop_ node. This will generate 12 spheres and because of the _implicit union_ behaviour they will be added to the output geometry one by one. The result is a circle of spheres.
 
 ##### Nested loops
 
@@ -257,7 +257,7 @@ This will add a second input to the _Loop start_ node and the loop will now repe
 
 ![](images/loop_example_1d.png)
 
-Now say we want to have a square made out of cubes, so we need to translate the cube both in `x` and `y` direction. For this we can simply add a loop level and connect the range output to the second input of the loop. Now the loop will run once for each combination of `x` and `y`. We use the values of `x` and `y` to calculate the translation vector.
+Now say we want to have a square made out of cubes, so we need to translate the cube both in the `x` and `y` directions. For this we can simply add a loop level and connect the range output to the second input of the loop. Now the loop will run once for each combination of `x` and `y`. We use the values of `x` and `y` to calculate the translation vector.
 
 ![](images/loop_example_2d.png)
 
@@ -268,7 +268,7 @@ We can take this one step further and add a third loop level. Now the loop will 
 
 #### Intersection loops
 
-A _For loop_ by defaults returns the union of all iterations. Sometimes you want to return the intersection of all iterations. To do this, right-click the _Loop start_ node and select the _Toggle intersection mode_ option. This will will switch the _For loop_ to an _Intersection-for loop_.
+A _For loop_ by default returns the union of all iterations. Sometimes you want to return the intersection of all iterations. To do this, right-click the _Loop start_ node and select the _Toggle intersection mode_ option. This will will switch the _For loop_ to an _Intersection-for loop_.
 
 ![](images/intersect_for.gif)
 
@@ -294,7 +294,7 @@ Vectors play a large role in OpenSCAD. They are used to represent positions and 
 
 #### Construct `vector2` / `vector3`
 
-These nodes allow you to build a `vector2` or `vector3` from numbers. 
+These nodes allow you to build a `vector2` or `vector3` from numbers.
 
 ![](images/construct_vector23.png)
 
@@ -325,7 +325,7 @@ Similarly you can remove the last item from the vector by right-clicking the nod
 
 #### Index `vector` / `string`
 
-This node allows you to extract a value from a `vector` or `string` value. 
+This node allows you to extract a value from a `vector` or `string` value.
 
 ![](images/index_vector_string.png)
 
@@ -346,7 +346,7 @@ The _Cast_ node will not magically convert a node to a different type. It is sim
 The following nodes have been added to simplify often-used operations. They can all be replicated with one or more other nodes but are included for convenience as they require less nodes to achieve the same result or reduce visual clutter.
 
 #### Double
- 
+
  This node calculates the double of the given input number or vector. It is equivalent to using the multiply node with a factor of 2.
 
 ![](images/double_node.png)
@@ -391,7 +391,7 @@ You can add a comment to any node by right-clicking it and selecting _Add commen
 
 ### Reroute nodes
 
-When you have quite a few nodes connected to each other it can become difficult to avoid having connections crossing over other connections and thereby making the graph look messy. The _Reroute_ node allows you to reroute a connection, so you can prevent connections from crossing over each other. You can create a reroute node either by using the _Add node_ dialog or by holding `Shift` while you drag a connection to an empty space. 
+When you have quite a few nodes connected to each other it can become difficult to avoid having connections crossing over other connections and thereby making the graph look messy. The _Reroute_ node allows you to reroute a connection, so you can prevent connections from crossing over each other. You can create a reroute node either by using the _Add node_ dialog or by holding `Shift` while you drag a connection to an empty space.
 
 #### Wireless reroute nodes
 
@@ -411,9 +411,9 @@ When you delete a reroute node all connections that were routed through it will 
 
 ### Straighten connections
 
-You can straighten the connections between nodes by selecting a the nodes between which you want to straighten the connections and then pressing the `Q` key. 
+You can straighten the connections between nodes by selecting a the nodes between which you want to straighten the connections and then pressing the `Q` key.
 
-Connections will be straightened from right to left, e.g. the right-most node will never be moved. The algorithm will work from the right-most node and then move nodes left of the right-most node up and down so that the first connection between them is straight. 
+Connections will be straightened from right to left, e.g. the right-most node will never be moved. The algorithm will work from the right-most node and then move nodes left of the right-most node up and down so that the first connection between them is straight.
 
 
 ### Align nodes
@@ -431,7 +431,7 @@ A very simple way to see what is going on is simply adding a bit of color to a n
 
 ![](images/changing_color.gif)
 
-In this example we give sphere a purple color and the cube a blue color. Naturally this will only work for nodes that produce geometry output.
+In this example we give the sphere a purple color and the cube a blue color. Naturally this will only work for nodes that produce geometry output.
 
 ### Debug modifiers
 
@@ -462,7 +462,7 @@ The _Disable subtree_ modifier will disable the node's output. This is useful if
 
 ![](images/disable_modifier.png)
 
-The second cylinder is now disabled. Its node is being displayed slightly translucent in the graph editor to indicate this. The cylinder does no longer appear in live preview.
+The second cylinder is now disabled. Its node is being displayed slightly translucent in the graph editor to indicate this. The cylinder no longer appears in the live preview.
 
 #### Make root modifiers
 
@@ -482,7 +482,7 @@ When you build expressions in the graph, sometimes the resulting graph can be a 
 
 ### Inspecting the generated code
 
-If you want to inspect the generated OpenSCAD code you can press the _View Code_ button in the top right of the editor. This will replace the node graph with a text editor which shows the generated code. 
+If you want to inspect the generated OpenSCAD code you can press the _View Code_ button in the top right of the editor. This will replace the node graph with a text editor which shows the generated code.
 
 ![](images/code_preview.png)
 
@@ -491,7 +491,7 @@ If you want to inspect the generated OpenSCAD code you can press the _View Code_
 Variables allow you to parameterize your graph. Instead of making an object that has fixed dimensions, you can create variables which allow you to change the dimensions of your object without having to change the graph. They can also be used to toggle certain features of your object on and off. This is very useful if you want different variations of the same object. If you upload your OpenSCAD files on sites like Thingiverse, users can then easily change the dimensions and features of your object to fit their needs.
 
 #### Creating a new variable
-To create a variable, click the _V_ icon above the project tree. This will open the _Variables_ dialog. 
+To create a variable, click the _V_ icon above the project tree. This will open the _Variables_ dialog.
 
 ![](images/create_variable.gif)
 
@@ -506,7 +506,7 @@ To use a variable, you can simply drag it into the graph from your project tree.
 - Get `name of the variable` - will create a node that provides the value of the variable which you can then connect to another node.
 - Set `name of the variable` - will create a node that allows you to set the value of the variable.
 
-The next image shows you to set a variable's value to 10 and then using an `echo` node to print the value of the variable:
+The next image shows you how to set a variable's value to 10 and then use an `echo` node to print the value of the variable:
 
 ![](images/getting_setting_variables.gif)
 
@@ -564,7 +564,7 @@ my_custom_variable = 15;
 echo(my_custom_variable);
 my_custom_variable = 10;
 ```
-However, when you execute this, the printed value will actually be `10`, because `10` was the last value assigned to `my_custom_variable`. It is therefore a good idea to only use variables to parameterize your graph, but not to store any intermediate values. 
+However, when you execute this, the printed value will actually be `10`, because `10` was the last value assigned to `my_custom_variable`. It is therefore a good idea to only use variables to parameterize your graph, but not to store any intermediate values.
 
 Because OpenSCAD Graph Editor is a visual editor, there is a lot less need for having intermediate values stored in a variable. You can simply connect the output of a calculation into multiple inputs without the need to create a variable for this:
 
@@ -575,13 +575,13 @@ You can also make use of [wireless reroute nodes](#wireless-reroute-nodes) to ke
 
 ### Modules
 #### Creating a new module
-OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the _M_ icon above the project tree. 
+OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the _M_ icon above the project tree.
 
 ![](images/create_module.gif)
 
 A popup dialog will open. In this dialog you can specify the name of the module and any parameters and their types.  Once you are done press _OK_ to create the module. A new tab will open in which you can edit the graph of the module. It will already contain one node - the module's entry point - from which you can drag out the parameters given to your module.
 
-Editing a module graph works exactly the same as editing the main graph (the main graph is also a module in a sense). Also the rules about _implicit union_ behaviour apply, so every node that has an unconnected _geometry_ port will be implicitly added to the output geometry of the module. 
+Editing a module graph works exactly the same as editing the main graph (the main graph is also a module in a sense). Also the rules about _implicit union_ behaviour apply, so every node that has an unconnected _geometry_ port will be implicitly added to the output geometry of the module.
 
 #### Using a module
 
@@ -639,21 +639,21 @@ You can add documentation to your modules, so you and other users can understand
 
 ![](images/edit_documentation_popup.png)
 
-Now a dialog will open where you can add descriptions to the module and the parameters. 
+Now a dialog will open where you can add descriptions to the module and the parameters.
 
 ![](images/documentation_dialog.png)
 
-When you are done, press _OK_ to save the documentation. The documentation will now be shown if you request help for the module (by pressing `F1`). 
+When you are done, press _OK_ to save the documentation. The documentation will now be shown if you request help for the module (by pressing `F1`).
 
 ![](images/port_colors.png)
 
-It will also be rendered out in the generated OpenSCAD code. 
+It will also be rendered out in the generated OpenSCAD code.
 
 ![](images/documentation_in_code.png)
 
 #### Duplicating a module
 
-Sometimes you may want to duplicate a module to serve as a starting point for a new module. To do so, right-click either the module's entry point or any instance where you use the module or right-click the module in the project tree. A popup menu will open. Select the _Duplicate &lt;module&gt;_ entry. This will copy the whole module including its documentation, parameters and node graph. The new module will have the same name as the old one with a number appended to it. You can then rename the module and change its parameters as you see fit. 
+Sometimes you may want to duplicate a module to serve as a starting point for a new module. To do so, right-click either the module's entry point or any instance where you use the module or right-click the module in the project tree. A popup menu will open. Select the _Duplicate &lt;module&gt;_ entry. This will copy the whole module including its documentation, parameters and node graph. The new module will have the same name as the old one with a number appended to it. You can then rename the module and change its parameters as you see fit.
 
 ![](images/duplicate_module.gif)
 
@@ -676,11 +676,11 @@ Functions have an additional node where you can connect the return value of the 
 
 The two numbers are given as parameters to the function. Then we use an _Add_ node to add the two numbers. The output of the _Add_ node is connected to the _Return_ node's input port, so now the function will return the sum of the two numbers.
 
-From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, duplicate them, find their usages and can edit their documentation in the same way as you do for modules. 
+From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, duplicate them, find their usages and can edit their documentation in the same way as you do for modules.
 
 ## Using functions and modules from text-based libraries
 
-OpenSCAD has no shortage of [libraries](https://openscad.org/libraries.html) which simplify a lot of things, from creating standardized parts like nuts and bolts over ready-made enclosures, rounded edges, threads, etc. Therefore OpenSCAD graph editor allows you to include these libraries and use their functions and modules just like you would use any built-in function and module. 
+OpenSCAD has no shortage of [libraries](https://openscad.org/libraries.html) which simplify a lot of things, from creating standardized parts like nuts and bolts over ready-made enclosures, rounded edges, threads, etc. Therefore OpenSCAD graph editor allows you to include these libraries and use their functions and modules just like you would use any built-in function and module.
 
 ### Adding a reference to a library
 
@@ -699,7 +699,7 @@ Next you can choose how you want to refer to the library.
 - _Absolute_ - the library path will be absolute. This is usually not recommended as the file will then only work on the computer it was created on.
 - _Library_ - the library will be resolved from the OpenSCAD library path. This is recommended if you want to use libraries in multiple projects.
 
-Finally you can select the actual library file. If you have selected _Relative_ or _Absolute_ mode, you can use a file picker to pick the library file. If you have selected _Library_ mode, a dropdown will appear showing all OpenSCAD libraries within the OpenSCAD library path. 
+Finally you can select the actual library file. If you have selected _Relative_ or _Absolute_ mode, you can use a file picker to pick the library file. If you have selected _Library_ mode, a dropdown will appear showing all OpenSCAD libraries within the OpenSCAD library path.
 
 Once everything is set up, press _OK_ to add the library. OpenSCAD graph editor will now parse the library and show all functions and modules in the tree. For big libraries with lots of functions and modules and possibly lots of recursive includes (like BOSL2) this may take a few seconds, so please be patient.
 
@@ -731,7 +731,7 @@ You may have noticed that there is no functionality for supporting renames. This
 
 ## Miscellaneous features
 ### Preamble for the generated OpenSCAD code
-Sometimes you may want to add some code to the head of the generated OpenSCAD code. For example, you may want to add a license header or some preprocessing statements for third party software like RapCAD. You can set up a preamble in the _Settings_ dialog in the _Default Preamble_ setting. 
+Sometimes you may want to add some code to the head of the generated OpenSCAD code. For example, you may want to add a license header or some preprocessing statements for third party software like RapCAD. You can set up a preamble in the _Settings_ dialog in the _Default Preamble_ setting.
 
 ![](images/default_preamble.png)
 
@@ -766,7 +766,7 @@ OpenSCAD graph editor will render the code in the preamble verbatim, so make sur
 - Holding `Ctrl+Shift` while dragging a connection to an empty space - Create a wireless node.
 
 ### Documentation comment format
-OpenSCAD graph editor uses a standardized format for documentation comments. If you follow this format in text-based OpenSCAD libraries, OpenSCAD graph editor will be able to parse the format and show better documentation for the nodes when pressing `F1`. 
+OpenSCAD graph editor uses a standardized format for documentation comments. If you follow this format in text-based OpenSCAD libraries, OpenSCAD graph editor will be able to parse the format and show better documentation for the nodes when pressing `F1`.
 
 #### An example
 ```openscad
@@ -777,7 +777,7 @@ OpenSCAD graph editor uses a standardized format for documentation comments. If 
  * magna aliquyam.
  * @param a Lorem ipsum dolor sit amet
  * @param b Lorem ipsum dolor sit amet
- * @param c [vector3] Lorem ipsum dolor sit amet 
+ * @param c [vector3] Lorem ipsum dolor sit amet
  */
 module foo(a = 10, b = [1,2,3], c) { /* ... */ }
 
@@ -797,11 +797,11 @@ Parameters for both modules and functions are documented as:
 @param <name> [<type>] <description>
 ```
 
-where the type is written in `[]` and is optional. Return values of functions are documented as: 
+where the type is written in `[]` and is optional. Return values of functions are documented as:
 
 ```
 @return [<type>] <description>
-``` 
+```
 
 where again the type is written in `[]` and is optional.
 
