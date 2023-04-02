@@ -420,6 +420,12 @@ namespace OpenScadGraphEditor.Widgets
                 _connectionHighlightPoints = closest[0].Value.BezierPoints;
                 _connectionHighlightLayer.Update();
             }
+            
+            if (evt.IsSelectAll()) 
+            {
+                SelectNodes(Graph.GetAllNodes().ToList());
+                return;
+            }
 
             if (evt.IsCopy())
             {

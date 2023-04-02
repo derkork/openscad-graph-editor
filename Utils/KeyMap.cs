@@ -57,6 +57,9 @@ namespace OpenScadGraphEditor.Utils
             return Input.IsKeyPressed((int) KeyList.Control);
         }
         
+        // select all
+        public static bool IsSelectAll(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.A);
+        
         // copy+paste
         public static bool IsCopy(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.C);
         public static bool IsPaste(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.V);
@@ -73,10 +76,10 @@ namespace OpenScadGraphEditor.Utils
         public static bool IsStraighten(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.Q);
         
         // align
-        public static bool IsAlignLeft(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.A);
+        public static bool IsAlignLeft(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.A) && !inputEvent.IsCmdOrControlPressed();
         public static bool IsAlignRight(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.D) && !inputEvent.IsCmdOrControlPressed();
-        public static bool IsAlignTop(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.W);
-        public static bool IsAlignBottom(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.S);
+        public static bool IsAlignTop(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.W) && !inputEvent.IsCmdOrControlPressed();
+        public static bool IsAlignBottom(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.S) && !inputEvent.IsCmdOrControlPressed();
         
         // show help
         public static bool IsShowHelp(this InputEvent inputEvent) => inputEvent.IsKeyPressed(KeyList.F1);

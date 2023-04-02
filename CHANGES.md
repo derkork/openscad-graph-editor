@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2023-04-02
+### Added
+
+- You can now select all nodes in a graph by pressing `Ctrl+A`/`Cmd+A`.
+
+### Improved
+
+- The stylus debug dialog shows now more information about received events. Information can be easily copied and pasted into bug reports.
+
+### Fixed
+- Pressing a combination of `W`, `A`, `S` and `D` with `Cmd`/`Ctrl` no longer will trigger a node layout.
+
 ## [0.9.1] - 2023-03-21
 ### Fixed
 

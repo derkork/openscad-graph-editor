@@ -753,17 +753,19 @@ OpenSCAD graph editor will render the code in the preamble verbatim, so make sur
 - `S` - align selected nodes to the bottom.
 - `Delete` or `Backspace` - delete selected nodes.
 - `Shift` + `Delete` or `Shift` + `Backspace` - delete selected nodes, retaining connections if possible.
-- `Ctrl+C` / `Cmd+C` - Copy the selected nodes.
-- `Ctrl+D` / `Cmd+D` - Duplicate the selected nodes.
-- `Ctrl+V` / `Cmd+V` - Paste the copied nodes.
-- `Ctrl+X` / `Cmd+X` - Cut the selected nodes.
-- `Ctrl+Z` / `Cmd+Z` - Undo the last action.
-- `Ctrl+Shift+Z` / `Cmd+Shift+Z` - Redo the last action.
+- `Ctrl`+`A` / `Cmd` + `A` - Select all nodes.
+- `Ctrl`+`C` / `Cmd` + `C` - Copy the selected nodes.
+- `Ctrl`+`D` / `Cmd` + `D` - Duplicate the selected nodes.
+- `Ctrl`+`V` / `Cmd` + `V` - Paste the copied nodes.
+- `Ctrl`+`X` / `Cmd` + `X` - Cut the selected nodes.
+- `Ctrl`+`Z` / `Cmd` + `Z` - Undo the last action.
+- `Ctrl`+`Shift`+`Z` / `Cmd`+`Shift`+`Z` - Redo the last action.
 - `Right Click` over a connection - Delete the connection.
 - `Shift` + `Right Click` over a connection - Insert a reroute node on the connection.
 - `Shift` + `Ctrl` + `Right Click` / `Shift` + `Cmd` + `Right Click` - over a connection - Insert a wireless reroute node on the connection.
 - Holding `Shift` while dragging a connection to an empty space - Create a reroute node.
-- Holding `Ctrl+Shift` while dragging a connection to an empty space - Create a wireless node.
+- Holding `Ctrl`+`Shift` while dragging a connection to an empty space - Create a wireless node.
+- `Ctrl` + `Shift` + `T` / `Cmd` + `Shift` + `T` - Show stylus debug dialog.
 
 ### Documentation comment format
 OpenSCAD graph editor uses a standardized format for documentation comments. If you follow this format in text-based OpenSCAD libraries, OpenSCAD graph editor will be able to parse the format and show better documentation for the nodes when pressing `F1`.
