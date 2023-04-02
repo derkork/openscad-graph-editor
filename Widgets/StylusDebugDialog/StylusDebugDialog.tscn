@@ -3,14 +3,15 @@
 [ext_resource path="res://Widgets/StylusDebugDialog/StylusDebugDialog.cs" type="Script" id=1]
 
 [node name="StylusDebugDialog" type="WindowDialog"]
+visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -398.0
-margin_top = -212.0
-margin_right = 398.0
-margin_bottom = 212.0
+margin_left = -602.0
+margin_top = -320.0
+margin_right = 672.0
+margin_bottom = 353.0
 window_title = "Stylus Debug"
 script = ExtResource( 1 )
 
@@ -26,22 +27,39 @@ custom_constants/margin_bottom = 10
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 margin_left = 10.0
 margin_top = 10.0
-margin_right = 786.0
-margin_bottom = 414.0
+margin_right = 1264.0
+margin_bottom = 663.0
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_right = 776.0
-margin_bottom = 25.0
-text = "Test stylus below"
+margin_right = 1254.0
+margin_bottom = 20.0
+text = "Test the stylus at the blank area below, try clicking and dragging. "
+autowrap = true
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 33.0
-margin_right = 776.0
-margin_bottom = 371.0
-mouse_filter = 2
+[node name="TestContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+margin_top = 28.0
+margin_right = 1254.0
+margin_bottom = 316.0
 size_flags_vertical = 3
 
-[node name="DebugLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_top = 379.0
-margin_right = 776.0
-margin_bottom = 404.0
+[node name="DebugEdit" type="TextEdit" parent="MarginContainer/VBoxContainer"]
+margin_top = 324.0
+margin_right = 1254.0
+margin_bottom = 613.0
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+margin_top = 621.0
+margin_right = 1254.0
+margin_bottom = 653.0
+
+[node name="CopyToClipboardButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_right = 178.0
+margin_bottom = 32.0
+text = "Copy text to clipboard"
+
+[node name="ClearButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+margin_left = 186.0
+margin_right = 247.0
+margin_bottom = 32.0
+text = "Clear"
