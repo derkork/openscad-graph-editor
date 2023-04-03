@@ -88,7 +88,7 @@ jobs:
       - name: Zip results
         run: |
           mkdir -p ./builds/archives
-          cd ./builds/osx && zip -r ../archives/osx.zip .
+          cd ./builds/osx && mv openscad-graph-editor.dmg ../archives
           cd ./builds/linux && zip -r ../archives/linux.zip .
           cd ./builds/windows && zip -r ../archives/windows.zip .
       
