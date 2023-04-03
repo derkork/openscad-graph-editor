@@ -51,10 +51,10 @@ jobs:
           MACOS_APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-            sed -i "s/__CODESIGN_IDENTITY__/$MACOS_CERTIFICATE_ID/g" export_presets.cfg
-            sed -i "s/__APPLE_ID__/$MACOS_APPLE_ID/g" export_presets.cfg
-            sed -i "s/__APPLE_ID_PASSWORD__/$MACOS_APPLE_ID_PASSWORD/g" export_presets.cfg
-            sed -i "s/__APPLE_TEAM_ID__/$MACOS_APPLE_TEAM_ID/g" export_presets.cfg
+            awk -v var="$MACOS_CERTIFICATE_ID" '{gsub(/__CODESIGN_IDENTITY__/,var)}1' export_presets.cfg > export_presets.cfg
+            awk -v var="$MACOS_APPLE_ID" '{gsub(/__APPLE_ID__/,var)}1' export_presets.cfg > export_presets.cfg
+            awk -v var="$MACOS_APPLE_ID_PASSWORD" '{gsub(/__APPLE_ID_PASSWORD__/,var)}1' export_presets.cfg > export_presets.cfg
+            awk -v var="$MACOS_APPLE_TEAM_ID" '{gsub(/__APPLE_TEAM_ID__/,var)}1' export_presets.cfg > export_presets.cfg
       
       - name: Export
         uses: firebelley/godot-export@v5.0.0
