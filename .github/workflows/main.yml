@@ -156,7 +156,10 @@ jobs:
           
       - name: Zip notarized build
         run: |
-          zip -r "MacOSX.zip" "openscad-graph-editor.app"
+          mkdir -p notarized
+          mv openscad-graph-editor.app notarized
+          cd notarized
+          zip -r "../MacOSX.zip" .
           
       - name: Upload notarized build
         uses: actions/upload-artifact@v3
