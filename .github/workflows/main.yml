@@ -70,7 +70,7 @@ jobs:
           curl -o ./godot-templates.zip $GODOT_TEMPLATES_URL
           unzip ./godot-templates.zip
           mkdir -p "$GODOT_TEMPLATES_DIR"
-          mv templates "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable.mono"
+          mv templates/* "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable.mono"
      
 
       - name: Export
