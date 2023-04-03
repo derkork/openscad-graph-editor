@@ -20,6 +20,13 @@ Not natively. You will need to use [Rosetta 2](https://support.apple.com/en-us/H
 
 You can change the UI scaling in the settings dialog. Click the the button _Settings_ and then change the UI scaling to 150% or 200%. You will need to restart the editor afterwards.
 
+## Other issues
+### I am using a stylus on Windows 11 and dragging does not seem to work
+
+In the pen settings disable "Let my use my pen as a mouse". This should restore proper mouse events to which the editor can react:
+
+!["Windows 11 pen settings"](images/windows11_pen_settings.png)
+
 ## Questions about features
 ### Can this do full roundtrip between OpenSCAD code and the visual graph?
 
