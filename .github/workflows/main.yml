@@ -25,12 +25,12 @@ jobs:
       - name: get tag from version
         id: tag_version
         run: |
-            echo "TAG_VERSION=${{GITHUB_REF#refs/tags/v}}" >> $GITHUB_OUTPUT
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: write version into file
-        run: |
-          VERSION=${{steps.tag_version.outputs.TAG_VERSION}}
-          sed -i "s/## Development Build ##/$VERSION/g" AppVersion.cs
+    #  - name: write version into file
+    #    run: |
+     #     VERSION=${{steps.tag_version.outputs.TAG_VERSION}}
+     #     sed -i "s/## Development Build ##/$VERSION/g" AppVersion.cs
 
       - name: setup godot
         uses: paulloz/godot-action@v1.2
