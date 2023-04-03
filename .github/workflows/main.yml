@@ -50,7 +50,7 @@ jobs:
           MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
           MACOS_APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          run: |
+        run: |
             sed -i "s/__CODESIGN_IDENTITY__/$MACOS_CERTIFICATE_ID/g" export_presets.cfg
             sed -i "s/__APPLE_ID__/$MACOS_APPLE_ID/g" export_presets.cfg
             sed -i "s/__APPLE_ID_PASSWORD__/$MACOS_APPLE_ID_PASSWORD/g" export_presets.cfg
