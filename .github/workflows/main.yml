@@ -9,10 +9,7 @@ on:
   
 jobs:
   export:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
       
     name: Export Application 
     steps:
@@ -32,13 +29,6 @@ jobs:
      #     VERSION=${{steps.tag_version.outputs.TAG_VERSION}}
      #     sed -i "s/## Development Build ##/$VERSION/g" AppVersion.cs
 
-      - name: setup godot
-        uses: paulloz/godot-action@v1.2
-        with:
-          version: 3.5
-          mono: true
-          export-templates: true
-      
       # on OSX install signing certificate
       - name: Install Signing Certificate
         if: matrix.os == 'macos-latest'
@@ -54,29 +44,16 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
       
+      - name: Export
+        uses: firebelley/godot-export@v5.0.0
+        with:
+          # Defining all the required inputs
+          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_osx.universal.zip
+          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_export_templates.tpz
+          relative_project_path: ./
+          archive_output: true
+          use_preset_export_path: true
       
-      - name: Export Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          nuget restore
-          mkdir -p builds/linux
-          godot --export Linux/X11
-          
-          
-      - name: Export Windows
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          nuget restore
-          mkdir -p builds/windows
-          godot --export "Windows Desktop"
-          
-      - name: Export OSX
-        if: matrix.os == 'macos-latest'
-        run: |
-          nuget restore
-          mkdir -p builds/osx
-          godot --export "Mac OSX"
-
       - name: Notarize OSX
         env:
           MACOS_BUNDLE_ID: "de.janthomae.openscadgrapheditor"
@@ -93,46 +70,6 @@ jobs:
           xcrun stapler staple "openscad-graph-editor.app"
           rm "openscad-graph-editor.app.zip"
 
-
-      - name: Zip Linux
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          mkdir builds/archives
-          (cd builds/linux; zip -r ../archives/Linux.zip .)    
-        
-      - name: Zip Windows
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          mkdir builds/archives
-          (cd builds/windows; zip -r ../archives/Windows.zip .)
-          
-      - name: Zip OSX
-        if: matrix.os == 'macos-latest'
-        run: |
-          mkdir builds/archives
-          (cd builds/osx; zip -r ../archives/MacOSX.zip .)
-          
-      - name: Upload Windows build
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: windows
-          path: builds/archives/Windows.zip
-          
-      - name: Upload Linux build  
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux
-          path: builds/archives/Linux.zip
-          
-      - name: Upload OSX build
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: osx
-          path: builds/archives/MacOSX.zip
-          
 
 
 #      - name: create release
