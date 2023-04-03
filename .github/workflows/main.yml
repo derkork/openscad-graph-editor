@@ -100,7 +100,6 @@ jobs:
           rm MacOSX.zip
       
       - name: Codesign OSX Bundle
-        if: matrix.os == 'macos-latest'
         env:
           MACOS_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
@@ -115,7 +114,6 @@ jobs:
           /usr/bin/codesign -vvv --force --deep --strict --sign "$MACOS_CERTIFICATE_ID" --options runtime --entitlements entitlements.plist --timestamp penscad-graph-editor.app       
 
       - name: Notarize OSX
-        if: matrix.os == 'macos-latest'
         env:
           MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
           MACOS_APPLE_ID_PWD: ${{ secrets.APPLE_ID_PASSWORD }}
