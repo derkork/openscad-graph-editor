@@ -105,7 +105,7 @@ jobs:
           MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
           MACOS_CERTIFICATE_ID: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_ID }}
         run: |
-          echo $MACOS_CERTIFICATE | base64 —decode > certificate.p12
+          echo $MACOS_CERTIFICATE | base64 -d > certificate.p12
           security create-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
