@@ -32,6 +32,7 @@ theme/custom="res://ui_theme.tres"
 
 [mono]
 
+project/assembly_name="OpenScadGraphEditor"
 unhandled_exception_policy=1
 
 [physics]

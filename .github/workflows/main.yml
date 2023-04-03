@@ -1,17 +1,16 @@
 # Whenever we push a v* tag we make a new release.
 on:
   push:
+    branches:
+      - new_build_pipeline
     # Sequence of patterns matched against refs/tags
-    tags:
-      - 'v*' 
+    # tags:
+    #  - 'v*' 
   
 jobs:
-  # job id, can be anything
-  export_editor:
-    # Always use ubuntu-latest for this action
+  export:
     runs-on: ubuntu-latest
-    # Job name, can be anything
-    name: Export Game Job
+    name: Export Application 
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -22,10 +21,10 @@ jobs:
       - name: get tag from version
         id: tag_version
         run: |
-            echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/tags/v}
+            echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: write version into file
-        uses: jacobtomlinson/gha-find-replace@v2
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
             find: "## Development Build ##"
             replace: ${{steps.tag_version.outputs.TAG_VERSION}}
@@ -39,27 +38,139 @@ jobs:
           mono: true
           export-templates: true
       
-      - name: export game      
+      - name: Export all
         run: |
           nuget restore
           mkdir -p builds/linux
           godot --export Linux/X11
-          mkdir -p builds/osx
-          godot --export "Mac OSX"
           mkdir -p builds/windows
           godot --export "Windows Desktop"
-          
-      - name: zip
+          mkdir -p builds/osx
+          godot --export "Mac OSX"
+        
+      - name: Zip all
         run: |
           mkdir builds/archives
           (cd builds/linux; zip -r ../archives/Linux.zip .)
           (cd builds/windows; zip -r ../archives/Windows.zip .)
-          cp builds/osx/openscad-graph-editor.app.zip builds/archives/MacOSX.zip
-
-      - name: create release
-        uses: softprops/action-gh-release@v0.1.14
+          (cd builds/osx; zip -r ../archives/MacOSX.zip .)
+          
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v3
         with:
-          tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
-          files: ./builds/archives/*
-          fail_on_unmatched_files: true
-          body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
+          name: windows
+          path: builds/archives/Windows.zip
+          
+      - name: Upload Linux build  
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: builds/archives/Linux.zip
+          
+      - name: Upload OSX build
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx
+          path: builds/archives/MacOSX.zip
+          
+      - name: Upload entitlements
+        uses: actions/upload-artifact@v3
+        with:
+          name: entitlements
+          path: entitlements.plist
+  
+  codesign:        
+    runs-on: macos-latest
+    name: Codesign and notarize
+    steps:
+      - name: Download OSX build
+        uses: actions/download-artifact@v3
+        with:
+          name: osx
+    
+      - name: Download entitlements
+        uses: actions/download-artifact@v3
+        with:
+          name: entitlements    
+    
+      - name: Unzip OSX build
+        run: |
+          unzip MacOSX.zip
+          rm MacOSX.zip
+      
+      - name: Codesign OSX Bundle
+        if: matrix.os == 'macos-latest'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
+          MACOS_CERTIFICATE_ID: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_ID }}
+        run: |
+          echo $MACOS_CERTIFICATE | base64 —decode > certificate.p12
+          security create-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
+          /usr/bin/codesign -vvv --force --deep --strict --sign "$MACOS_CERTIFICATE_ID" --options runtime --entitlements entitlements.plist --timestamp penscad-graph-editor.app       
+
+      - name: Notarize OSX
+        if: matrix.os == 'macos-latest'
+        env:
+          MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MACOS_APPLE_ID_PWD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: |
+          echo "Uploading for notarization..."
+          cd builds/osx
+          zip -r "openscad-graph-editor.app.zip" "openscad-graph-editor.app"
+          xcrun altool --notarize-app -t osx -f "openscad-graph-editor.app.zip" --primary-bundle-id "$MACOSX_BUNDLE_ID" -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PWD" --output-format xml > /tmp/notarize-app.xml
+          rm -f "openscad-graph-editor.app.zip"
+          NUUID=`/usr/libexec/PlistBuddy -c 'Print :notarization-upload:RequestUUID' /tmp/notarize-app.xml`
+          if [ -z "${NUUID}" ]; then
+              cat /tmp/notarize-app.xml
+              die "* error: no RequestUUID found in upload response"
+          fi
+          echo "RequestUUID: ${NUUID}"
+          
+          echo "Waiting for notarization to complete..."
+          while true; do
+              xcrun altool --notarization-info ${NUUID} -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_PASSWORD" --output-format xml > /tmp/notarize-info.xml
+              NSTAT=`/usr/libexec/PlistBuddy -c 'Print :notarization-info:Status' /tmp/notarize-info.xml`
+              echo "  `date "+%H:%M:%S"` ${NSTAT}"
+              if [ -z "${NUUID}" ]; then
+                  cat /tmp/notarize-info.xml
+                  die "* error: no Status found in info response"
+              fi
+          
+              if [ "${NSTAT}" == "invalid" ]; then
+                  cat /tmp/notarize-info.xml
+                  die "* error: error notarizing app"
+              fi
+          
+              if [ "${NSTAT}" == "success" ]; then
+                  break
+              fi
+              sleep 30s
+          done
+          
+          echo "Stapling ticket to app..."
+          xcrun stapler staple "openscad-graph-editor.app"
+          
+      - name: Zip notarized build
+        run: |
+          zip -r "MacOSX.zip" "openscad-graph-editor.app"
+          
+      - name: Upload notarized build
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx_notarized
+          path: MacOSX.zip
+          
+
+
+#      - name: create release
+#        uses: softprops/action-gh-release@v0.1.14
+#        with:
+#          tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
+#          files: ./builds/archives/*
+#          fail_on_unmatched_files: true
+#          body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
