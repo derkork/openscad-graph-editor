@@ -118,10 +118,11 @@ jobs:
           MACOS_BUNDLE_ID: "de.janthomae.openscadgrapheditor"
           MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
           MACOS_APPLE_ID_PWD: ${{ secrets.APPLE_ID_PASSWORD }}
+          MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           echo "Uploading for notarization..."
           zip -r "openscad-graph-editor.app.zip" "openscad-graph-editor.app"
-          xcrun notarytool submit "openscad-graph-editor.app.zip" --apple-id "$MACOS_APPLE_ID" --password "$MACOS_APPLE_ID_PWD" --wait --verbose
+          xcrun notarytool submit "openscad-graph-editor.app.zip" --apple-id "$MACOS_APPLE_ID" --password "$MACOS_APPLE_ID_PWD" --"$MACOS_APPLE_TEAM_ID" --wait --verbose
           
           echo "Stapling ticket to app..."
           xcrun stapler staple "openscad-graph-editor.app"
