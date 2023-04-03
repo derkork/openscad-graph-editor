@@ -111,6 +111,7 @@ jobs:
           security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
           security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
+          find openscad-graph-editor.app -name "*.dylib" -exec /usr/bin/codesign --force --sign "$MACOS_CERTIFICATE_ID" --options runtime --entitlements entitlements.plist --timestamp {} \;
           /usr/bin/codesign --verbose=4 --force --deep --strict --sign "$MACOS_CERTIFICATE_ID" --options runtime --entitlements entitlements.plist --timestamp openscad-graph-editor.app       
 
       - name: Notarize OSX
