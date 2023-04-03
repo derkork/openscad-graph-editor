@@ -132,7 +132,7 @@ jobs:
           
           echo "Waiting for notarization to complete..."
           while true; do
-              xcrun altool --notarization-info ${NUUID} -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_PASSWORD" --output-format xml > /tmp/notarize-info.xml
+              xcrun altool --notarization-info ${NUUID} -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PWD" --output-format xml > /tmp/notarize-info.xml
               NSTAT=`/usr/libexec/PlistBuddy -c 'Print :notarization-info:Status' /tmp/notarize-info.xml`
               echo "  `date "+%H:%M:%S"` ${NSTAT}"
               if [ -z "${NUUID}" ]; then
