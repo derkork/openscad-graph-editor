@@ -148,7 +148,7 @@ jobs:
               if [ "${NSTAT}" == "success" ]; then
                   break
               fi
-              sleep 30s
+              sleep 30
           done
           
           echo "Stapling ticket to app..."
