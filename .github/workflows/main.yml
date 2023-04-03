@@ -31,7 +31,6 @@ jobs:
 
       # on OSX install signing certificate
       - name: Install Signing Certificate
-        if: matrix.os == 'macos-latest'
         env:
           MACOS_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
@@ -43,6 +42,19 @@ jobs:
           security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
           security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
+          
+      # patch export_presets.cfg to use the correct certificate and credentials for notarization
+      - name: Patch export_presets.cfg
+        env:
+          MACOS_CERTIFICATE_ID: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_ID }}
+          MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MACOS_APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          run: |
+            sed -i "s/__CODESIGN_IDENTITY__/$MACOS_CERTIFICATE_ID/g" export_presets.cfg
+            sed -i "s/__APPLE_ID__/$MACOS_APPLE_ID/g" export_presets.cfg
+            sed -i "s/__APPLE_ID_PASSWORD__/$MACOS_APPLE_ID_PASSWORD/g" export_presets.cfg
+            sed -i "s/__APPLE_TEAM_ID__/$MACOS_APPLE_TEAM_ID/g" export_presets.cfg
       
       - name: Export
         uses: firebelley/godot-export@v5.0.0
@@ -53,24 +65,8 @@ jobs:
           relative_project_path: ./
           archive_output: true
           use_preset_export_path: true
+          use_godot_3: true
       
-      - name: Notarize OSX
-        env:
-          MACOS_BUNDLE_ID: "de.janthomae.openscadgrapheditor"
-          MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
-          MACOS_APPLE_ID_PWD: ${{ secrets.APPLE_ID_PASSWORD }}
-          MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          echo "Uploading for notarization..."
-          cd builds/osx
-          zip -r "openscad-graph-editor.app.zip" "openscad-graph-editor.app"
-          xcrun notarytool submit "openscad-graph-editor.app.zip" --apple-id "$MACOS_APPLE_ID" --password "$MACOS_APPLE_ID_PWD" --team-id "$MACOS_APPLE_TEAM_ID" --wait --verbose 2>&1
-          
-          echo "Stapling ticket to app..."
-          xcrun stapler staple "openscad-graph-editor.app"
-          rm "openscad-graph-editor.app.zip"
-
-
 
 #      - name: create release
 #        uses: softprops/action-gh-release@v0.1.14
