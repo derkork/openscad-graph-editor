@@ -70,7 +70,7 @@ jobs:
           curl -o ./godot-templates.zip $GODOT_TEMPLATES_URL
           unzip ./godot-templates.zip
           mkdir -p "$GODOT_TEMPLATES_DIR"
-          mv templates "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable"
+          mv templates "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable.mono"
      
 
       - name: Export
@@ -80,9 +80,9 @@ jobs:
           mkdir -p ./builds/osx
           mkdir -p ./builds/linux
           mkdir -p ./builds/windows
-          $GODOT_EXEC --export "Mac OSX" 
-          $GODOT_EXEC --export "Linux/X11"
-          $GODOT_EXEC --export "Windows Desktop"
+          $GODOT_EXEC --no-window --export "Mac OSX" 
+          $GODOT_EXEC --no-window --export "Linux/X11"
+          $GODOT_EXEC --no-window --export "Windows Desktop"
         
       - name: Zip results
         run: |
