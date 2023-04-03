@@ -9,7 +9,11 @@ on:
   
 jobs:
   export:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+      
     name: Export Application 
     steps:
       - name: checkout
@@ -38,68 +42,9 @@ jobs:
           mono: true
           export-templates: true
       
-      - name: Export all
-        run: |
-          nuget restore
-          mkdir -p builds/linux
-          godot --export Linux/X11
-          mkdir -p builds/windows
-          godot --export "Windows Desktop"
-          mkdir -p builds/osx
-          godot --export "Mac OSX"
-        
-      - name: Zip all
-        run: |
-          mkdir builds/archives
-          (cd builds/linux; zip -r ../archives/Linux.zip .)
-          (cd builds/windows; zip -r ../archives/Windows.zip .)
-          (cd builds/osx; zip -r ../archives/MacOSX.zip .)
-          
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v3
-        with:
-          name: windows
-          path: builds/archives/Windows.zip
-          
-      - name: Upload Linux build  
-        uses: actions/upload-artifact@v3
-        with:
-          name: linux
-          path: builds/archives/Linux.zip
-          
-      - name: Upload OSX build
-        uses: actions/upload-artifact@v3
-        with:
-          name: osx
-          path: builds/archives/MacOSX.zip
-          
-      - name: Upload entitlements
-        uses: actions/upload-artifact@v3
-        with:
-          name: entitlements
-          path: entitlements.plist
-  
-  codesign:    
-    needs: export
-    runs-on: macos-latest
-    name: Codesign and notarize
-    steps:
-      - name: Download OSX build
-        uses: actions/download-artifact@v3
-        with:
-          name: osx
-    
-      - name: Download entitlements
-        uses: actions/download-artifact@v3
-        with:
-          name: entitlements    
-    
-      - name: Unzip OSX build
-        run: |
-          unzip MacOSX.zip
-          rm MacOSX.zip
-      
-      - name: Codesign OSX Bundle
+      # on OSX install signing certificate
+      - name: Install Signing Certificate
+        if: matrix.os == 'macos-latest'
         env:
           MACOS_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
@@ -111,8 +56,29 @@ jobs:
           security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
           security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
-          find openscad-graph-editor.app -name "*.dylib" -exec /usr/bin/codesign --force --sign "$MACOS_CERTIFICATE_ID" --options runtime --entitlements entitlements.plist --timestamp {} \;
-          /usr/bin/codesign --verbose=4 --force --deep --strict --sign "$MACOS_CERTIFICATE_ID" --options runtime --entitlements entitlements.plist --timestamp openscad-graph-editor.app       
+      
+      
+      - name: Export Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          nuget restore
+          mkdir -p builds/linux
+          godot --export Linux/X11
+          
+          
+      - name: Export Windows
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          nuget restore
+          mkdir -p builds/windows
+          godot --export "Windows Desktop"
+          
+      - name: Export OSX
+        if: matrix.os == 'macos-latest'
+        run: |
+          nuget restore
+          mkdir -p builds/osx
+          godot --export "Mac OSX"
 
       - name: Notarize OSX
         env:
@@ -122,24 +88,53 @@ jobs:
           MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           echo "Uploading for notarization..."
+          cd builds/osx
           zip -r "openscad-graph-editor.app.zip" "openscad-graph-editor.app"
           xcrun notarytool submit "openscad-graph-editor.app.zip" --apple-id "$MACOS_APPLE_ID" --password "$MACOS_APPLE_ID_PWD" --team-id "$MACOS_APPLE_TEAM_ID" --wait --verbose 2>&1
           
           echo "Stapling ticket to app..."
           xcrun stapler staple "openscad-graph-editor.app"
-          
-      - name: Zip notarized build
+          rm "openscad-graph-editor.app.zip"
+
+
+      - name: Zip Linux
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          mkdir -p notarized
-          mv openscad-graph-editor.app notarized
-          cd notarized
-          zip -r "../MacOSX.zip" .
+          mkdir builds/archives
+          (cd builds/linux; zip -r ../archives/Linux.zip .)    
+        
+      - name: Zip Windows
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir builds/archives
+          (cd builds/windows; zip -r ../archives/Windows.zip .)
           
-      - name: Upload notarized build
+      - name: Zip OSX
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir builds/archives
+          (cd builds/osx; zip -r ../archives/MacOSX.zip .)
+          
+      - name: Upload Windows build
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v3
         with:
-          name: osx_notarized
-          path: MacOSX.zip
+          name: windows
+          path: builds/archives/Windows.zip
+          
+      - name: Upload Linux build  
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux
+          path: builds/archives/Linux.zip
+          
+      - name: Upload OSX build
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx
+          path: builds/archives/MacOSX.zip
           
 
 
