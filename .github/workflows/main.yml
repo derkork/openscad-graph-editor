@@ -28,12 +28,9 @@ jobs:
             echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: write version into file
-        uses: jacobtomlinson/gha-find-replace@v3
-        with:
-            find: "## Development Build ##"
-            replace: ${{steps.tag_version.outputs.TAG_VERSION}}
-            regex: false
-            include: AppVersion.cs
+        run:
+          # replace "## Development Build ##" with the tag version in AppVersion.cs
+          sed -i "s/## Development Build ##/${{steps.tag_version.outputs.TAG_VERSION}}/g" AppVersion.cs
 
       - name: setup godot
         uses: paulloz/godot-action@v1.2
