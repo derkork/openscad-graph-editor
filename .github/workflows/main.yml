@@ -51,22 +51,51 @@ jobs:
           MACOS_APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-            python .buildtools/replace.py export_presets.cfg "__CODESIGN_IDENTITY__" "$MACOS_CERTIFICATE_ID"
-            python .buildtools/replace.py export_presets.cfg "__APPLE_ID__" "$MACOS_APPLE_ID"
-            python .buildtools/replace.py export_presets.cfg "__APPLE_ID_PASSWORD__" "$MACOS_APPLE_ID_PASSWORD"
-            python .buildtools/replace.py export_presets.cfg "__APPLE_TEAM_ID__" "$MACOS_APPLE_TEAM_ID"
+          python .buildtools/replace.py export_presets.cfg "__CODESIGN_IDENTITY__" "$MACOS_CERTIFICATE_ID"
+          python .buildtools/replace.py export_presets.cfg "__APPLE_ID__" "$MACOS_APPLE_ID"
+          python .buildtools/replace.py export_presets.cfg "__APPLE_ID_PASSWORD__" "$MACOS_APPLE_ID_PASSWORD"
+          python .buildtools/replace.py export_presets.cfg "__APPLE_TEAM_ID__" "$MACOS_APPLE_TEAM_ID"
       
+      
+      - name: Prepare Godot
+        env:
+          GODOT_VERSION: 3.5.2
+          GODOT_URL: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_osx.universal.zip
+          GODOT_TEMPLATES_URL: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_export_templates.tpz
+          GODOT_TEMPLATES_DIR: "~/Library/Application Support/Godot/templates"
+
+        run: |
+          curl -o ./godot.zip $GODOT_URL
+          unzip ./godot.zip
+          curl -o ./godot-templates.zip $GODOT_TEMPLATES_URL
+          unzip ./godot-templates.zip
+          mkdir -p "$GODOT_TEMPLATES_DIR"
+          mv templates "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable"
+     
+
       - name: Export
-        uses: firebelley/godot-export@v5.0.0
-        with:
-          # Defining all the required inputs
-          godot_executable_download_url: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_osx.universal.zip
-          godot_export_templates_download_url: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_export_templates.tpz
-          relative_project_path: ./
-          archive_output: true
-          use_preset_export_path: true
-          use_godot_3: true
+        env:
+          GODOT_EXEC: Godot.app/Contents/MacOS/Godot
+        run:
+          mkdir -p ./builds/osx
+          mkdir -p ./builds/linux
+          mkdir -p ./builds/windows
+          $GODOT_EXEC --export "Mac OSX" 
+          $GODOT_EXEC --export "Linux/X11"
+          $GODOT_EXEC --export "Windows Desktop"
+        
+      - name: Zip results
+        run: |
+          mkdir -p ./builds/archives
+          cd ./builds/osx && zip -r ../archives/osx.zip .
+          cd ./builds/linux && zip -r ../archives/linux.zip .
+          cd ./builds/windows && zip -r ../archives/windows.zip .
       
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: builds
+          path: ./builds/archives/*
 
 #      - name: create release
 #        uses: softprops/action-gh-release@v0.1.14
