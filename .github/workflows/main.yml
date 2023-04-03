@@ -115,13 +115,13 @@ jobs:
 
       - name: Notarize OSX
         env:
+          MACOS_BUNDLE_ID: "de.janthomae.openscadgrapheditor"
           MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
           MACOS_APPLE_ID_PWD: ${{ secrets.APPLE_ID_PASSWORD }}
         run: |
           echo "Uploading for notarization..."
-          cd builds/osx
           zip -r "openscad-graph-editor.app.zip" "openscad-graph-editor.app"
-          xcrun altool --notarize-app -t osx -f "openscad-graph-editor.app.zip" --primary-bundle-id "$MACOSX_BUNDLE_ID" -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PWD" --output-format xml > /tmp/notarize-app.xml
+          xcrun altool --notarize-app -t osx -f "openscad-graph-editor.app.zip" --primary-bundle-id "$MACOS_BUNDLE_ID" -u "$MACOS_APPLE_ID" -p "$MACOS_APPLE_ID_PWD" --output-format xml > /tmp/notarize-app.xml
           rm -f "openscad-graph-editor.app.zip"
           NUUID=`/usr/libexec/PlistBuddy -c 'Print :notarization-upload:RequestUUID' /tmp/notarize-app.xml`
           if [ -z "${NUUID}" ]; then
