@@ -75,8 +75,8 @@ jobs:
 
       - name: Export
         env:
-          GODOT_EXEC: Godot.app/Contents/MacOS/Godot
-        run:
+          GODOT_EXEC: ./Godot_mono.app/Contents/MacOS/Godot
+        run: |
           mkdir -p ./builds/osx
           mkdir -p ./builds/linux
           mkdir -p ./builds/windows
