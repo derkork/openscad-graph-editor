@@ -81,7 +81,7 @@ jobs:
           # codesign the whole thing
           rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist "openscad-graph-editor.app"
           # Then send it to Apple for notarization and staple it
-          # rcodesign notary-submit --api-key-path ../../api_key.txt --wait --staple openscad-graph-editor.app
+          rcodesign notary-submit --api-key-path ../../api_key.txt --wait --staple openscad-graph-editor.app
           
       - name: Clean secrets
         if: always()
