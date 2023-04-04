@@ -57,14 +57,14 @@ jobs:
         env:
           APPLE_DEVELOPER_CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
           APPLE_DEVELOPER_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
-          APPLE_APPSTORE_API_KEY: ${{ secrets.APPLE_APPSTORE_API_KEY }}
+          APPLE_APPSTORE_API_KEY_BASE64: ${{ secrets.APPLE_APPSTORE_API_KEY_BASE64 }}
         run: |
           # Decode the certificate into a file
           echo $APPLE_DEVELOPER_CERTIFICATE_BASE64 | base64 --decode > certificate.p12
           # Put the password into a file
           echo $APPLE_DEVELOPER_CERTIFICATE_PASSWORD > certificate_password.txt
-          # Put the API key into a file
-          echo $APPLE_APPSTORE_API_KEY > api_key.txt
+          # Decode the API key into a file
+          echo $APPLE_APPSTORE_API_KEY_BASE64 | base64 --decode > api_key.txt
           cd builds/osx
           # First codesign all libraries
           find openscad-graph-editor.app -name "*.dylib" -exec rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist {} \; 
