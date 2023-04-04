@@ -34,7 +34,7 @@ jobs:
       - name: setup godot
         uses: paulloz/godot-action@v1.2
         with:
-          version: 3.5
+          version: 3.5.1
           mono: true
           export-templates: true
 
