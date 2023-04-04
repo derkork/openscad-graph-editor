@@ -67,11 +67,13 @@ jobs:
           echo $APPLE_APPSTORE_API_KEY_BASE64 | base64 --decode > api_key.txt
           cd builds/osx
           # Move all libs to Frameworks
-          find openscad-graph-editor.app -name "*.dylib" -exec mv {} openscad-graph-editor.app/Contents/Frameworks \;
           # symlink all libs in Contents/Frameworks to Contents/Resources/GodotSharp/Mono/lib
           cd openscad-graph-editor.app/Contents/Resources/GodotSharp/Mono/lib
-          ln -s ../../../../Frameworks/libMonoPosixHelper.dylib .          
+          mv libMonoPosixHelper.dylib ../../../../Frameworks
+          ln -s ../../../../Frameworks/libMonoPosixHelper.dylib .
+          mv libmono-native.dylib ../../../../Frameworks
           ln -s ../../../../Frameworks/libmono-native.dylib .
+          mv libmono-btls-shared.dylib ../../../../Frameworks
           ln -s ../../../../Frameworks/libmono-btls-shared.dylib .
           # codesign the whole thing
           rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist "openscad-graph-editor.app"
