@@ -46,12 +46,12 @@ jobs:
       - name: export game      
         run: |
           nuget restore
-          #   mkdir -p builds/linux
-          #   godot --export Linux/X11
+          mkdir -p builds/linux
+          godot --export Linux/X11
           mkdir -p builds/osx
           godot --export "Mac OSX"
-          #   mkdir -p builds/windows
-          #   godot --export "Windows Desktop"
+          mkdir -p builds/windows
+          godot --export "Windows Desktop"
      
       - name: Sign and notarize MacOSX
         env:
@@ -72,6 +72,8 @@ jobs:
           rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist openscad-graph-editor.app
           # Then send it to Apple for notarization and staple it
           rcodesign notary-submit --api-key-path ../../api_key.txt --wait --staple openscad-graph-editor.app
+          # and rename it so it looks nicer
+          mv openscad-graph-editor.app "OpenSCAD Graph Editor.app"
           
       - name: Clean secrets
         if: always()
@@ -83,8 +85,8 @@ jobs:
       - name: zip
         run: |
           mkdir builds/archives
-          # (cd builds/linux; zip -r ../archives/Linux.zip .)
-          # (cd builds/windows; zip -r ../archives/Windows.zip .)
+          (cd builds/linux; zip -r ../archives/Linux.zip .)
+          (cd builds/windows; zip -r ../archives/Windows.zip .)
           (cd builds/osx; zip -r ../archives/MacOSX.zip .)
  
       - name: upload artifacts
