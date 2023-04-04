@@ -8,10 +8,9 @@ on:
     #  - 'v*' 
   
 jobs:
-  export:
-    runs-on: macos-latest
-      
-    name: Export Application 
+  export_editor:
+    runs-on: ubuntu-latest
+    name: Create Release
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -23,81 +22,77 @@ jobs:
         id: tag_version
         run: |
             echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-    #  - name: write version into file
-    #    run: |
-     #     VERSION=${{steps.tag_version.outputs.TAG_VERSION}}
-     #     sed -i "s/## Development Build ##/$VERSION/g" AppVersion.cs
-
-      # on OSX install signing certificate
-      - name: Install Signing Certificate
-        env:
-          MACOS_CERTIFICATE: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
-          MACOS_CERTIFICATE_ID: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_ID }}
-        run: |
-          echo $MACOS_CERTIFICATE | base64 -d > certificate.p12
-          security create-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$MACOS_CERTIFICATE_PWD" build.keychain
-          security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CERTIFICATE_PWD" build.keychain
-          
-      # patch export_presets.cfg to use the correct certificate and credentials for notarization
-      - name: Patch export_presets.cfg
-        env:
-          MACOS_CERTIFICATE_ID: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_ID }}
-          MACOS_APPLE_ID: ${{ secrets.APPLE_ID }}
-          MACOS_APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-          MACOS_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          python .buildtools/replace.py export_presets.cfg "__CODESIGN_IDENTITY__" "$MACOS_CERTIFICATE_ID"
-          python .buildtools/replace.py export_presets.cfg "__APPLE_ID__" "$MACOS_APPLE_ID"
-          python .buildtools/replace.py export_presets.cfg "__APPLE_ID_PASSWORD__" "$MACOS_APPLE_ID_PASSWORD"
-          python .buildtools/replace.py export_presets.cfg "__APPLE_TEAM_ID__" "$MACOS_APPLE_TEAM_ID"
+    
+      - name: write version into file
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+            find: "## Development Build ##"
+            replace: ${{steps.tag_version.outputs.TAG_VERSION}}
+            regex: false
+            include: AppVersion.cs
       
-      
-      - name: Prepare Godot
-        env:
-          GODOT_VERSION: 3.5.2
-          GODOT_URL: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_osx.universal.zip
-          GODOT_TEMPLATES_URL: https://downloads.tuxfamily.org/godotengine/3.5.2/mono/Godot_v3.5.2-stable_mono_export_templates.tpz
-          GODOT_TEMPLATES_DIR: "/Users/runner/Library/Application Support/Godot/templates"
+      - name: setup godot
+        uses: paulloz/godot-action@v1.2
+        with:
+          version: 3.5
+          mono: true
+          export-templates: true
 
+      - name: Install apple codesign
+        uses: baptiste0928/cargo-install@v2
+        with:
+          crate: apple-codesign
+
+      - name: export game      
         run: |
-          curl -o ./godot.zip $GODOT_URL
-          unzip ./godot.zip
-          curl -o ./godot-templates.zip $GODOT_TEMPLATES_URL
-          unzip ./godot-templates.zip
-          mkdir -p "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable.mono"
-          mv templates/* "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable.mono"
-          ls -la "$GODOT_TEMPLATES_DIR/${GODOT_VERSION}.stable.mono"
+          nuget restore
+          mkdir -p builds/linux
+          godot --export Linux/X11
+          mkdir -p builds/osx
+          godot --export "Mac OSX"
+          mkdir -p builds/windows
+          godot --export "Windows Desktop"
      
-
-      - name: Export
+      - name: Sign and notarize MacOSX
         env:
-          GODOT_EXEC: ./Godot_mono.app/Contents/MacOS/Godot
+          APPLE_DEVELOPER_CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
+          APPLE_DEVELOPER_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
+          APPLE_APPSTORE_API_KEY: ${{ secrets.APPLE_APPSTORE_API_KEY }}
         run: |
-          mkdir -p ./builds/osx
-          mkdir -p ./builds/linux
-          mkdir -p ./builds/windows
-          $GODOT_EXEC --no-window --export "Mac OSX" 
-          $GODOT_EXEC --no-window --export "Linux/X11"
-          $GODOT_EXEC --no-window --export "Windows Desktop"
-        
-      - name: Zip results
+          # Decode the certificate into a file
+          echo $APPLE_DEVELOPER_CERTIFICATE_BASE64 | base64 --decode > certificate.p12
+          # Put the password into a file
+          echo $APPLE_DEVELOPER_CERTIFICATE_PASSWORD > certificate_password.txt
+          # Put the API key into a file
+          echo $APPLE_APPSTORE_API_KEY > api_key.txt
+          cd builds/osx
+          # First codesign all libraries
+          find openscad-graph-editor.app -name "*.dylib" -exec rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist {} \; 
+          # Then codesign the app
+          rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist openscad-graph-editor.app
+          # Then send it to Apple for notarization and staple it
+          rcodesign notary-submit --api-key-path ../../api_key.txt --wait --staple openscad-graph-editor.app
+          
+      - name: Clean secrets
+        if: always()
         run: |
-          mkdir -p ./builds/archives
-          cd ./builds/osx && mv openscad-graph-editor.dmg ../archives
-          cd ./builds/linux && zip -r ../archives/linux.zip .
-          cd ./builds/windows && zip -r ../archives/windows.zip .
-      
-      - name: Upload artifacts
+          rm -f certificate.p12
+          rm -f certificate_password.txt
+          rm -f api_key.txt
+     
+      - name: zip
+        run: |
+          mkdir builds/archives
+          (cd builds/linux; zip -r ../archives/Linux.zip .)
+          (cd builds/windows; zip -r ../archives/Windows.zip .)
+          (cd builds/osx; zip -r ../archives/MacOSX.zip .)
+ 
+      - name: upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: builds
-          path: ./builds/archives/*
-
+          path: builds/archives/*
+        
 #      - name: create release
 #        uses: softprops/action-gh-release@v0.1.14
 #        with:
