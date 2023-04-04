@@ -46,12 +46,12 @@ jobs:
       - name: export game      
         run: |
           nuget restore
-          mkdir -p builds/linux
-          godot --export Linux/X11
+          #   mkdir -p builds/linux
+          #   godot --export Linux/X11
           mkdir -p builds/osx
           godot --export "Mac OSX"
-          mkdir -p builds/windows
-          godot --export "Windows Desktop"
+          #   mkdir -p builds/windows
+          #   godot --export "Windows Desktop"
      
       - name: Sign and notarize MacOSX
         env:
@@ -83,8 +83,8 @@ jobs:
       - name: zip
         run: |
           mkdir builds/archives
-          (cd builds/linux; zip -r ../archives/Linux.zip .)
-          (cd builds/windows; zip -r ../archives/Windows.zip .)
+          # (cd builds/linux; zip -r ../archives/Linux.zip .)
+          # (cd builds/windows; zip -r ../archives/Windows.zip .)
           (cd builds/osx; zip -r ../archives/MacOSX.zip .)
  
       - name: upload artifacts
