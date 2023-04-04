@@ -67,7 +67,7 @@ jobs:
           echo $APPLE_APPSTORE_API_KEY_BASE64 | base64 --decode > api_key.txt
           cd builds/osx
           # First codesign all libraries
-          find openscad-graph-editor.app -name "*.dylib" -exec rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path  {} \; 
+          find openscad-graph-editor.app -name "*.dylib" -exec rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist {} \; 
           # Then codesign the main binary
           rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist openscad-graph-editor.app
           # Then send it to Apple for notarization and staple it
