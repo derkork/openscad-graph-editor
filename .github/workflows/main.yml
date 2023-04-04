@@ -66,22 +66,12 @@ jobs:
           # Decode the API key into a file
           echo $APPLE_APPSTORE_API_KEY_BASE64 | base64 --decode > api_key.txt
           cd builds/osx
-          # remeber current directory
-          OSX_DIR=$(pwd)
-          # Move all libs to Frameworks
-          # symlink all libs in Contents/Frameworks to Contents/Resources/GodotSharp/Mono/lib
-          cd openscad-graph-editor.app/Contents/Resources/GodotSharp/Mono/lib
-          mv libMonoPosixHelper.dylib ../../../../Frameworks
-          ln -s ../../../../Frameworks/libMonoPosixHelper.dylib .
-          mv libmono-native.dylib ../../../../Frameworks
-          ln -s ../../../../Frameworks/libmono-native.dylib .
-          mv libmono-btls-shared.dylib ../../../../Frameworks
-          ln -s ../../../../Frameworks/libmono-btls-shared.dylib .
-          cd $OSX_DIR
-          # codesign the whole thing
-          rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist "openscad-graph-editor.app"
+          # First codesign all libraries
+          find openscad-graph-editor.app -name "*.dylib" -exec rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt {} \; 
+          # Then codesign the main binary
+          rcodesign sign --p12-file ../../certificate.p12 --p12-password-file ../../certificate_password.txt --code-signature-flags runtime --entitlements-xml-path ../../entitlements.plist "openscad-graph-editor.app/Content/MacOS/OpenSCAD Graph Editor"
           # Then send it to Apple for notarization and staple it
-          rcodesign notary-submit --api-key-path ../../api_key.txt --wait --staple openscad-graph-editor.app
+          # rcodesign notary-submit --api-key-path ../../api_key.txt --wait --staple openscad-graph-editor.app
           
       - name: Clean secrets
         if: always()
