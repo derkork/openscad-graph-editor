@@ -25,6 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [Windows 10, Ubuntu 22.04, OSX 12.0.1]
+ - Version of OpenSCAD Graph Editor: [0.9.2]
 
 **Additional context**
 Add any other context about the problem here.
