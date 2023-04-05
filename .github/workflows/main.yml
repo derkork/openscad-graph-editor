@@ -1,11 +1,8 @@
 # Whenever we push a v* tag we make a new release.
 on:
   push:
-    branches:
-      - new_build_pipeline
-    # Sequence of patterns matched against refs/tags
-    # tags:
-    #  - 'v*' 
+    tags:
+     - 'v*' 
   
 jobs:
   export_editor:
@@ -96,10 +93,10 @@ jobs:
           name: builds
           path: builds/archives/*
         
-#      - name: create release
-#        uses: softprops/action-gh-release@v0.1.14
-#        with:
-#          tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
-#          files: ./builds/archives/*
-#          fail_on_unmatched_files: true
-#          body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
+      - name: create release
+        uses: softprops/action-gh-release@v0.1.14
+        with:
+          tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
+          files: ./builds/archives/*
+          fail_on_unmatched_files: true
+          body: See [CHANGES.md](https://github.com/derkork/openscad-graph-editor/blob/master/CHANGES.md) for details.
