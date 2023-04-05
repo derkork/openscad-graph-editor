@@ -43,13 +43,6 @@ jobs:
         with:
           crate: apple-codesign
           
-      - name: Install rcedit
-        run: |
-         sudo apt-get update
-         sudo apt-get install -y wine
-         sudo npm install -g rcedit
-         which rcedit
-
       - name: export game      
         run: |
           nuget restore
@@ -59,6 +52,7 @@ jobs:
           godot --export "Mac OSX"
           mkdir -p builds/windows
           godot --export "Windows Desktop"
+          godot -s ReplaceIcon.gd Icons/logo0000.ico builds/windows/openscad-graph-editor.exe
           
       - name: Sign and notarize MacOSX
         env:
