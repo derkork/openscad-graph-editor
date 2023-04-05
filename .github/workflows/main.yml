@@ -88,7 +88,7 @@ jobs:
           (cd builds/osx; zip -r ../archives/MacOSX.zip .)
  
       - name: create release
-        uses: softprops/action-gh-release@v0.1.14
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.tag_version.outputs.TAG_VERSION }}
           files: ./builds/archives/*
