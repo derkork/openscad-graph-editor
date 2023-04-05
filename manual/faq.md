@@ -4,6 +4,10 @@
 ## Installation and setup problems
 ### I cannot open the app on the Mac, it says it is damaged
 
+Starting with version 0.9.3 this should no longer be an issue. If you still see this problem with a version later than 0.9.3, please open an [issue](https://github.com/derkork/openscad-graph-editor/issues).
+
+If you have an older version than 0.9.3 and for some reason cannot upgrade, you can use these instructions to make the application work:
+
 Apple doesn't like apps which are not going through their App store. To fix this first unzip the application in the `Downloads` folder, then run the following commands in a Terminal:
 
 ```bash
