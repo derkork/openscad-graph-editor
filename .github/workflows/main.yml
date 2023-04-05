@@ -39,6 +39,11 @@ jobs:
         uses: baptiste0928/cargo-install@v2
         with:
           crate: apple-codesign
+          
+      - name: Install rcedit
+        run: |
+         sudo apt-get install -y wine
+         npm install -g rcedit
 
       - name: export game      
         run: |
@@ -49,7 +54,7 @@ jobs:
           godot --export "Mac OSX"
           mkdir -p builds/windows
           godot --export "Windows Desktop"
-     
+          
       - name: Sign and notarize MacOSX
         env:
           APPLE_DEVELOPER_CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_BASE64 }}
