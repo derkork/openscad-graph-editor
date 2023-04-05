@@ -65,6 +65,7 @@ margin_bottom = 250.0
 [node name="SettingsDialog" parent="." instance=ExtResource( 25 )]
 
 [node name="StylusDebugDialog" parent="." instance=ExtResource( 27 )]
+visible = false
 
 [node name="VariableRefactorDialog" parent="." instance=ExtResource( 6 )]
 
