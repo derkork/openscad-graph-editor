@@ -48,6 +48,7 @@ jobs:
          sudo apt-get update
          sudo apt-get install -y wine
          sudo npm install -g rcedit
+         which rcedit
 
       - name: export game      
         run: |
