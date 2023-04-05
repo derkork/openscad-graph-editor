@@ -1,8 +1,11 @@
 # Whenever we push a v* tag we make a new release.
 on:
   push:
-    tags:
-      - 'v*' 
+    branches:
+      - new_build_pipeline
+    # Sequence of patterns matched against refs/tags
+    # tags:
+    #  - 'v*' 
   
 jobs:
   export_editor:
