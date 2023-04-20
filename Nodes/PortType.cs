@@ -1,4 +1,6 @@
 using System;
+using Godot;
+using GodotTestDriver.Drivers;
 
 namespace OpenScadGraphEditor.Nodes
 {
@@ -16,6 +18,7 @@ namespace OpenScadGraphEditor.Nodes
         Any = 8,
         Reroute = 9,
         Vector2 = 10,
+        Many = 11,  // multiple any
     }
 
     public static class PortTypeExt
@@ -40,6 +43,8 @@ namespace OpenScadGraphEditor.Nodes
                     return "string";
                 case PortType.Any:
                     return "any";
+                case PortType.Many:
+                    return "many";
                 case PortType.Reroute:
                     return "";
                 default:
@@ -61,6 +66,7 @@ namespace OpenScadGraphEditor.Nodes
                     return true;
                 case PortType.Geometry:
                 case PortType.Reroute:
+                case PortType.Many:
                     return false;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(self), self, null);
@@ -76,6 +82,7 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Boolean:
                 case PortType.String:
                 case PortType.Any:
+                case PortType.Many:
                 case PortType.Reroute:
                     return false;
                 case PortType.Number:
@@ -88,7 +95,29 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        // todo: use this function in the connection rules
+        public static bool SupportsMultipleInputs(this PortType self)
+        {
+            switch (self)
+            {
+                // these port types support multiple inputs
+                case PortType.Geometry:
+                case PortType.Number:
+                case PortType.Vector2:
+                case PortType.Vector3:
+                case PortType.Vector:
+                case PortType.String:
+                case PortType.Many:
+                    return true;
+                // anything else does not
+                case PortType.Any:
+                case PortType.Boolean:
+                case PortType.None:
+                case PortType.Reroute:
+                default:
+                    return false;
+            }
+        }
+
         public static bool CanBeAssignedTo(this PortType self, PortType other)
         {
             // if port types are the same, it's always possible
@@ -122,5 +151,35 @@ namespace OpenScadGraphEditor.Nodes
             // anything else - nope
             return false;
         }
+
+        public static Color Color(this PortType portType)
+        {
+            switch (portType)
+            {
+                case PortType.Geometry:
+                    return new Color(1, 1, 1); // white
+                case PortType.Boolean:
+                    return new Color(1, 0.4f, 0.4f); // red
+                case PortType.Number:
+                    return new Color(1, 0.8f, 0.4f); // orange
+                case PortType.Vector3:
+                    return new Color(.8f, 0.8f, 1f); // light blue
+                case PortType.Vector2:
+                    return new Color(.9f, 0.9f, 1f); // lighter blue
+                case PortType.Vector:
+                    return new Color(.5f, 0.5f, 1f); // dark blue
+                case PortType.String:
+                    return new Color(1f, 1f, 0f); // yellow
+                case PortType.Any:
+                    return new Color(1, 0f, 1f); // magenta
+                case PortType.Many:
+                    return new Color(0.7f, 0, 0.7f); // dark magenta
+                case PortType.Reroute:
+                    return new Color(0, 0.8f, 0); // green
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
+            }
+        } 
+            
     }
 }

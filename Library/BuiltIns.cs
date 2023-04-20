@@ -340,6 +340,21 @@ namespace OpenScadGraphEditor.Library
                     .WithParameter("invert", PortType.Boolean, "Invert", "Inverts how the color values of imported images are translated into height values. This has no effect when importing text data files. Defaults to false.", true)
                     .WithParameter("convexity", PortType.Number, "Convexity", "The convexity parameter specifies the maximum number of front sides (or back sides) a ray intersecting the object might penetrate.", true)
                     .Build(),
+                
+                // miscellaneous modules
+                // echo
+                ModuleBuilder.NewBuiltInModule("echo", "Eccc", nodeName: "Echo")
+                    .WithDescription("Prints the given information to the console.")
+                    .WithParameter("text", PortType.Many, label: "Text", description: "The text to print. You can connect multiple values to this port.")
+                    .Build(),
+                
+                // concat
+                ModuleBuilder.NewBuiltInModule("concat", "Cnc", nodeName: "Concat")
+                    .WithDescription("Concatenates the given strings.")
+                    .WithParameter("strings", PortType.Many, label: "Strings", description: "The strings to concatenate.")
+                    .WithParameter("sep", PortType.String, label: "Separator", optional: true,
+                        description: "The separator to use between the strings.")
+                    .Build(),
             };
 
             // find out if we have any duplicate module ids

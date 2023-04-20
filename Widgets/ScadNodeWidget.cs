@@ -199,13 +199,13 @@ namespace OpenScadGraphEditor.Widgets
             if (port.IsInput)
             {
                 SetSlotEnabledLeft(idx + titleOffset, true);
-                SetSlotColorLeft(idx + titleOffset, ColorFor(connectorPortType));
+                SetSlotColorLeft(idx + titleOffset, connectorPortType.Color());
                 SetSlotTypeLeft(idx + titleOffset, (int) connectorPortType);
             }
             else
             {
                 SetSlotEnabledRight(idx + titleOffset, true);
-                SetSlotColorRight(idx + titleOffset, ColorFor(connectorPortType));
+                SetSlotColorRight(idx + titleOffset, connectorPortType.Color());
                 SetSlotTypeRight(idx + titleOffset, (int) connectorPortType);
             }
 
@@ -252,33 +252,6 @@ namespace OpenScadGraphEditor.Widgets
             container.Setup(port.IsInput, portDefinition.Name, (Control) literalWidget);
         }
 
-
-        protected static Color ColorFor(PortType portType)
-        {
-            switch (portType)
-            {
-                case PortType.Geometry:
-                    return new Color(1, 1, 1);
-                case PortType.Boolean:
-                    return new Color(1, 0.4f, 0.4f);
-                case PortType.Number:
-                    return new Color(1, 0.8f, 0.4f);
-                case PortType.Vector3:
-                    return new Color(.8f, 0.8f, 1f);
-                case PortType.Vector2:
-                    return new Color(.9f, 0.9f, 1f);
-                case PortType.Vector:
-                    return new Color(.5f, 0.5f, 1f);
-                case PortType.String:
-                    return new Color(1f, 1f, 0f);
-                case PortType.Any:
-                    return new Color(1, 0f, 1f);
-                case PortType.Reroute:
-                    return new Color(0, 0.8f, 0);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(portType), portType, null);
-            }
-        }
 
         public override void _Notification(int what)
         {

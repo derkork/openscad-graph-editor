@@ -40,9 +40,9 @@ namespace OpenScadGraphEditor.Widgets
         private void RefreshType()
         {
             _portType = BoundNode.GetPortType(PortId.Input(0));
-            SetSlotColorLeft(0, ColorFor(_portType));
+            SetSlotColorLeft(0, _portType.Color());
             SetSlotTypeLeft(0, (int) _portType);
-            SetSlotColorRight(0, ColorFor(_portType));
+            SetSlotColorRight(0, _portType.Color());
             SetSlotTypeRight(0, (int) _portType);
             
         }

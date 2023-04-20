@@ -77,6 +77,11 @@ namespace OpenScadGraphEditor.Nodes
         {
             return self.PortType(Nodes.PortType.Any, name);
         }
+        
+        public static List<PortDefinition> Many(this List<PortDefinition> self, string name = "")
+        {
+            return self.PortType(Nodes.PortType.Many, name);
+        }
 
         public static List<PortDefinition> String(this List<PortDefinition> self, string name = "",
             bool allowLiteral = true, bool autoSetLiteralWhenPortIsDisconnected = true, string defaultValue = "", 

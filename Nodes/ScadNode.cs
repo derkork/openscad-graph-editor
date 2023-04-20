@@ -266,14 +266,14 @@ namespace OpenScadGraphEditor.Nodes
         {
             if (port.IsInput)
             {
-                // render all output ports of all connected nodes and join them to a single string.
+                // render all output ports of all connected nodes and join them to a single string. The operator depends on the port type.
                 var connectedNodes = context.GetAllConnections()
                     .Where(it => it.IsTo(this, port.Port))
                     .ToList();
 
                 if (connectedNodes.Count > 0)
                 {
-                    return connectedNodes
+                    var nodeValues = connectedNodes
                         // sort the candidates by their position in the graph
                         // top to bottom, then left to right; e.g.
                         // nodes with a lower y value will be rendered first
@@ -295,8 +295,43 @@ namespace OpenScadGraphEditor.Nodes
                             }
 
                             return rendered;
-                        })
-                        .JoinToString("\n");
+                        }).ToList();
+                        
+                        var portType = GetPortType(port);
+                        switch (portType)
+                        {
+                            case PortType.Geometry:
+                                // if the port is geometry, we simply join the values with a newline
+                                return nodeValues.JoinToString("\n");
+                            case PortType.Number:
+                            case PortType.Vector2:
+                            case PortType.Vector3:
+                            case PortType.Vector:
+                                // if it is numbers or vectors, add them together
+                                // only add () if there are multiple values
+                                if (nodeValues.Count == 1)
+                                {
+                                    return nodeValues.FirstOrDefault() ?? "";
+                                }
+                                return $"({nodeValues.JoinToString(" + ")})";
+                            case PortType.String:
+                                // for strings, call the concat function, if there are multiple values
+                                if (nodeValues.Count == 1)
+                                {
+                                    return nodeValues.FirstOrDefault() ?? "";
+                                }
+                                return $"concat({nodeValues.JoinToString(", ")})";
+                            case PortType.Many:
+                                // multiple anything, just join them with a comma
+                                return nodeValues.JoinToString(", ");
+                            // anything else does not support multiple inputs, so we just take the first one
+                            case PortType.Boolean:
+                            case PortType.None:
+                            case PortType.Any:
+                            case PortType.Reroute:
+                            default:
+                                return nodeValues.FirstOrDefault() ?? "";
+                        }
                 }
             }
 

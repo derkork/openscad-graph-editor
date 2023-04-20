@@ -40,43 +40,17 @@ namespace OpenScadGraphEditor.Nodes
             // We can never connect nodes as a circle
             AddConnectRule(WouldCreateCircle, OperationRuleDecision.Veto);
 
-            // connections of the same type can always be made
+            // and then allow by type
             AddConnectRule(it =>
-                    it.TryGetFromPortType(out var fromType) && it.TryGetToPortType(out var toType) &&
-                    fromType == toType,
+                    it.TryGetFromPortType(out var fromType) 
+                    && it.TryGetToPortType(out var toType) 
+                    && fromType.CanBeAssignedTo(toType),
                 OperationRuleDecision.Allow
             );
-
-            // a connection from "Any" can be made to all expression types
-            AddConnectRule(it =>
-                    it.TryGetFromPortType(out var fromType) && fromType == PortType.Any &&
-                    it.TryGetToPortType(out var toType) && toType.IsExpressionType(),
-                OperationRuleDecision.Allow
-            );
-
-            // a connection to "Any" can be made from all expression types
-            AddConnectRule(it =>
-                    it.TryGetToPortType(out var toType) && toType == PortType.Any &&
-                    it.TryGetFromPortType(out var fromType) && fromType.IsExpressionType(),
-                OperationRuleDecision.Allow
-            );
-
-            // a connection to "Array" can also be made from "Vector3" types (but not the other way around)
-            AddConnectRule(it =>
-                    it.TryGetToPortType(out var toType) && toType == PortType.Vector &&
-                    it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector3,
-                OperationRuleDecision.Allow
-            );
-
-            // same for Vector2
-            AddConnectRule(it =>
-                    it.TryGetToPortType(out var toType) && toType == PortType.Vector &&
-                    it.TryGetFromPortType(out var fromType) && fromType == PortType.Vector2,
-                OperationRuleDecision.Allow
-            );
+           
         }
 
-        public static bool WouldCreateCircle(ScadConnection connection)
+        private static bool WouldCreateCircle(ScadConnection connection)
         {
             // starting at the given connection, walk the graph and check if we would create a circle
             var openSet = new HashSet<ScadConnection> {connection};

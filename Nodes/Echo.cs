@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using GodotExt;
 using JetBrains.Annotations;
@@ -8,7 +9,8 @@ using OpenScadGraphEditor.Utils;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class Echo : ScadNode,  IHaveVariableInputSize
+    [Obsolete("Replaced by a built-in library function.")]
+    public class Echo : ScadNode,  IHaveVariableInputSize, ICannotBeCreated /* added here so no new nodes of this type can be created */
     {
         public override string NodeTitle => "Echo";
         public override string NodeQuickLookup => "Eccc";
