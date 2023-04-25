@@ -24,7 +24,7 @@ namespace OpenScadGraphEditor.Utils
         private static bool IsKeyPress(this InputEvent evt, out InputEventKey keyEvent)
         {
             keyEvent = evt as InputEventKey;
-            return keyEvent != null && keyEvent.Pressed;
+            return keyEvent is {Pressed: true};
         }
 
         private static bool IsCmdOrControlPressed(this InputEvent evt)

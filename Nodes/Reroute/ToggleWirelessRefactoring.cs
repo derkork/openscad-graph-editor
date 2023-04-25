@@ -1,7 +1,7 @@
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Nodes.Reroute;
+using OpenScadGraphEditor.Refactorings;
 
-namespace OpenScadGraphEditor.Refactorings
+namespace OpenScadGraphEditor.Nodes.Reroute
 {
     /// <summary>
     /// Refactoring which toggles whether or not a reroute node is wireless.
