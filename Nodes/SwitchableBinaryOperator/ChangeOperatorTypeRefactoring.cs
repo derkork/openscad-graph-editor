@@ -6,37 +6,15 @@ using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 {
-    public class ChangeOperatorTypeRefactoring : UserSelectableNodeRefactoring
+    public class ChangeOperatorTypeRefactoring : NodeRefactoring
     {
-        private Type _nodeType;
-        private SwitchableBinaryOperator _example;
+        private readonly Type _nodeType;
 
-        public ChangeOperatorTypeRefactoring(ScadGraph holder, ScadNode node, Type nodeType) : base(holder, node)
+        public ChangeOperatorTypeRefactoring(ScadGraph holder, SwitchableBinaryOperator node, Type nodeType) : base(holder, node)
         {
             _nodeType = nodeType;
-            _example = (SwitchableBinaryOperator) NodeFactory.Build(_nodeType);
         }
 
-        public override int Order => 1;
-
-        public override string Title => $"Change to {_example.NodeTitle}";
-
-        public override string Group => "Change operator";
-
-        public override bool IsApplicableToNode => Node is SwitchableBinaryOperator oldOperator
-                                                   && Node.GetType() != _nodeType
-                                                   &&
-                                                   (
-                                                       // the new operator type must either support 'any' or it must support
-                                                       // both operand types of the old operator
-                                                       _example.Supports(PortType.Any) ||
-                                                       (
-                                                           _example.Supports(
-                                                               oldOperator.GetPortType(PortId.Input(0))) &&
-                                                           _example.Supports(
-                                                               oldOperator.GetPortType(PortId.Input(1)))
-                                                       )
-                                                   );
 
         public override void PerformRefactoring(RefactoringContext context)
         {

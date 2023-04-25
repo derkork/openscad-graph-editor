@@ -6,22 +6,19 @@ using OpenScadGraphEditor.Refactorings;
 namespace OpenScadGraphEditor.Nodes
 {
     [UsedImplicitly]
-    public class FlipBinaryOperatorInputsRefactoring : UserSelectableNodeRefactoring
+    public class FlipBinaryOperatorInputsRefactoring : NodeRefactoring
     {
 
         public FlipBinaryOperatorInputsRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }
 
-        public override int Order => 10;
-
-        public override string Title => "Flip inputs";
-
-
-        public override bool IsApplicableToNode => Node is BinaryOperator && !(Node is SwitchableBinaryOperator.SwitchableBinaryOperator);
-
         public override void PerformRefactoring(RefactoringContext context)
         {
+            if (!(Node is BinaryOperator) || Node is SwitchableBinaryOperator.SwitchableBinaryOperator)
+            {
+                return; // not applicable
+            }
             
             // first find the connection for the first input
             var firstInputConnection = Holder.GetAllConnections().FirstOrDefault(it => it.IsTo(Node, 0));

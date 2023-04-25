@@ -6,6 +6,9 @@ using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Nodes
 {
+    /// <summary>
+    /// This node represents the entry point of a function or module.
+    /// </summary>
     public abstract class EntryPoint : ScadNode, ICannotBeDeleted, ICannotBeCreated
     {
         protected string RenderDocumentationComment(InvokableDescription invokableDescription)

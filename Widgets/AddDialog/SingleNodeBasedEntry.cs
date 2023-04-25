@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
 
@@ -30,18 +31,18 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         public EntryFittingDecision CanAdd(RequestContext context)
         {
-            if (!context.Source.Description.CanUse(_template))
+            if (context.TryGetNodeAndPort(out var graph, out var contextNode, out var contextPort, out _))
             {
                 // if the node is not allowed to be used here, we can't use it
-                return EntryFittingDecision.Veto;
-            }
-
-            if (context.TryGetNodeAndPort(out var contextNode, out var contextPort))
-            {
+                if (!graph.Description.CanUse(_template))
+                {
+                    return EntryFittingDecision.Veto;
+                }
+                
                 // if this came from a node left of us, check if we have a matching input port
                 if (contextPort.IsOutput)
                 {
-                    if (ConnectionRules.TryGetPossibleConnection(context.Source, contextNode, _template, contextPort,
+                    if (ConnectionRules.TryGetPossibleConnection(graph, contextNode, _template, contextPort,
                             out _))
                     {
                         return EntryFittingDecision.Fits;
@@ -50,7 +51,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
                 // if this came from a node right of us, check if we have a matching output port
                 else
                 {
-                    if (ConnectionRules.TryGetPossibleConnection(context.Source, _template, contextNode, contextPort,
+                    if (ConnectionRules.TryGetPossibleConnection(graph, _template, contextNode, contextPort,
                             out _))
                     {
                         return EntryFittingDecision.Fits;
@@ -68,11 +69,12 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         {
             // build a new node, put it to the correct position and then add it using the refactoring facility
             var node = _factory();
-            node.Offset = context.Position;
-            context.TryGetNodeAndPort(out var otherNode, out var otherPort);
+            // at this point we know that  the context contains a node and port, so we can safely use the out parameters
+            context.TryGetNodeAndPort(out var graph, out var otherNode, out var otherPort, out var position);
+            node.Offset = position;
 
             _canPerformRefactorings.PerformRefactorings("Add node",
-                new AddNodeRefactoring(context.Source, node, otherNode, otherPort));
+                new AddNodeRefactoring(graph, node, otherNode, otherPort));
         }
     }
 }

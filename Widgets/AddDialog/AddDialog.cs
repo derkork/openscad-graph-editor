@@ -3,6 +3,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.AddDialog
@@ -75,7 +76,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         {
             _entries = entries;
             _context = context;
-            _filterByContextCheckbox.Pressed = context.TryGetNodeAndPort(out _, out _);
+            _filterByContextCheckbox.Pressed = context.TryGetNodeAndPort(out _, out _, out _, out _);
             _lineEdit.Text = "";
             Refresh();
             PopupCentered();

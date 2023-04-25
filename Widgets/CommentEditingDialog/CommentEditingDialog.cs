@@ -2,20 +2,23 @@ using System;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
-using OpenScadGraphEditor.Widgets.AddDialog;
+using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
 {
     [UsedImplicitly]
     public class CommentEditingDialog : WindowDialog
     {
-        public event Action<RequestContext, string, string> CommentAndTitleChanged;
-
+        public event Action<string, Refactoring> RefactoringRequested;
+        
         private LineEdit _titleEdit;
         private Label _descriptionLabel;
         private TextEdit _descriptionEdit;
-        private RequestContext _requestContext;
-        private bool _showDescription;
+        private ScadNode _node;
+        private ScadGraph _graph;
+        private Vector2 _position;
 
         public override void _Ready()
         {
@@ -44,21 +47,51 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
             
         }
 
-        public void Open(RequestContext requestContext, string title = "", string description = "", bool showDescription = true)
+        public void Open(ScadGraph graph, ScadNode node)
         {
-            _requestContext = requestContext;
-            _titleEdit.Text = title;
-            _descriptionEdit.Text = description;
-            _showDescription = showDescription;
-        
-            _descriptionLabel.Visible = showDescription;
-            _descriptionEdit.Visible = showDescription;
+            _node = node;
+            _graph = graph;
+            
+            if (node is Comment comment)
+            {
+                _titleEdit.Text = comment.CommentTitle;
+                _descriptionEdit.Text = comment.CommentDescription;
+                _descriptionLabel.Visible = true;
+                _descriptionEdit.Visible = true;
+            }
+            else
+            {
+                _titleEdit.Text = "";
+                if (node.TryGetComment(out var commentText))
+                {
+                    _titleEdit.Text = commentText;
+                }
+                _descriptionEdit.Text = "";
+                _descriptionLabel.Visible = false;
+                _descriptionEdit.Visible = false;
+            }
             
             SetAsMinsize();
             PopupCenteredMinsize();
             _titleEdit.GrabFocus();
         }
 
+        
+        public void OpenForCreation(ScadGraph graph, Vector2 position)
+        {
+            _node = null;
+            _graph = graph;
+            _position = position;
+            
+            _titleEdit.Text = "";
+            _descriptionEdit.Text = "";
+            _descriptionLabel.Visible = true;
+            _descriptionEdit.Visible = true;
+            
+            SetAsMinsize();
+            PopupCenteredMinsize();
+            _titleEdit.GrabFocus();
+        }
 
         private void OnCancelButtonPressed()
         {
@@ -82,8 +115,23 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
         {
             var title = _titleEdit.Text;
             var description = _descriptionEdit.Text;
-
-            CommentAndTitleChanged?.Invoke(_requestContext, title, _showDescription ? description : "");
+            
+            // if we have no node, we first need to create one, but only if at least one of the fields is not empty
+            if (_node == null && (title.Empty() == false || description.Empty() == false))
+            {
+                var comment = NodeFactory.Build<Comment>();
+                comment.CommentTitle = title;
+                comment.CommentDescription = description;
+                comment.Offset = _position;
+                RefactoringRequested?.Invoke("Create comment",  new AddNodeRefactoring(_graph, comment));
+            }
+            else if (_node != null)
+            {
+                // if both fields are empty, we delete the comment
+                // otherwise we just update the comment
+                var actionText = title.Empty() && description.Empty() ? "Delete comment" : "Update comment";
+                RefactoringRequested?.Invoke(actionText, new ChangeCommentRefactoring(_graph, _node, title, description));
+            }
 
             Hide();
         }

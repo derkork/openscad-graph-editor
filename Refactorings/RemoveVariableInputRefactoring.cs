@@ -11,14 +11,8 @@ namespace OpenScadGraphEditor.Refactorings
     /// and fixes all connections.
     /// </summary>
     [UsedImplicitly]
-    public class RemoveVariableInputRefactoring : UserSelectableNodeRefactoring
+    public class RemoveVariableInputRefactoring : NodeRefactoring
     {
-        public override string Title => ((IHaveVariableInputSize) Node).RemoveRefactoringTitle;
-        public override int Order => 1;
-
-        public override bool IsApplicableToNode => Node is IHaveVariableInputSize variableInputSize &&
-                                                   variableInputSize.CurrentInputSize > 1;
-
         public RemoveVariableInputRefactoring(ScadGraph holder, ScadNode node) : base(holder, node)
         {
         }

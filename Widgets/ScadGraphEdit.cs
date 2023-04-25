@@ -6,6 +6,7 @@ using GodotExt;
 using JetBrains.Annotations;
 using KdTree;
 using KdTree.Math;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
