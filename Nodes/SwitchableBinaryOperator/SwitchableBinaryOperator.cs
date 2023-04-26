@@ -1,4 +1,3 @@
-using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.IO;
 
@@ -24,17 +23,24 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             // connecting to switchable binary operator input will automatically switch the input port 
             // output ports and fix any adjacent connections
             ConnectionRules.AddConnectRule(
-                it => it.To is SwitchableBinaryOperator,
+                it => it.To is SwitchableBinaryOperator ,
                 ConnectionRules.OperationRuleDecision.Undecided,
-                it => new FixSwitchableBinaryOperatorPortTypesRefactoring(it.Owner, it.To, it.ToPort)
+                it => new FixSwitchableBinaryOperatorPortTypesRefactoring(it.Owner, (SwitchableBinaryOperator) it.To)
             );
 
             // same but for disconnection from a binary operator input
             ConnectionRules.AddDisconnectRule(
                 it => it.To is SwitchableBinaryOperator,
                 ConnectionRules.OperationRuleDecision.Undecided,
-                it => new FixSwitchableBinaryOperatorPortTypesRefactoring(it.Owner, it.To, it.ToPort)
+                it => new FixSwitchableBinaryOperatorPortTypesRefactoring(it.Owner, (SwitchableBinaryOperator) it.To)
             );
+            
+            // connecting to a switchable binary operator input is possible
+            // if the port type is supported by the operator, even if it is currently
+            // not the correct type
+            ConnectionRules.AddConnectRule(
+                it => it.To is SwitchableBinaryOperator bo && it.TryGetFromPortType(out var type) && bo.Supports(type) ,
+                ConnectionRules.OperationRuleDecision.Allow);
             
         }
 
@@ -59,24 +65,45 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             base.RestorePortDefinitions(node, resolver);
         }
 
-        public void SwitchPortType(PortId port, PortType newPortType)
+        
+        public void SwitchInputPorts(PortType firstPortType, PortType secondPortType)
         {
-            GdAssert.That(port.IsInput && port.Port < InputPorts.Count, "Invalid port id");
+            SwitchPortType(PortId.Input(0), firstPortType);
+            SwitchPortType(PortId.Input(1), secondPortType);
+
+            var outputPortType = CalculateOutputPortType();
+            SwitchPortType(PortId.Output(0), outputPortType);
+        }
+        
+        private void SwitchPortType(PortId port, PortType newPortType)
+        {
+            
             if (GetPortType(port) == newPortType)
             {
                 return; // nothing to do.
             }
+
+            var existingDefinition = GetPortDefinition(port);
             
-            var existingDefinition = InputPorts[port.Port];
-            InputPorts[port.Port] = new PortDefinition(newPortType, newPortType.GetMatchingLiteralType(), existingDefinition.Name,
+            var newDefinition = new PortDefinition(newPortType, newPortType.GetMatchingLiteralType(), existingDefinition.Name,
                 existingDefinition.LiteralIsAutoSet, existingDefinition.DefaultValue, existingDefinition.RenderHint);
+            
+            SetPortDefinition(port, newDefinition);
+
+            // for input ports we may need to rebuild the literal
+
+            if (!port.IsInput)
+            {
+                // the output port of this node will never have a literal, so we are done here.
+                return;
+            }
 
             var wasSet = false;
             if (TryGetLiteral(port, out var literal))
             {
                 wasSet = literal.IsSet;
             }
-            
+
             DropPortLiteral(port);
             BuildPortLiteral(port);
 
@@ -85,5 +112,13 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 newLiteral.IsSet = wasSet;
             }
         }
+
+        /// <summary>
+        /// Calculates the output port type based on the currently set input port types. Should return
+        /// <see cref="PortType.Any"/> if the output port type cannot be determined or the input port type
+        /// combination is not supported.
+        /// </summary>
+        /// <returns></returns>
+        protected abstract PortType CalculateOutputPortType();
     }
 }

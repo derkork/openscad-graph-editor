@@ -70,6 +70,17 @@ namespace OpenScadGraphEditor.Nodes
             return port.IsInput ? InputPorts[port.Port] : OutputPorts[port.Port];
         }
 
+        protected void SetPortDefinition(PortId port, PortDefinition portDefinition)
+        {
+            if (port.IsInput)
+            {
+                InputPorts[port.Port] = portDefinition;
+            }
+            else
+            {
+                OutputPorts[port.Port] = portDefinition;
+            }
+        }
 
         public void DropPortLiteral(PortId port)
         {

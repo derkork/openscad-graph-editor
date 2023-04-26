@@ -14,7 +14,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 
         public override void PerformRefactoring(RefactoringContext context)
         {
-            if (!(Node is SwitchableBinaryOperator))
+            if (!(Node is SwitchableBinaryOperator switchableBinaryOperator))
             {
                 return;
             }
@@ -35,24 +35,20 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 context.PerformRefactoring(new DeleteConnectionRefactoring(secondInputConnection));
             }
 
-            // if the first connection exists, find out its originating port type
-            if (firstInputConnection != null)
-            {
-                var originatorPortType =
-                    firstInputConnection.From.GetPortType(PortId.Output(firstInputConnection.FromPort));
-                
-                // now switch the node's second port to the type of the first port
-                context.PerformRefactoring(new SwitchBinaryOperatorPortTypeRefactoring(Holder, Node, false, originatorPortType));
-            }
+            // gather the port type from the input connections. use PortType.Any if there is no connection
+            var firstPortType = firstInputConnection != null 
+                ? firstInputConnection.From.GetPortType(PortId.Output(firstInputConnection.FromPort)) 
+                : PortType.Any;
             
-            // report the same for the second port
-            if (secondInputConnection != null)
-            {
-                var originatorPortType =
-                    secondInputConnection.From.GetPortType(PortId.Output(secondInputConnection.FromPort));
-                
-                context.PerformRefactoring(new SwitchBinaryOperatorPortTypeRefactoring(Holder, Node, true, originatorPortType));
-            }
+            var secondPortType = secondInputConnection != null 
+                ? secondInputConnection.From.GetPortType(PortId.Output(secondInputConnection.FromPort)) 
+                : PortType.Any;
+            
+            // now switch the port types
+            context.PerformRefactoring(
+                new SwitchBinaryOperatorInputPortTypesRefactoring(Holder, switchableBinaryOperator,
+                    // note how this is deliberately flipped as we want to reverse the order of the inputs
+                    secondPortType, firstPortType));
             
             // now reconnect the ports
             if (firstInputConnection != null)

@@ -34,7 +34,6 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             {
                 firstInputTargetPortType = PortType.Any;
             }
-            context.PerformRefactoring(new SwitchBinaryOperatorPortTypeRefactoring(Holder, newNode, true, firstInputTargetPortType));
 
             // repeat for second input port
             var secondInputTargetPortType = oldNode.GetPortType(PortId.Input(1));
@@ -42,7 +41,8 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
             {
                 secondInputTargetPortType = PortType.Any;
             }
-            context.PerformRefactoring(new SwitchBinaryOperatorPortTypeRefactoring(Holder, newNode, false, secondInputTargetPortType));
+            
+            context.PerformRefactoring(new SwitchBinaryOperatorInputPortTypesRefactoring(Holder, newNode, firstInputTargetPortType, secondInputTargetPortType));
                 
             // now copy over any literal values from the old node to the new one
             if (oldNode.TryGetLiteral(PortId.Input(0), out var firstInputLiteral))

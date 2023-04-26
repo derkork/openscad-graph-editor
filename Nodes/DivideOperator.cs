@@ -22,6 +22,33 @@ namespace OpenScadGraphEditor.Nodes
             
         }
 
+        protected override PortType CalculateOutputPortType()
+        {
+            var firstPortType = GetPortType(PortId.Input(0));
+            var secondPortType = GetPortType(PortId.Input(1));
+            
+            // if any of the port types is ANY, the result is ANY
+            if (firstPortType == PortType.Any || secondPortType == PortType.Any)
+            {
+                return PortType.Any;
+            }
+            
+            // if the divisor is a number, the result is the port type of the dividend
+            if (secondPortType == PortType.Number)
+            {
+                return firstPortType;
+            }
+            
+            // if the dividend is a number, the result is the port type of the divisor
+            if (firstPortType == PortType.Number)
+            {
+                return secondPortType;
+            }
+            
+            // every other case is not supported, so ANY
+            return PortType.Any;
+        }
+
         public override Texture NodeBackground => Resources.DivideIcon;
     }
 }
