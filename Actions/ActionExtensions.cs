@@ -1,5 +1,6 @@
 ﻿using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
+using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Actions
 {
@@ -8,14 +9,39 @@ namespace OpenScadGraphEditor.Actions
     /// </summary>
     public static class ActionExtensions
     {
-        public static bool IsEditableInvokable(this RequestContext item, IEditorContext context, out InvokableDescription result)
+        public static bool IsInvokable(this RequestContext item, out InvokableDescription result)
         {
-            result = default;
+            if (item.TryGetInvokableDescription(out result) && !(result is MainModuleDescription))
+            {
+                return true;
+            }
 
-            if (!item.TryGetInvokableDescription(out var invokableDescription) || invokableDescription is MainModuleDescription)
+            // check if it is a node referring to an invokable
+            if (!item.TryGetNode(out _, out var node) || !(node is IReferToAnInvokable referToAnInvokable))
             {
                 return false;
             }
+
+            if (referToAnInvokable.InvokableDescription is MainModuleDescription)
+            {
+                return false;
+            }
+
+            result = referToAnInvokable.InvokableDescription;
+            return true;
+
+        }
+
+        public static bool IsEditableInvokable(this RequestContext item, IEditorContext context,
+            out InvokableDescription result)
+        {
+            result = default;
+
+            if (!item.IsInvokable(out var invokableDescription))
+            {
+                return false;
+            }
+
             if (!context.CurrentProject.IsDefinedInThisProject(invokableDescription))
             {
                 return false;
@@ -24,11 +50,29 @@ namespace OpenScadGraphEditor.Actions
             result = invokableDescription;
             return true;
         }
-        
-        public static bool IsEditableVariable(this RequestContext item, IEditorContext context, out VariableDescription result)
+
+        public static bool IsVariable(this RequestContext item, out VariableDescription result)
+        {
+            if (item.TryGetVariableDescription(out result))
+            {
+                return true;
+            }
+
+            // check if it is a node referring to a variable
+            if (item.TryGetNode(out _, out var node) && node is IReferToAVariable referToAVariable)
+            {
+                result = referToAVariable.VariableDescription;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsEditableVariable(this RequestContext item, IEditorContext context,
+            out VariableDescription result)
         {
             result = default;
-            if (!item.TryGetVariableDescription(out var variableDescription))
+            if (!item.IsVariable(out var variableDescription))
             {
                 return false;
             }
@@ -49,9 +93,14 @@ namespace OpenScadGraphEditor.Actions
             {
                 return false;
             }
-         
+
             result = externalReference;
             return false;
+        }
+
+        public static bool IsEntryPoint(this RequestContext item)
+        {
+            return item.TryGetNode(out _, out var node) && node is EntryPoint;
         }
     }
 }

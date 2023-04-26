@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Actions
 
         public override bool TryBuildQuickAction(IEditorContext context, RequestContext item, out QuickAction result)
         {
-            if (item.TryGetNode(out var graph, out var node, out _)
+            if (item.TryGetNode(out var graph, out var node)
                 && node.GetModifiers().HasFlag(ScadNodeModifier.Color))
             {
                 result = new QuickAction("Clear color",

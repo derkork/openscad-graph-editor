@@ -12,7 +12,7 @@ namespace OpenScadGraphEditor.Nodes
         public string Group => "";
         public bool TryBuildQuickAction(IEditorContext context, RequestContext item, out QuickAction result)
         {
-            if (item.TryGetNode(out var graph, out var node, out _)
+            if (item.TryGetNode(out var graph, out var node)
                 && node is BinaryOperator && !(node is SwitchableBinaryOperator.SwitchableBinaryOperator))
             {
                 const string title = "Flip inputs";

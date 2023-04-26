@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using GodotExt;
 using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -42,7 +43,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         {
   
 
-            if (context.TryGetNodeAndPort(out var graph, out var contextNode, out var contextPort, out _))
+            if (context.TryGetNodeAndPort(out var graph, out var contextNode, out var contextPort))
             {
                 if (!graph.Description.CanUse(_firstNodeTemplate) || !graph.Description.CanUse(_secondNodeTemplate))
                 {
@@ -78,13 +79,15 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         private void OnEntrySelected(RequestContext context)
         {
+            var hasPosition = context.TryGetPosition(out var graph, out var position);
+            GdAssert.That(hasPosition, "BoundPairBasedEntry can only be used in a context with a position.");
+            
             // make the new nodes
             var firstNode = _firstNodeFactory();
             var secondNode = _secondNodeFactory();
             
-            // at this point we know it's a context to a port, so we can safely get the 
-            // out parameters of the function
-            context.TryGetNodeAndPort(out var graph, out var otherNode, out var otherPort, out var position);
+            // try getting a context node if it is there.
+            context.TryGetNodeAndPort(out _, out var otherNode, out var otherPort);
 
             
             // offset the second node from the first node so they don't overlap

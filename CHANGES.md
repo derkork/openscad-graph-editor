@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Improved
+- All context menus are now created through a central code instance making their layout and item order consistent no matter if you right-click something in the tree or a node in the graph.
+- A lot of code has been reorganized under the hood to make it easier to add new features and fix bugs.
+
+### Fixed
+- Reroute nodes now properly restore their port type to "Reroute" when you remove the last connection from them. Before they sometimes kept the previously used port type which made it impossible to connect them to other nodes.
+
 ## [0.9.3] - 2023-04-05
 ### Improved
 - The editor is now properly code signed and notarized by Apple. This should make it easier to install and use it on Mac OSX. ([#33](https://github.com/derkork/openscad-graph-editor/issues/33)). **A huge thanks goes out to [Will Adams](https://github.com/WillAdams) for donating the funds on [ko-fi](https://ko-fi.com/derkork) to make this possible!**

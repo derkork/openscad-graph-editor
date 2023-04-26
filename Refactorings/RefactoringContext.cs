@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Utils;
 using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -13,75 +14,42 @@ namespace OpenScadGraphEditor.Refactorings
     public class RefactoringContext
     {
         public ScadProject Project { get; }
-        private readonly List<Refactoring> _refactorings = new List<Refactoring>();
-
-        private RefactoringPhase _phase;
-
-        /// <summary>
-        /// An enum representing the current refactoring phase.
-        /// </summary>
-        private enum RefactoringPhase
-        {
-            /// <summary>
-            /// The default phase. Most refactorings run in this phase.
-            /// </summary>
-            Default,
-            
-            /// <summary>
-            /// The late phase. Refactorings in this phase are applied after all other refactorings have been.
-            /// </summary>
-            Late
-        }
+        private readonly Queue<Refactoring> _refactorings = new Queue<Refactoring>();
 
 
         public RefactoringContext(ScadProject project)
         {
             Project = project;
-            _phase = RefactoringPhase.Default;
         }
 
         public void PerformRefactorings(IEnumerable<Refactoring> refactorings)
         {
-            _refactorings.AddRange(refactorings);
+            _refactorings.Clear();
+            refactorings.ForAll(_refactorings.Enqueue);
             
-            // start with the default phase.
-            var defaultPhaseRefactorings = _refactorings.Where(it => !it.IsLate)
-                .ToList();
 
-            foreach (var refactoring in defaultPhaseRefactorings)
+            while(_refactorings.Any())
             {
+                var refactoring = _refactorings.Dequeue();
                 Log.Information("Performing refactoring {Refactoring}", refactoring.GetType().Name);
                 refactoring.PerformRefactoring(this);
             }
-
-            // now the late phase
-            _phase = RefactoringPhase.Late;
-
-            var latePhaseRefactorings = _refactorings.Where(it => it.IsLate)
-                .ToList();
-            foreach (var refactoring in latePhaseRefactorings)
-            {
-                Log.Information("Performing late-stage refactoring {Refactoring}", refactoring.GetType().Name);
-                refactoring.PerformRefactoring(this);
-            }
-
-            _refactorings.Clear();
         }
 
         /// <summary>
-        /// Can be called by refactorings, to run another refactoring. If the refactoring's phase matches
-        /// the current phase it will be performed immediately, otherwise it will be performed later
-        /// when the phase of th refactoring comes. 
+        /// Can be called by refactorings, to run another refactoring. If the refactoring runs in late phase, it will
+        /// be enqueued and run after all other refactorings have been applied. Otherwise it will be run immediately.
         /// </summary>
         /// <param name="refactoring"></param>
         internal void PerformRefactoring(Refactoring refactoring)
         {
-            if (_phase == RefactoringPhase.Default && refactoring.IsLate)
+            if (refactoring.IsLate)
             {
-                _refactorings.Add(refactoring);
+                Log.Information("Enqueuing late-stage refactoring {Refactoring}", refactoring.GetType().Name);
+                _refactorings.Enqueue(refactoring);
                 return;
-            } 
-            
+            }
+           
             Log.Information("Performing refactoring {Refactoring}", refactoring.GetType().Name);
             refactoring.PerformRefactoring(this);
         }

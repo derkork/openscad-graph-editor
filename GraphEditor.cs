@@ -310,7 +310,6 @@ namespace OpenScadGraphEditor
 
 		private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)
 		{
-			var actions = new List<QuickAction>();
 			var requestContext = entry switch
 			{
 				ScadInvokableTreeEntry invokableTreeEntry => RequestContext.ForInvokableDescription(invokableTreeEntry.Description),
@@ -323,15 +322,8 @@ namespace OpenScadGraphEditor
 			{
 				return;
 			}
-			
-			foreach (var editorAction in _editorActions)
-			{
-				if (editorAction.TryBuildQuickAction(this, requestContext, out var quickAction))
-				{
-					actions.Add(quickAction);
-				}
-			}
 
+			var actions = BuildItemContextMenu(requestContext);
 			_quickActionsPopup.Open(mousePosition, actions);
 		}
 
@@ -420,7 +412,8 @@ namespace OpenScadGraphEditor
 
 		private void AddNode(RequestContext context, ScadNode node)
 		{
-			context.TryGetNodeAndPort(out var graph, out var otherNode, out var otherPort, out var position);
+			context.TryGetPosition(out var graph, out var position);
+			context.TryGetNodeAndPort(out _, out var otherNode, out var otherPort);
 			node.Offset = position;
 
 			PerformRefactorings("Add node",
@@ -462,7 +455,7 @@ namespace OpenScadGraphEditor
 
 		private void OnHelpRequested(RequestContext obj)
 		{
-			if (obj.TryGetNode(out var graph, out var node, out _))
+			if (obj.TryGetNode(out var graph, out var node))
 			{
 				_helpDialog.Open(_currentProject, graph, node);
 			}
@@ -495,7 +488,7 @@ namespace OpenScadGraphEditor
 		/// </summary>
 		private void OnEditCommentRequested(RequestContext requestContext)
 		{
-			if (!requestContext.TryGetNode(out var graph, out var node, out _))
+			if (!requestContext.TryGetNode(out var graph, out var node))
 			{
 				return;
 			}
@@ -730,9 +723,16 @@ namespace OpenScadGraphEditor
 			catch (Exception e)
 			{
 				NotificationService.ShowError(
-					"Unexpected exception occurred. Running undo to restore a known working state. See console for details.");
+					"Unexpected exception occurred. Trying to run an undo to restore a known working state. See console for details.");
 				Log.Error(e, "Unexpected exception");
-				Undo();
+				if (_currentHistoryStack.CanUndo(out _))
+				{
+					Undo();
+				}
+				else
+				{
+					NotificationService.ShowError("Undo failed. Please restart the application.");
+				}
 			}
 		}
 
@@ -808,89 +808,106 @@ namespace OpenScadGraphEditor
 		private void OnItemDataDropped(ScadGraphEdit graph, ProjectTreeEntry entry, Vector2 mousePosition,
 			Vector2 virtualPosition)
 		{
-			// did we drag an invokable from the list to the graph?
-			if (entry is ScadInvokableTreeEntry invokableListEntry)
+			switch (entry)
 			{
-				// then add a new node calling the invokable.
-				var description = invokableListEntry.Description;
-				ScadNode node;
-				if (description is FunctionDescription functionDescription)
+				// did we drag an invokable from the list to the graph?
+				case ScadInvokableTreeEntry invokableListEntry:
 				{
-					node = NodeFactory.Build<FunctionInvocation>(functionDescription);
+					// then add a new node calling the invokable.
+					var description = invokableListEntry.Description;
+					var node = description switch
+					{
+						FunctionDescription functionDescription => 
+							NodeFactory.Build<FunctionInvocation>( functionDescription),
+						ModuleDescription moduleDescription => 
+							NodeFactory.Build<ModuleInvocation>(moduleDescription),
+						_ => throw new InvalidOperationException("Unknown invokable type.")
+					};
+
+					// ensure we don't drag in stuff that isn't usable by the graph in question.
+					if (!graph.Graph.Description.CanUse(node))
+					{
+						return;
+					}
+
+					node.Offset = virtualPosition;
+					PerformRefactoring("Add node", new AddNodeRefactoring(graph.Graph, node));
+					break;
 				}
-				else if (description is ModuleDescription moduleDescription)
+				// did we drag a variable from the list to the graph?
+				case ScadVariableTreeEntry variableListEntry:
 				{
-					node = NodeFactory.Build<ModuleInvocation>(moduleDescription);
+					// in case of a variable we can either _get_ or _set_ the variable
+					// so we will need to open a popup menu to let the user choose.
+					var getNode = NodeFactory.Build<GetVariable>(variableListEntry.Description);
+					getNode.Offset = virtualPosition;
+					var setNode = NodeFactory.Build<SetVariable>(variableListEntry.Description);
+					setNode.Offset = virtualPosition;
+
+					var actions = new List<QuickAction>
+					{
+						new QuickAction($"Get {variableListEntry.Description.Name}",
+							() => PerformRefactoring("Add node", new AddNodeRefactoring(graph.Graph, getNode))),
+						new QuickAction($"Set {variableListEntry.Description.Name}",
+							() => PerformRefactoring("Add node", new AddNodeRefactoring(graph.Graph, setNode)))
+					};
+
+					_quickActionsPopup.Open(mousePosition, actions);
+					break;
 				}
-				else
-				{
-					throw new InvalidOperationException("Unknown invokable type.");
-				}
-
-				// ensure we don't drag in stuff that isn't usable by the graph in question.
-				if (!graph.Graph.Description.CanUse(node))
-				{
-					return;
-				}
-
-				node.Offset = virtualPosition;
-				PerformRefactoring("Add node", new AddNodeRefactoring(graph.Graph, node));
-			}
-
-			// did we drag a variable from the list to the graph?
-			if (entry is ScadVariableTreeEntry variableListEntry)
-			{
-				// in case of a variable we can either _get_ or _set_ the variable
-				// so we will need to open a popup menu to let the user choose.
-				var getNode = NodeFactory.Build<GetVariable>(variableListEntry.Description);
-				getNode.Offset = virtualPosition;
-				var setNode = NodeFactory.Build<SetVariable>(variableListEntry.Description);
-				setNode.Offset = virtualPosition;
-
-				var actions = new List<QuickAction>
-				{
-					new QuickAction($"Get {variableListEntry.Description.Name}",
-						() => PerformRefactoring("Add node", new AddNodeRefactoring(graph.Graph, getNode))),
-					new QuickAction($"Set {variableListEntry.Description.Name}",
-						() => PerformRefactoring("Add node", new AddNodeRefactoring(graph.Graph, setNode)))
-				};
-
-				_quickActionsPopup.Open(mousePosition, actions);
 			}
 		}
 
 		private void OnNodeContextMenuRequested(RequestContext requestContext)
 		{
-			requestContext.TryGetNode(out var graph, out var node, out var position);
-
-			// build a list of quick actions that include all refactorings that would apply to the selected node
-			var actions = UserSelectableNodeRefactoring
-				.GetApplicable(graph, node)
-				.OrderBy(it => it.Order)
-				.GroupBy(it => it.Group)
-				.Select(it =>
-				{
-					if (it.Count() > 1)
-					{
-						// group into submenu
-						return new QuickAction(it.Key, it.Select(refactoring =>
-							new QuickAction(refactoring.Title,
-								() => PerformRefactoring(refactoring.Title, refactoring))).ToList());
-					}
-
-					// just return the item
-					var refactoring = it.First();
-					return new QuickAction(refactoring.Title,
-						() => PerformRefactoring(refactoring.Title, refactoring));
-				});
-
-		
-		
-			
-
-			_quickActionsPopup.Open(position, actions);
+			requestContext.TryGetPosition(out _, out var position);
+			_quickActionsPopup.Open(position, BuildItemContextMenu(requestContext));
 		}
 
+
+		private IEnumerable<QuickAction> BuildItemContextMenu(RequestContext context)
+		{
+			return _editorActions
+				.OrderBy(it => it.Order)
+				.GroupBy(it => it.Group)
+				.SelectMany(group =>
+				{
+					var result = new List<QuickAction>();
+
+					// first gather all the quick actions for this group
+					var actions = group.SelectMany(it => 
+						it.TryBuildQuickAction(this, context, out var action) 
+						? new[] {action} 
+						: Enumerable.Empty<QuickAction>()).ToList();
+					
+					// no actions in the group? then we just skip it.
+					if (actions.Count == 0)
+					{
+						return result;
+					}
+
+					// if the group name starts with a dash, we add a separator before the group
+					// and then just inline all the actions.
+					if (group.Key.StartsWith("-"))
+					{
+						result.Add(new QuickAction(group.Key.Substring(1)));
+						result.AddRange(actions);
+					}
+					// if we have a group name, create a submenu for the group
+					else if (!group.Key.Empty())
+					{
+						result.Add(new QuickAction(group.Key, actions));
+					}
+					else
+					{
+						// otherwise just add the actions to the result
+						result.AddRange(actions);
+					}
+					
+					return result;
+				}).ToList();
+		}
+		
 		private void OnOpenFileDialogRequested()
 		{
 			_fileDialog.Mode = FileDialog.ModeEnum.OpenFile;

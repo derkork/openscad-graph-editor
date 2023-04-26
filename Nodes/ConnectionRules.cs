@@ -161,7 +161,7 @@ namespace OpenScadGraphEditor.Nodes
                 // on undecided, we allow the disconnect, since nobody vetoed it.
                 .Aggregate(OperationResult.Undecided(), CalculateEffectiveResult);
 
-            return result.Decision == OperationRuleDecision.Undecided ? OperationResult.Allow() : result;
+            return result.Decision == OperationRuleDecision.Undecided ? OperationResult.Allow(result.Refactorings) : result;
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ using OpenScadGraphEditor.Widgets;
 namespace OpenScadGraphEditor.Actions
 {
     [UsedImplicitly]
-    public abstract class ToggleDebugModifierAction : ToggleModifierAction
+    public class ToggleDebugModifierAction : ToggleModifierAction
     {
         public override int Order => 1000;
 

@@ -67,37 +67,33 @@ namespace OpenScadGraphEditor.Actions
         private readonly VariableDescription _variableDescription;
         private readonly ExternalReference _externalReference;
 
-        public bool TryGetNodeAndPort(out ScadGraph graph, out ScadNode node, out PortId port, out Vector2 position)
+        public bool TryGetNodeAndPort(out ScadGraph graph, out ScadNode node, out PortId port)
         {
             if (_graph == null || _node == null || !_port.IsDefined)
             {
                 graph = default;
                 node = default;
                 port = default;
-                position = default;
                 return false;
             }
 
             graph = _graph;
             node = _node;
             port = _port;
-            position = _position;
             return true;
         }
 
-        public bool TryGetNode(out ScadGraph graph, out ScadNode node, out Vector2 position)
+        public bool TryGetNode(out ScadGraph graph, out ScadNode node)
         {
             if (_graph == null || _node == null)
             {
                 graph = default;
                 node = default;
-                position = default;
                 return false;
             }
 
             graph = _graph;
             node = _node;
-            position = _position;
             return true;
         }
         

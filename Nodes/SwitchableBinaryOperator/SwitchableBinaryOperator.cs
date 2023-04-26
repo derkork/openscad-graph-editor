@@ -10,14 +10,32 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
         protected SwitchableBinaryOperator()
         {
             InputPorts
-                // we start with `Any` for the first input port as usually you will connect another node there
+                // we start with `Any` for both input port as usually you will connect another node there
                 // and therefore this is the most suitable setting.
                 .Any() 
-                // number is going to be the most common case for the second operator, so we start with this by default
-                .Number();
+                .Any();
 
             OutputPorts
                 .PortType(PortType.Any);
+        }
+
+        static SwitchableBinaryOperator()
+        {
+            // connecting to switchable binary operator input will automatically switch the input port 
+            // output ports and fix any adjacent connections
+            ConnectionRules.AddConnectRule(
+                it => it.To is SwitchableBinaryOperator,
+                ConnectionRules.OperationRuleDecision.Undecided,
+                it => new FixSwitchableBinaryOperatorPortTypesRefactoring(it.Owner, it.To, it.ToPort)
+            );
+
+            // same but for disconnection from a binary operator input
+            ConnectionRules.AddDisconnectRule(
+                it => it.To is SwitchableBinaryOperator,
+                ConnectionRules.OperationRuleDecision.Undecided,
+                it => new FixSwitchableBinaryOperatorPortTypesRefactoring(it.Owner, it.To, it.ToPort)
+            );
+            
         }
 
         public override void SaveInto(SavedNode node)
