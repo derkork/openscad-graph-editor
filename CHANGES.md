@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Improved
+- Operator nodes now automatically switch their input and output types depending on what is connected to them. It is no longer necessary to switch the operator input type manually. For operator nodes it is now also possible to draw a connection to an input port if the type currently does not fit. The operator node will automatically adjust the type of the input port to match the new incoming connection. This greatly eases working with operator nodes.
 - All context menus are now created through a central code instance making their layout and item order consistent no matter if you right-click something in the tree or a node in the graph.
 - A lot of code has been reorganized under the hood to make it easier to add new features and fix bugs.
 

@@ -18,7 +18,7 @@ namespace OpenScadGraphEditor.Nodes
         private static readonly List<ConnectionRule> ConnectRules = new List<ConnectionRule>();
         private static readonly List<ConnectionRule> DisconnectRules = new List<ConnectionRule>();
 
-        private delegate OperationResult ConnectionRule(ScadConnection connection);
+        private delegate OperationResult ConnectionRule(ScadConnection connection, ConnectionRuleEvaluationFlags flags);
 
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace OpenScadGraphEditor.Nodes
 
             // the same connection may not exist twice
             AddConnectRule(
-                it => it.Owner.GetAllConnections().Any(c =>
+                (it, flags) => !flags.IgnoreExistingConnections && it.Owner.GetAllConnections().Any(c =>
                     c.From == it.From && c.To == it.To && c.FromPort == it.FromPort && c.ToPort == it.ToPort),
                 OperationRuleDecision.Veto);
 
@@ -76,7 +76,7 @@ namespace OpenScadGraphEditor.Nodes
             );
         }
 
-        public static bool WouldCreateCircle(ScadConnection connection)
+        private static bool WouldCreateCircle(ScadConnection connection)
         {
             // starting at the given connection, walk the graph and check if we would create a circle
             var openSet = new HashSet<ScadConnection> {connection};
@@ -104,33 +104,44 @@ namespace OpenScadGraphEditor.Nodes
         public static void AddConnectRule(Predicate<ScadConnection> predicate, OperationRuleDecision decision,
             params Func<ScadConnection, Refactoring>[] refactorings)
         {
-            ConnectRules.Add(MakeRule(predicate, decision, refactorings));
+            AddConnectRule((connection, flags) => predicate(connection), decision, refactorings);
+        }
+        
+        public static void AddConnectRule(Func<ScadConnection, ConnectionRuleEvaluationFlags, bool> decider, OperationRuleDecision decision,
+            params Func<ScadConnection, Refactoring>[] refactorings)
+        {
+            ConnectRules.Add(MakeRule(decider, decision, refactorings));
         }
 
         public static void AddDisconnectRule(Predicate<ScadConnection> predicate, OperationRuleDecision decision,
             params Func<ScadConnection, Refactoring>[] refactorings)
         {
-            DisconnectRules.Add(MakeRule(predicate, decision, refactorings));
+            AddDisconnectRule((connection, flags) => predicate(connection), decision, refactorings);
+        }
+        
+        public static void AddDisconnectRule(Func<ScadConnection, ConnectionRuleEvaluationFlags, bool> decider, OperationRuleDecision decision,
+            params Func<ScadConnection, Refactoring>[] refactorings)
+        {
+            DisconnectRules.Add(MakeRule(decider, decision, refactorings));
         }
 
-        private static ConnectionRule MakeRule(Predicate<ScadConnection> predicate, OperationRuleDecision decision,
-            Func<ScadConnection, Refactoring>[] refactorings)
+        private static ConnectionRule MakeRule(Func<ScadConnection, ConnectionRuleEvaluationFlags, bool> decider, 
+            OperationRuleDecision decision, Func<ScadConnection, Refactoring>[] refactorings)
         {
-            return connection =>
+            return (connection, flags) =>
             {
-                if (predicate(connection))
+                if (decider(connection, flags))
                 {
-                    switch (decision)
+                    return decision switch
                     {
-                        case OperationRuleDecision.Undecided:
-                            return OperationResult.Undecided(refactorings.Select(it => it(connection)));
-                        case OperationRuleDecision.Allow:
-                            return OperationResult.Allow(refactorings.Select(it => it(connection)));
-                        case OperationRuleDecision.Veto:
-                            return OperationResult.Veto();
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(decision), decision, null);
-                    }
+                        OperationRuleDecision.Undecided => 
+                            OperationResult.Undecided( refactorings.Select(it => it(connection))),
+                        OperationRuleDecision.Allow => 
+                            OperationResult.Allow(refactorings.Select(it => it(connection))),
+                        OperationRuleDecision.Veto => 
+                            OperationResult.Veto(),
+                        _ => throw new ArgumentOutOfRangeException(nameof(decision), decision, null)
+                    };
                 }
 
                 return OperationResult.Undecided();
@@ -141,10 +152,10 @@ namespace OpenScadGraphEditor.Nodes
         /// Checks if a connection is allowed. Checks all the connection rules and return the effective
         /// result of these rules. If no rule can decide, the connection will be vetoed. 
         /// </summary>
-        public static OperationResult CanConnect(ScadConnection connection)
+        public static OperationResult CanConnect(ScadConnection connection, ConnectionRuleEvaluationFlags flags = default)
         {
             var result = ConnectRules
-                .Select(rule => rule(connection))
+                .Select(rule => rule(connection, flags))
                 .Aggregate(OperationResult.Undecided(), CalculateEffectiveResult);
 
             return result.Decision == OperationRuleDecision.Undecided ? OperationResult.Veto() : result;
@@ -154,10 +165,10 @@ namespace OpenScadGraphEditor.Nodes
         /// Checks if disconnecting a connection is allowed. Checks all the disconnection rules and return the effective
         /// result of these rules. If no rule can decide, the disconnection is allowed. 
         /// </summary>
-        public static OperationResult CanDisconnect(ScadConnection connection)
+        public static OperationResult CanDisconnect(ScadConnection connection, ConnectionRuleEvaluationFlags flags = default)
         {
             var result = DisconnectRules
-                .Select(rule => rule(connection))
+                .Select(rule => rule(connection, flags))
                 // on undecided, we allow the disconnect, since nobody vetoed it.
                 .Aggregate(OperationResult.Undecided(), CalculateEffectiveResult);
 
@@ -269,5 +280,15 @@ namespace OpenScadGraphEditor.Nodes
                 return new OperationResult(OperationRuleDecision.Undecided, refactorings);
             }
         }
+    }
+
+    public readonly struct ConnectionRuleEvaluationFlags
+    {
+        public ConnectionRuleEvaluationFlags(bool ignoreExistingConnections)
+        {
+            IgnoreExistingConnections = ignoreExistingConnections;
+        }
+
+        public bool IgnoreExistingConnections { get; } 
     }
 }

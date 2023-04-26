@@ -23,6 +23,7 @@ namespace OpenScadGraphEditor.Nodes
                    || portType == PortType.Vector;
         }
 
+
         public override Texture NodeBackground => Resources.EqualIcon;
     }
 }

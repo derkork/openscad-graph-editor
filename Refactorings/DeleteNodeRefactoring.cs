@@ -39,7 +39,7 @@ namespace OpenScadGraphEditor.Refactorings
                 .Where(it => it.InvolvesNode(Node))
                 .ToList();
 
-            if (connections.Select(ConnectionRules.CanDisconnect)
+            if (connections.Select(it => ConnectionRules.CanDisconnect(it))
                 .Any(result => result.Decision == ConnectionRules.OperationRuleDecision.Veto))
             {
                 Log.Information("Disconnect vetoed");
