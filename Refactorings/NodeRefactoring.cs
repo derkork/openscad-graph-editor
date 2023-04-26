@@ -1,3 +1,4 @@
+using GodotExt;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 
@@ -13,6 +14,8 @@ namespace OpenScadGraphEditor.Refactorings
 
         protected NodeRefactoring(ScadGraph holder, ScadNode node)
         {
+            GdAssert.That(holder != null, "holder != null");
+            GdAssert.That(node != null, "node != null");
             Holder = holder;
             Node = node;
         }

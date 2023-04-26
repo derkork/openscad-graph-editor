@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Actions
@@ -10,7 +11,7 @@ namespace OpenScadGraphEditor.Actions
 
         public override bool TryBuildQuickAction(IEditorContext context, RequestContext item, out QuickAction result)
         {
-            if (item.TryGetNode(out var graph, out var node, out _))
+            if (item.TryGetNode(out var graph, out var node) && node is ICanHaveModifier)
             {
                 result = new QuickAction("Set color", () => context.EditNodeColor(graph, node));
                 return true;

@@ -10,14 +10,14 @@ namespace OpenScadGraphEditor.Actions
         public string Group => "";
         public bool TryBuildQuickAction(IEditorContext context, RequestContext item, out QuickAction result)
         {
-            if (item.IsEditableInvokable(context, out var invokableDescription))
+            if (item.IsInvokable(out var invokableDescription))
             {
                 result = new QuickAction($"Find usages of {invokableDescription.Name}",
                     () => context.FindAndShowUsages(invokableDescription));
                 return true;
             }
             
-            if (item.IsEditableVariable(context, out var variableDescription))
+            if (item.IsVariable(out var variableDescription))
             {
                 result = new QuickAction($"Find usages of {variableDescription.Name}",
                     () => context.FindAndShowUsages(variableDescription));

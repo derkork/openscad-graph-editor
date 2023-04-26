@@ -31,7 +31,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         public EntryFittingDecision CanAdd(RequestContext context)
         {
-            if (context.TryGetNodeAndPort(out var graph, out var contextNode, out var contextPort, out _))
+            if (context.TryGetNodeAndPort(out var graph, out var contextNode, out var contextPort))
             {
                 // if the node is not allowed to be used here, we can't use it
                 if (!graph.Description.CanUse(_template))
@@ -69,8 +69,11 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
         {
             // build a new node, put it to the correct position and then add it using the refactoring facility
             var node = _factory();
-            // at this point we know that  the context contains a node and port, so we can safely use the out parameters
-            context.TryGetNodeAndPort(out var graph, out var otherNode, out var otherPort, out var position);
+            // get graph and position
+            context.TryGetPosition(out var graph, out var position);
+            // if we have, get the other node and port (note this returns null for everything if we have no node, so
+            // we don't take graph and position from this call
+            context.TryGetNodeAndPort(out _, out var otherNode, out var otherPort);
             node.Offset = position;
 
             _canPerformRefactorings.PerformRefactorings("Add node",

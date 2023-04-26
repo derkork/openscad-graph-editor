@@ -8,7 +8,7 @@ namespace OpenScadGraphEditor.Actions
     {
         public override bool TryBuildQuickAction(IEditorContext context, RequestContext item, out QuickAction result)
         {
-            if (item.TryGetNode(out var graph, out var node, out _) && node is ICanHaveModifier)
+            if (item.TryGetNode(out var graph, out var node) && node is ICanHaveModifier)
             {
                 result = BuildAction(context, graph, node);
                 return true;

@@ -16,12 +16,13 @@ namespace OpenScadGraphEditor.Nodes.Reroute
 
         public bool TryBuildQuickAction(IEditorContext context, RequestContext item, out QuickAction result)
         {
-            if (item.TryGetNode(out var graph, out var node, out _) && node is RerouteNode rerouteNode)
+            if (item.TryGetNode(out var graph, out var node) && node is RerouteNode rerouteNode)
             {
                 var text = rerouteNode.IsWireless ? "Make wired" : "Make wireless";
 
-                new QuickAction(text,
+                result = new QuickAction(text,
                     () => context.PerformRefactoring(text, new ToggleWirelessRefactoring(graph, rerouteNode)));
+                return true;
             }
 
             result = default;
