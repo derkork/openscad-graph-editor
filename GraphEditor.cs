@@ -305,7 +305,7 @@ namespace OpenScadGraphEditor
 		private void OnUpdateImportRequested(ExternalReference reference, string path, IncludeMode includeMode)
 		{
 			PerformRefactoring($"Update reference to {path}",
-				new AddOrUpdateExternalReferenceRefactoring(path, includeMode));
+				new AddOrUpdateExternalReferenceRefactoring(path, includeMode, reference));
 		}
 
 		private void OnItemContextMenuRequested(ProjectTreeEntry entry, Vector2 mousePosition)

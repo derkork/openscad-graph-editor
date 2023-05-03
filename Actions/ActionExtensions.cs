@@ -95,7 +95,7 @@ namespace OpenScadGraphEditor.Actions
             }
 
             result = externalReference;
-            return false;
+            return true;
         }
 
         public static bool IsEntryPoint(this RequestContext item)

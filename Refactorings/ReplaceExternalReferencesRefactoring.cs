@@ -6,14 +6,17 @@ using GodotExt;
 using JetBrains.Annotations;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
+using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Utils;
+using OpenScadGraphEditor.Widgets;
 using Serilog;
 
 namespace OpenScadGraphEditor.Refactorings
 {
     /// <summary>
     /// Refactoring that replaces all currently known external references with the new ones given. The refactoring
-    /// tries to preserve as much as possible.
+    /// tries to preserve as much as possible. This is one of the most complex refactorings in the whole project,
+    /// and it probably still has bugs.
     /// </summary>
     public class ReplaceExternalReferencesRefactoring : Refactoring
     {
@@ -51,7 +54,54 @@ namespace OpenScadGraphEditor.Refactorings
                 .ToList();
             
             // load the new references into a unit
-            var newReferences = LoadReferences(project, _newReferences).AllReferences.ToList();
+            var externalUnit = new ExternalUnit(project);
+            foreach (var newReference in _newReferences)
+            {
+                var result = TryLoadReference(externalUnit, project.ProjectPath, newReference.Key, newReference.Value);
+                // this is a top level reference. If it failed, the file may have moved elsewhere, so we try to keep
+                // the information we have cached about this reference. If the file reappears later, we can just
+                // update it then but for now we keep all the information we have so we don't delete stuff from our graphs
+                // just because the file is missing
+
+                if (result != LoadReferenceStatus.Failed)
+                {
+                    // all good, we can continue
+                    continue;
+                }
+
+                // try to find the matching top-level reference in the old references
+                var matchingOldReference = project.ExternalReferences
+                    .FirstOrDefault(it =>
+                        it.IncludePath == newReference.Key && it.Mode == newReference.Value && !it.IsTransitive);
+
+                if (matchingOldReference != null) // we found a match
+                {
+                    // put this into the new unit
+                    // strictly speaking the path is not the full path, but the path relative to the project, but
+                    // since we don't actually have the file anymore, so we cannot resolve a full path
+                    externalUnit.AddReferenceIfNotExists(matchingOldReference, newReference.Key);
+                    
+                    // issue a warning to the user
+                    NotificationService.ShowError($"Could not load external reference {newReference.Key}, the file does not exist. I'm keeping the old reference for now, but the project will likely not work right now. Please fix the path to that file.");
+                    
+                    // also, add all the transitive references of the old reference to the new unit
+                    var transitiveReferences = project.ExternalReferences
+                        .Where(it => it.IsTransitive && it.IncludedBy == matchingOldReference.Id);
+                        
+                    foreach (var transitiveReference in transitiveReferences)
+                    {
+                        externalUnit.AddReferenceIfNotExists(transitiveReference, transitiveReference.IncludePath);
+                    }
+                }
+                else
+                {
+                    // no match found, so somehow the user got an invalid path into the project. We will just
+                    // ignore this reference and hope for the best
+                    NotificationService.ShowError($"Could not load external reference {newReference.Key}, the file does not exist. I'm ignoring this reference.");
+                }
+            }
+            
+            var newReferences = externalUnit.AllReferences.ToList();
             
             // now we need to fix up all references to the old references and see if we can find a match in the new references
             // first make some variables to cut down on the linq
@@ -62,6 +112,9 @@ namespace OpenScadGraphEditor.Refactorings
             // until now the project is still unchanged. We will first massage the old references to look like the new
             // ones and then just swap them out. This way we can use the already existing refactorings to do the work for us.
             // start with modules
+            
+            // if we delete nodes, we need to keep track of which ones we deleted so we don't try to fix them up later
+            var goneModules = new HashSet<ModuleDescription>();
             foreach (var (oldModule, nodes) in nodesReferencingModules)
             {
                 // find the new module that matches best
@@ -69,6 +122,8 @@ namespace OpenScadGraphEditor.Refactorings
                 {
                     // if we can't find a match we need to remove the nodes (for now, later we may introduce some orphaned node handling)
                     Log.Information("Could not find a match for module {module}, removing all references to it.", oldModule.Name);
+                    // we cannot modify the list while iterating over it, so we need to collect the modules first
+                    goneModules.Add(oldModule);
                     foreach (var node in nodes)
                     {
                         context.PerformRefactoring(new DeleteNodeRefactoring(node.Graph, node.Node));
@@ -94,13 +149,19 @@ namespace OpenScadGraphEditor.Refactorings
                     context.PerformRefactoring(new DisableChildrenRefactoring(oldModule));
                 }
             }
+            // drop all the modules we deleted
+            nodesReferencingModules.RemoveAll(it => goneModules.Contains(it.Module));
             
+            
+            var goneFunctions = new HashSet<FunctionDescription>();
             // now do the same for functions
             foreach (var (oldFunction, nodes) in nodesReferencingFunctions)
             {
                 if (!functions.TryFindMatch(oldFunction, out var newFunction))
                 {
                     Log.Information("Could not find a match for function {function}, removing all references to it.", oldFunction.Name);
+                    // same as above, we cannot modify the list while iterating over it
+                    goneFunctions.Add(oldFunction);
                     foreach (var node in nodes)
                     {
                         context.PerformRefactoring(new DeleteNodeRefactoring(node.Graph, node.Node));
@@ -117,13 +178,18 @@ namespace OpenScadGraphEditor.Refactorings
                     context.PerformRefactoring(new ChangeFunctionReturnTypeRefactoring(oldFunction, newFunction.ReturnTypeHint));
                 }
             }
+            // drop all the functions we deleted
+            nodesReferencingFunctions.RemoveAll(it => goneFunctions.Contains(it.Function));
             
+            var goneVariables = new HashSet<VariableDescription>();
             // finally the variables
             foreach (var (oldVariable, nodes) in nodesReferencingVariables)
             {
                 if (!variables.TryFindMatch(oldVariable, out var newVariable))
                 {
                     Log.Information("Could not find a match for variable {variable}, removing all references to it.", oldVariable.Name);
+                    // same as above, we cannot modify the list while iterating over it
+                    goneVariables.Add(oldVariable);
                     foreach (var node in nodes)
                     {
                         context.PerformRefactoring(new DeleteNodeRefactoring(node.Graph, node.Node));
@@ -137,9 +203,24 @@ namespace OpenScadGraphEditor.Refactorings
                     context.PerformRefactoring(new ChangeVariableTypeRefactoring(oldVariable, newVariable.TypeHint));
                 }
             }
+            // drop all the variables we deleted
+            nodesReferencingVariables.RemoveAll(it => goneVariables.Contains(it.Variable));
             
             // now we can just swap out the old references with the new ones
+            // however we need to be careful, if an old reference is also a new reference, we don't want to remove it
+            // and add it again, because that would break stuff. We also don't want to add it again, because that would
+            // also break stuff. So we need to remove all old references that are also new references from both lists
+            
+            // so get the intersection of both lists
+            var keepReferences = oldReferences.Intersect(newReferences).ToList();
+            
+            // and remove them from both lists
+            oldReferences.RemoveAll(it => keepReferences.Contains(it));
+            newReferences.RemoveAll(it => keepReferences.Contains(it));
+            
+            // now kill the remaining old references
             oldReferences.ForAll(it => project.RemoveExternalReference(it));
+            // and add all new ones
             newReferences.ForAll(it => project.AddExternalReference(it));
             
             // and we need to update the references in the project
@@ -213,31 +294,30 @@ namespace OpenScadGraphEditor.Refactorings
                 context.PerformRefactoring(new ChangeParameterOrderRefactoring(oldInvokable, newParameterNames));
 
         }
-        
-           
-        /// <summary>
-        /// Adds a reference to a scad file to the project using the given include mode.
-        /// </summary>
-        private static ExternalUnit LoadReferences(ScadProject project, Dictionary<string,IncludeMode> references)
+
+        enum LoadReferenceStatus
         {
-            var result = new ExternalUnit(project);
-            references.ForAll(it => LoadReference(result, project.ProjectPath, it.Key, it.Value));
-            return result;
+            Failed,
+            Success,
+            Skipped
         }
 
-        private static void LoadReference(ExternalUnit unit, string sourceFile, string includePath, IncludeMode mode,
+        private static LoadReferenceStatus TryLoadReference(ExternalUnit unit, string sourceFile, string includePath, IncludeMode mode,
             [CanBeNull] ExternalReference owner = null)
         {
-            GdAssert.That(owner == null || mode == IncludeMode.Include, "We should not have include mode 'use' for a transitive reference.");
             var resolved = PathResolver.TryResolve(sourceFile, includePath, out var fullPath);
-            GdAssert.That(resolved, $"Could not resolve reference '{sourceFile}'");
+            // if we cannot resolve the file, then it's a failure.
+            if (!resolved)
+            {
+                return LoadReferenceStatus.Failed;
+            }
             
             // now check if we have any external reference with the same path in the unit already
             if (unit.HasPath(fullPath))
             {
                 // if so, we can skip this one.
                 Log.Information("Reference to {FullPath} already loaded, skipping it", fullPath);
-                return;
+                return LoadReferenceStatus.Skipped;
             }
             
             // build an external reference to parse into
@@ -245,7 +325,8 @@ namespace OpenScadGraphEditor.Refactorings
 
             if (!ParseFile(externalReference, fullPath))
             {
-                return;
+                Log.Warning("Failed to parse file {FullPath}", fullPath);
+                return LoadReferenceStatus.Failed;
             }
 
             // and add it to the project
@@ -255,8 +336,11 @@ namespace OpenScadGraphEditor.Refactorings
             // now recursively add all transitive references
             foreach (var transitiveReference in externalReference.References)
             {
-                LoadReference(unit, fullPath, transitiveReference, IncludeMode.Include, externalReference);
+                // for recursive references, we do best effort. If we cannot load a reference, we just skip it.
+                TryLoadReference(unit, fullPath, transitiveReference, IncludeMode.Include, externalReference);
             }
+
+            return LoadReferenceStatus.Success;
         }
 
         private static bool ParseFile(ExternalReference externalReference, string fullPath)

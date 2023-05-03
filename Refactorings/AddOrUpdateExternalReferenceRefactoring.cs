@@ -13,11 +13,13 @@ namespace OpenScadGraphEditor.Refactorings
     {
         private readonly string _includePath;
         private readonly IncludeMode _includeMode;
+        private readonly ExternalReference _toUpdate;
 
-        public AddOrUpdateExternalReferenceRefactoring(string includePath, IncludeMode includeMode)
+        public AddOrUpdateExternalReferenceRefactoring(string includePath, IncludeMode includeMode, ExternalReference toUpdate = null)
         {
             _includePath = includePath;
             _includeMode = includeMode;
+            _toUpdate = toUpdate;
         }
 
         public override void PerformRefactoring(RefactoringContext context)
@@ -33,6 +35,8 @@ namespace OpenScadGraphEditor.Refactorings
             // we only look at the top level imports, all transitive imports will be just deleted and then
             // re-added should they still exist in the files
             context.Project.ExternalReferences
+                // we don't want to include the reference we are updating, otherwise we will end up with two
+                .Where(it => it != _toUpdate)
                 .Where(it => !it.IsTransitive)
                 .ForAll(import => filesToImport[import.IncludePath] = import.Mode);
             
