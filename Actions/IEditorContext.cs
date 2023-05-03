@@ -62,6 +62,11 @@ namespace OpenScadGraphEditor.Actions
         /// Opens the node color editing dialog for the given node.
         /// </summary>
         void EditNodeColor(ScadGraph graph, ScadNode node);
+        
+        /// <summary>
+        /// Shows the help for the given node.
+        /// </summary>
+        void ShowHelp(ScadGraph graph, ScadNode node);
 
     }
 }

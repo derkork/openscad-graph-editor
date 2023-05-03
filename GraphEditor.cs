@@ -457,9 +457,10 @@ namespace OpenScadGraphEditor
 		{
 			if (obj.TryGetNode(out var graph, out var node))
 			{
-				_helpDialog.Open(_currentProject, graph, node);
+				ShowHelp(graph, node);
 			}
 		}
+
 
 		private void Close(ScadGraphEdit editor)
 		{
@@ -1174,5 +1175,11 @@ namespace OpenScadGraphEditor
 		{
 			_nodeColorDialog.Open(graph, node);
 		}
+		
+		public  void ShowHelp(ScadGraph graph, ScadNode node)
+		{
+			_helpDialog.Open(_currentProject, graph, node);
+		}
+
  	}
 }
