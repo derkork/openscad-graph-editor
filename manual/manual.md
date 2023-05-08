@@ -286,6 +286,8 @@ Operator nodes have some useful functionality built into their right-click menu.
 
 You can also right-click on an operator node and select the _Flip inputs_ option. This will quickly swap the inputs of the node. This is useful if you want to change the operands without having to reconnect them manually.
 
+Operator nodes will automatically switch their input and output port types to match what is connected to them. For example if you connect a `vector3` and a `number` to the inputs of a _Multiply_ node, then the output port will be of type `vector3`, while if you connect two `vector3` to the inputs of a _Multiply_ node, then the output port will be of type `number`.
+
 ![](images/flip_inputs.gif)
 
 ### Vector nodes
@@ -377,6 +379,15 @@ This node takes two `vector2`, `vector3` or `vector` values. It multiplies the v
 ![](images/pairwise_multiply.png)
 
 This functionality is not actually built into OpenSCAD (e.g. using the normal multiplication operator `*` will return the dot product of the vectors). Under the hood this will build a loop that walks over the vectors and multiplies the values pairwise.
+
+
+#### Sum
+
+The _Sum_ node is a specialization of the _Add_ operator. It allows you to sum any number of inputs. Since summing up values is a very common operation this node is included for convenience and better graph readability. The following two setups are equivalent:
+
+![Summing with operators vs. Sum node](images/sum_node.png)
+
+The _Sum_ node can sum numbers or vectors (e.g `vector2`, `vector2`, `vector`), but you cannot mix numbers with vectors as the result would be undefined. Like the operator nodes the sum node will automatically adjust its output type to match the sum produced by the input types.
 
 ## Keeping the graph neat and tidy
 

@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- A new _Sum_ node which can accept any number of incoming connections has been added. Summing up multiple values is a very common thing to do in OpenSCAD. Using the normal add operator node for this requires you to add one operator node for each two values you want to add. This can become tedious when you want to add more than two values. The new _Sum_ node allows you to add any number of values in a single node, which requires less clicks and improves the graphs readability. ([#53](https://github.com/derkork/openscad-graph-editor/issues/53)).
+
 ### Improved
 - When moving external SCAD files around the editor now handles absent files more gracefully. It will show a warning when trying to load a file that no longer exists or has become invalid. It will operate on the last known good state. This makes it easier to move files around without breaking your graph. ([#36](https://github.com/derkork/openscad-graph-editor/issues/36)).
 - The help dialog for nodes can now also be accessed through the context menu of a node. ([#46](https://github.com/derkork/openscad-graph-editor/issues/46)).
