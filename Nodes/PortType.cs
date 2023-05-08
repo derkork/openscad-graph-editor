@@ -88,7 +88,6 @@ namespace OpenScadGraphEditor.Nodes
             }
         }
 
-        // todo: use this function in the connection rules
         public static bool CanBeAssignedTo(this PortType self, PortType other)
         {
             // if port types are the same, it's always possible

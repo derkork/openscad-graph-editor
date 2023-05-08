@@ -22,6 +22,7 @@ namespace OpenScadGraphEditor.Utils
         public static readonly Texture MinusIcon = GD.Load<Texture>("res://Icons/minus0000.png");
         public static readonly Texture TimesIcon = GD.Load<Texture>("res://Icons/times0000.png");
         public static readonly Texture DivideIcon = GD.Load<Texture>("res://Icons/divide0000.png");
+        public static readonly Texture SumIcon = GD.Load<Texture>("res://Icons/sum0000.png");
         public static readonly Texture ExpIcon = GD.Load<Texture>("res://Icons/exp0000.png");
         public static readonly Texture GreaterIcon = GD.Load<Texture>("res://Icons/greater0000.png");
         public static readonly Texture GreaterEqualIcon = GD.Load<Texture>("res://Icons/greater_equal0000.png");

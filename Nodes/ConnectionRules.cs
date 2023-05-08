@@ -27,7 +27,8 @@ namespace OpenScadGraphEditor.Nodes
         static ConnectionRules()
         {
             // there can only ever be one incoming connection to a port unless it is a geometry port
-            AddConnectRule(it => !it.IsToPortType(PortType.Geometry),
+            // or the node controls the number of incoming connections itself
+            AddConnectRule(it => !it.IsToPortType(PortType.Geometry) && ! (it.To is ICanHaveMultipleInputConnections),
                 OperationRuleDecision.Undecided, // this is a side-effect-only rule
                 it => new DeleteInputConnectionsRefactoring(it.Owner, it.To, it.ToPort));
 
