@@ -16,6 +16,9 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 
         public override void PerformRefactoring(RefactoringContext context)
         {
+            // TODO: if only a single thing is connected, make the other thing of the same type so we can
+            // have a literal to type in. this is currently broken
+            
             // Plan of attack:
             // We first need to find out which inputs currently go into the node. We then switch the input
             // ports to have the correct type. If an input port is currently not connected, we switch it to
