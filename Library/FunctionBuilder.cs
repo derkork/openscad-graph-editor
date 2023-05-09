@@ -1,5 +1,6 @@
 using System;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -48,7 +49,7 @@ namespace OpenScadGraphEditor.Library
         {
             var parameter = new ParameterDescription
             {
-                Name = name,
+                Name = _currentFunctionDescription.SafeParameterName(name),
                 Description = description,
                 TypeHint = typeHint,
                 Label = label,
