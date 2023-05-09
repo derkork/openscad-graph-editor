@@ -13,9 +13,9 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
     /// </summary>
     public class BoundPairBasedEntry : IAddDialogEntry
     {
-        private readonly ICanPerformRefactorings _canPerformRefactorings;
         private readonly Func<ScadNode> _firstNodeFactory;
         private readonly Func<ScadNode> _secondNodeFactory;
+        private readonly IEditorContext _editorContext;
         private readonly ScadNode _firstNodeTemplate;
         private readonly ScadNode _secondNodeTemplate;
 
@@ -27,11 +27,11 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         public BoundPairBasedEntry(Texture icon, string title, string keywords,
             Func<ScadNode> firstNodeFactory, Func<ScadNode> secondNodeFactory,
-            ICanPerformRefactorings canPerformRefactorings)
+            IEditorContext editorContext)
         {
             _firstNodeFactory = firstNodeFactory;
             _secondNodeFactory = secondNodeFactory;
-            _canPerformRefactorings = canPerformRefactorings;
+            _editorContext = editorContext;
             _firstNodeTemplate = firstNodeFactory();
             _secondNodeTemplate = secondNodeFactory();
             Icon = icon;
@@ -122,7 +122,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             };
             
             // and run it.
-            _canPerformRefactorings.PerformRefactorings("Add node", refactorings);
+            _editorContext.PerformRefactorings("Add node", refactorings);
         }
     }
 }

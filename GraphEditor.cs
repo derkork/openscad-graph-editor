@@ -34,7 +34,7 @@ using Serilog;
 namespace OpenScadGraphEditor
 {
 	[UsedImplicitly]
-	public class GraphEditor : Control, ICanPerformRefactorings, IEditorContext
+	public class GraphEditor : Control, IEditorContext
 	{
 		private AddDialog _addDialog;
 		private QuickActionsPopup _quickActionsPopup;
@@ -149,11 +149,11 @@ namespace OpenScadGraphEditor
 
 			_nodeColorDialog = this.WithName<NodeColorDialog>("NodeColorDialog");
 			_nodeColorDialog.ColorSelected +=
-				(graph, node, color) => PerformRefactorings("Change node color",
+				(graph, node, color) => PerformRefactoring("Change node color",
 					new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, true, color));
 
 			_nodeColorDialog.ColorCleared +=
-				(graph, node) => PerformRefactorings("Clear node color",
+				(graph, node) => PerformRefactoring("Clear node color",
 					new ToggleModifierRefactoring(graph, node, ScadNodeModifier.Color, false));
 
 
@@ -163,11 +163,11 @@ namespace OpenScadGraphEditor
 			_invokableRefactorDialog.InvokableCreationRequested +=
 				// create the invokable, then open it's graph in a new tab.
 				(description, refactorings) => PerformRefactorings($"Create {description.Name}", refactorings,
-					() => Open(_currentProject.FindDefiningGraph(description)));
+					(context) => Open(_currentProject.FindDefiningGraph(description)));
 
 			_documentationDialog = this.WithName<DocumentationDialog>("DocumentationDialog");
 			_documentationDialog.RefactoringRequested +=
-				(refactoring) => PerformRefactorings("Edit documentation", refactoring);
+				(refactoring) => PerformRefactoring("Edit documentation", refactoring);
 
 			_variableRefactorDialog = this.WithName<VariableRefactorDialog>("VariableRefactorDialog");
 			_variableRefactorDialog.RefactoringsRequested +=
@@ -382,7 +382,7 @@ namespace OpenScadGraphEditor
 
 			_addDialogEntries.Clear();
 			_addDialogEntries.AddRange(
-				_addDialogEntryFactories.SelectMany(it => it.BuildEntries(_currentProject, this))
+				_addDialogEntryFactories.SelectMany(it => it.BuildEntries(this))
 			);
 		}
 
@@ -416,7 +416,7 @@ namespace OpenScadGraphEditor
 			context.TryGetNodeAndPort(out _, out var otherNode, out var otherPort);
 			node.Offset = position;
 
-			PerformRefactorings("Add node",
+			PerformRefactoring("Add node",
 				new AddNodeRefactoring(graph, node, otherNode, otherPort));
 		}
 
@@ -496,153 +496,27 @@ namespace OpenScadGraphEditor
 			EditComment(graph, node);
 		}
 
-		/// <summary>
-		/// Copies the given nodes from the source graph into a copy buffer.
-		/// </summary>
-		private ScadGraph MakeCopyBuffer(ScadGraph source, IEnumerable<ScadNode> selection)
-		{
-			var result = new ScadGraph();
-			// remove all nodes which cannot be deleted (which are usually nodes that are built in so they cannot be copied either).
-			// also make it a HashSet so we don't have duplicates and have quicker lookups
-			var sanitizedSet = selection
-				.Where(it => !(it is ICannotBeDeleted))
-				.ToHashSet();
-
-			var idMapping = new Dictionary<string, string>();
-			// make copies of all the nodes and put them into the copy buffer
-			foreach (var node in sanitizedSet)
-			{
-				var copy = NodeFactory.Duplicate(node, _currentProject);
-				// make note of the id mapping, because we need this to resolve connections
-				// and bound nodes later.
-				idMapping[node.Id] = copy.Id;
-				result.AddNode(copy);
-			}
-
-			// correct the id mappings of any bound nodes
-			foreach (var node in result.GetAllNodes().Where(it => it is IAmBoundToOtherNode))
-			{
-				var partnerId = ((IAmBoundToOtherNode) node).OtherNodeId;
-				// find out which id the partner has in the copy
-				var partnerCopyId = idMapping[partnerId];
-				// and set the partner id to the copy id
-				((IAmBoundToOtherNode) node).OtherNodeId = partnerCopyId;
-			}
-
-			//  copy all connections which are between the selected nodes
-			foreach (var connection in source.GetAllConnections())
-			{
-				if (sanitizedSet.Contains(connection.From) && sanitizedSet.Contains(connection.To))
-				{
-					result.AddConnection(idMapping[connection.From.Id], connection.FromPort,
-						idMapping[connection.To.Id], connection.ToPort);
-				}
-			}
-
-			return result;
-		}
-
 		private void OnCopyRequested(ScadGraphEdit source, List<ScadNode> selection)
 		{
-			_copyBuffer = SelectionToBuffer(source, selection);
+			_copyBuffer = source.Graph.CloneSelection(_currentProject, selection, out _);
 		}
 
 		private void OnDuplicateRequested(ScadGraphEdit source, List<ScadNode> selection, Vector2 position)
 		{
-			var copies = SelectionToBuffer(source, selection);
+			var copies = source.Graph.CloneSelection(_currentProject, selection, out _);
 			PasteNodes(source, position, copies, "Duplicate nodes");
-		}
-
-		private ScadGraph SelectionToBuffer(ScadGraphEdit source, List<ScadNode> selection)
-		{
-			// when we make a copy we need to take special care about bound nodes
-			// each bound node needs to have its partner within the copy even if it was not originally selected.
-			// so we look up all bound nodes in the selection and if its partner is not in the
-			// selection we silently add it.
-
-			var correctedSelection = new List<ScadNode>(selection);
-
-			var boundNodes = selection.Where(it => it is IAmBoundToOtherNode).ToList();
-			foreach (var boundNode in boundNodes)
-			{
-				var boundTo = (IAmBoundToOtherNode) boundNode;
-				var partner = source.Graph.ById(boundTo.OtherNodeId);
-
-				if (!selection.Contains(partner))
-				{
-					correctedSelection.Add(partner);
-				}
-			}
-
-			// now we can be sure that we have no bound nodes without their partner in the corrected selection.
-			return MakeCopyBuffer(source.Graph, correctedSelection);
 		}
 
 		private void OnPasteRequested(ScadGraphEdit target, Vector2 position)
 		{
-			// now make another copy from the copy buffer and paste that. The reason we do this is because
-			// nodes need unique Ids so for each pasting we need to make a new copy.
-			var copy = MakeCopyBuffer(_copyBuffer, _copyBuffer.GetAllNodes());
-
-			PasteNodes(target, position, copy, "Paste nodes");
+			PasteNodes(target, position, _copyBuffer, "Paste nodes");
 		}
 
 		private void PasteNodes(ScadGraphEdit target, Vector2 position, ScadGraph copy, string refactoringTitle)
 		{
-			// now the clipboard may contain nodes that are not allowed in the given target graph. So we need
-			// to filter these out here and also delete all connections to these nodes.
-			var disallowedNodes = copy.GetAllNodes()
-				.Where(it => !target.Graph.Description.CanUse(it))
-				.ToList();
-
-			// delete all connections to the disallowed nodes
-			copy.GetAllConnections()
-				.Where(it => disallowedNodes.Any(it.InvolvesNode))
-				.ToList() // avoid concurrent modification
-				.ForAll(copy.RemoveConnection);
-
-			// and the nodes themselves
-			disallowedNodes.ForAll(copy.RemoveNode);
-
-			var scadNodes = copy.GetAllNodes().ToList();
-			if (scadNodes.Count == 0)
-			{
-				return;
-			}
-
-			// we now need to normalize the position of the nodes so they are pasted in the correct position
-			// we do this by finding the bounding box of the nodes and then offsetting them by the difference between the position
-			// of the bounding box and the position of the node that is closes to top left
-
-			// we start with a rectangle that is a point that simply has the position of the first node
-			var boundingBox = new Rect2(scadNodes[0].Offset, Vector2.Zero);
-			// now expand this rectangle so it contains all the points of all the offsets of the nodes
-			boundingBox = scadNodes.Aggregate(boundingBox, (current, node) => current.Expand(node.Offset));
-			// now we calculate the offset of the bounding box position and the desired position
-			var offset = position - boundingBox.Position;
-
-			// and offset every node by this
-			scadNodes.ForAll(it => it.Offset += offset);
-
-			// now run the refactorings to add the given nodes and connections
-			var refactorings = new List<Refactoring>();
-			foreach (var node in scadNodes)
-			{
-				refactorings.Add(new AddNodeRefactoring(target.Graph, node));
-			}
-
-			foreach (var connection in copy.GetAllConnections())
-			{
-				refactorings.Add(
-					new AddConnectionRefactoring(
-						new ScadConnection(target.Graph, connection.From, connection.FromPort, connection.To,
-							connection.ToPort
-						)
-					)
-				);
-			}
-
-			PerformRefactorings(refactoringTitle, refactorings, () => target.SelectNodes(scadNodes));
+			PerformRefactoring<PasteNodesRefactoring,List<ScadNode>>(
+				refactoringTitle, new PasteNodesRefactoring(target.Graph, copy, position),
+				target.SelectNodes);
 		}
 
 		private void OnAddFunctionPressed()
@@ -660,13 +534,25 @@ namespace OpenScadGraphEditor
 			_invokableRefactorDialog.OpenForNewModule(_currentProject);
 		}
 
-		public void PerformRefactorings(string description, params Refactoring[] refactorings)
+		public void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings)
 		{
-			PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
+			PerformRefactorings(description, refactorings, ctx => { });
 		}
 
-		public void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
-			params Action[] after)
+		public void PerformRefactoring<T, D>(string description, T refactoring, Action<D> after)
+			where T : Refactoring, IProvideTicketData<D>
+		{
+			PerformRefactorings(description, new[] {refactoring}, ctx =>
+			{
+				if (ctx.TryGetData<D>(refactoring.Ticket, out var data))
+				{
+					after(data);
+				}
+			});
+		}
+
+		private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings,
+			params Action<RefactoringContext>[] after)
 		{
 			try
 			{
@@ -719,7 +605,7 @@ namespace OpenScadGraphEditor
 				_refactoringInProgress = false;
 				Log.Debug("<< Refactorings end");
 
-				after.ForAll(it => it());
+				after.ForAll(it => it(context));
 			}
 			catch (Exception e)
 			{
@@ -1159,7 +1045,7 @@ namespace OpenScadGraphEditor
 
 		public void PerformRefactoring(string description, Refactoring refactoring)
 		{
-			PerformRefactorings(description, refactoring);
+			PerformRefactorings(description, new []{refactoring});
 		}
 
 		public void OpenGraph(InvokableDescription invokableDescription)

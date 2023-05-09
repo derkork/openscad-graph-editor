@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
@@ -12,32 +13,32 @@ namespace OpenScadGraphEditor.Nodes
     /// </summary>
     public class GetterSetterAddDialogEntryFactory : IAddDialogEntryFactory
     {
-        public IEnumerable<IAddDialogEntry> BuildEntries(ScadProject currentProject, ICanPerformRefactorings canPerformRefactorings)
+        public IEnumerable<IAddDialogEntry> BuildEntries(IEditorContext editorContext)
         {
             var result = new List<IAddDialogEntry>();
             
             
             // for the variables directly in the project
             result.AddRange(
-                currentProject.Variables
+                editorContext.CurrentProject.Variables
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.VariableIcon,
                         () => NodeFactory.Build<SetVariable>(it),
-                        canPerformRefactorings
+                        editorContext
                     ))
             );
 
             result.AddRange(
-                currentProject.Variables
+                editorContext.CurrentProject.Variables
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.VariableIcon,
                         () => NodeFactory.Build<GetVariable>(it),
-                        canPerformRefactorings
+                        editorContext
                     ))
             );
             
             // for the variables in external modules
-            var externalVariableDescriptions = currentProject.ExternalReferences
+            var externalVariableDescriptions = editorContext.CurrentProject.ExternalReferences
                 .SelectMany(it => it.Variables)
                 .ToList();
 
@@ -46,7 +47,7 @@ namespace OpenScadGraphEditor.Nodes
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.VariableIcon,
                         () => NodeFactory.Build<SetVariable>(it),
-                        canPerformRefactorings
+                        editorContext
                     ))
             );
 
@@ -55,7 +56,7 @@ namespace OpenScadGraphEditor.Nodes
                     .Select(it => new SingleNodeBasedEntry(
                         Resources.VariableIcon,
                         () => NodeFactory.Build<GetVariable>(it),
-                        canPerformRefactorings
+                        editorContext
                     ))
             );
 

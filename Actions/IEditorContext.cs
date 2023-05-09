@@ -1,4 +1,5 @@
-﻿using OpenScadGraphEditor.Library;
+﻿using System.Collections.Generic;
+using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -38,6 +39,11 @@ namespace OpenScadGraphEditor.Actions
         /// </summary>
         void PerformRefactoring(string description, Refactoring refactoring);
 
+        /// <summary>
+        /// Performs the given refactorings as a block operation.
+        /// </summary>
+        void PerformRefactorings(string title, IEnumerable<Refactoring> refactorings);
+        
         /// <summary>
         /// Finds all usages of the given invokable description and shows them in the editor.
         /// </summary>
