@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - A new _Sum_ node which can accept any number of incoming connections has been added. Summing up multiple values is a very common thing to do in OpenSCAD. Using the normal add operator node for this requires you to add one operator node for each two values you want to add. This can become tedious when you want to add more than two values. The new _Sum_ node allows you to add any number of values in a single node, which requires less clicks and improves the graphs readability. ([#53](https://github.com/derkork/openscad-graph-editor/issues/53)).
+- A new refactoring which allows you to extract a set of nodes into a function or module with a single keystroke. The refactoring automatically detects all incoming and outgoing connections, decides on the appropriate type (function or module) creates the necessary parameters and return values and then moves the nodes into the new graph, replacing them with call to the new function or module in the original graph  ([#51](https://github.com/derkork/openscad-graph-editor/issues/51)).
 
 ### Improved
 - When moving external SCAD files around the editor now handles absent files more gracefully. It will show a warning when trying to load a file that no longer exists or has become invalid. It will operate on the last known good state. This makes it easier to move files around without breaking your graph. ([#36](https://github.com/derkork/openscad-graph-editor/issues/36)).
