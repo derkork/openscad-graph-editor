@@ -33,17 +33,8 @@ namespace OpenScadGraphEditor.Refactorings
             
             // modify the ID of the saved invokable description
             savedGraph.Description.Id = Guid.NewGuid().ToString();
-            // give the invokable a unique name by appending an ascending number
-            // verify that no other invokable or variable in the project has the same name (including libraries)
-            // if there is a name conflict, increase the number until there is no conflict
-            var number = 2;
-            var newName = savedGraph.Description.Name + number;
-            while (context.Project.IsNameUsed(newName))
-            {
-                number++;
-                newName = savedGraph.Description.Name + number;
-            }
-            savedGraph.Description.Name = newName;            
+            // give the duplicate a unique new name
+            savedGraph.Description.Name = context.Project.SafeName(savedGraph.Description.Name);            
             
             // now we need to patch up all node IDs in the saved graph and replace them with new ones
             // this also means that we need to patch the connections in the saved graph

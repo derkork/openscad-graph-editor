@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using GodotExt;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Refactorings;
 
 namespace OpenScadGraphEditor.Library
 {
@@ -52,11 +53,9 @@ namespace OpenScadGraphEditor.Library
         public ModuleBuilder WithParameter(string name, PortType typeHint = PortType.Any,
             string label = "", string description = "", bool optional = false, RenderHint renderHint = RenderHint.None)
         {
-            GdAssert.That(_currentModuleDescription.Parameters.All(it => it.Name != name), $"Parameter with name '{name}' already exists");
-
             var parameter = new ParameterDescription
             {
-                Name = name,
+                Name = _currentModuleDescription.SafeParameterName(name),
                 Description = description,
                 TypeHint = typeHint,
                 Label = label,
