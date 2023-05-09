@@ -16,6 +16,11 @@ namespace OpenScadGraphEditor.Refactorings
         public ScadProject Project { get; }
         private readonly Queue<Refactoring> _refactorings = new Queue<Refactoring>();
 
+        /// <summary>
+        /// Dictionary storing data under the ticket of the refactoring that created it.
+        /// </summary>
+        private readonly Dictionary<string, object> _data = new Dictionary<string, object>();
+
 
         public RefactoringContext(ScadProject project)
         {
@@ -25,10 +30,11 @@ namespace OpenScadGraphEditor.Refactorings
         public void PerformRefactorings(IEnumerable<Refactoring> refactorings)
         {
             _refactorings.Clear();
+            _data.Clear();
             refactorings.ForAll(_refactorings.Enqueue);
-            
 
-            while(_refactorings.Any())
+
+            while (_refactorings.Any())
             {
                 var refactoring = _refactorings.Dequeue();
                 Log.Information("Performing refactoring {Refactoring}", refactoring.GetType().Name);
@@ -49,10 +55,38 @@ namespace OpenScadGraphEditor.Refactorings
                 _refactorings.Enqueue(refactoring);
                 return;
             }
-           
+
             Log.Information("Performing refactoring {Refactoring}", refactoring.GetType().Name);
             refactoring.PerformRefactoring(this);
         }
 
+        /// <summary>
+        /// Stores ticket data under the ticket of the refactoring that created it.
+        /// </summary>
+        internal void StoreTicketData<T>(IProvideTicketData<T> source, T data)
+        {
+            _data[source.Ticket] = data;
+        }
+
+        /// <summary>
+        /// Tries to retrieve data stored under the ticket of the refactoring that created it.
+        /// </summary>
+        public bool TryGetData<T>(string ticket, out T data)
+        {
+            data = default;
+            if (!_data.ContainsKey(ticket))
+            {
+                return false;
+            }
+
+            var result = _data[ticket];
+            if (!(result is T t))
+            {
+                return false;
+            }
+
+            data = t;
+            return true;
+        }
     }
 }
