@@ -342,6 +342,9 @@ namespace OpenScadGraphEditor.Widgets
                     return;
                 }
  
+                // TODO: BUG - if you have a textfield selected and then right click on a connection
+                // two refactorings will run at the same time, crashing the editor
+                
                 // otherwise we want to delete the connection
                 PerformRefactorings("Delete connection", new DeleteConnectionRefactoring(toDelete));
                 return;
@@ -439,6 +442,11 @@ namespace OpenScadGraphEditor.Widgets
                 var pastePosition = GetPastePosition();
 
                 DuplicateRequested?.Invoke(this, GetSelectedNodes().ToList(), pastePosition);
+            }
+
+            if (evt.IsExtract())
+            {
+                RefactoringsRequested?.Invoke("Extract nodes", new Refactoring[]{ new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList())});
             }
             
             if (evt.IsCut())

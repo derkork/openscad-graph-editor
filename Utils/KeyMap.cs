@@ -68,6 +68,9 @@ namespace OpenScadGraphEditor.Utils
         // duplicate
         public static bool IsDuplicate(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.D);
         
+        // extract
+        public static bool IsExtract(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.E);
+        
         // undo/redo
         public static bool IsUndo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z);
         public static bool IsRedo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z) && inputEvent.IsShiftPressed();
