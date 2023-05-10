@@ -77,6 +77,10 @@ namespace OpenScadGraphEditor.Widgets
         /// </summary>
         public event Action<ScadGraphEdit,ProjectTreeEntry, Vector2, Vector2> ItemDataDropped;
         
+        // TODO: make an event that exposes the current selection. then most other events can be removed
+        // and we handle global shortcuts in the main window. this will also allow it to add a menu in the
+        // main window which shows available actions for the current selection.
+        
         private readonly HashSet<string> _selection = new HashSet<string>();
         private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
         /// <summary>
