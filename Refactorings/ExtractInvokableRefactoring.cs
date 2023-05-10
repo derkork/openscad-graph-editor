@@ -405,7 +405,43 @@ namespace OpenScadGraphEditor.Refactorings
                 .Select(it =>
                 {
                     var portType = it.TryGetFromPortType(out var type) ? type : PortType.Any;
-                    // TODO: get a bit cleverer here and try to deduce a good name
+                    
+                    // check the source node where the connection comes from
+                    var sourceNode = it.From;
+                    
+                    // if the source node is a variable getter, use the variable name as the parameter name
+                    if (sourceNode is GetVariable variableGetter)
+                    {
+                        return (variableGetter.VariableDescription.Name, portType);
+                    }
+                    
+                    // if the source node is an entry point, use the parameter name that matches the port
+                    if (sourceNode is EntryPoint entryPoint)
+                    {
+                        // if the entry point refers to an invokable, get it's description
+                        if (entryPoint is IReferToAnInvokable referToAnInvokable)
+                        {
+                            var invokableDescription = referToAnInvokable.InvokableDescription;
+                            if (invokableDescription.Parameters.Count > it.FromPort)
+                            {
+                                return (invokableDescription.Parameters[it.FromPort].Name, portType);
+                            }
+                        }
+                    }
+                    
+                    // if the source node otherwise refers to an invokable, use the name of the invokable as the parameter name
+                    if (sourceNode is IReferToAnInvokable referToAnInvokable2)
+                    {
+                        return (referToAnInvokable2.InvokableDescription.Name, portType);
+                    }
+                    
+                    // if there is a reasonable short comment on the source node use that
+                    if (sourceNode.TryGetComment(out var comment) && comment.Length < 20)
+                    {
+                        return (comment.AsSafeIdentifier(), portType);
+                    }
+                    
+                    // well, no more clever ideas, so just use "parameter"
                     return ("parameter", portType);
                 }).ToList();
         }

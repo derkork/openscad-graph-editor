@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using static System.Text.RegularExpressions.Regex;
 
 namespace OpenScadGraphEditor.Refactorings
 {
@@ -42,22 +42,50 @@ namespace OpenScadGraphEditor.Refactorings
                 }
             }
         }
+
+        /// <summary>
+        /// Ensures that the given name is a safe identifier for OpenSCAD. Valid identifiers only contain letters
+        /// numbers and underscores and start with a letter or a $ sign. If the name is not a valid identifier, it is
+        /// converted to a valid identifier by replacing all invalid characters with an underscore. If the identifier
+        /// starts with a number an underscore is prepended. A null or empty string is converted to a single underscore.
+        /// </summary>
+        public static string AsSafeIdentifier(this string identifier)
+        {
+            if (string.IsNullOrEmpty(identifier))
+            {
+                return "_";
+            }
+            
+            var result = identifier;
+            if (!char.IsLetter(result[0]) && result[0] != '$')
+            {
+                result = "_" + result;
+            }
+            
+            // at this point the first character is guaranteed to be a letter or a $.
+            // for the rest of the string regex replace any character that is not a letter, number or underscore with an underscore
+            result = result.Substring(0, 1) + Replace(result.Substring(1), "[^a-zA-Z0-9_]", "_");
+            return result;
+            
+        }
         
         /// <summary>
         /// Generates a safe name for any member of the project. If the name is already used, a number is appended to the name.
         /// </summary>
         public static string SafeName(this ScadProject project, string name)
         {
-            if (!project.IsNameUsed(name))
+            var safeIdentifier = name.AsSafeIdentifier();
+            
+            if (!project.IsNameUsed(safeIdentifier))
             {
-                return name;
+                return safeIdentifier;
             }
             
-            var result = name;
+            var result = safeIdentifier;
             var i = 2;
             while (project.IsNameUsed(result))
             {
-                result = $"{name}{i}";
+                result = $"{safeIdentifier}{i}";
                 i++;
             }
 
@@ -70,16 +98,18 @@ namespace OpenScadGraphEditor.Refactorings
         /// </summary>
         public static string SafeParameterName(this InvokableDescription invokableDescription, string name)
         {
-            if (invokableDescription.Parameters.All(it => it.Name != name))
+            var safeIdentifier = name.AsSafeIdentifier();
+            
+            if (invokableDescription.Parameters.All(it => it.Name != safeIdentifier))
             {
-                return name;
+                return safeIdentifier;
             }
             
-            var result = name;
+            var result = safeIdentifier;
             var i = 2;
             while (invokableDescription.Parameters.Any(it => it.Name == result))
             {
-                result = $"{name}{i}";
+                result = $"{safeIdentifier}{i}";
                 i++;
             }
             

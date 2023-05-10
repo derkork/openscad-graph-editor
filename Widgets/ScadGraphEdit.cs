@@ -12,7 +12,6 @@ using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
-using OpenScadGraphEditor.Widgets.AddDialog;
 using OpenScadGraphEditor.Widgets.ProjectTree;
 using Serilog;
 
