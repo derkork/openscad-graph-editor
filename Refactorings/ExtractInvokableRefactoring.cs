@@ -199,6 +199,9 @@ namespace OpenScadGraphEditor.Refactorings
                 // if we don't have any geometry inputs, we can skip this
                 if (geometryInputs.Count > 0)
                 {
+                    // enable children for this graph, because we'll need it
+                    context.PerformRefactoring(new EnableChildrenRefactoring((ModuleDescription) invokableDescription));
+                    
                     // check how many sources and destinations we have
                     var sources = geometryInputs.Select(it => it.From).Distinct().ToList();
                     var destinations = geometryInputs.Select(it => it.To).Distinct().ToList();
@@ -223,10 +226,6 @@ namespace OpenScadGraphEditor.Refactorings
                         context.PerformRefactoring(new ChangeNodePositionRefactoring(newGraph, childrenNode,
                             entryPoint.Offset + new Vector2(0, 200)));
 
-                        // enable children for this graph
-                        context.PerformRefactoring(
-                            new EnableChildrenRefactoring((ModuleDescription) invokableDescription));
-
                         // and connect it's output to all destinations
                         foreach (var connection in geometryInputs)
                         {
@@ -237,35 +236,43 @@ namespace OpenScadGraphEditor.Refactorings
                     }
                     else
                     {
-                        // it's a bit more tricky here, we need to create a child(x) node for each incoming connection
+                        // it's a bit more tricky here, we need to create a child(x) node for each incoming source
                         // and connect it to the corresponding destination.
-
-                        for (var index = 0; index < geometryInputs.Count; index++)
+                        
+                        // first create a child node for each source and store it in a dictionary
+                        var childNodes = new Dictionary<ScadNode, Child>();
+                        for (var i = 0; i < sources.Count; i++)
                         {
-                            var connection = geometryInputs[index];
-
-                            // make a new child node
+                            var sourceNode = sources[i];
                             var childNode = NodeFactory.Build<Child>();
-
+                            childNodes.Add(sourceNode, childNode);
+                            
                             // add the node to the graph
                             context.PerformRefactoring(new AddNodeRefactoring(newGraph, childNode));
+                            
                             // position it below the entry point, 200 units down below the previous child
                             context.PerformRefactoring(new ChangeNodePositionRefactoring(newGraph, childNode,
-                                entryPoint.Offset + new Vector2(0, 200 + index * 200)));
-                            // enable children for this graph
-                            context.PerformRefactoring(
-                                new EnableChildrenRefactoring((ModuleDescription) invokableDescription));
+                                entryPoint.Offset + new Vector2(0, 200 + i * 200)));
+                            
+                            // also set the input port literal of the child node to the index, so first node
+                            // gets 0, second node gets 1, etc.
+                            context.PerformRefactoring(new SetLiteralValueRefactoring(newGraph, childNode,
+                                PortId.Input(0), new NumberLiteral(i)));
+                        }
+
+                        foreach (var connection in geometryInputs)
+                        {
+                            if (!childNodes.TryGetValue(connection.From, out var childNode))
+                            {
+                                NotificationService.ShowBug("Cannot find child node for source node.");
+                                continue;
+                            }
 
                             // and connect it's output to the corresponding destination
                             var newConnection = new ScadConnection(newGraph, childNode, 0,
                                 newGraph.ById(newIds[connection.To.Id]), connection.ToPort);
 
                             context.PerformRefactoring(new AddConnectionRefactoring(newConnection));
-
-                            // also set the input port literal of the child node to the index, so first node
-                            // gets 0, second node gets 1, etc.
-                            context.PerformRefactoring(new SetLiteralValueRefactoring(newGraph, childNode,
-                                PortId.Input(0), new NumberLiteral(index)));
                         }
                     }
                 }
