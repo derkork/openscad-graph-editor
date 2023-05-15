@@ -9,9 +9,8 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
         protected SwitchableBinaryOperator()
         {
             InputPorts
-                // we start with `Any` for both input port as usually you will connect another node there
-                // and therefore this is the most suitable setting.
-                .Any() 
+                // we start with `Any` as it is the most compatible
+                .Any()
                 .Any();
 
             OutputPorts
@@ -52,6 +51,13 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
         }
 
         public abstract bool Supports(PortType portType);
+        
+        
+        /// <summary>
+        /// Checks if the given input port types are supported by this operator in this combination and returns
+        /// the result port type. If the combination is not supported, the result port type is set to `PortType.Any`.
+        /// </summary>
+        public abstract bool Supports(PortType first, PortType second, out PortType resultPortType);
 
         public override void RestorePortDefinitions(SavedNode node, IReferenceResolver resolver)
         {
@@ -120,5 +126,6 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
         /// </summary>
         /// <returns></returns>
         protected abstract PortType CalculateOutputPortType();
+
     }
 }

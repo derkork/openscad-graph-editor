@@ -24,40 +24,58 @@ namespace OpenScadGraphEditor.Nodes
             
         }
 
-        protected override PortType CalculateOutputPortType()
+        public override bool Supports(PortType first, PortType second, out PortType resultPortType)
         {
-            var firstPortType = GetPortType(PortId.Input(0));
-            var secondPortType = GetPortType(PortId.Input(1));
+            var portTypes = new[] {first, second};
             
-            var portTypes = new[] {firstPortType, secondPortType};
+            // if any port type is not supported, the result is ANY
+            if (portTypes.Any(it => !Supports(it)))
+            {
+                resultPortType = PortType.Any;
+                return false;
+            }
             
             // if any of the port types is ANY, the result is ANY
             if (portTypes.Any(it => it == PortType.Any))
             {
-                return PortType.Any;
+                resultPortType = PortType.Any;
+                return true;
             }
             
             // if both are numbers, the result is a number
             if (portTypes.All(it => it == PortType.Number))
             {
-                return PortType.Number;
+                resultPortType =  PortType.Number;
+                return true;
             }
             
             // if both are vector types the result is a number (dot product)
             if (portTypes.All(it => it == PortType.Vector2 || it == PortType.Vector3 || it == PortType.Vector))
             {
-                return PortType.Number;
+                resultPortType =  PortType.Number;
+                return true;
             }
             
             // if one factor is a number and the other one is a vector type (vector, vector2, vector3), the result is the vector type
             if (portTypes.Any(it => it == PortType.Number) && portTypes.Any(it => it == PortType.Vector2 || it == PortType.Vector3 || it == PortType.Vector))
             {
-                return portTypes.First(it => it == PortType.Vector2 || it == PortType.Vector3 || it == PortType.Vector);
+                resultPortType =  portTypes.First(it => it == PortType.Vector2 || it == PortType.Vector3 || it == PortType.Vector);
+                return true;
             }
             
             // should never happen, but if we get here, it's ANY
+            resultPortType =  PortType.Any;
+            return false;
+        }
+
+        protected override PortType CalculateOutputPortType()
+        {
+            if (Supports(GetPortType(PortId.Input(0)), GetPortType(PortId.Input(1)), out var result))
+            {
+                return result;
+            }
+
             return PortType.Any;
-            
         }
 
         public override Texture NodeBackground => Resources.TimesIcon;

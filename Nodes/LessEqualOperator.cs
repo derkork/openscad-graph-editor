@@ -18,6 +18,25 @@ namespace OpenScadGraphEditor.Nodes
             return portType == PortType.Number || portType == PortType.String || portType == PortType.Boolean || portType == PortType.Any;
         }
 
+        public override bool Supports(PortType first, PortType second, out PortType resultPortType)
+        {
+            // all combinations are supported as long as they are the same type and both are a supported type
+            if (first != second)
+            {
+                resultPortType = PortType.Any;
+                return false;
+            }
+            
+            if (!Supports(first) || !Supports(second))
+            {
+                resultPortType = PortType.Any;
+                return false;
+            }
+
+            resultPortType = PortType.Boolean;
+            return true;
+        }
+
         public override Texture NodeBackground => Resources.LessEqualIcon;
     }
 }
