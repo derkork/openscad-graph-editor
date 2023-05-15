@@ -6,6 +6,7 @@ namespace OpenScadGraphEditor.Nodes
     {
         // indicates the absence of a port type.
         None = 0,
+
         // do not change the numbers, otherwise saved graphs will break!
         Geometry = 1,
         Boolean = 2,
@@ -27,7 +28,7 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Geometry:
                     return "geometry";
                 case PortType.Boolean:
-                    return "boolean";   
+                    return "boolean";
                 case PortType.Number:
                     return "number";
                 case PortType.Vector3:
@@ -41,12 +42,13 @@ namespace OpenScadGraphEditor.Nodes
                 case PortType.Any:
                     return "any";
                 case PortType.Reroute:
+                case PortType.None:
                     return "";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(self), self, null);
             }
         }
-        
+
         public static bool IsExpressionType(this PortType self)
         {
             switch (self)
@@ -61,10 +63,11 @@ namespace OpenScadGraphEditor.Nodes
                     return true;
                 case PortType.Geometry:
                 case PortType.Reroute:
+                case PortType.None:
                     return false;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(self), self, null);
-            } 
+            }
         }
 
         public static bool IsNumericInCustomizer(this PortType self)
@@ -95,29 +98,30 @@ namespace OpenScadGraphEditor.Nodes
             {
                 return true;
             }
-            
+
             // vector2 and 3 can be assigned to Vector
             if (self == PortType.Vector2 && other == PortType.Vector)
             {
                 return true;
             }
+
             if (self == PortType.Vector3 && other == PortType.Vector)
             {
                 return true;
             }
-            
+
             // any can be assigned to any expression type
             if (self == PortType.Any && other.IsExpressionType())
             {
                 return true;
             }
-            
+
             // any expression type can be assigned to any
             if (self.IsExpressionType() && other == PortType.Any)
             {
                 return true;
             }
-            
+
             // anything else - nope
             return false;
         }

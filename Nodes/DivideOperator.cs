@@ -22,27 +22,45 @@ namespace OpenScadGraphEditor.Nodes
             
         }
 
-        protected override PortType CalculateOutputPortType()
+        public override bool Supports(PortType first, PortType second, out PortType resultPortType)
         {
-            var firstPortType = GetPortType(PortId.Input(0));
-            var secondPortType = GetPortType(PortId.Input(1));
+            // if any port type is not supported, the result is ANY
+            if (!Supports(first) || !Supports(second))
+            {
+                resultPortType = PortType.Any;
+                return false;
+            }
             
             // if any of the port types is ANY, the result is ANY
-            if (firstPortType == PortType.Any || secondPortType == PortType.Any)
+            if (first == PortType.Any || second == PortType.Any)
             {
-                return PortType.Any;
+                resultPortType = PortType.Any;
+                return true;
             }
             
             // if the divisor is a number, the result is the port type of the dividend
-            if (secondPortType == PortType.Number)
+            if (second == PortType.Number)
             {
-                return firstPortType;
+                resultPortType =  first;
+                return true;
             }
             
             // if the dividend is a number, the result is the port type of the divisor
-            if (firstPortType == PortType.Number)
+            if (first == PortType.Number)
             {
-                return secondPortType;
+                resultPortType =  second;
+                return true;
+            };
+            
+            resultPortType = PortType.Any;
+            return false;
+        }
+
+        protected override PortType CalculateOutputPortType()
+        {
+            if (Supports(GetPortType(PortId.Input(0)),GetPortType(PortId.Input(1)), out var result))
+            {
+                return result;
             }
             
             // every other case is not supported, so ANY

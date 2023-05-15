@@ -37,9 +37,9 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 )
                )
             {
-                var title = $"Change to {_example.NodeTitle}";
+                var title = $"to {_example.NodeTitle}";
                 result = new QuickAction(title,
-                    () => context.PerformRefactoring(title, 
+                    () => context.PerformRefactoring($"Change operator {title}", 
                         new ChangeOperatorTypeRefactoring(graph, oldOperator, _nodeType))
                 );
                 return true;
