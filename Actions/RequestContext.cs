@@ -5,67 +5,112 @@ using OpenScadGraphEditor.Nodes;
 
 namespace OpenScadGraphEditor.Actions
 {
-    public class RequestContext
+    public readonly struct RequestContext
     {
-        public static RequestContext ForPosition(ScadGraph source, Vector2 position)
+        public static RequestContext ForPositionInGraph(ScadGraph source, Vector2 position)
         {
-            return new RequestContext(source, position);
+            return new RequestContext().WithGraph(source).WithPosition(position);
         }
 
-        public static RequestContext FromPort(ScadGraph source, Vector2 position, ScadNode node, int port)
+        public static RequestContext ForOutputPort(ScadGraph source, Vector2 position, ScadNode node, int port)
         {
-            return new RequestContext(source, position, node, PortId.Output(port));
+            return new RequestContext().WithNodePort(source, node, PortId.Output(port)).WithPosition(position);
         }
-        public static RequestContext ToPort(ScadGraph source, Vector2 position, ScadNode node, int port)
+
+        public static RequestContext ForInputPort(ScadGraph source, Vector2 position, ScadNode node, int port)
         {
-            return new RequestContext(source, position, node, PortId.Input(port));
+            return new RequestContext().WithNodePort(source, node, PortId.Input(port)).WithPosition(position);
         }
 
         public static RequestContext ForNode(ScadGraph source, Vector2 position, ScadNode node)
         {
-            return new RequestContext(source, position, node);
+            return new RequestContext().WithNode(source, node).WithPosition(position);
         }
 
         public static RequestContext ForInvokableDescription(InvokableDescription description)
         {
-            return new RequestContext(invokableDescription:description);
-        }
-        
-        public static RequestContext ForVariableDescription(VariableDescription description)
-        {
-            return new RequestContext(variableDescription:description);
-        }
-        
-        public static RequestContext ForExternalReference(ExternalReference reference)
-        {
-            return new RequestContext(externalReference:reference);
-        }
-        
-        private RequestContext(ScadGraph graph = default, 
-            Vector2 position = default, 
-            ScadNode node = default, 
-            PortId portId = default, 
-            InvokableDescription invokableDescription = default,
-            VariableDescription variableDescription = default,
-            ExternalReference externalReference = default
-            )
-        {
-            _graph = graph;
-            _position = position;
-            _node = node;
-            _port = portId;
-            _invokableDescription = invokableDescription;
-            _variableDescription = variableDescription;
-            _externalReference = externalReference;
+            return new RequestContext().WithInvokableDescription(description);
         }
 
+        public static RequestContext ForVariableDescription(VariableDescription description)
+        {
+            return new RequestContext().WithVariableDescription(description);
+        }
+
+        public static RequestContext ForExternalReference(ExternalReference reference)
+        {
+            return new RequestContext().WithExternalReference(reference);
+        }
+
+
         private readonly ScadGraph _graph;
-        private readonly Vector2 _position; 
+        private readonly Vector2 _position;
+        private readonly bool _hasPosition;
         private readonly ScadNode _node;
         private readonly PortId _port;
         private readonly InvokableDescription _invokableDescription;
         private readonly VariableDescription _variableDescription;
         private readonly ExternalReference _externalReference;
+
+        private RequestContext(ScadGraph graph, Vector2 position, bool hasPosition,
+            ScadNode node, PortId port, InvokableDescription invokableDescription,
+            VariableDescription variableDescription, ExternalReference externalReference)
+        {
+            _graph = graph;
+            _position = position;
+            _hasPosition = hasPosition;
+            _node = node;
+            _port = port;
+            _invokableDescription = invokableDescription;
+            _variableDescription = variableDescription;
+            _externalReference = externalReference;
+        }
+        
+        public bool IsEmpty => _graph == null && _node == null && _invokableDescription == null &&
+                               _variableDescription == null && _externalReference == null;
+
+        public RequestContext WithGraph(ScadGraph graph)
+        {
+            return new RequestContext(graph, _position, _hasPosition, _node, _port, _invokableDescription,
+                _variableDescription, _externalReference);
+        }
+
+        public RequestContext WithPosition(Vector2 position)
+        {
+            return new RequestContext(_graph, position, true, _node, _port, _invokableDescription, _variableDescription,
+                _externalReference);
+        }
+
+        public RequestContext WithNode(ScadGraph graph, ScadNode node)
+        {
+            return new RequestContext(graph, _position, _hasPosition, node, _port, _invokableDescription,
+                _variableDescription, _externalReference);
+        }
+
+        public RequestContext WithNodePort(ScadGraph graph, ScadNode node, PortId port)
+        {
+            return new RequestContext(graph, _position, _hasPosition, node, _port, _invokableDescription,
+                _variableDescription, _externalReference);
+        }
+
+        public RequestContext WithInvokableDescription(InvokableDescription description)
+        {
+            return new RequestContext(_graph, _position, _hasPosition, _node, _port, description,
+                _variableDescription, _externalReference);
+        }
+
+        public RequestContext WithVariableDescription(VariableDescription description)
+        {
+            return new RequestContext(_graph, _position, _hasPosition, _node, _port, _invokableDescription,
+                description, _externalReference);
+        }
+
+        public RequestContext WithExternalReference(ExternalReference reference)
+        {
+            return new RequestContext(_graph, _position, _hasPosition, _node, _port, _invokableDescription,
+                _variableDescription, reference);
+        }
+
 
         public bool TryGetNodeAndPort(out ScadGraph graph, out ScadNode node, out PortId port)
         {
@@ -96,11 +141,11 @@ namespace OpenScadGraphEditor.Actions
             node = _node;
             return true;
         }
-        
-        
-        public bool TryGetPosition(out ScadGraph graph, out Vector2 position)
+
+
+        public bool TryGetPositionInGraph(out ScadGraph graph, out Vector2 position)
         {
-            if (_graph == null)
+            if (_graph == null || !_hasPosition)
             {
                 graph = default;
                 position = default;
@@ -111,7 +156,20 @@ namespace OpenScadGraphEditor.Actions
             position = _position;
             return true;
         }
-        
+
+        public bool TryGetPosition(out Vector2 position)
+        {
+            if (!_hasPosition)
+            {
+                position = default;
+                return false;
+            }
+
+            position = _position;
+            return true;
+        }
+
+
         public bool TryGetInvokableDescription(out InvokableDescription description)
         {
             if (_invokableDescription == null)
@@ -122,7 +180,7 @@ namespace OpenScadGraphEditor.Actions
                     description = invokableReference.InvokableDescription;
                     return true;
                 }
-                
+
                 description = default;
                 return false;
             }
@@ -130,7 +188,7 @@ namespace OpenScadGraphEditor.Actions
             description = _invokableDescription;
             return true;
         }
-        
+
         public bool TryGetVariableDescription(out VariableDescription description)
         {
             if (_variableDescription == null)
@@ -141,6 +199,7 @@ namespace OpenScadGraphEditor.Actions
                     description = variableReference.VariableDescription;
                     return true;
                 }
+
                 description = default;
                 return false;
             }
@@ -148,7 +207,7 @@ namespace OpenScadGraphEditor.Actions
             description = _variableDescription;
             return true;
         }
-        
+
         public bool TryGetExternalReference(out ExternalReference reference)
         {
             if (_externalReference == null)
@@ -160,7 +219,5 @@ namespace OpenScadGraphEditor.Actions
             reference = _externalReference;
             return true;
         }
-
-    
     }
 }
