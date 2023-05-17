@@ -27,11 +27,6 @@ namespace OpenScadGraphEditor.Widgets
     {
 
         /// <summary>
-        /// Emitted when refactorings are requested.
-        /// </summary>
-        public event Action<string, Refactoring[]> RefactoringsRequested;
-        
-        /// <summary>
         /// Emitted when the user requested copying nodes.
         /// </summary>
         public event Action<ScadGraphEdit, List<ScadNode>> CopyRequested;
@@ -67,11 +62,6 @@ namespace OpenScadGraphEditor.Widgets
         public event Action<RequestContext> EditCommentRequested;
 
         /// <summary>
-        /// Emitted when the user requests help on a certain node.
-        /// </summary>
-        public event Action<RequestContext> HelpRequested;
-
-        /// <summary>
         /// Called when data from any list entry is dropped.
         /// </summary>
         public event Action<ScadGraphEdit,ProjectTreeEntry, Vector2, Vector2> ItemDataDropped;
@@ -95,6 +85,7 @@ namespace OpenScadGraphEditor.Widgets
         private List<Vector2> _connectionHighlightPoints;
         private ScadConnection _highlightedConnection;
         private ScadProject _project;
+        private IEditorContext _context;
 
 
         public void SelectNodes(List<ScadNode> nodes)
@@ -197,10 +188,9 @@ namespace OpenScadGraphEditor.Widgets
         private void OnEndNodeMove()
         {
             // all nodes which are currently selected have moved, so we need to send a refactoring request for them.
-            PerformRefactorings("Move node(s)",
-                GetSelectedNodes()
-                    .Select(it => new ChangeNodePositionRefactoring(Graph, it, _widgets[it.Id].Offset)));
-
+            IEnumerable<Refactoring> refactorings = GetSelectedNodes()
+                .Select(it => new ChangeNodePositionRefactoring(Graph, it, _widgets[it.Id].Offset));
+            _context.PerformRefactorings("Move node(s)", refactorings);
         }
         
         public void FocusEntryPoint()
@@ -225,10 +215,11 @@ namespace OpenScadGraphEditor.Widgets
         }
         
 
-        public void Render(ScadProject project, ScadGraph graph)
+        public async void Render(IEditorContext context, ScadGraph graph)
         {
             Graph = graph;
-            _project = project;
+            _project = context.CurrentProject;
+            _context = context;
             
             // rebuild the nodes
             foreach (var node in Graph.GetAllNodes())
@@ -252,8 +243,6 @@ namespace OpenScadGraphEditor.Widgets
                 ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
             }
             
-            // build the lookup tree
-            BuildConnectionLookupTree();
 
             // highlight any bound nodes
             HighlightBoundNodes();
@@ -273,6 +262,8 @@ namespace OpenScadGraphEditor.Widgets
                 // also remove them from the selection if they were in 
                 _selection.Remove(id);
             }
+
+            BuildConnectionLookupTree();
         }
 
         private void BuildConnectionLookupTree()
@@ -358,7 +349,7 @@ namespace OpenScadGraphEditor.Widgets
             if (!TryGetNodeAtPosition(relativePosition, out var node))
             {
                 // right-click in empty space yields you the add dialog
-                AddDialogRequested?.Invoke(RequestContext.ForPosition(Graph, relativePosition));
+                AddDialogRequested?.Invoke(RequestContext.ForPositionInGraph(Graph, relativePosition));
                 return;
             }
 
@@ -449,7 +440,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsExtract())
             {
-                RefactoringsRequested?.Invoke("Extract nodes", new Refactoring[]{ new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList())});
+                _context.PerformRefactoring("Extract nodes", new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList()));
             }
             
             if (evt.IsCut())
@@ -476,7 +467,7 @@ namespace OpenScadGraphEditor.Widgets
             if (evt.IsShowHelp() && _selection.Count == 1)
             {
                 var selectedNode = Graph.GetAllNodes().First(it => it.Id == _selection.First());
-                HelpRequested?.Invoke(RequestContext.ForNode(Graph, selectedNode.Offset, selectedNode));
+                _context.ShowHelp(Graph, selectedNode);
                 return;
             }
             
@@ -487,22 +478,22 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsAlignLeft())
             {
-                AlignSelectionLeft();
+                new GraphLayout(Graph, _context).AlignNodesLeft(GetSelectedWidgets());
             }
             
             if (evt.IsAlignRight())
             {
-                AlignSelectionRight();
+                new GraphLayout(Graph, _context).AlignNodesRight(GetSelectedWidgets());
             }
             
             if (evt.IsAlignTop())
             {
-                AlignSelectionTop();
+                new GraphLayout(Graph, _context).AlignNodesTop(GetSelectedWidgets());
             }
             
             if (evt.IsAlignBottom())
             {
-                AlignSelectionBottom();
+                new GraphLayout(Graph, _context).AlignNodesBottom(GetSelectedWidgets());
             }
         }
 
@@ -632,7 +623,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (refactorings.Any())
             {
-                PerformRefactorings("Straighten connections", refactorings);
+                _context.PerformRefactorings("Straighten connections", refactorings);
             }
             else
             {
@@ -640,55 +631,15 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
-        private void AlignSelectionLeft()
-        {
-            AlignSelection("Align left", 
-                () => GetSelectedNodes().Min(it  => it.Offset.x),
-                (it, position) => new Vector2(position, it.Offset.y));
-        }
 
-        private void AlignSelectionRight()
-        {
-            AlignSelection("Align right", 
-                () => GetSelectedNodes().Max(it  => it.Offset.x + _widgets[it.Id].RectSize.x),
-                (it, position) => new Vector2(position - _widgets[it.Id].RectSize.x, it.Offset.y));
-        }
-        
-        private void AlignSelectionTop()
-        {
-            AlignSelection("Align top", 
-                () => GetSelectedNodes().Min(it  => it.Offset.y),
-                (it, position) => new Vector2(it.Offset.x, position));
-        }
-        
-        private void AlignSelectionBottom()
-        {
-            AlignSelection("Align bottom", 
-                () => GetSelectedNodes().Max(it  => it.Offset.y),
-                (it, position) => new Vector2(it.Offset.x, position));
-        }
-        
-        private void AlignSelection(string humanReadableName, Func<float> getPosition, Func<ScadNode, float, Vector2> getOffset)
-        {
-            if (GetSelectedNodes().Count() < 2)
-            {
-                NotificationService.ShowNotification("Select at least two nodes to align.");
-                return;
-            }
-            
-            var alignmentPosition = getPosition();
-            var refactorings =
-                GetSelectedNodes()
-                    .Select(it =>
-                        new ChangeNodePositionRefactoring(Graph, it, getOffset(it, alignmentPosition)));
-
-            PerformRefactorings(humanReadableName, refactorings);
-        }
-        
-        
         private IEnumerable<ScadNode> GetSelectedNodes()
         {
             return _selection.Select(it => _widgets[it].BoundNode);
+        }
+
+        private List<ScadNodeWidget> GetSelectedWidgets()
+        {
+            return _selection.Select(it => _widgets[it]).ToList();
         }
 
         private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
@@ -708,14 +659,14 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            var context = RequestContext.FromPort(Graph, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(fromWidgetName), fromPort);
+            var context = RequestContext.ForOutputPort(Graph, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(fromWidgetName), fromPort);
             AddDialogRequested?.Invoke(context);
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
             
-            var context = RequestContext.ToPort(Graph, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(toWidgetName), toPort);
+            var context = RequestContext.ForInputPort(Graph, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(toWidgetName), toPort);
             AddDialogRequested?.Invoke(context);
         }
 
@@ -783,7 +734,7 @@ namespace OpenScadGraphEditor.Widgets
                     .Select(it => new DeleteNodeRefactoring(Graph, it, KeyMap.IsKeepConnectionsPressed()))
                     .ToList();
             _selection.Clear();
-            PerformRefactorings("Delete selection",  refactorings);
+            _context.PerformRefactorings("Delete selection", refactorings);
         }
 
         // Godot 3.5
@@ -830,18 +781,7 @@ namespace OpenScadGraphEditor.Widgets
 
         private void PerformRefactorings(string description, params Refactoring[] refactorings)
         {
-            PerformRefactorings(description, (IEnumerable<Refactoring>) refactorings);
-        }
-
-        private void PerformRefactorings(string description, IEnumerable<Refactoring> refactorings)
-        {
-            var refactoringsAsArray = refactorings.ToArray();
-            if (refactoringsAsArray.Length == 0)
-            {
-                return;
-            }
-            
-            RefactoringsRequested?.Invoke(description, refactoringsAsArray);
+            _context.PerformRefactorings(description, refactorings);
         }
 
         private (Vector2 Start, Vector2 End) GetConnectionPoints(ScadConnection connection)

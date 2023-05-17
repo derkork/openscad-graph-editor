@@ -37,5 +37,17 @@ namespace OpenScadGraphEditor.Utils
                 index++;
             }
         }
+        
+        // minBy (as it is only available in .NET 6)
+        public static T MinBy<T, TKey>(this IEnumerable<T> self, Func<T, TKey> keySelector) where TKey : IComparable<TKey>
+        {
+            return self.Aggregate((a, b) => keySelector(a).CompareTo(keySelector(b)) < 0 ? a : b);
+        }
+        
+        // maxBy (as it is only available in .NET 6)
+        public static T MaxBy<T, TKey>(this IEnumerable<T> self, Func<T, TKey> keySelector) where TKey : IComparable<TKey>
+        {
+            return self.Aggregate((a, b) => keySelector(a).CompareTo(keySelector(b)) > 0 ? a : b);
+        }
     }
 }

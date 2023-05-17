@@ -276,7 +276,7 @@ namespace OpenScadGraphEditor
 			if (editor.Graph != null)
 			{
 				// re-paint
-				editor.Render(_currentProject, editor.Graph);
+				editor.Render(this, editor.Graph);
 			}
 		}
 
@@ -315,16 +315,15 @@ namespace OpenScadGraphEditor
 				ScadInvokableTreeEntry invokableTreeEntry => RequestContext.ForInvokableDescription(invokableTreeEntry.Description),
 				ExternalReferenceTreeEntry externalReferenceTreeEntry => RequestContext.ForExternalReference(externalReferenceTreeEntry.Description),
 				ScadVariableTreeEntry variableTreeEntry => RequestContext.ForVariableDescription(variableTreeEntry.Description),
-				_ => null
+				_ => default
 			};
 
-			if (requestContext == null)
+			if (requestContext.IsEmpty)
 			{
 				return;
 			}
 
-			var actions = BuildItemContextMenu(requestContext);
-			_quickActionsPopup.Open(mousePosition, actions);
+			ShowPopupMenu(requestContext);
 		}
 
 		/// <summary>
@@ -412,8 +411,8 @@ namespace OpenScadGraphEditor
 
 		private void AddNode(RequestContext context, ScadNode node)
 		{
-			context.TryGetPosition(out var graph, out var position);
-			context.TryGetNodeAndPort(out _, out var otherNode, out var otherPort);
+			context.TryGetPosition(out var position);
+			context.TryGetNodeAndPort(out var graph, out var otherNode, out var otherPort);
 			node.Offset = position;
 
 			PerformRefactoring("Add node",
@@ -426,13 +425,12 @@ namespace OpenScadGraphEditor
 			if (_openEditors.TryGetValue(toOpen.Description.Id, out var existingEditor))
 			{
 				_tabContainer.CurrentTab = existingEditor.GetIndex();
-				existingEditor.Render(_currentProject, toOpen);
+				existingEditor.Render(this, toOpen);
 				return existingEditor;
 			}
 
 			// if not, open a new tab
 			var editor = Prefabs.New<ScadGraphEdit>();
-			editor.RefactoringsRequested += PerformRefactorings;
 			editor.NodePopupRequested += OnNodeContextMenuRequested;
 			editor.ItemDataDropped += OnItemDataDropped;
 			editor.AddDialogRequested += OnAddDialogRequested;
@@ -441,11 +439,10 @@ namespace OpenScadGraphEditor
 			editor.PasteRequested += OnPasteRequested;
 			editor.CutRequested += OnCutRequested;
 			editor.EditCommentRequested += OnEditCommentRequested;
-			editor.HelpRequested += OnHelpRequested;
 
 			editor.Name = toOpen.Description.Id;
 			editor.MoveToNewParent(_tabContainer);
-			editor.Render(_currentProject, toOpen);
+			editor.Render(this, toOpen);
 			_openEditors[toOpen.Description.Id] = editor;
 			_tabContainer.CurrentTab = _tabContainer.GetChildCount() - 1;
 			_tabContainer.SetTabTitle(_tabContainer.CurrentTab, editor.Graph.Description.NodeNameOrFallback);
@@ -453,13 +450,7 @@ namespace OpenScadGraphEditor
 			return editor;
 		}
 
-		private void OnHelpRequested(RequestContext obj)
-		{
-			if (obj.TryGetNode(out var graph, out var node))
-			{
-				ShowHelp(graph, node);
-			}
-		}
+
 
 
 		private void Close(ScadGraphEdit editor)
@@ -591,7 +582,7 @@ namespace OpenScadGraphEditor
 				{
 					var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
 					// update the graph renderings.
-					graphEdit.Render(_currentProject, graphEdit.Graph);
+					graphEdit.Render(this, graphEdit.Graph);
 					// and update the tab title as it might have changed.
 					_tabContainer.SetTabTitle(i, graphEdit.Graph.Description.NodeNameOrFallback);
 				}
@@ -747,14 +738,12 @@ namespace OpenScadGraphEditor
 
 		private void OnNodeContextMenuRequested(RequestContext requestContext)
 		{
-			requestContext.TryGetPosition(out _, out var position);
-			_quickActionsPopup.Open(position, BuildItemContextMenu(requestContext));
+			ShowPopupMenu(requestContext);
 		}
 
-
-		private IEnumerable<QuickAction> BuildItemContextMenu(RequestContext context)
+		public void ShowPopupMenu(RequestContext context)
 		{
-			return _editorActions
+			var popupActions =  _editorActions
 				.OrderBy(it => it.Order)
 				.GroupBy(it => it.Group)
 				.SelectMany(group =>
@@ -793,6 +782,9 @@ namespace OpenScadGraphEditor
 					
 					return result;
 				}).ToList();
+			
+			context.TryGetPosition(out var position);
+			_quickActionsPopup.Open(position, popupActions);
 		}
 		
 		private void OnOpenFileDialogRequested()
@@ -882,7 +874,7 @@ namespace OpenScadGraphEditor
 			{
 				var graphEdit = (ScadGraphEdit) _tabContainer.GetTabControl(i);
 				// update the graph renderings.
-				graphEdit.Render(_currentProject, graphEdit.Graph);
+				graphEdit.Render(this, graphEdit.Graph);
 			}
 			
 			MarkDirty(true);
@@ -1067,5 +1059,9 @@ namespace OpenScadGraphEditor
 			_helpDialog.Open(_currentProject, graph, node);
 		}
 
- 	}
+		public void ShowInfo(string message)
+		{
+			NotificationService.ShowNotification(message);
+		}
+	}
 }
