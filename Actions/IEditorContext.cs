@@ -74,5 +74,9 @@ namespace OpenScadGraphEditor.Actions
         /// </summary>
         void ShowHelp(ScadGraph graph, ScadNode node);
 
+        /// <summary>
+        /// Shows the given message as a popup info in the bottom right.
+        /// </summary>
+        void ShowInfo(string message);
     }
 }
