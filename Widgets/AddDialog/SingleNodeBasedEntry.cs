@@ -70,7 +70,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
             // build a new node, put it to the correct position and then add it using the refactoring facility
             var node = _factory();
             // get graph and position
-            context.TryGetPosition(out var graph, out var position);
+            context.TryGetPositionInGraph(out var graph, out var position);
             // if we have, get the other node and port (note this returns null for everything if we have no node, so
             // we don't take graph and position from this call
             context.TryGetNodeAndPort(out _, out var otherNode, out var otherPort);

@@ -79,7 +79,7 @@ namespace OpenScadGraphEditor.Widgets.AddDialog
 
         private void OnEntrySelected(RequestContext context)
         {
-            var hasPosition = context.TryGetPosition(out var graph, out var position);
+            var hasPosition = context.TryGetPositionInGraph(out var graph, out var position);
             GdAssert.That(hasPosition, "BoundPairBasedEntry can only be used in a context with a position.");
             
             // make the new nodes
