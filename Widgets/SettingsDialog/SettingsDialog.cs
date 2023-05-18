@@ -1,8 +1,7 @@
-using System;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
-using OpenScadGraphEditor.Library;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Refactorings;
 
@@ -11,18 +10,12 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
     [UsedImplicitly]
     public class SettingsDialog : WindowDialog
     {
-        private Configuration _configuration;
-        private ScadProject _currentProject;
-
-        
         private TextEdit _projectPreambleTextEdit;
-
         private OptionButton _editorScaleOptionButton;
         private FileSelectBox.FileSelectBox _fileSelectBox;
         private TextEdit _defaultPreambleTextEdit;
         private SpinBox _backupsSpinBox;
-        
-        public event Action<string, Refactoring> RefactoringRequested; 
+        private IEditorContext _context;
 
         public override void _Ready()
         {
@@ -47,10 +40,11 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
                 .To(this, nameof(OnCancelPressed));
         }
 
-        public void Open(Configuration configuration, ScadProject currentProject)
+        public void Open(IEditorContext context)
         {
-            _configuration = configuration;
-            _currentProject = currentProject;
+            _context = context;
+            var configuration = context.Configuration;
+            
             var editorScale = configuration.GetEditorScalePercent();
             _editorScaleOptionButton.Selected = editorScale switch
             {
@@ -59,10 +53,10 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
                 _ => 0
             };
 
-            _fileSelectBox.CurrentPath = _configuration.GetOpenScadPath();
-            _backupsSpinBox.Value = _configuration.GetNumberOfBackups();
-            _defaultPreambleTextEdit.Text = _configuration.GetDefaultPreamble();
-            _projectPreambleTextEdit.Text = _currentProject.Preamble;
+            _fileSelectBox.CurrentPath = configuration.GetOpenScadPath();
+            _backupsSpinBox.Value = configuration.GetNumberOfBackups();
+            _defaultPreambleTextEdit.Text = configuration.GetDefaultPreamble();
+            _projectPreambleTextEdit.Text = _context.CurrentProject.Preamble;
             PopupCentered();
             SetAsMinsize();
         }
@@ -80,13 +74,13 @@ namespace OpenScadGraphEditor.Widgets.SettingsDialog
                 2 => 200,
                 _ => 100
             };
-            _configuration.SetEditorScalePercent(editorScale);
-            _configuration.SetOpenScadPath(_fileSelectBox.CurrentPath);
-            _configuration.SetNumberOfBackups((int)_backupsSpinBox.Value);
-            _configuration.SetDefaultPreamble(_defaultPreambleTextEdit.Text);
-            if (_projectPreambleTextEdit.Text != _currentProject.Preamble)
+            _context.Configuration.SetEditorScalePercent(editorScale);
+            _context.Configuration.SetOpenScadPath(_fileSelectBox.CurrentPath);
+            _context.Configuration.SetNumberOfBackups((int)_backupsSpinBox.Value);
+            _context.Configuration.SetDefaultPreamble(_defaultPreambleTextEdit.Text);
+            if (_projectPreambleTextEdit.Text != _context.CurrentProject.Preamble)
             {
-                RefactoringRequested?.Invoke("Update project preamble", new ChangeProjectPreambleRefactoring(_projectPreambleTextEdit.Text));
+                _context.PerformRefactoring("Update project preamble", new ChangeProjectPreambleRefactoring(_projectPreambleTextEdit.Text));
             }
             Hide();
         }

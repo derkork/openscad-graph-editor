@@ -6,8 +6,6 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
 {
     public class ScadMainModuleTreeEntry : ScadInvokableTreeEntry
     {
-        
-        public override bool CanBeDragged => false;
 
         public override Texture Icon => Resources.ModuleIcon;
 

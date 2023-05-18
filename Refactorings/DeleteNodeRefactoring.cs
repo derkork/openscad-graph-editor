@@ -25,6 +25,7 @@ namespace OpenScadGraphEditor.Refactorings
         {
             if (Node is ICannotBeDeleted)
             {
+                // if it cannot be deleted, nothing to do
                 return;
             }
 

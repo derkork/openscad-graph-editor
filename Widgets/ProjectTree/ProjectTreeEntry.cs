@@ -6,8 +6,6 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
     public abstract class ProjectTreeEntry
     {
         public abstract string Title { get; }
-        public abstract bool CanBeDragged { get; }
-        public abstract bool CanBeActivated { get; }
         
         public virtual bool CanBeCollapsed => true;
 
@@ -16,6 +14,12 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
         public abstract string Id { get; }
 
         public virtual List<ProjectTreeEntry> Children => new List<ProjectTreeEntry>();
+
+        public virtual bool TryGetDragData(out object data)
+        {
+            data = default;
+            return false;
+        }
     }
     
     public abstract class ProjectTreeEntry<T> : ProjectTreeEntry

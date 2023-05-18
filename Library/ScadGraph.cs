@@ -71,7 +71,7 @@ namespace OpenScadGraphEditor.Library
                 return !renderModifier.Empty() ? string.Format(renderModifier, nodeContent) : nodeContent;
             }).JoinToString("\n");
             // now check if the graph has an entrypoint if, so render the entry point with the given content
-            if (_nodes.FirstOrDefault(it => it is EntryPoint) is EntryPoint entryPoint)
+            if (TryGetEntryPoint(out var entryPoint))
             {
                 content = entryPoint.RenderEntryPoint( content);
             }
@@ -79,6 +79,15 @@ namespace OpenScadGraphEditor.Library
             return content;
         }
 
+        /// <summary>
+        /// Tries to get the entry point of this graph if it has any.
+        /// </summary>
+        public bool TryGetEntryPoint(out EntryPoint entryPoint)
+        {
+            entryPoint = _nodes.FirstOrDefault(it => it is EntryPoint) as EntryPoint;
+            return entryPoint != null;
+        }   
+        
         public IEnumerable<ScadNode> GetAllNodes()
         {
             return _nodes.ToList();

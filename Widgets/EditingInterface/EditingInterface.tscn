@@ -12,24 +12,18 @@
 [node name="EditingInterface" type="HBoxContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_constants/separation = 0
+custom_constants/separation = 10
 script = ExtResource( 1 )
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
-margin_right = 60.0
+[node name="ButtonBar" type="VFlowContainer" parent="."]
+margin_right = 32.0
 margin_bottom = 1080.0
 
-[node name="ButtonBar" type="VFlowContainer" parent="PanelContainer"]
-margin_left = 14.0
-margin_top = 14.0
-margin_right = 46.0
-margin_bottom = 1066.0
-
-[node name="HSeparator" type="HSeparator" parent="PanelContainer/ButtonBar"]
+[node name="HSeparator" type="HSeparator" parent="ButtonBar"]
 margin_right = 32.0
 margin_bottom = 8.0
 
-[node name="AlignLeftButton" parent="PanelContainer/ButtonBar" instance=ExtResource( 3 )]
+[node name="AlignLeftButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 16.0
@@ -39,7 +33,7 @@ Icon = ExtResource( 4 )
 HintTooltip = "Align Left (W)"
 Padding = Vector2( 6, 6 )
 
-[node name="AlignRightButton" parent="PanelContainer/ButtonBar" instance=ExtResource( 3 )]
+[node name="AlignRightButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 56.0
@@ -49,7 +43,7 @@ Icon = ExtResource( 6 )
 HintTooltip = "Align Right (D)"
 Padding = Vector2( 6, 6 )
 
-[node name="AlignTopButton" parent="PanelContainer/ButtonBar" instance=ExtResource( 3 )]
+[node name="AlignTopButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 96.0
@@ -59,7 +53,7 @@ Icon = ExtResource( 5 )
 HintTooltip = "Align Top (W)"
 Padding = Vector2( 6, 6 )
 
-[node name="AlignBottomButton" parent="PanelContainer/ButtonBar" instance=ExtResource( 3 )]
+[node name="AlignBottomButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 136.0
@@ -69,7 +63,7 @@ Icon = ExtResource( 7 )
 HintTooltip = "Align Bottom (S)"
 Padding = Vector2( 6, 6 )
 
-[node name="ShowHelpButton" parent="PanelContainer/ButtonBar" instance=ExtResource( 3 )]
+[node name="ShowHelpButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_top = 176.0
@@ -80,9 +74,10 @@ HintTooltip = "Show Help (F1)"
 Padding = Vector2( 6, 6 )
 
 [node name="GraphEdit" type="GraphEdit" parent="."]
-margin_left = 60.0
+margin_left = 42.0
 margin_right = 1920.0
 margin_bottom = 1080.0
+mouse_filter = 1
 size_flags_horizontal = 3
-scroll_offset = Vector2( -24, 0 )
+scroll_offset = Vector2( -32, 0 )
 script = ExtResource( 2 )

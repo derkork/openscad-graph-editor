@@ -12,7 +12,6 @@ using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Nodes.Reroute;
 using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
-using OpenScadGraphEditor.Widgets.ProjectTree;
 using Serilog;
 
 namespace OpenScadGraphEditor.Widgets
@@ -25,70 +24,28 @@ namespace OpenScadGraphEditor.Widgets
     /// </summary>
     public class ScadGraphEdit : GraphEdit
     {
-
-        /// <summary>
-        /// Emitted when the user requested copying nodes.
-        /// </summary>
-        public event Action<ScadGraphEdit, List<ScadNode>> CopyRequested;
-        
-        /// <summary>
-        /// Emitted when the user requested duplicating nodes.
-        /// </summary>
-        public event Action<ScadGraphEdit, List<ScadNode>, Vector2> DuplicateRequested;
-
-        /// <summary>
-        /// Emitted when the user requested cutting nodes.
-        /// </summary>
-        public event Action<ScadGraphEdit, List<ScadNode>> CutRequested;
-        
-        /// <summary>
-        /// Emitted when the user requested pasting nodes. 
-        /// </summary>
-        public event Action<ScadGraphEdit, Vector2> PasteRequested;
-        
-        /// <summary>
-        /// Emitted when the user right-clicks on a node.
-        /// </summary>
-        public event Action<RequestContext> NodePopupRequested;
-
-        /// <summary>
-        /// Emitted when the user requires the dialog to add a node.
-        /// </summary>
-        public event Action<RequestContext> AddDialogRequested;
-
-        /// <summary>
-        /// Emitted when the user requests editing the comment of a node.
-        /// </summary>
-        public event Action<RequestContext> EditCommentRequested;
-
-        /// <summary>
-        /// Called when data from any list entry is dropped.
-        /// </summary>
-        public event Action<ScadGraphEdit,ProjectTreeEntry, Vector2, Vector2> ItemDataDropped;
-        
-        // TODO: make an event that exposes the current selection. then most other events can be removed
-        // and we handle global shortcuts in the main window. this will also allow it to add a menu in the
-        // main window which shows available actions for the current selection.
-        
         private readonly HashSet<string> _selection = new HashSet<string>();
         private readonly Dictionary<string, ScadNodeWidget> _widgets = new Dictionary<string, ScadNodeWidget>();
+
         /// <summary>
         /// Lookup tree for finding the closest connection to a given point.
         /// </summary>
-        private  KdTree<float, (ScadConnection Connection,List<Vector2> BezierPoints)> _connectionTree = 
-            new KdTree<float, (ScadConnection Connection,List<Vector2> BezierPoints)>(2, new FloatMath());
+        private KdTree<float, (ScadConnection Connection, List<Vector2> BezierPoints)> _connectionTree =
+            new KdTree<float, (ScadConnection Connection, List<Vector2> BezierPoints)>(2, new FloatMath());
+
         private ScadConnection _pendingDisconnect;
         public ScadGraph Graph { get; private set; }
-        
+
         private Control _connectionHighlightLayer;
-        
+
         private List<Vector2> _connectionHighlightPoints;
         private ScadConnection _highlightedConnection;
         private ScadProject _project;
         private IEditorContext _context;
+        private GraphLayout _graphLayout;
 
 
-        public void SelectNodes(List<ScadNode> nodes)
+        private void SelectNodes(List<ScadNode> nodes)
         {
             var set = nodes.Select(it => it.Id).ToHashSet();
             _widgets.Values.ForAll(it => it.Selected = set.Contains(it.BoundNode.Id));
@@ -108,7 +65,7 @@ namespace OpenScadGraphEditor.Widgets
             {
                 foreach (var to in allPortTypes)
                 {
-                   AddValidConnectionType((int) from, (int) to);
+                    AddValidConnectionType((int) from, (int) to);
                 }
             }
 
@@ -131,7 +88,7 @@ namespace OpenScadGraphEditor.Widgets
 
             this.Connect("_end_node_move")
                 .To(this, nameof(OnEndNodeMove));
-            
+
             this.Connect("draw")
                 .To(this, nameof(BuildConnectionLookupTree));
 
@@ -140,23 +97,69 @@ namespace OpenScadGraphEditor.Widgets
             _connectionHighlightLayer
                 .Connect("draw")
                 .To(this, nameof(OnConnectionHighlightLayerDraw));
-            
+
             this.Connect("scroll_offset_changed")
                 .To(this, nameof(OnScrollOffsetChanged));
         }
-        
-
 
         public override bool CanDropData(Vector2 position, object data)
         {
-            return data is ProjectTreeDragData;
+            return data is DragData;
         }
 
         public override void DropData(Vector2 position, object data)
         {
-            if (data is ProjectTreeDragData itemListDragData)
+            if (!(data is DragData dragData))
             {
-                ItemDataDropped?.Invoke(this, itemListDragData.Entry, GetGlobalMousePosition(), LocalToGraphRelative(position));
+                return; // we cannot handle this data.
+            }
+
+            if (dragData.TryGetData(out InvokableDescription invokableDescription))
+            {
+                // someone dragged an invokable description here, so we'll create a new node for it.
+                var node = invokableDescription switch
+                {
+                    FunctionDescription functionDescription =>
+                        NodeFactory.Build<FunctionInvocation>(functionDescription),
+                    ModuleDescription moduleDescription =>
+                        NodeFactory.Build<ModuleInvocation>(moduleDescription),
+                    _ => null
+                };
+
+                if (node == null)
+                {
+                    return; // we cannot handle this data.
+                }
+
+                // ensure we don't drag in stuff that isn't usable by the graph in question.
+                if (!Graph.Description.CanUse(node))
+                {
+                    return;
+                }
+
+                node.Offset = LocalToGraphRelative(position);
+                _context.PerformRefactoring("Add node", new AddNodeRefactoring(Graph, node));
+                return;
+            }
+
+            if (dragData.TryGetData(out VariableDescription variableDescription))
+            {
+                // in case of a variable we can either _get_ or _set_ the variable
+                // so we will need to open a popup menu to let the user choose.
+                var getNode = NodeFactory.Build<GetVariable>(variableDescription);
+                getNode.Offset = LocalToGraphRelative(position);
+                var setNode = NodeFactory.Build<SetVariable>(variableDescription);
+                setNode.Offset = LocalToGraphRelative(position);
+
+                var actions = new List<QuickAction>
+                {
+                    new QuickAction($"Get {variableDescription.Name}",
+                        () => _context.PerformRefactoring("Add node", new AddNodeRefactoring(Graph, getNode))),
+                    new QuickAction($"Set {variableDescription.Name}",
+                        () => _context.PerformRefactoring("Add node", new AddNodeRefactoring(Graph, setNode)))
+                };
+
+                _context.ShowPopupMenu(GetGlobalMousePosition(), actions);
             }
         }
 
@@ -172,7 +175,7 @@ namespace OpenScadGraphEditor.Widgets
                 // the name of the widget to something unique.
                 widget.Name = node.Id;
                 widget.LiteralToggled += (port, enabled) =>
-                    PerformRefactorings( "Toggle literal", new ToggleLiteralRefactoring(Graph, node, port, enabled));
+                    PerformRefactorings("Toggle literal", new ToggleLiteralRefactoring(Graph, node, port, enabled));
                 widget.LiteralValueChanged += (port, value) =>
                     PerformRefactorings("Set literal value", new SetLiteralValueRefactoring(Graph, node, port, value));
                 widget.SizeChanged += size =>
@@ -181,7 +184,7 @@ namespace OpenScadGraphEditor.Widgets
                 _widgets[node.Id] = widget;
                 widget.MoveToNewParent(this);
             }
-            
+
             widget.BindTo(_project, Graph, node);
         }
 
@@ -192,61 +195,52 @@ namespace OpenScadGraphEditor.Widgets
                 .Select(it => new ChangeNodePositionRefactoring(Graph, it, _widgets[it.Id].Offset));
             _context.PerformRefactorings("Move node(s)", refactorings);
         }
-        
-        public void FocusEntryPoint()
-        {
-            var entryPoint = Graph.GetAllNodes().FirstOrDefault(it => it is EntryPoint);
-            if (entryPoint != null)
-            {
-                var widget = _widgets[entryPoint.Id];
-                // move it somewhere top left
-                ScrollOffset = widget.Offset - new Vector2(100, 100);
-            }
-        }
-        
+
         public void FocusNode(ScadNode node)
         {
-           var widget = _widgets[node.Id];
-           var middle = RectSize / 2;
-           
-           // calculate the offset we need to move to get the widget into the middle.
-           ScrollOffset = widget.Offset - (middle * Zoom);
-           widget.Flash();
-        }
-        
+            var widget = _widgets[node.Id];
+            var middle = RectSize / 2;
 
-        public async void Render(IEditorContext context, ScadGraph graph)
+            // calculate the offset we need to move to get the widget into the middle.
+            ScrollOffset = widget.Offset - (middle * Zoom);
+            widget.Flash();
+        }
+
+
+        public void Render(IEditorContext context, ScadGraph graph)
         {
             Graph = graph;
             _project = context.CurrentProject;
             _context = context;
-            
+            _graphLayout = new GraphLayout(graph, _context, GlobalToGraphRelative);
+
             // rebuild the nodes
             foreach (var node in Graph.GetAllNodes())
             {
-                CreateOrGet(node); 
+                CreateOrGet(node);
             }
 
             // redo the connections
             ClearConnections();
-            
+
             foreach (var connection in Graph.GetAllConnections())
             {
                 // do not show connections to wireless reroutes by default, unless the reroute node is currently selected
-                if (connection.To is RerouteNode {IsWireless: true} && !_selection.Contains(connection.To.Id))
+                if (connection.To.IsWirelessReroute() && !_selection.Contains(connection.To.Id))
                 {
-                    continue; 
+                    continue;
                 }
 
                 // connection contains ScadNode ids but we need to connect widgets, so first we need to find the 
                 // the widget and then connect these widgets.
-                ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
+                ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name,
+                    connection.ToPort);
             }
-            
+
 
             // highlight any bound nodes
             HighlightBoundNodes();
-            
+
             // finally destroy all the widgets that are not in the graph anymore
             // set of Ids of nodes that are in the graph
             var nodeIds = graph.GetAllNodes().Select(n => n.Id).ToHashSet();
@@ -264,6 +258,9 @@ namespace OpenScadGraphEditor.Widgets
             }
 
             BuildConnectionLookupTree();
+
+            // prevent phantom connections from being drawn
+            ClearHighlightedConnection();
         }
 
         private void BuildConnectionLookupTree()
@@ -300,12 +297,12 @@ namespace OpenScadGraphEditor.Widgets
             relativePosition /= Zoom;
             return relativePosition;
         }
-        
+
 
         private void OnPopupRequest(Vector2 position)
         {
             var relativePosition = GlobalToGraphRelative(position);
-            
+
             if (_highlightedConnection != null)
             {
                 // a right click on a connection will in every case delete the connection, so first
@@ -313,7 +310,7 @@ namespace OpenScadGraphEditor.Widgets
                 var toDelete = _highlightedConnection;
                 _highlightedConnection = null;
                 _connectionHighlightPoints = null;
-                
+
                 // if shift is pressed we want to break the connection and insert a reroute node
                 // if additionally ctrl is pressed we want to break the connection and insert a wireless reroute node
                 if (KeyMap.IsShiftPressed())
@@ -323,38 +320,38 @@ namespace OpenScadGraphEditor.Widgets
                     {
                         rerouteNode.IsWireless = true;
                     }
+
                     rerouteNode.Offset = relativePosition;
-                    
+
                     PerformRefactorings("Insert reroute node",
-                            // first, delete the connection
-                            new DeleteConnectionRefactoring( toDelete),
-                            // then insert the reroute node and connect it to the old connection's target
-                            new AddNodeRefactoring(Graph, rerouteNode, toDelete.To, PortId.Input(toDelete.ToPort)),
-                            // and add a new connection from the old connection's source to the reroute node
-                            new AddConnectionRefactoring(new ScadConnection(Graph, toDelete.From, toDelete.FromPort, rerouteNode, 0))
-                            );
+                        // first, delete the connection
+                        new DeleteConnectionRefactoring(toDelete),
+                        // then insert the reroute node and connect it to the old connection's target
+                        new AddNodeRefactoring(Graph, rerouteNode, toDelete.To, PortId.Input(toDelete.ToPort)),
+                        // and add a new connection from the old connection's source to the reroute node
+                        new AddConnectionRefactoring(new ScadConnection(Graph, toDelete.From, toDelete.FromPort,
+                            rerouteNode, 0))
+                    );
                     return;
                 }
- 
+
                 // TODO: BUG - if you have a textfield selected and then right click on a connection
                 // two refactorings will run at the same time, crashing the editor
-                
+
                 // otherwise we want to delete the connection
                 PerformRefactorings("Delete connection", new DeleteConnectionRefactoring(toDelete));
                 return;
             }
 
-            
 
             if (!TryGetNodeAtPosition(relativePosition, out var node))
             {
                 // right-click in empty space yields you the add dialog
-                AddDialogRequested?.Invoke(RequestContext.ForPositionInGraph(Graph, relativePosition));
+                AddNodeOrOpenDialog(relativePosition);
                 return;
             }
 
-            NodePopupRequested?.Invoke(RequestContext.ForNode(Graph, position, node));
-            
+            _context.ShowPopupMenu(RequestContext.ForNode(Graph, node, position));
         }
 
         private bool TryGetNodeAtPosition(Vector2 relativePosition, out ScadNode node)
@@ -369,7 +366,120 @@ namespace OpenScadGraphEditor.Widgets
 
         public override void _GuiInput(InputEvent evt)
         {
-            if (evt is InputEventMouseButton mouseButtonEvent && !mouseButtonEvent.Pressed && _pendingDisconnect != null)
+            if (evt.IsSelectAll())
+            {
+                SelectNodes(Graph.GetAllNodes().ToList());
+                return;
+            }
+
+            if (evt.IsCopy())
+            {
+                _context.CopyNodesToClipboard(Graph, GetSelectedNodes());
+                return;
+            }
+
+            if (evt.IsDuplicate())
+            {
+                var duplicatedNodes =
+                    Graph.CloneSelection(_context.CurrentProject, GetSelectedNodes(), out _);
+
+                var pastePosition = GlobalMousePositionToGraphOffset(GetGlobalMousePosition());
+                var refactoringData = _context.PerformRefactoring(
+                    "Duplicate nodes", new PasteNodesRefactoring(Graph, duplicatedNodes, pastePosition));
+
+                // select the pasted nodes
+                if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
+                {
+                    SelectNodes(pastedNodes);
+                }
+            }
+
+            if (evt.IsExtract())
+            {
+                _context.PerformRefactoring("Extract nodes",
+                    new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList()));
+                return;
+            }
+
+            if (evt.IsCut())
+            {
+                // first copy the nodes to the clipboard
+                var selectedNodes = GetSelectedNodes();
+                _context.CopyNodesToClipboard(Graph, selectedNodes);
+
+                // then run refactorings to delete them
+                // this will implicitly also delete the connections.
+                var deleteRefactorings = selectedNodes
+                    .Select(it => new DeleteNodeRefactoring(Graph, it))
+                    .ToList();
+
+                _context.PerformRefactorings("Cut nodes", deleteRefactorings);
+                return;
+            }
+
+            if (evt.IsPaste())
+            {
+                var clipboardContents = _context.GetNodesInClipboard();
+                var pastePosition = GlobalMousePositionToGraphOffset(GetGlobalMousePosition());
+                var refactoringData = _context.PerformRefactoring(
+                    "Paste nodes", new PasteNodesRefactoring(Graph, clipboardContents, pastePosition));
+
+                if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
+                {
+                    SelectNodes(pastedNodes);
+                }
+
+                return;
+            }
+
+            if (evt.IsEditComment())
+            {
+                if (!TryGetSingleSelectedNode("Please select exactly one node to edit its comment.", out var selection))
+                {
+                    return;
+                }
+
+                _context.EditComment(Graph, selection);
+                return;
+            }
+
+            if (evt.IsShowHelp())
+            {
+                ShowHelpForSelection();
+                return;
+            }
+
+            if (evt.IsStraighten())
+            {
+                _graphLayout.StraightenConnections(GetSelectedWidgets());
+            }
+
+            if (evt.IsAlignLeft())
+            {
+                AlignSelectionLeft();
+                return;
+            }
+
+            if (evt.IsAlignRight())
+            {
+                AlignSelectionRight();
+                return;
+            }
+
+            if (evt.IsAlignTop())
+            {
+                AlignSelectionTop();
+                return;
+            }
+
+            if (evt.IsAlignBottom())
+            {
+                AlignSelectionBottom();
+                return;
+            }
+
+            if (evt is InputEventMouseButton {Pressed: false} &&
+                _pendingDisconnect != null)
             {
                 Log.Debug("Resolving pending disconnect");
                 PerformRefactorings("Remove connection", new DeleteConnectionRefactoring(_pendingDisconnect));
@@ -386,20 +496,20 @@ namespace OpenScadGraphEditor.Widgets
                     ClearHighlightedConnection();
                     return;
                 }
-                
+
                 // find the closest connection to the mouse
                 // we use * zoom because GlobalToGraphRelative will give us the coordinates in graph space and 
                 // we need to convert them to screen space but relative to the graph widget.
                 var mousePosition = mousePositionRelativeToTheGraph * Zoom;
-                
-                var closest = _connectionTree.GetNearestNeighbours(new []{mousePosition.x, mousePosition.y}, 1);
+
+                var closest = _connectionTree.GetNearestNeighbours(new[] {mousePosition.x, mousePosition.y}, 1);
                 if (closest.Length <= 0)
                 {
                     ClearHighlightedConnection();
                     return;
-                } 
-                
-                
+                }
+
+
                 // are we close enough to the connection?
                 var distance = new Vector2(closest[0].Point[0], closest[0].Point[1]).DistanceTo(mousePosition);
                 if (distance > 20)
@@ -407,94 +517,47 @@ namespace OpenScadGraphEditor.Widgets
                     ClearHighlightedConnection();
                     return;
                 }
-                
+
                 // no need to redraw, if the connection is the same
                 if (_highlightedConnection == closest[0].Value.Connection)
                 {
                     return;
                 }
-                
+
                 _highlightedConnection = closest[0].Value.Connection;
                 _connectionHighlightPoints = closest[0].Value.BezierPoints;
                 _connectionHighlightLayer.Update();
             }
-            
-            if (evt.IsSelectAll()) 
+        }
+
+        public void ShowHelpForSelection()
+        {
+            if (!TryGetSingleSelectedNode("Please select exactly one node to show its help.", out var selection))
             {
-                SelectNodes(Graph.GetAllNodes().ToList());
                 return;
             }
 
-            if (evt.IsCopy())
-            {
-                CopyRequested?.Invoke(this, GetSelectedNodes().ToList());
-                return;
-            }
+            _context.ShowHelp(Graph, selection);
+        }
 
-            if (evt.IsDuplicate())
-            {
-                var pastePosition = GetPastePosition();
+        public void AlignSelectionBottom()
+        {
+            _graphLayout.AlignNodesBottom(GetSelectedWidgets());
+        }
 
-                DuplicateRequested?.Invoke(this, GetSelectedNodes().ToList(), pastePosition);
-            }
+        public void AlignSelectionTop()
+        {
+            _graphLayout.AlignNodesTop(GetSelectedWidgets());
+        }
 
-            if (evt.IsExtract())
-            {
-                _context.PerformRefactoring("Extract nodes", new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList()));
-            }
-            
-            if (evt.IsCut())
-            {
-                CutRequested?.Invoke(this, GetSelectedNodes().ToList());
-                return;
-            }
-            
-            if (evt.IsPaste())
-            {
-                var pastePosition = GetPastePosition();
+        public void AlignSelectionRight()
+        {
+            _graphLayout.AlignNodesRight(GetSelectedWidgets());
+        }
 
-                PasteRequested?.Invoke(this, pastePosition);
-                return;
-            }
-
-            if (evt.IsEditComment() && _selection.Count == 1)
-            {
-                var selectedNode = Graph.GetAllNodes().First(it => it.Id == _selection.First());
-                EditCommentRequested?.Invoke(RequestContext.ForNode(Graph, selectedNode.Offset, selectedNode));
-                return;
-            }
-
-            if (evt.IsShowHelp() && _selection.Count == 1)
-            {
-                var selectedNode = Graph.GetAllNodes().First(it => it.Id == _selection.First());
-                _context.ShowHelp(Graph, selectedNode);
-                return;
-            }
-            
-            if (evt.IsStraighten())
-            {
-                StraightenSelection();
-            }
-
-            if (evt.IsAlignLeft())
-            {
-                new GraphLayout(Graph, _context).AlignNodesLeft(GetSelectedWidgets());
-            }
-            
-            if (evt.IsAlignRight())
-            {
-                new GraphLayout(Graph, _context).AlignNodesRight(GetSelectedWidgets());
-            }
-            
-            if (evt.IsAlignTop())
-            {
-                new GraphLayout(Graph, _context).AlignNodesTop(GetSelectedWidgets());
-            }
-            
-            if (evt.IsAlignBottom())
-            {
-                new GraphLayout(Graph, _context).AlignNodesBottom(GetSelectedWidgets());
-            }
+        public void AlignSelectionLeft()
+        {
+            _graphLayout.AlignNodesLeft(GetSelectedWidgets());
         }
 
         private void ClearHighlightedConnection()
@@ -503,138 +566,64 @@ namespace OpenScadGraphEditor.Widgets
             {
                 return;
             }
+
             _highlightedConnection = null;
             _connectionHighlightPoints = null;
             _connectionHighlightLayer.Update();
         }
 
-        private Vector2 GetPastePosition()
+        /// <summary>
+        /// Calculates a graph offset from a given global mouse position. If the mouse position is outside the graph
+        /// the returned position will be at 100,100 relative to the currently visible graph area.
+        /// </summary>
+        private Vector2 GlobalMousePositionToGraphOffset(Vector2 globalMousePosition)
         {
             // get the offset over the mouse position
             var globalRect = GetGlobalRect();
-            var globalMousePosition = GetGlobalMousePosition();
 
-            // default paste position
-            var pastePosition = ScrollOffset + new Vector2(100, 100);
+            // default position
+            var result = ScrollOffset + new Vector2(100, 100);
 
             if (globalRect.HasPoint(globalMousePosition))
             {
                 // if the mouse is inside the graph, paste the nodes at the mouse position
-                pastePosition = GlobalToGraphRelative(globalMousePosition);
+                result = GlobalToGraphRelative(globalMousePosition);
             }
 
-            return pastePosition;
-        }
-
-        private void StraightenSelection()
-        {
-            // all selected nodes 
-            var selectedNodes = GetSelectedNodes().ToHashSet();
-
-            // relevant connections, these are all connections between the selected nodes
-            var relevantConnections = Graph.GetAllConnections()
-                .Where(it => selectedNodes.Contains(it.From) && selectedNodes.Contains(it.To))
-                // also exclude connections which have a wireless node as target, as we don't layout those
-                .Where(it => !(it.To is RerouteNode rerouteNode && rerouteNode.IsWireless))
-                .ToList();
-
-            // first up remove all nodes which do not have any connections to any other selected node, there is nothing to
-            // straighten for them.
-            selectedNodes.RemoveWhere(it => !relevantConnections.Any(connection => connection.InvolvesNode(it)));
-            
-            // now we have two sets, one is the set of nodes that are starting points for straightening, the other
-            // is the set of nodes we have not yet laid out.
-            var nodesToStraighten = selectedNodes.ToHashSet();
-            var startingPoints = new HashSet<ScadNode>();
-
-            // We are going to move the nodes around but only do so after the 
-            // straightening refactoring is run. However some calculations depend on knowing where
-            // the node will be after the refactoring. So we make ourselves a little lookup table where
-            // we have the current node positions by id, which we overwrite during the layout process
-            var nodePositions = new Dictionary<string, Vector2>(); 
-            nodesToStraighten.ForAll(it => nodePositions[it.Id] = it.Offset);
-            
-            var refactorings = new List<Refactoring>();
-            
-            // now while we still have nodes in the set
-            while (nodesToStraighten.Count > 0)
-            {
-                // first check if we have any starting points, if not, take the rightmost node we still have to 
-                // straighten and use that one as a starting point.
-                if (!startingPoints.Any())
-                {
-                    var newStartingPoint = nodesToStraighten.OrderByDescending(it => it.Offset.x).First();
-                    startingPoints.Add(newStartingPoint);
-                    nodesToStraighten.Remove(newStartingPoint);
-                }
-                
-                GdAssert.That(startingPoints.Any(), "Should have at least one starting point");
-                
-                // now pop a node from the starting points and go from there
-                var currentNode = startingPoints.First();
-                startingPoints.Remove(currentNode);
-
-                if (currentNode is RerouteNode rerouteNode && rerouteNode.IsWireless)
-                {
-                    continue; // a wireless node has no incoming connections that could be straightened
-                }
-
-                var currentNodeConnections = relevantConnections
-                    .Where(it => it.To == currentNode)
-                    .OrderBy(it => it.ToPort);
-                
-                // now walk over the connections and see if we can straighten them
-                foreach (var connection in currentNodeConnections)
-                {
-                    if (!nodesToStraighten.Contains(connection.From))
-                    {
-                        // the connection is to a node we already moved, so go to the next one.
-                        continue;
-                    }
-                    // good, we can straighten this connection
-                    // to do this, we need to get the port offset of the right side of the connection
-                    // and then move the left side of the connection to that offset
-                    var rightSideWidget = _widgets[connection.To.Id];
-                    var leftSideWidget = _widgets[connection.From.Id];
-
-                    var rightOffset = nodePositions[connection.To.Id];
-                    var rightConnectorPosition = GlobalToGraphRelative(rightSideWidget.GetConnectionInputPosition(connection.ToPort)) + rightOffset;
-                    var leftOffset = nodePositions[connection.From.Id];
-                    var leftConnectorPosition = GlobalToGraphRelative(leftSideWidget.GetConnectionOutputPosition(connection.FromPort)) + leftOffset;
-                        
-                    // we only move the left node and we only change the y axis
-                    var deltaY = rightConnectorPosition.y - leftConnectorPosition.y;
-                    
-                    // only run a refactoring if we actually need to
-                    if (Mathf.Abs(deltaY) > 0.001f)
-                    {
-                        var newLeftOffset = new Vector2(leftOffset.x,  leftOffset.y + deltaY);
-                        // write it down into our intermediate node position lookup table
-                        nodePositions[connection.From.Id] = newLeftOffset;
-                        refactorings.Add(new ChangeNodePositionRefactoring(Graph, connection.From, newLeftOffset));
-                    }
-                    
-                    // now we can remove the node from the set of nodes to straighten but it can still be a starting
-                    // point for other nodes
-                    nodesToStraighten.Remove(connection.From);
-                    startingPoints.Add(connection.From);
-                }
-            }
-
-            if (refactorings.Any())
-            {
-                _context.PerformRefactorings("Straighten connections", refactorings);
-            }
-            else
-            {
-                NotificationService.ShowNotification("Everything is already straightened");
-            }
+            return result;
         }
 
 
-        private IEnumerable<ScadNode> GetSelectedNodes()
+        private void AddNodeOrOpenDialog(Vector2 position, [CanBeNull] ScadNode otherNode = null,
+            PortId otherPort = default)
         {
-            return _selection.Select(it => _widgets[it].BoundNode);
+            // when shift is pressed this means we want to have a reroute node.
+            if (KeyMap.IsShiftPressed())
+            {
+                var rerouteNode = NodeFactory.Build<RerouteNode>();
+                // when also CTRL/CMD is down, we make the reroute node a wireless node
+                if (KeyMap.IsCmdOrControlPressed())
+                {
+                    rerouteNode.IsWireless = true;
+                }
+
+                rerouteNode.Offset = position;
+                _context.PerformRefactoring("Add reroute node",
+                    new AddNodeRefactoring(Graph, rerouteNode, otherNode, otherPort));
+                return;
+            }
+
+            // otherwise let the user choose a node.
+            var requestContext = new RequestContext().WithNodePort(Graph, otherNode, otherPort)
+                .WithPosition(position);
+
+            _context.OpenAddDialog(requestContext);
+        }
+
+
+        private List<ScadNode> GetSelectedNodes()
+        {
+            return _selection.Select(it => _widgets[it].BoundNode).ToList();
         }
 
         private List<ScadNodeWidget> GetSelectedWidgets()
@@ -645,9 +634,9 @@ namespace OpenScadGraphEditor.Widgets
         private void OnDisconnectionRequest(string fromWidgetName, int fromSlot, string toWidgetName, int toSlot)
         {
             Log.Debug("Disconnect request");
-            var connection = new ScadConnection(Graph,ScadNodeForWidgetName(fromWidgetName), fromSlot,
+            var connection = new ScadConnection(Graph, ScadNodeForWidgetName(fromWidgetName), fromSlot,
                 ScadNodeForWidgetName(toWidgetName), toSlot);
-            
+
             // the disconnect is not done until the user has released the mouse button, so in case this is called
             // while the mouse is still down, just visually disconnect, but don't do a refactoring yet.
             if (Input.IsMouseButtonPressed((int) ButtonList.Left))
@@ -659,45 +648,46 @@ namespace OpenScadGraphEditor.Widgets
 
         private void OnConnectionToEmpty(string fromWidgetName, int fromPort, Vector2 releasePosition)
         {
-            var context = RequestContext.ForOutputPort(Graph, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(fromWidgetName), fromPort);
-            AddDialogRequested?.Invoke(context);
+            AddNodeOrOpenDialog(LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(fromWidgetName),
+                PortId.Output(fromPort));
         }
 
         private void OnConnectionFromEmpty(string toWidgetName, int toPort, Vector2 releasePosition)
         {
-            
-            var context = RequestContext.ForInputPort(Graph, LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(toWidgetName), toPort);
-            AddDialogRequested?.Invoke(context);
+            AddNodeOrOpenDialog(LocalToGraphRelative(releasePosition), ScadNodeForWidgetName(toWidgetName),
+                PortId.Input(toPort));
         }
 
         private void OnNodeSelected(ScadNodeWidget node)
         {
             _selection.Add(node.BoundNode.Id);
-            
+
             // if the node was a wireless node, then temporarily show its wireless connection
-            if (node.BoundNode is RerouteNode rerouteNode && rerouteNode.IsWireless)
+            if (node.BoundNode.IsWirelessReroute())
             {
                 var relevantConnections = Graph.GetAllConnections()
                     .Where(it => it.To == node.BoundNode);
 
                 foreach (var connection in relevantConnections)
                 {
-                    ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
+                    ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name,
+                        connection.ToPort);
                 }
             }
+
             HighlightBoundNodes();
         }
 
         private void HighlightBoundNodes()
         {
             var boundNodes = Graph.GetAllNodes().OfType<IAmBoundToOtherNode>().ToList();
-            
+
             foreach (var node in boundNodes)
             {
                 var partnerNodeId = node.OtherNodeId;
                 var partnerNodeWidget = _widgets[partnerNodeId];
                 // if the node's partner node is not currently selected, but the node is selected then highlight the node's partner node, otherwise clear it.
-                if (!_selection.Contains(partnerNodeId) && _selection.Contains(((ScadNode)node).Id))
+                if (!_selection.Contains(partnerNodeId) && _selection.Contains(((ScadNode) node).Id))
                 {
                     partnerNodeWidget.Modulate = Colors.Yellow;
                 }
@@ -707,29 +697,30 @@ namespace OpenScadGraphEditor.Widgets
                 }
             }
         }
-        
+
         private void OnNodeUnselected(ScadNodeWidget node)
         {
             _selection.Remove(node.BoundNode.Id);
-            
+
             // if the node was a wireless node, then hide its wireless connections
-            if (node.BoundNode is RerouteNode rerouteNode && rerouteNode.IsWireless)
+            if (node.BoundNode.IsWirelessReroute())
             {
                 var relevantConnections = Graph.GetAllConnections()
                     .Where(it => it.To == node.BoundNode);
-                foreach(var connection in relevantConnections)
+                foreach (var connection in relevantConnections)
                 {
-                    DisconnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name, connection.ToPort);
+                    DisconnectNode(_widgets[connection.From.Id].Name, connection.FromPort,
+                        _widgets[connection.To.Id].Name, connection.ToPort);
                 }
             }
-            
+
             HighlightBoundNodes();
         }
 
         // Godot 3.4
         private void OnDeleteSelection()
         {
-            var refactorings = 
+            var refactorings =
                 GetSelectedNodes()
                     .Select(it => new DeleteNodeRefactoring(Graph, it, KeyMap.IsKeepConnectionsPressed()))
                     .ToList();
@@ -766,8 +757,8 @@ namespace OpenScadGraphEditor.Widgets
                     return;
                 }
             }
-            
-            
+
+
             var refactorings = new AddConnectionRefactoring(connection);
             PerformRefactorings("Create connection", refactorings);
         }
@@ -792,12 +783,13 @@ namespace OpenScadGraphEditor.Widgets
             var toPort = toNode.GetConnectionInputPosition(connection.ToPort) + toNode.Offset * Zoom;
             return (fromPort, toPort);
         }
-        
-        
+
+
         /// <summary>
         /// Bezier interpolation function for the connection lines. This is copied straight from the Godot source code.
         /// </summary>
-        private static Vector2 BezierInterpolate(float t, Vector2 start, Vector2 control1, Vector2 control2, Vector2 end)
+        private static Vector2 BezierInterpolate(float t, Vector2 start, Vector2 control1, Vector2 control2,
+            Vector2 end)
         {
             var omt = 1.0f - t;
             var omt2 = omt * omt;
@@ -807,7 +799,7 @@ namespace OpenScadGraphEditor.Widgets
 
             return start * omt3 + control1 * omt2 * t * 3.0f + control2 * omt * t2 * 3.0f + end * t3;
         }
-   
+
         /// <summary>
         /// Segment baking function for the connection lines. This is copied straight from the Godot source code + some modifications.
         /// </summary>
@@ -819,11 +811,11 @@ namespace OpenScadGraphEditor.Widgets
             var beg = BezierInterpolate(pBegin, pA, pA + pOut, pB + pIn, pB);
             var mid = BezierInterpolate(mp, pA, pA + pOut, pB + pIn, pB);
             var end = BezierInterpolate(pEnd, pA, pA + pOut, pB + pIn, pB);
-            
+
             var na = (mid - beg).Normalized();
             var nb = (end - mid).Normalized();
             var dp = Mathf.Rad2Deg(Mathf.Acos(na.Dot(nb)));
-            
+
             // the maxLength check is to ensure we don't get longer straight segments of lines because we want 
             // to keep the points that make up the lines evenly spaced, so our KDTree can find the closest point
             // to the mouse cursor and we don't get "holes" in the detection when the mouse is over a straight line
@@ -836,8 +828,10 @@ namespace OpenScadGraphEditor.Widgets
             }
             else
             {
-                BakeSegment2D(points, pBegin, mp, pA, pOut, pB, pIn, pDepth + 1, pMinDepth, pMaxDepth, pTol, pMaxLength, ref lines);
-                BakeSegment2D(points, mp, pEnd, pA, pOut, pB, pIn, pDepth + 1, pMinDepth, pMaxDepth, pTol, pMaxLength, ref lines);
+                BakeSegment2D(points, pBegin, mp, pA, pOut, pB, pIn, pDepth + 1, pMinDepth, pMaxDepth, pTol, pMaxLength,
+                    ref lines);
+                BakeSegment2D(points, mp, pEnd, pA, pOut, pB, pIn, pDepth + 1, pMinDepth, pMaxDepth, pTol, pMaxLength,
+                    ref lines);
             }
         }
 
@@ -851,8 +845,8 @@ namespace OpenScadGraphEditor.Widgets
             var cpLen = GetConstant("bezier_len_pos") * bezierRatio;
             var cpNegLen = GetConstant("bezier_len_neg") * bezierRatio;
 
-            var cpOffset = diff > 0 
-                ? Mathf.Min(cpLen, diff * 0.5f) 
+            var cpOffset = diff > 0
+                ? Mathf.Min(cpLen, diff * 0.5f)
                 : Mathf.Max(Mathf.Min(cpLen - diff, cpNegLen), -diff * 0.5f);
 
             var c1 = new Vector2(cpOffset * Zoom, 0);
@@ -863,17 +857,16 @@ namespace OpenScadGraphEditor.Widgets
             var points = new List<Vector2> {fromPoint};
             BakeSegment2D(points, 0, 1, fromPoint, c1, toPoint, c2, 0, 3, 9, 3, 20, ref lines);
             points.Add(toPoint);
-            
+
             return points;
         }
-        
+
         private void OnScrollOffsetChanged([UsedImplicitly] Vector2 _)
         {
             // when the scroll offset/zoom is changed our previously highlighted connection is no longer valid
             // so we need to clear it, otherwise we'll get an artifact where the connection is still highlighted
             // in its old position and scale
-            _highlightedConnection = null;
-            _connectionHighlightPoints = null;
+            ClearHighlightedConnection();
         }
 
         private void OnConnectionHighlightLayerDraw()
@@ -882,9 +875,23 @@ namespace OpenScadGraphEditor.Widgets
             {
                 return;
             }
-            _connectionHighlightLayer.DrawPolyline(_connectionHighlightPoints.ToArray(), new Color(1,1,1, 0.5f), 5, true);
+
+            _connectionHighlightLayer.DrawPolyline(_connectionHighlightPoints.ToArray(), new Color(1, 1, 1, 0.5f), 5,
+                true);
         }
 
-    }
+        private bool TryGetSingleSelectedNode(string warningMessage, out ScadNode result)
+        {
+            var selection = GetSelectedNodes().ToList();
+            if (selection.Count != 1)
+            {
+                result = default;
+                _context.ShowInfo(warningMessage);
+                return false;
+            }
 
+            result = selection.First();
+            return true;
+        }
+    }
 }

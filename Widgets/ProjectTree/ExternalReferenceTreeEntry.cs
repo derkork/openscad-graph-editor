@@ -10,8 +10,6 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
     {
         public override string Title => Description.IncludePath;
         public override ExternalReference Description { get; }
-        public override bool CanBeDragged => false;
-        public override bool CanBeActivated => true;
         public override Texture Icon => Description.IsTransitive ? Resources.TransitiveImportIcon : Resources.ImportIcon;
         public override string Id => Description.Id;
 

@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Godot;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Library.External;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
+using OpenScadGraphEditor.Widgets;
 
 namespace OpenScadGraphEditor.Actions
 {
@@ -11,7 +14,15 @@ namespace OpenScadGraphEditor.Actions
     /// </summary>
     public interface IEditorContext
     {
+        /// <summary>
+        /// The currently open project.
+        /// </summary>
         ScadProject CurrentProject { get; }
+        
+        /// <summary>
+        /// The editor configuration.
+        /// </summary>
+        Configuration Configuration { get; }
         
         /// <summary>
         /// Opens the refactor dialog for the given invokable description.
@@ -37,12 +48,12 @@ namespace OpenScadGraphEditor.Actions
         /// <summary>
         /// Performs a refactoring with the given description.
         /// </summary>
-        void PerformRefactoring(string description, Refactoring refactoring);
+        RefactoringData PerformRefactoring(string description, Refactoring refactoring);
 
         /// <summary>
         /// Performs the given refactorings as a block operation.
         /// </summary>
-        void PerformRefactorings(string title, IEnumerable<Refactoring> refactorings);
+        RefactoringData PerformRefactorings(string title, IEnumerable<Refactoring> refactorings);
         
         /// <summary>
         /// Finds all usages of the given invokable description and shows them in the editor.
@@ -78,5 +89,30 @@ namespace OpenScadGraphEditor.Actions
         /// Shows the given message as a popup info in the bottom right.
         /// </summary>
         void ShowInfo(string message);
+        
+        /// <summary>
+        /// Copies the given nodes to the editor node clipboard.
+        /// </summary>
+        void CopyNodesToClipboard(ScadGraph graph, IEnumerable<ScadNode> selection);
+
+        /// <summary>
+        /// Shows the popup menu for the item represented by the given request context.
+        /// </summary>
+        void ShowPopupMenu(RequestContext requestContext);
+
+        /// <summary>
+        /// Shows the popup menu with the given entries at the given position.
+        /// </summary>
+        void ShowPopupMenu(Vector2 position, List<QuickAction> entries);
+        
+        /// <summary>
+        /// Returns the nodes in the editor node clipboard as a graph.
+        /// </summary>
+        ScadGraph GetNodesInClipboard();
+
+        /// <summary>
+        /// Opens the add node dialog for the given request context.
+        /// </summary>
+        void OpenAddDialog(RequestContext requestContext);
     }
 }

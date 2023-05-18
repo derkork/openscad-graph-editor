@@ -1,7 +1,7 @@
-using System;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -11,7 +11,6 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
     [UsedImplicitly]
     public class CommentEditingDialog : WindowDialog
     {
-        public event Action<string, Refactoring> RefactoringRequested;
         
         private LineEdit _titleEdit;
         private Label _descriptionLabel;
@@ -19,6 +18,7 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
         private ScadNode _node;
         private ScadGraph _graph;
         private Vector2 _position;
+        private IEditorContext _context;
 
         public override void _Ready()
         {
@@ -47,10 +47,11 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
             
         }
 
-        public void Open(ScadGraph graph, ScadNode node)
+        public void Open(IEditorContext context, ScadGraph graph, ScadNode node)
         {
             _node = node;
             _graph = graph;
+            _context = context;
             
             if (node is Comment comment)
             {
@@ -123,14 +124,14 @@ namespace OpenScadGraphEditor.Widgets.CommentEditingDialog
                 comment.CommentTitle = title;
                 comment.CommentDescription = description;
                 comment.Offset = _position;
-                RefactoringRequested?.Invoke("Create comment",  new AddNodeRefactoring(_graph, comment));
+                _context.PerformRefactoring("Create comment",  new AddNodeRefactoring(_graph, comment));
             }
             else if (_node != null)
             {
                 // if both fields are empty, we delete the comment
                 // otherwise we just update the comment
                 var actionText = title.Empty() && description.Empty() ? "Delete comment" : "Update comment";
-                RefactoringRequested?.Invoke(actionText, new ChangeCommentRefactoring(_graph, _node, title, description));
+                _context.PerformRefactoring(actionText, new ChangeCommentRefactoring(_graph, _node, title, description));
             }
 
             Hide();

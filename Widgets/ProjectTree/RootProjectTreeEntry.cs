@@ -8,8 +8,6 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
     public class RootProjectTreeEntry : ProjectTreeEntry<ScadProject>
     {
         public override string Title => "Project";
-        public override bool CanBeDragged => false;
-        public override bool CanBeActivated => false;
 
         public override bool CanBeCollapsed => false;
 
