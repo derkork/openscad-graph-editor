@@ -163,7 +163,7 @@ namespace OpenScadGraphEditor.Refactorings
             // ====================================================================================================
 
             // find the entry point
-            var entryPoint = newGraph.GetAllNodes().First(it => it is EntryPoint) as EntryPoint;
+            newGraph.TryGetEntryPoint(out var entryPoint); // this should always be true
 
             // paste the selection into the new graph, right next to the entry point
             var pastePosition = entryPoint.Offset + new Vector2(200, 0);

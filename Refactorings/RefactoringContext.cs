@@ -14,13 +14,9 @@ namespace OpenScadGraphEditor.Refactorings
     public class RefactoringContext
     {
         public ScadProject Project { get; }
+        public RefactoringData Data { get; } = new RefactoringData();
+
         private readonly Queue<Refactoring> _refactorings = new Queue<Refactoring>();
-
-        /// <summary>
-        /// Dictionary storing data under the ticket of the refactoring that created it.
-        /// </summary>
-        private readonly Dictionary<string, object> _data = new Dictionary<string, object>();
-
 
         public RefactoringContext(ScadProject project)
         {
@@ -30,7 +26,7 @@ namespace OpenScadGraphEditor.Refactorings
         public void PerformRefactorings(IEnumerable<Refactoring> refactorings)
         {
             _refactorings.Clear();
-            _data.Clear();
+            Data.Clear();
             refactorings.ForAll(_refactorings.Enqueue);
 
 
@@ -61,32 +57,13 @@ namespace OpenScadGraphEditor.Refactorings
         }
 
         /// <summary>
-        /// Stores ticket data under the ticket of the refactoring that created it.
+        /// Stores refactoring data under the given key.
         /// </summary>
-        internal void StoreTicketData<T>(IProvideTicketData<T> source, T data)
+        internal void StoreRefactoringData<TV>(RefactoringDataKey<TV> key, TV data)
         {
-            _data[source.Ticket] = data;
+            Data.StoreData(key, data);
         }
 
-        /// <summary>
-        /// Tries to retrieve data stored under the ticket of the refactoring that created it.
-        /// </summary>
-        public bool TryGetData<T>(string ticket, out T data)
-        {
-            data = default;
-            if (!_data.ContainsKey(ticket))
-            {
-                return false;
-            }
-
-            var result = _data[ticket];
-            if (!(result is T t))
-            {
-                return false;
-            }
-
-            data = t;
-            return true;
-        }
+    
     }
 }

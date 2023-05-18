@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -14,9 +15,6 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
     [UsedImplicitly]
     public class VariableRefactorDialog : WindowDialog
     {
-        public event Action<Refactoring[]> RefactoringsRequested;
-
-        private ScadProject _currentProject;
         private VariableDescription _baseDescription;
         private DialogMode _mode = DialogMode.Edit;
 
@@ -56,6 +54,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
 
         private Button _okButton;
         private Label _errorLabel;
+        private IEditorContext _context;
 
 
         public override void _Ready()
@@ -162,11 +161,11 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
         }
 
 
-        public void OpenForNewVariable(ScadProject currentProject)
+        public void OpenForNewVariable(IEditorContext context)
         {
             Clear();
+            _context = context;
             _mode = DialogMode.Create;
-            _currentProject = currentProject;
             _typeHintOptionButton.Select(0);
             OnVariableTypeChanged(0);
 
@@ -177,12 +176,12 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             SetAsMinsize();
         }
 
-        public void Open(VariableDescription description, ScadProject currentProject)
+        public void Open(IEditorContext context, VariableDescription description)
         {
             Clear();
+            _context = context;
             _mode = DialogMode.Edit;
             _baseDescription = description;
-            _currentProject = currentProject;
 
             _nameEdit.Text = description.Name;
             _descriptionEdit.Text = description.Description;
@@ -265,7 +264,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
             _descriptionEdit.Text = "";
             _customizerTabEdit.Text = "";
             _baseDescription = null;
-            _currentProject = null;
+            _context = null;
             _minStepMaxMinEdit.Text = "0";
             _minStepMaxStepEdit.Text = "1";
             _minStepMaxMaxEdit.Text = "1";
@@ -318,7 +317,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     refactorings.Add(
                         new ChangeVariableDefaultValueRefactoring(_baseDescription, _defaultValueLiteral));
 
-                    RefactoringsRequested?.Invoke(refactorings.ToArray());
+                    _context.PerformRefactorings("Change variable settings", refactorings);
 
                     break;
                 case DialogMode.Create:
@@ -331,10 +330,7 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                     newVariable.CustomizerDescription = customizerDescription;
                     newVariable.DefaultValue = _defaultValueLiteral;
 
-                    RefactoringsRequested?.Invoke(new Refactoring[]
-                    {
-                        new IntroduceVariableRefactoring(newVariable)
-                    });
+                    _context.PerformRefactoring("Create variable", new IntroduceVariableRefactoring(newVariable));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -429,9 +425,9 @@ namespace OpenScadGraphEditor.Widgets.VariableRefactorDialog
                 .Check(
                     // we create a variable, then the name must be different from all other variables in the project
                     (_mode == DialogMode.Create &&
-                     _currentProject.Variables.Select(it => it.Name).All(it => it != _nameEdit.Text))
+                     _context.CurrentProject.Variables.Select(it => it.Name).All(it => it != _nameEdit.Text))
                     // we edit a variable, then the name must be different from all other variables in the project 
-                    || (_mode == DialogMode.Edit && _currentProject.Variables.Where(it => it != _baseDescription)
+                    || (_mode == DialogMode.Edit &&  _context.CurrentProject.Variables.Where(it => it != _baseDescription)
                         .Select(it => it.Name).All(it => it != _nameEdit.Text))
                     , "The name is already used in this project."
                 )

@@ -1,8 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -13,17 +14,16 @@ namespace OpenScadGraphEditor.Widgets.DocumentationDialog
     /// <summary>
     /// Dialog for editing the documentation of an invokable.
     /// </summary>
+    [UsedImplicitly]
     public class DocumentationDialog : WindowDialog
     {
-        public event Action<Refactoring> RefactoringRequested;
-        
         private TextEdit _descriptionEdit;
         private Control _returnValueSection;
         private LineEdit _returnValueEdit;
         private Control _parametersSection;
         private readonly List<LineEdit> _parameterEditFields = new List<LineEdit>();
         private InvokableDescription _invokableDescription;
-        
+        private IEditorContext _context;
         
 
         public override void _Ready()
@@ -43,10 +43,14 @@ namespace OpenScadGraphEditor.Widgets.DocumentationDialog
         }
 
 
-        public void Open(InvokableDescription invokableDescription)
+        public void Open(IEditorContext context, InvokableDescription invokableDescription)
         {
-            GdAssert.That(!(invokableDescription is MainModuleDescription), "MainModuleDescription is not supported");
+            if (invokableDescription is MainModuleDescription)
+            {
+                return; // not supported
+            }
             
+            _context = context;
             _invokableDescription = invokableDescription;
             _descriptionEdit.Text = invokableDescription.Description;
 
@@ -88,11 +92,11 @@ namespace OpenScadGraphEditor.Widgets.DocumentationDialog
             if (_invokableDescription is FunctionDescription functionDescription)
             {
                 var newReturnValueDescription = _returnValueEdit.Text;
-                RefactoringRequested?.Invoke(new ChangeInvokableDocumentationRefactoring(functionDescription, newDescription, newReturnValueDescription, newParameterDescriptions));
+                _context.PerformRefactoring("Edit documentation", new ChangeInvokableDocumentationRefactoring(functionDescription, newDescription, newReturnValueDescription, newParameterDescriptions));
             }
             else
             {
-                RefactoringRequested?.Invoke(new ChangeInvokableDocumentationRefactoring((ModuleDescription) _invokableDescription, newDescription, newParameterDescriptions));
+                _context.PerformRefactoring("Edit documentation", new ChangeInvokableDocumentationRefactoring((ModuleDescription) _invokableDescription, newDescription, newParameterDescriptions));
             }
             Hide();
         }

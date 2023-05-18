@@ -1,33 +1,26 @@
 using System;
 using Godot;
 using GodotExt;
+using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Refactorings;
 using OpenScadGraphEditor.Utils;
 
 namespace OpenScadGraphEditor.Widgets.NodeColorDialog
 {
+    [UsedImplicitly]
     public class NodeColorDialog : WindowDialog
     {
-   
-        /// <summary>
-        /// Called when a color was selected.
-        /// </summary>
-        public event Action<ScadGraph, ScadNode, Color> ColorSelected;
-        
-        /// <summary>
-        /// Called when the color was removed.
-        /// </summary>
-        public event Action<ScadGraph, ScadNode> ColorCleared;
-
-        private ScadGraph _contextGraph;
-        private ScadNode _contextNode;
+        private ScadGraph _graph;
+        private ScadNode _node;
+        private IEditorContext _context;
 
         public override void _Ready()
         {
-            
             var buttonRow = this.WithName<Container>("ButtonRow");
-            // attach to all buttons int he button row
+            // attach to all buttons in the button row
             buttonRow.GetChildNodes<ColorButton.ColorButton>()
                 .ForAll(it => it.Pressed += OnColorButtonPressed);
             
@@ -41,23 +34,26 @@ namespace OpenScadGraphEditor.Widgets.NodeColorDialog
                 .Connect("pressed")
                 .To(this, nameof(OnCancel));
         }
+        
+        public void Open(IEditorContext context, ScadGraph contextGraph, ScadNode contextNode)
+        {
+            _node = contextNode;
+            _graph = contextGraph;
+            _context = context;
+            PopupCenteredMinsize();
+        }
 
         private void OnColorButtonPressed(ColorButton.ColorButton button)
         {
-            ColorSelected?.Invoke(_contextGraph, _contextNode, button.Color);
+            _context.PerformRefactoring("Change node color",
+                new ToggleModifierRefactoring(_graph, _node, ScadNodeModifier.Color, true, button.Color));
             Hide();
         }
 
-        public void Open(ScadGraph contextGraph, ScadNode contextNode)
-        {
-            _contextNode = contextNode;
-            _contextGraph = contextGraph;
-            PopupCenteredMinsize();
-        }
-        
         private void OnClearColor()
         {
-            ColorCleared?.Invoke(_contextGraph, _contextNode);
+            _context.PerformRefactoring("Clear node color",
+                new ToggleModifierRefactoring(_graph, _node, ScadNodeModifier.Color, false));
             Hide();
         }
 

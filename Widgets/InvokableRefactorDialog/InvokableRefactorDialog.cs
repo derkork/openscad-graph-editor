@@ -4,6 +4,7 @@ using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -14,9 +15,6 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
     [UsedImplicitly]
     public class InvokableRefactorDialog : WindowDialog
     {
-        public event Action<InvokableDescription, IEnumerable<Refactoring>> InvokableCreationRequested;
-        public event Action<InvokableDescription, IEnumerable<Refactoring>> InvokableModificationRequested;
-
         private LineEdit _nameEdit;
         private Label _returnTypeLabel;
         private PortTypeSelector _returnTypeOptionButton;
@@ -33,7 +31,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
 
         private DialogMode _mode = DialogMode.Edit;
         private Button _okButton;
-        private ScadProject _currentProject;
+        private IEditorContext _context;
 
         public override void _Ready()
         {
@@ -74,10 +72,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         }
 
 
-        public void OpenForNewFunction(ScadProject currentProject)
+        public void OpenForNewFunction(IEditorContext context)
         {
             Clear();
-            _currentProject = currentProject;
+            _context = context;
             WindowTitle = "New Function";
             _mode = DialogMode.CreateFunction;
             _returnTypeLabel.Visible = true;
@@ -88,10 +86,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             PopupCentered();
         }
 
-        public void OpenForNewModule(ScadProject currentProject)
+        public void OpenForNewModule(IEditorContext context)
         {
             Clear();
-            _currentProject = currentProject;
+            _context = context;
             WindowTitle = "New Module";
             _mode = DialogMode.CreateModule;
             _returnTypeLabel.Visible = false;
@@ -100,10 +98,10 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             PopupCentered();
         }
 
-        public void Open(InvokableDescription description, ScadProject currentProject)
+        public void OpenForEditing(IEditorContext context, InvokableDescription description)
         {
             Clear();
-            _currentProject = currentProject;
+            _context = context;
             WindowTitle = $"Refactor {description.Name}";
             _baseDescription = description;
             _mode = DialogMode.Edit;
@@ -137,7 +135,7 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
         private void Clear()
         {
             _baseDescription = null;
-            _currentProject = null;
+            _context = null;
             _nameEdit.Text = "";
             _parameterLines.ForAll(it => it.Discard());
             _parameterLines.Clear();
@@ -273,11 +271,13 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
                 switch (_mode)
                 {
                     case DialogMode.Edit:
-                        InvokableModificationRequested?.Invoke(_baseDescription, refactorings);
+                        _context.PerformRefactorings($"Change {_baseDescription.Name}", refactorings);
                         break;
                     case DialogMode.CreateFunction:
                     case DialogMode.CreateModule:
-                        InvokableCreationRequested?.Invoke(_baseDescription, refactorings);
+                        _context.PerformRefactorings($"Create {_baseDescription.Name}", refactorings);
+                        // then open the newly created function
+                        _context.OpenGraph(_baseDescription);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -303,13 +303,13 @@ namespace OpenScadGraphEditor.Widgets.InvokableRefactorDialog
             ValidityChecker.For(_errorLabel, _okButton)
                 .Check(
                     // we create a function, then the name must be different from all other functions in the project
-                    (_mode == DialogMode.CreateFunction && _currentProject.Functions.Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    (_mode == DialogMode.CreateFunction && _context.CurrentProject.Functions.Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
                     // we create a module, then the name must be different from all other modules in the project
-                    || (_mode == DialogMode.CreateModule && _currentProject.Modules.Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    || (_mode == DialogMode.CreateModule && _context.CurrentProject.Modules.Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
                     // we edit a function, then the name must be different from all other functions in the project
-                    || (_mode == DialogMode.Edit && _baseDescription is FunctionDescription && _currentProject.Functions.Where(it => it.Description != _baseDescription).Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    || (_mode == DialogMode.Edit && _baseDescription is FunctionDescription && _context.CurrentProject.Functions.Where(it => it.Description != _baseDescription).Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
                     // we edit a module, then the name must be different from all other modules in the project
-                    || (_mode == DialogMode.Edit && _baseDescription is ModuleDescription && _currentProject.Modules.Where(it => it.Description != _baseDescription).Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
+                    || (_mode == DialogMode.Edit && _baseDescription is ModuleDescription && _context.CurrentProject.Modules.Where(it => it.Description != _baseDescription).Select(it => it.Description.Name).All(it => it != _nameEdit.Text))
                     , "The name is already used in this project.")
                 .Check(
                     _nameEdit.Text.IsValidIdentifier(),

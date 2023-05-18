@@ -11,8 +11,13 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
 
         public override string Title => Description.Name;
         public override InvokableDescription Description { get; }
-        public override bool CanBeDragged => true;
-        public override bool CanBeActivated => true;
+
+
+        public override bool TryGetDragData(out object data)
+        {
+            data = Description;
+            return true;
+        }
 
         public ScadInvokableTreeEntry(InvokableDescription description)
         {

@@ -1,48 +1,57 @@
-using System.Collections.Generic;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
-using OpenScadGraphEditor.Widgets;
-using OpenScadGraphEditor.Widgets.IconButton;
+using OpenScadGraphEditor.Nodes;
 
-public class EditingInterface : Control
+namespace OpenScadGraphEditor.Widgets.EditingInterface
 {
-    private ScadGraphEdit _graphEdit;
-    private Control _buttonBar;
-    private IEditorContext _editorContext;
-    /// <summary>
-    /// Controls which appear when a selection is active.
-    /// </summary>
-    private List<Control> _selectionControls;
-    
-    public override void _Ready()
+    public class EditingInterface : Control
     {
-        _graphEdit = this.WithName<ScadGraphEdit>("GraphEdit");
-        _buttonBar = this.WithName<Control>("ButtonBar");
-        var alignLeftButton = _buttonBar.WithName<IconButton>("AlignLeftButton");
-        
-        var alignRightButton = _buttonBar.WithName<IconButton>("AlignRightButton");
-        var alignTopButton = _buttonBar.WithName<IconButton>("AlignTopButton");
-        var alignBottomButton = _buttonBar.WithName<IconButton>("AlignBottomButton");
-        
-        _selectionControls.Add(alignLeftButton);
-        _selectionControls.Add(alignRightButton);
-        _selectionControls.Add(alignTopButton);
-        _selectionControls.Add(alignBottomButton);
-        
-    }
+        /// <summary>
+        /// The actual graph editor.
+        /// </summary>
+        private ScadGraphEdit _graphEdit;
 
-    public void Init(IEditorContext editorContext)
-    {
-        _editorContext = editorContext;
+  
+        /// <summary>
+        /// The current editor context.
+        /// </summary>
+        private IEditorContext _editorContext;
+
+        public ScadGraph Graph => _graphEdit.Graph;
+
+        public Vector2 ScrollOffset
+        {
+            get => _graphEdit.ScrollOffset;
+            set => _graphEdit.ScrollOffset = value;
+        }
+
+        public override void _Ready()
+        {
+            _graphEdit = this.WithName<ScadGraphEdit>("GraphEdit"); 
+            this.WithName<IconButton.IconButton>("AlignLeftButton").ButtonPressed += _graphEdit.AlignSelectionLeft;
+            this.WithName<IconButton.IconButton>("AlignRightButton").ButtonPressed += _graphEdit.AlignSelectionRight;
+            this.WithName<IconButton.IconButton>("AlignTopButton").ButtonPressed += _graphEdit.AlignSelectionTop;
+            this.WithName<IconButton.IconButton>("AlignBottomButton").ButtonPressed += _graphEdit.AlignSelectionBottom;
+            this.WithName<IconButton.IconButton>("ShowHelpButton").ButtonPressed += _graphEdit.ShowHelpForSelection;
+        }
+
+        public void Init(IEditorContext editorContext)
+        {
+            _editorContext = editorContext;
+        }
+
+        public void Render(ScadGraph scadGraph)
+        {
+            _graphEdit.Render(_editorContext, scadGraph);
+        }
+
+
+        public void FocusNode(ScadNode node)
+        {
+            _graphEdit.FocusNode(node);
+        }
+
     }
-    
-    public void Render(ScadGraph scadGraph)
-    {
-        _graphEdit.Render(_editorContext, scadGraph);
-    }
-    
-    
-    
 }

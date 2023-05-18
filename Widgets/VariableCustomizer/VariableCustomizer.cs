@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using GodotExt;
 using JetBrains.Annotations;
+using OpenScadGraphEditor.Actions;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
 using OpenScadGraphEditor.Refactorings;
@@ -13,9 +13,6 @@ namespace OpenScadGraphEditor.Widgets.VariableCustomizer
     [UsedImplicitly]
     public class VariableCustomizer : MarginContainer
     {
-        public event Action<string, Refactoring> RefactoringRequested;
-        public event Action<VariableDescription> VariableEditingRequested;
-
         private Control _sectionTemplate;
         private Control _variableTemplate;
 
@@ -26,6 +23,8 @@ namespace OpenScadGraphEditor.Widgets.VariableCustomizer
 
         private readonly Dictionary<string, VariableDescription> _variablesByName =
             new Dictionary<string, VariableDescription>();
+
+        private IEditorContext _context;
 
         public override void _Ready()
         {
@@ -39,8 +38,9 @@ namespace OpenScadGraphEditor.Widgets.VariableCustomizer
             _sectionsContainer = this.WithName<Control>("Sections");
         }
 
-        public void Setup(List<VariableDescription> variables)
+        public void Setup(IEditorContext context, List<VariableDescription> variables)
         {
+            _context = context;
             // fill the variables by name dictionary
             _variablesByName.Clear();
             foreach (var variable in variables)
@@ -188,7 +188,7 @@ namespace OpenScadGraphEditor.Widgets.VariableCustomizer
                     newWidget.LiteralValueChanged += (newLiteral) =>
                     {
                         // when the value changes, request a refactoring
-                        RefactoringRequested?.Invoke($"Change default value of {variable.Name}",
+                        _context.PerformRefactoring($"Change default value of {variable.Name}",
                             new ChangeVariableDefaultValueRefactoring(variable, newLiteral));
                     };
                 }
@@ -205,7 +205,7 @@ namespace OpenScadGraphEditor.Widgets.VariableCustomizer
         private void OnVariableClicked([UsedImplicitly] object _, string variableName)
         {
             // when the variable name is clicked, request the variable editing dialog
-            VariableEditingRequested?.Invoke(_variablesByName[variableName]);
+            _context.OpenRefactorDialog(_variablesByName[variableName]);
         }
     }
 }

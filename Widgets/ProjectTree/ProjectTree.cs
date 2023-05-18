@@ -128,7 +128,7 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
         public override object GetDragData(Vector2 position)
         {
             var entry = GetSelectedEntry();
-            if (entry == null || !entry.CanBeDragged)
+            if (entry == null || !entry.TryGetDragData(out var data))
             {
                 return null;
             }
@@ -138,7 +138,7 @@ namespace OpenScadGraphEditor.Widgets.ProjectTree
             panel.AddChild(label);
             label.Text = entry.Title;
             SetDragPreview(panel);
-            return new ProjectTreeDragData(this, entry.Id);
+            return new DragData(data);
         }
 
         private void OnItemActivated()
