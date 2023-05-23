@@ -41,6 +41,10 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
                 it => it.To is SwitchableBinaryOperator bo && it.TryGetFromPortType(out var type) && bo.Supports(type) ,
                 ConnectionRules.OperationRuleDecision.Allow);
             
+            // if the operator does not support the port type, it's a hard veto
+            ConnectionRules.AddConnectRule(
+                it => it.To is SwitchableBinaryOperator bo && it.TryGetFromPortType(out var type) && !bo.Supports(type) ,
+                ConnectionRules.OperationRuleDecision.Veto);
         }
 
         public override void SaveInto(SavedNode node)
@@ -63,10 +67,7 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
         {
             var firstOperandPortType = (PortType) node.GetDataInt("first_operand_port_type", (int) PortType.Any);
             var secondOperandPortType = (PortType) node.GetDataInt("second_operand_port_type", (int) PortType.Any);
-            InputPorts.Clear();
-            InputPorts
-                .PortType(firstOperandPortType, literalType: firstOperandPortType.GetMatchingLiteralType())
-                .PortType(secondOperandPortType, literalType: secondOperandPortType.GetMatchingLiteralType());
+            SwitchInputPorts(firstOperandPortType, secondOperandPortType);
 
             base.RestorePortDefinitions(node, resolver);
         }
@@ -91,7 +92,10 @@ namespace OpenScadGraphEditor.Nodes.SwitchableBinaryOperator
 
             var existingDefinition = GetPortDefinition(port);
             
-            var newDefinition = new PortDefinition(newPortType, newPortType.GetMatchingLiteralType(), existingDefinition.Name,
+            var newDefinition = new PortDefinition(newPortType, 
+                // the output port will never have a literal
+                port.IsOutput ? LiteralType.None : newPortType.GetMatchingLiteralType(),
+                existingDefinition.Name,
                 existingDefinition.LiteralIsAutoSet, existingDefinition.DefaultValue, existingDefinition.RenderHint);
             
             SetPortDefinition(port, newDefinition);
