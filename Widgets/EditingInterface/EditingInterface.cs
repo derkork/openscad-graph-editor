@@ -1,3 +1,4 @@
+using System.Drawing;
 using Godot;
 using GodotExt;
 using OpenScadGraphEditor.Actions;
@@ -29,7 +30,11 @@ namespace OpenScadGraphEditor.Widgets.EditingInterface
 
         public override void _Ready()
         {
-            _graphEdit = this.WithName<ScadGraphEdit>("GraphEdit"); 
+            _graphEdit = this.WithName<ScadGraphEdit>("GraphEdit");
+            this.WithName<IconButton.IconButton>("AddButton").ButtonPressed += _graphEdit.AddNode;
+            this.WithName<IconButton.IconButton>("StraightenButton").ButtonPressed += _graphEdit.StraightenSelection;
+            this.WithName<IconButton.IconButton>("ExtractButton").ButtonPressed += _graphEdit.ExtractSelection;
+            this.WithName<IconButton.IconButton>("CommentButton").ButtonPressed += _graphEdit.CommentSelection;
             this.WithName<IconButton.IconButton>("AlignLeftButton").ButtonPressed += _graphEdit.AlignSelectionLeft;
             this.WithName<IconButton.IconButton>("AlignRightButton").ButtonPressed += _graphEdit.AlignSelectionRight;
             this.WithName<IconButton.IconButton>("AlignTopButton").ButtonPressed += _graphEdit.AlignSelectionTop;
