@@ -7,19 +7,14 @@ namespace OpenScadGraphEditor.Actions
 {
     public readonly struct RequestContext
     {
-        public static RequestContext ForOutputPort(ScadGraph source, Vector2 position, ScadNode node, int port)
-        {
-            return new RequestContext().WithNodePort(source, node, PortId.Output(port)).WithPosition(position);
-        }
-
-        public static RequestContext ForInputPort(ScadGraph source, Vector2 position, ScadNode node, int port)
-        {
-            return new RequestContext().WithNodePort(source, node, PortId.Input(port)).WithPosition(position);
-        }
-
         public static RequestContext ForNode(ScadGraph source, ScadNode node, Vector2 position)
         {
             return new RequestContext().WithNode(source, node).WithPosition(position);
+        }
+        
+        public static RequestContext ForPosition(Vector2 position)
+        {
+            return new RequestContext().WithPosition(position);
         }
 
         public static RequestContext ForInvokableDescription(InvokableDescription description)

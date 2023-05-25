@@ -396,8 +396,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsExtract())
             {
-                _context.PerformRefactoring("Extract nodes",
-                    new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList()));
+                ExtractSelection();
                 return;
             }
 
@@ -434,12 +433,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsEditComment())
             {
-                if (!TryGetSingleSelectedNode("Please select exactly one node to edit its comment.", out var selection))
-                {
-                    return;
-                }
-
-                _context.EditComment(Graph, selection);
+                CommentSelection();
                 return;
             }
 
@@ -451,7 +445,8 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsStraighten())
             {
-                _graphLayout.StraightenConnections(GetSelectedWidgets());
+                StraightenSelection();
+                return;
             }
 
             if (evt.IsAlignLeft())
@@ -530,6 +525,27 @@ namespace OpenScadGraphEditor.Widgets
             }
         }
 
+        public void ExtractSelection()
+        {
+            _context.PerformRefactoring("Extract nodes",
+                new ExtractInvokableRefactoring(Graph, GetSelectedNodes().ToList()));
+        }
+
+        public void StraightenSelection()
+        {
+            _graphLayout.StraightenConnections(GetSelectedWidgets());
+        }
+
+        public void CommentSelection()
+        {
+            if (!TryGetSingleSelectedNode("Please select exactly one node to edit its comment.", out var selection))
+            {
+                return;
+            }
+
+            _context.EditComment(Graph, selection);
+        }
+
         public void ShowHelpForSelection()
         {
             if (!TryGetSingleSelectedNode("Please select exactly one node to show its help.", out var selection))
@@ -560,6 +576,7 @@ namespace OpenScadGraphEditor.Widgets
             _graphLayout.AlignNodesLeft(GetSelectedWidgets());
         }
 
+  
         private void ClearHighlightedConnection()
         {
             if (_highlightedConnection == null)
@@ -734,6 +751,11 @@ namespace OpenScadGraphEditor.Widgets
             OnDeleteSelection();
         }
 
+
+        public void AddNode()
+        {
+            AddNodeOrOpenDialog(ScrollOffset + GetGlobalRect().Size / 2);
+        }
 
         public override void _UnhandledKeyInput(InputEventKey evt)
         {
