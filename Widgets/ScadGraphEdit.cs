@@ -82,7 +82,7 @@ namespace OpenScadGraphEditor.Widgets
             this.Connect("node_unselected")
                 .To(this, nameof(OnNodeUnselected));
             this.Connect("delete_nodes_request")
-                .To(this, nameof(OnDeleteSelection));
+                .To(this, nameof(DeleteSelection));
             this.Connect("popup_request")
                 .To(this, nameof(OnPopupRequest));
 
@@ -735,7 +735,7 @@ namespace OpenScadGraphEditor.Widgets
         }
 
         // Godot 3.4
-        private void OnDeleteSelection()
+        public void DeleteSelection()
         {
             var refactorings =
                 GetSelectedNodes()
@@ -746,9 +746,9 @@ namespace OpenScadGraphEditor.Widgets
         }
 
         // Godot 3.5
-        private void OnDeleteSelection([UsedImplicitly] Node[] _)
+        private void DeleteSelection([UsedImplicitly] Node[] _)
         {
-            OnDeleteSelection();
+            DeleteSelection();
         }
 
 
@@ -761,7 +761,7 @@ namespace OpenScadGraphEditor.Widgets
         {
             if (KeyMap.IsRemoveNodePressed(evt))
             {
-                OnDeleteSelection();
+                DeleteSelection();
             }
         }
 
