@@ -654,7 +654,7 @@ Now a dialog will open where you can add descriptions to the module and the para
 
 ![](images/documentation_dialog.png)
 
-When you are done, press _OK_ to save the documentation. The documentation will now be shown if you request help for the module (by pressing `F1`).
+When you are done, press _OK_ to save the documentation. The documentation will now be shown if you request help for the module (by pressing `F1` or the <img src="../Icons/help0000.png" height="20px" valign="bottom" alt="Help icon"> icon in the toolbar).
 
 ![](images/port_colors.png)
 
@@ -688,6 +688,22 @@ Functions have an additional node where you can connect the return value of the 
 The two numbers are given as parameters to the function. Then we use an _Add_ node to add the two numbers. The output of the _Add_ node is connected to the _Return_ node's input port, so now the function will return the sum of the two numbers.
 
 From here on functions work exactly the same as modules. So you can use them the same way by dragging them from the project tree into the graph, change, move or delete parameters and the return type, duplicate them, find their usages and can edit their documentation in the same way as you do for modules.
+
+## Extracting parts of the graph into modules or functions
+
+When you work on a more complex model you usually want to create smaller reusable modules and functions to keep things neat and tidy. OpenSCAD Graph Editor simplifies this process significantly by allowing you to extract parts of the graph into modules or functions. To do this, simply select a set of nodes and press `Ctrl`+`E` or `Cmd`+`E` on Mac. Alternatively you can also click the  <img src="../Icons/extract0000.png" height="20px" valign="bottom" alt="Extract function/module icon"> icon in the tool bar.
+
+![extracting a function](images/extract_function.gif)
+
+In this example a set of nodes that  calculates a circumference of a rectangle is extracted into a function. When extracting editor will automatically create functions and modules according to these rules:
+
+- if any geometry node is involved, a module will be created, otherwise a function will be created
+- if any connection goes into the selected nodes from a non-selected node, a parameter will be created for the function/module
+- likewise if any connection goes out of the selected nodes to a non-selected node, a return value will be created for the function
+- if an incoming connection is a geometry connection,  the module will become an [operator module](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/User-Defined_Functions_and_Modules#Operator_modules) (e.g. modify incoming geometry and return the modified geometry)
+- parameter types and return types will be inferred from the connected nodes
+- parameter names will also be inferred from the connected nodes, if possible, otherwise they will be named `param1`, `param2`, etc - you can change the names later
+- if the node selection cannot be meaningfully extracted into a function or module (e.g. if it has multiple return values), the extraction will fail and a message will be displayed
 
 ## Using functions and modules from text-based libraries
 
@@ -767,6 +783,7 @@ OpenSCAD graph editor will render the code in the preamble verbatim, so make sur
 - `Ctrl`+`A` / `Cmd` + `A` - Select all nodes.
 - `Ctrl`+`C` / `Cmd` + `C` - Copy the selected nodes.
 - `Ctrl`+`D` / `Cmd` + `D` - Duplicate the selected nodes.
+- `Ctrl`+`E` / `Cmd` + `E` - Extract the selected nodes into a module or function.
 - `Ctrl`+`V` / `Cmd` + `V` - Paste the copied nodes.
 - `Ctrl`+`X` / `Cmd` + `X` - Cut the selected nodes.
 - `Ctrl`+`Z` / `Cmd` + `Z` - Undo the last action.
