@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Widgets/EditingInterface/EditingInterface.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/ScadGraphEdit.cs" type="Script" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://Icons/add0000.png" type="Texture" id=10]
 [ext_resource path="res://Icons/straighten0000.png" type="Texture" id=11]
 [ext_resource path="res://Icons/extract0000.png" type="Texture" id=12]
+[ext_resource path="res://Icons/delete0000.png" type="Texture" id=13]
 
 [node name="EditingInterface" type="HBoxContainer"]
 anchor_right = 1.0
@@ -32,17 +33,27 @@ Icon = ExtResource( 10 )
 HintTooltip = "Add Node (+)"
 Padding = Vector2( 6, 6 )
 
-[node name="HSeparator" type="HSeparator" parent="ButtonBar"]
+[node name="DeleteButton" parent="ButtonBar" instance=ExtResource( 3 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 40.0
 margin_right = 32.0
-margin_bottom = 48.0
+margin_bottom = 72.0
+Icon = ExtResource( 13 )
+HintTooltip = "Delete Selection (Delete / Backspace)"
+Padding = Vector2( 6, 6 )
+
+[node name="HSeparator" type="HSeparator" parent="ButtonBar"]
+margin_top = 80.0
+margin_right = 32.0
+margin_bottom = 88.0
 
 [node name="CommentButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 56.0
+margin_top = 96.0
 margin_right = 32.0
-margin_bottom = 88.0
+margin_bottom = 128.0
 Icon = ExtResource( 9 )
 HintTooltip = "Add / Edit Comment (F2)"
 Padding = Vector2( 6, 6 )
@@ -50,9 +61,9 @@ Padding = Vector2( 6, 6 )
 [node name="StraightenButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 96.0
+margin_top = 136.0
 margin_right = 32.0
-margin_bottom = 128.0
+margin_bottom = 168.0
 Icon = ExtResource( 11 )
 HintTooltip = "Straighten Connections (Q)"
 Padding = Vector2( 6, 6 )
@@ -60,9 +71,9 @@ Padding = Vector2( 6, 6 )
 [node name="ExtractButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 136.0
+margin_top = 176.0
 margin_right = 32.0
-margin_bottom = 168.0
+margin_bottom = 208.0
 Icon = ExtResource( 12 )
 HintTooltip = "Extract Selection (Ctrl+E / Cmd+E)"
 Padding = Vector2( 6, 6 )
@@ -70,24 +81,24 @@ Padding = Vector2( 6, 6 )
 [node name="ShowHelpButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 176.0
+margin_top = 216.0
 margin_right = 32.0
-margin_bottom = 208.0
+margin_bottom = 248.0
 Icon = ExtResource( 8 )
 HintTooltip = "Show Help (F1)"
 Padding = Vector2( 6, 6 )
 
 [node name="HSeparator3" type="HSeparator" parent="ButtonBar"]
-margin_top = 216.0
+margin_top = 256.0
 margin_right = 32.0
-margin_bottom = 224.0
+margin_bottom = 264.0
 
 [node name="AlignLeftButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 232.0
+margin_top = 272.0
 margin_right = 32.0
-margin_bottom = 264.0
+margin_bottom = 304.0
 Icon = ExtResource( 4 )
 HintTooltip = "Align Left (W)"
 Padding = Vector2( 6, 6 )
@@ -95,9 +106,9 @@ Padding = Vector2( 6, 6 )
 [node name="AlignRightButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 272.0
+margin_top = 312.0
 margin_right = 32.0
-margin_bottom = 304.0
+margin_bottom = 344.0
 Icon = ExtResource( 6 )
 HintTooltip = "Align Right (D)"
 Padding = Vector2( 6, 6 )
@@ -105,9 +116,9 @@ Padding = Vector2( 6, 6 )
 [node name="AlignTopButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 312.0
+margin_top = 352.0
 margin_right = 32.0
-margin_bottom = 344.0
+margin_bottom = 384.0
 Icon = ExtResource( 5 )
 HintTooltip = "Align Top (W)"
 Padding = Vector2( 6, 6 )
@@ -115,9 +126,9 @@ Padding = Vector2( 6, 6 )
 [node name="AlignBottomButton" parent="ButtonBar" instance=ExtResource( 3 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 352.0
+margin_top = 392.0
 margin_right = 32.0
-margin_bottom = 384.0
+margin_bottom = 424.0
 Icon = ExtResource( 7 )
 HintTooltip = "Align Bottom (S)"
 Padding = Vector2( 6, 6 )
