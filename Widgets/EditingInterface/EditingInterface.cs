@@ -33,6 +33,12 @@ namespace OpenScadGraphEditor.Widgets.EditingInterface
             _graphEdit = this.WithName<ScadGraphEdit>("GraphEdit");
             this.WithName<IconButton.IconButton>("AddButton").ButtonPressed += _graphEdit.AddNode;
             this.WithName<IconButton.IconButton>("DeleteButton").ButtonPressed += _graphEdit.DeleteSelection;
+            
+            this.WithName<IconButton.IconButton>("DuplicateButton").ButtonPressed += _graphEdit.DuplicateSelection;
+            this.WithName<IconButton.IconButton>("CopyButton").ButtonPressed += _graphEdit.CopySelection;
+            this.WithName<IconButton.IconButton>("CutButton").ButtonPressed += _graphEdit.CutSelection;
+            this.WithName<IconButton.IconButton>("PasteButton").ButtonPressed += _graphEdit.PasteClipboard;
+            
             this.WithName<IconButton.IconButton>("StraightenButton").ButtonPressed += _graphEdit.StraightenSelection;
             this.WithName<IconButton.IconButton>("ExtractButton").ButtonPressed += _graphEdit.ExtractSelection;
             this.WithName<IconButton.IconButton>("CommentButton").ButtonPressed += _graphEdit.CommentSelection;
