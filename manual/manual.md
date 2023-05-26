@@ -109,7 +109,7 @@ You are now ready to use the OpenSCAD Graph Editor.
 
 ## The basics
 ### Starting a new project
-When you start the OpenSCAD Graph Editor, it will show a blank graph. You can already add nodes to the graph but live preview is not enabled until you actually save the project somewhere. This is because live preview requires that OpenSCAD code is generated and written to a file so that the OpenSCAD executable can read it and produce a live preview. So you should immediately save the project somewhere. You can save it by pressing the _Save as..._ button.  After the project is saved you can start the live preview by pressing the OpenSCAD icon in the top right corner of the editor, provided that you have set it up correctly. If you haven't set this up yet, check the previous section.
+When you start the OpenSCAD Graph Editor, it will show a blank graph. You can already add nodes to the graph but live preview is not enabled until you actually save the project somewhere. This is because live preview requires that OpenSCAD code is generated and written to a file so that the OpenSCAD executable can read it and produce a live preview. So you should immediately save the project somewhere. You can save it by pressing the _Save as..._ button.  After the project is saved you can start the live preview by pressing the <img src="../Icons/openscad_logo.png" height="20px" valign="bottom" alt="OpenSCAD icon"> icon in the top right corner of the editor, provided that you have set it up correctly. If you haven't set this up yet, check the previous section.
 
 ![](images/starting_live_preview.png)
 
@@ -148,7 +148,7 @@ The following colors are used:
 - _White_ - geometry (a 2D or 3D object)
 
 ### Adding nodes
-There are multiple ways to add nodes to the graph. You can right-click on a free space in the graph to open the _Add Node_ dialog. This contains a list of all available nodes. You can then type the name of the node you want to add and press `Enter` or double-click the node in the list to add it to the graph. All built-in nodes come with a unique short name which is indicated in square brackets behind the node's full name. For example the _Cube_ node has the short name _Cbe_. This feature allows you to quickly add nodes by typing their short name and pressing `Enter`.
+There are multiple ways to add nodes to the graph. You can right-click on a free space in the graph or press the  <img src="../Icons/add0000.png" height="20px" valign="bottom" alt="Add node icon"> icon in the toolbar to open the _Add Node_ dialog.  This contains a list of all available nodes. You can then type the name of the node you want to add and press `Enter` or double-click the node in the list to add it to the graph. All built-in nodes come with a unique short name which is indicated in square brackets behind the node's full name. For example the _Cube_ node has the short name _Cbe_. This feature allows you to quickly add nodes by typing their short name and pressing `Enter`.
 
 ![](images/add_node.gif)
 
@@ -456,7 +456,7 @@ The _Debug subtree_ modifier will render the node's output in a translucent red 
 
 ![](images/debug_modifier.png)
 
-In this example where two cylinders are subtracted from a cube, one cylinder has a debug modifier applied. You can see this by the little "bug" icon above the node. Now the cylinder is rendered in a translucent red color.
+In this example where two cylinders are subtracted from a cube, one cylinder has a debug modifier applied. You can see this by the little <img src="../Icons/debug0000.png" height="20px" valign="bottom" alt="Debug icon"> icon above the node. Now the cylinder is rendered in a translucent red color.
 
 #### Background subtree
 
@@ -502,7 +502,7 @@ If you want to inspect the generated OpenSCAD code you can press the _View Code_
 Variables allow you to parameterize your graph. Instead of making an object that has fixed dimensions, you can create variables which allow you to change the dimensions of your object without having to change the graph. They can also be used to toggle certain features of your object on and off. This is very useful if you want different variations of the same object. If you upload your OpenSCAD files on sites like Thingiverse, users can then easily change the dimensions and features of your object to fit their needs.
 
 #### Creating a new variable
-To create a variable, click the _V_ icon above the project tree. This will open the _Variables_ dialog.
+To create a variable, click the <img src="../Icons/variable0000.png" height="20px" valign="bottom" alt="variable icon"> icon above the project tree. This will open the _Variables_ dialog.
 
 ![](images/create_variable.gif)
 
@@ -586,7 +586,7 @@ You can also make use of [wireless reroute nodes](#wireless-reroute-nodes) to ke
 
 ### Modules
 #### Creating a new module
-OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the _M_ icon above the project tree.
+OpenSCAD allows you to build custom modules, so you can reuse code. In OpenSCAD graph editor you can also create custom modules. To create a new module, click the <img src="../Icons/module0000.png" height="20px" valign="bottom" alt="module icon"> icon above the project tree.
 
 ![](images/create_module.gif)
 
@@ -602,7 +602,7 @@ To use a module in your main graph (or another module) you can either add it thr
 
 #### Default values for module parameters
 
-Module parameters can be given default values. To specify a default value for a module parameter click the pen icon next to the parameter's name in the module's entry point. This will then add a literal field to this parameter where you can enter the default value:
+Module parameters can be given default values. To specify a default value for a module parameter click the <img src="../Icons/pencil0000.png" height="20px" valign="bottom" alt="pencil icon"> icon next to the parameter's name in the module's entry point. This will then add a literal field to this parameter where you can enter the default value:
 
 ![](images/default_parameters.gif)
 
@@ -672,7 +672,7 @@ If the module calls itself recursively, the recursive call will be replaced with
 
 ### Functions
 
-Functions work very much like modules, except that they have a return value and they cannot create or work with geometry. You can add a new function by pressing the _F_ icon above the project tree. A popup dialog will open. In this dialog you can specify the name of the function, its return type and any parameters and their types. Once you are done press _OK_ to create the function. A new tab will open in which you can edit the graph of the function. It will already contain two nodes:
+Functions work very much like modules, except that they have a return value and they cannot create or work with geometry. You can add a new function by pressing the <img src="../Icons/function0000.png" height="20px" valign="bottom" alt="function icon"> icon above the project tree. A popup dialog will open. In this dialog you can specify the name of the function, its return type and any parameters and their types. Once you are done press _OK_ to create the function. A new tab will open in which you can edit the graph of the function. It will already contain two nodes:
 
 - the function's entry point, from which you can drag out the parameters given to your function
 - the function's return value node which has an input port for the function's return value
@@ -711,7 +711,7 @@ OpenSCAD has no shortage of [libraries](https://openscad.org/libraries.html) whi
 
 ### Adding a reference to a library
 
-You can add a reference to a library by clicking the `<>` icon in the top right. This will open a dialog where you can select the library you want to add:
+You can add a reference to a library by clicking the <img src="../Icons/import0000.png" height="20px" valign="bottom" alt="import icon"> icon above the project tree. This will open a dialog where you can select the library you want to add:
 
 ![](images/include_files.gif)
 
