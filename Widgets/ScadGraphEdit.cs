@@ -374,24 +374,13 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsCopy())
             {
-                _context.CopyNodesToClipboard(Graph, GetSelectedNodes());
+                CopySelection();
                 return;
             }
 
             if (evt.IsDuplicate())
             {
-                var duplicatedNodes =
-                    Graph.CloneSelection(_context.CurrentProject, GetSelectedNodes(), out _);
-
-                var pastePosition = GlobalMousePositionToGraphOffset(GetGlobalMousePosition());
-                var refactoringData = _context.PerformRefactoring(
-                    "Duplicate nodes", new PasteNodesRefactoring(Graph, duplicatedNodes, pastePosition));
-
-                // select the pasted nodes
-                if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
-                {
-                    SelectNodes(pastedNodes);
-                }
+                DuplicateSelection();
             }
 
             if (evt.IsExtract())
@@ -402,32 +391,13 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsCut())
             {
-                // first copy the nodes to the clipboard
-                var selectedNodes = GetSelectedNodes();
-                _context.CopyNodesToClipboard(Graph, selectedNodes);
-
-                // then run refactorings to delete them
-                // this will implicitly also delete the connections.
-                var deleteRefactorings = selectedNodes
-                    .Select(it => new DeleteNodeRefactoring(Graph, it))
-                    .ToList();
-
-                _context.PerformRefactorings("Cut nodes", deleteRefactorings);
+                CutSelection();
                 return;
             }
 
             if (evt.IsPaste())
             {
-                var clipboardContents = _context.GetNodesInClipboard();
-                var pastePosition = GlobalMousePositionToGraphOffset(GetGlobalMousePosition());
-                var refactoringData = _context.PerformRefactoring(
-                    "Paste nodes", new PasteNodesRefactoring(Graph, clipboardContents, pastePosition));
-
-                if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
-                {
-                    SelectNodes(pastedNodes);
-                }
-
+                PasteClipboard();
                 return;
             }
 
@@ -523,6 +493,61 @@ namespace OpenScadGraphEditor.Widgets
                 _connectionHighlightPoints = closest[0].Value.BezierPoints;
                 _connectionHighlightLayer.Update();
             }
+        }
+
+        public void CopySelection()
+        {
+            _context.CopyNodesToClipboard(Graph, GetSelectedNodes());
+            _context.ShowInfo("Copied selection to clipboard.");
+        }
+
+        public void DuplicateSelection()
+        {
+            var duplicatedNodes =
+                Graph.CloneSelection(_context.CurrentProject, GetSelectedNodes(), out _);
+
+            var pastePosition = CalculatePastePosition();
+            var refactoringData = _context.PerformRefactoring(
+                "Duplicate nodes", new PasteNodesRefactoring(Graph, duplicatedNodes, pastePosition));
+
+            // select the pasted nodes
+            if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
+            {
+                SelectNodes(pastedNodes);
+            }
+        }
+
+        public void PasteClipboard()
+        {
+            var clipboardContents = _context.GetNodesInClipboard();
+            var pastePosition = CalculatePastePosition();
+            var refactoringData = _context.PerformRefactoring(
+                "Paste nodes", new PasteNodesRefactoring(Graph, clipboardContents, pastePosition));
+
+            if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
+            {
+                SelectNodes(pastedNodes);
+            }
+        }
+
+        public void CutSelection()
+        {
+            // first copy the nodes to the clipboard
+            var selectedNodes = GetSelectedNodes();
+            _context.CopyNodesToClipboard(Graph, selectedNodes);
+
+            // then run refactorings to delete them
+            // this will implicitly also delete the connections.
+            var deleteRefactorings = selectedNodes
+                .Select(it => new DeleteNodeRefactoring(Graph, it))
+                .ToList();
+
+            _context.PerformRefactorings("Cut nodes", deleteRefactorings);
+        }
+
+        private Vector2 CalculatePastePosition()
+        {
+            return GlobalMousePositionToGraphOffset(GetGlobalMousePosition());
         }
 
         public void ExtractSelection()
