@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Godot;
 using GodotExt;
@@ -76,19 +77,23 @@ namespace OpenScadGraphEditor.Utils
             return input.Length == 0 ? defaultValue : input;
         }
 
+        /// <summary>
+        /// Word-wraps the given string to the given maximum number of characters per line.
+        /// </summary>
         public static string WordWrap(this string input, int maxCharactersPerLine)
         {
             var lines = input.Split('\n');
-            var output = "";
-            foreach (var line in lines)
+            var output = new StringBuilder();
+            for (var i = 0; i < lines.Length; i++)
             {
+                var line = lines[i];
                 var words = line.Split(' ');
                 var currentLine = "";
                 foreach (var word in words)
                 {
                     if (currentLine.Length + word.Length > maxCharactersPerLine)
                     {
-                        output += currentLine + "\n";
+                        output.Append(currentLine + "\n");
                         currentLine = word;
                     }
                     else
@@ -104,10 +109,15 @@ namespace OpenScadGraphEditor.Utils
                     }
                 }
 
-                output += currentLine + "\n";
+                output.Append(currentLine);
+                if (i < lines.Length - 1)
+                {
+                   output.Append("\n");  // add newline after each line except the last one
+                }
             }
 
-            return output;
+            // if we have no visible output, return an empty string
+            return output.IsNotBlank() ? output.ToString() : "";
         }
 
         /// <summary>
@@ -130,6 +140,27 @@ namespace OpenScadGraphEditor.Utils
                    // variables can only contain letters, numbers and underscores, they may optionally start with $
                    // and the first character must not be a number
                    Regex.IsMatch(input, @"^\$?[a-zA-Z_][a-zA-Z0-9_]*$");
+        }
+
+        /// <summary>
+        /// Appends a newline to the given StringBuilder if it is not empty.
+        /// </summary>
+        public static StringBuilder NewLineUnlessBlank(this StringBuilder builder)
+        {
+            if (builder.IsNotBlank())
+            {
+                builder.Append("\n");
+            }
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Returns true if the given StringBuilder contains non-whitespace characters.
+        /// </summary>
+        public static bool IsNotBlank(this StringBuilder builder)
+        {
+            return builder.ToString().Trim().Length > 0;
         }
     }
 }
