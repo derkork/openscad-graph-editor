@@ -21,26 +21,30 @@ namespace OpenScadGraphEditor.Nodes
 
             if (parameters.Count > 0)
             {
-                result.Append("\n");
+                result.NewLineUnlessBlank();
+                result.NewLineUnlessBlank();
                 result.Append(
                     parameters
                         .Select(it => $"@param {it.Name} {ToDocTypeHint(it.TypeHint)} {EscapeForComment(it.Description)}")
                         .Select(it => it.WordWrap(75))
-                        .JoinToString("")
+                        .JoinToString("\n")
                     );
             }
 
             if (invokableDescription is FunctionDescription functionDescription)
             {
-                result.Append("\n");
                 var returnValueDescription = $"@return {ToDocTypeHint(functionDescription.ReturnTypeHint)} {EscapeForComment(functionDescription.ReturnValueDescription)}";
                 returnValueDescription = returnValueDescription.WordWrap(75);
-                // strip trailing newline
-                returnValueDescription = returnValueDescription.Substring(0, returnValueDescription.Length - 1);
                 result.Append(returnValueDescription);
             }
-            
-            return "/**\n" + result.ToString().PrefixLines(" * ") + "\n */";
+
+            // don't add a comment if there would be no content
+            if (result.IsNotBlank())
+            {
+                return "/**\n" + result.ToString().PrefixLines(" * ") + "\n */";
+            }
+
+            return "";
         }
 
         
