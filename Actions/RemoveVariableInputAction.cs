@@ -15,7 +15,7 @@ namespace OpenScadGraphEditor.Actions
         {
             if (item.TryGetNode(out var graph, out var node)
                 && node is IHaveVariableInputSize variableInputSize
-                && variableInputSize.CurrentInputSize > 0)
+                && variableInputSize.CurrentInputSize > 1)
             {
                 var title = variableInputSize.RemoveRefactoringTitle;
                 result = new QuickAction(title,
