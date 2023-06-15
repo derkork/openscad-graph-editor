@@ -21,6 +21,7 @@ namespace OpenScadGraphEditor.Actions
             {
                 result = new QuickAction($"Find usages of {variableDescription.Name}",
                     () => context.FindAndShowUsages(variableDescription));
+                return true;
             }
             
             result = default;

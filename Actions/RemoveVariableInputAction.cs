@@ -20,6 +20,7 @@ namespace OpenScadGraphEditor.Actions
                 var title = variableInputSize.RemoveRefactoringTitle;
                 result = new QuickAction(title,
                     () => context.PerformRefactoring(title, new RemoveVariableInputRefactoring(graph, node)));
+                return true;
             }
             result = default;
             return false;
