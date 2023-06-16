@@ -105,6 +105,12 @@ namespace OpenScadGraphEditor.Nodes
                 return true;
             }
 
+            // vector2 can be assigned to vector3
+            if (self == PortType.Vector2 && other == PortType.Vector3)
+            {
+                return true;
+            }
+            
             if (self == PortType.Vector3 && other == PortType.Vector)
             {
                 return true;
