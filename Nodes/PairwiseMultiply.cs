@@ -57,7 +57,7 @@ namespace OpenScadGraphEditor.Nodes
             var var1 = Id.UniqueStableVariableName(0);
             var var2 = Id.UniqueStableVariableName(1);
             
-            return $"let({var1} = {first}, {var2} = {second}) [for(i =[0:max(len({var1}), len({var2}))-1]) (i < len({var1}) ? {var1}[i] : 0) * (i < len({var2}) ? {var2}[i] : 0)]";
+            return $"(let({var1} = {first}, {var2} = {second}) [for(i =[0:max(len({var1}), len({var2}))-1]) (i < len({var1}) ? {var1}[i] : 0) * (i < len({var2}) ? {var2}[i] : 0)])";
         }
 
         public ScadNodeWidget InstantiateCustomWidget()

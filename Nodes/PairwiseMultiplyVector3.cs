@@ -61,7 +61,7 @@ namespace OpenScadGraphEditor.Nodes
             var var2 = Id.UniqueStableVariableName(1);
             
             // we can use a simplified version of the code for the vector3 case
-            return $"let({var1} = {first}, {var2} = {second}) [{var1}.x*{var2}.x,{var1}.y*{var2}.y,{var1}.z*{var2}.z]";
+            return $"(let({var1} = {first}, {var2} = {second}) [{var1}.x*{var2}.x,{var1}.y*{var2}.y,{var1}.z*{var2}.z])";
         }
 
         public ScadNodeWidget InstantiateCustomWidget()
