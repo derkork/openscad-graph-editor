@@ -126,7 +126,7 @@ namespace OpenScadGraphEditor.Nodes.Sum
             // this one's a bit special so we need to do our own rendering. 
             // first get all input nodes
             var result = context.GetAllConnections()
-                .Where(it => ScadConnectionExt.IsTo(it, this, 0))
+                .Where(it => it.IsTo(this, 0))
                 // render their outputs
                 .Select(it => it.From.Render(context, it.FromPort))
                 // filter out empty strings
