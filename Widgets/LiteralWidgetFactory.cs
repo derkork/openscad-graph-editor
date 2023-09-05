@@ -34,7 +34,10 @@ namespace OpenScadGraphEditor.Widgets
                 case NumberLiteral numberLiteral:
                     if (customizerDescription != null)
                     {
-                        if (customizerDescription.ConstraintType == VariableCustomizerConstraintType.MinStepMax)
+                        // workaround for https://github.com/derkork/openscad-graph-editor/issues/61
+                        // the slider doesn't work with a step of > 0 and a min value of != 0. So we only render
+                        // a slider if the min value is 0. Otherwise we fall back to a number edit.
+                        if (customizerDescription.ConstraintType == VariableCustomizerConstraintType.MinStepMax && customizerDescription.Min.SafeParse(0) == 0)
                         {
                             // render a slider
                             if (!(existing is NumberSlider numberSlider))
