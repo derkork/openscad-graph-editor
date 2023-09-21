@@ -780,13 +780,14 @@ OpenSCAD graph editor will render the code in the preamble verbatim, so make sur
 - `S` - align selected nodes to the bottom.
 - `Delete` or `Backspace` - delete selected nodes.
 - `Shift` + `Delete` or `Shift` + `Backspace` - delete selected nodes, retaining connections if possible.
-- `Ctrl`+`A` / `Cmd` + `A` - Select all nodes.
-- `Ctrl`+`C` / `Cmd` + `C` - Copy the selected nodes.
-- `Ctrl`+`D` / `Cmd` + `D` - Duplicate the selected nodes.
-- `Ctrl`+`E` / `Cmd` + `E` - Extract the selected nodes into a module or function.
-- `Ctrl`+`V` / `Cmd` + `V` - Paste the copied nodes.
-- `Ctrl`+`X` / `Cmd` + `X` - Cut the selected nodes.
-- `Ctrl`+`Z` / `Cmd` + `Z` - Undo the last action.
+- `Ctrl`+`A` / `Cmd`+ `A` - Select all nodes.
+- `Ctrl`+`C` / `Cmd`+ `C` - Copy the selected nodes.
+- `Ctrl`+`D` / `Cmd`+ `D` - Duplicate the selected nodes.
+- `Ctrl`+`Shift`+`D` / `Cmd`+`Shift`+`D` - Duplicate the selected nodes and keep the copies connected to the graph.
+- `Ctrl`+`E` / `Cmd`+`E` - Extract the selected nodes into a module or function.
+- `Ctrl`+`V` / `Cmd`+`V` - Paste the copied nodes.
+- `Ctrl`+`X` / `Cmd`+`X` - Cut the selected nodes.
+- `Ctrl`+`Z` / `Cmd`+`Z` - Undo the last action.
 - `Ctrl`+`Shift`+`Z` / `Cmd`+`Shift`+`Z` - Redo the last action.
 - `Right Click` over a connection - Delete the connection.
 - `Shift` + `Right Click` over a connection - Insert a reroute node on the connection.
