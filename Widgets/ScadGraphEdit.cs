@@ -65,7 +65,7 @@ namespace OpenScadGraphEditor.Widgets
             {
                 foreach (var to in allPortTypes)
                 {
-                    AddValidConnectionType((int) from, (int) to);
+                    AddValidConnectionType((int)from, (int)to);
                 }
             }
 
@@ -273,7 +273,7 @@ namespace OpenScadGraphEditor.Widgets
                 var bezierPoints = BakeBezierLine(connectionPoints.Start, connectionPoints.End, 1);
                 foreach (var bezierPoint in bezierPoints)
                 {
-                    _connectionTree.Add(new[] {bezierPoint.x, bezierPoint.y}, (connection, bezierPoints));
+                    _connectionTree.Add(new[] { bezierPoint.x, bezierPoint.y }, (connection, bezierPoints));
                 }
             }
         }
@@ -427,6 +427,7 @@ namespace OpenScadGraphEditor.Widgets
 
             if (evt.IsAlignRight())
             {
+                GD.Print("Align right");
                 AlignSelectionRight();
                 return;
             }
@@ -443,7 +444,7 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
 
-            if (evt is InputEventMouseButton {Pressed: false} &&
+            if (evt is InputEventMouseButton { Pressed: false } &&
                 _pendingDisconnect != null)
             {
                 Log.Debug("Resolving pending disconnect");
@@ -467,7 +468,7 @@ namespace OpenScadGraphEditor.Widgets
                 // we need to convert them to screen space but relative to the graph widget.
                 var mousePosition = mousePositionRelativeToTheGraph * Zoom;
 
-                var closest = _connectionTree.GetNearestNeighbours(new[] {mousePosition.x, mousePosition.y}, 1);
+                var closest = _connectionTree.GetNearestNeighbours(new[] { mousePosition.x, mousePosition.y }, 1);
                 if (closest.Length <= 0)
                 {
                     ClearHighlightedConnection();
@@ -503,12 +504,49 @@ namespace OpenScadGraphEditor.Widgets
 
         public void DuplicateSelection()
         {
+            var selectedNodes = GetSelectedNodes().ToHashSet();
             var duplicatedNodes =
-                Graph.CloneSelection(_context.CurrentProject, GetSelectedNodes(), out _);
+                Graph.CloneSelection(_context.CurrentProject, selectedNodes, out var mappedIds);
+
+            // make a list of all refactorings that need to be performed
+            var refactorings = new List<Refactoring>();
 
             var pastePosition = CalculatePastePosition();
-            var refactoringData = _context.PerformRefactoring(
-                "Duplicate nodes", new PasteNodesRefactoring(Graph, duplicatedNodes, pastePosition));
+            // since we already make a clone of the nodes, we set "pasteCopy" to false here. This will also help
+            // with the ID-remapping for the extra connections.
+            var pasteNodesRefactoring = new PasteNodesRefactoring(Graph, duplicatedNodes, pastePosition, false);
+
+            refactorings.Add(pasteNodesRefactoring);
+
+            // when shift is pressed we want to also duplicate all connections that go into or out of the duplicated nodes
+            // https://github.com/derkork/openscad-graph-editor/issues/62
+            if (KeyMap.IsShiftPressed())
+            {
+                // get a list of all connections that go into or out of the duplicated nodes
+                // but only to nodes which are not part of the selection.
+                var connectionsToDuplicate = Graph.GetAllConnections()
+                    // the connection can either be from or to the duplicated nodes but not both
+                    .Where(it => selectedNodes.Contains(it.From) ^ selectedNodes.Contains(it.To))
+                    .ToList();
+
+                // now walk over the connections and create a copy of each, replacing either the from or
+                // to node with the new node.
+                var duplicatedConnections = connectionsToDuplicate
+                    .Select(it =>
+                    {
+                        var from = selectedNodes.Contains(it.From)
+                            ? duplicatedNodes.ById(mappedIds[it.From.Id])
+                            : it.From;
+                        var to = selectedNodes.Contains(it.To) ? duplicatedNodes.ById(mappedIds[it.To.Id]) : it.To;
+                        return new ScadConnection(Graph, from, it.FromPort, to, it.ToPort);
+                    })
+                    .Select(it => new AddConnectionRefactoring(it))
+                    .ToList();
+
+                refactorings.AddRange(duplicatedConnections);
+            }
+
+            var refactoringData = _context.PerformRefactorings("Duplicate nodes", refactorings);
 
             // select the pasted nodes
             if (refactoringData.TryGetData(PasteNodesRefactoring.PastedNodes, out var pastedNodes))
@@ -601,7 +639,7 @@ namespace OpenScadGraphEditor.Widgets
             _graphLayout.AlignNodesLeft(GetSelectedWidgets());
         }
 
-  
+
         private void ClearHighlightedConnection()
         {
             if (_highlightedConnection == null)
@@ -681,7 +719,7 @@ namespace OpenScadGraphEditor.Widgets
 
             // the disconnect is not done until the user has released the mouse button, so in case this is called
             // while the mouse is still down, just visually disconnect, but don't do a refactoring yet.
-            if (Input.IsMouseButtonPressed((int) ButtonList.Left))
+            if (Input.IsMouseButtonPressed((int)ButtonList.Left))
             {
                 DisconnectNode(fromWidgetName, fromSlot, toWidgetName, toSlot);
                 _pendingDisconnect = connection;
@@ -729,7 +767,7 @@ namespace OpenScadGraphEditor.Widgets
                 var partnerNodeId = node.OtherNodeId;
                 var partnerNodeWidget = _widgets[partnerNodeId];
                 // if the node's partner node is not currently selected, but the node is selected then highlight the node's partner node, otherwise clear it.
-                if (!_selection.Contains(partnerNodeId) && _selection.Contains(((ScadNode) node).Id))
+                if (!_selection.Contains(partnerNodeId) && _selection.Contains(((ScadNode)node).Id))
                 {
                     partnerNodeWidget.Modulate = Colors.Yellow;
                 }
@@ -901,7 +939,7 @@ namespace OpenScadGraphEditor.Widgets
 
             var lines = 0;
 
-            var points = new List<Vector2> {fromPoint};
+            var points = new List<Vector2> { fromPoint };
             BakeSegment2D(points, 0, 1, fromPoint, c1, toPoint, c2, 0, 3, 9, 3, 20, ref lines);
             points.Add(toPoint);
 

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2023-09-21
+### Added
+- You can now hold the _Shift_ key when duplicating nodes to automatically connect the duplicates to the same nodes as the original nodes. ([#62](https://github.com/derkork/openscad-graph-editor/issues/62)).
+
 ## [0.10.2] - 2023-09-05
 ### Fixed
 - When having a min/step/max-constrained number in the customizer and the min value is different from zero the slider could not select any correct value anymore. This is an issue with the underlying Godot engine 3 which doesn't support this combination for sliders. As such this issue cannot be fixed without migrating to Godot 4. As a workaround, the editor will not show a number edit instead of a slider in this case, so it is at least possible to enter a valid value. ([#61](https://github.com/derkork/openscad-graph-editor/issues/61)). 

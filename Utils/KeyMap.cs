@@ -1,4 +1,3 @@
-using System.Security.Policy;
 using Godot;
 
 namespace OpenScadGraphEditor.Utils
@@ -72,7 +71,7 @@ namespace OpenScadGraphEditor.Utils
         public static bool IsExtract(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.E);
         
         // undo/redo
-        public static bool IsUndo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z);
+        public static bool IsUndo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z) && !inputEvent.IsShiftPressed();
         public static bool IsRedo(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.Z) && inputEvent.IsShiftPressed();
         
         // straighten
