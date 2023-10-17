@@ -290,7 +290,7 @@ Operator nodes will automatically switch their input and output port types to ma
 
 ![](images/flip_inputs.gif)
 
-For calculating boolean values there are also boolean operators available. These are the _And_, _Or_ and _Not_ nodes. They work similar to the other operator nodes, but they only accept boolean values as input and they will output a boolean value.
+For calculating boolean values there are also boolean operators available. These are the _And_ (&&), _Or_ (||) and _Not_ (!) nodes. They work similar to the other operator nodes, but they only accept boolean values as input and they will output a boolean value.
 
 ![](images/boolean_operators.png)
 
