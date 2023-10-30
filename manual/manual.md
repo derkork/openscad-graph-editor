@@ -12,6 +12,7 @@
   * [Nodes](#nodes)
   * [Adding nodes](#adding-nodes)
   * [Getting help for a node](#getting-help-for-a-node)
+  * [Selecting nodes](#selecting-nodes)
   * [Connecting nodes](#connecting-nodes)
     + [Port types](#port-types)
     + [Connecting geometry ports](#connecting-geometry-ports)
@@ -164,6 +165,24 @@ After you have selected a node from the list the node will be added to the graph
 Sometimes it may not be immediately obvious what a node does and what needs to be connected to its inputs and outputs. You can get help for any node by selecting it and then pressing the `F1` key on your keyboard. This will show a help screen for that node which describes what the node does.
 
 ![](images/help_screen.gif)
+
+
+### Selecting nodes
+
+You can select a node by clicking on it. You can select multiple nodes by holding down the `Ctrl` / `Cmd` key while clicking on nodes. This also allows you to de-select single nodes while keeping the other nodes selected.
+
+![Selecting with CTRL](images/ctrl_selections.gif)
+
+You can also select multiple nodes by dragging a selection rectangle around them. You can hold down the `Ctrl` / `Cmd` key while dragging to add to the selection. 
+
+![Rectangle selections](images/drag_selections_add.gif)
+
+
+If you press `Shift` while dragging a selection, the selected nodes will be removed from the selection.
+
+![Subtracting from rectangle selection](images/shift_drag_selection.gif)
+
+To select all nodes in the graph, press `Ctrl` + `A` / `Cmd` + `A`. To deselect all nodes, left-click on a free space in the graph.
 
 
 ### Connecting nodes
