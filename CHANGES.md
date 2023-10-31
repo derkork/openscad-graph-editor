@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2023-10-31
+### Added
+- There is a new _String Enum_ node which makes it easier to compare a string to various fixed values ([#63](https://github.com/derkork/openscad-graph-editor/issues/63)).
+- A new action was added to select all unused nodes, e.g. all nodes which do not contribute to the generated code ([#64](https://github.com/derkork/openscad-graph-editor/issues/64)).
+
+
 ## [0.11.0] - 2023-09-21
 ### Added
 - You can now hold the _Shift_ key when duplicating nodes to automatically connect the duplicates to the same nodes as the original nodes. ([#62](https://github.com/derkork/openscad-graph-editor/issues/62)).
