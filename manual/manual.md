@@ -38,6 +38,8 @@
     + [PlusOne](#plusone)
     + [MinusOne](#minusone)
     + [Pairwise vector multiplication `vector2` / `vector3` / `vector`](#pairwise-vector-multiplication-vector2--vector3--vector)
+    + [Sum](#sum)
+    + [String Enum](#string-enum)
 - [Keeping the graph neat and tidy](#keeping-the-graph-neat-and-tidy)
   * [Comments](#comments)
   * [Reroute nodes](#reroute-nodes)
@@ -411,6 +413,21 @@ The _Sum_ node is a specialization of the _Add_ operator. It allows you to sum a
 ![Summing with operators vs. Sum node](images/sum_node.png)
 
 The _Sum_ node can sum numbers or vectors (e.g `vector2`, `vector2`, `vector`), but you cannot mix numbers with vectors as the result would be undefined. Like the operator nodes the sum node will automatically adjust its output type to match the sum produced by the input types.
+
+
+#### String Enum
+
+The _String Enum_ node provides a way of quickly testing a string value against a list of possible values. This is useful if you want to have some enumeration values to conditionally enable/disable parts of your graph. Here we have a graph that either renders a cube or a sphere based on the input string:
+
+![Before string enum](images/string_enum_before.png)
+
+The _String Enum_ node allows you to express this with less nodes and visual clutter:
+
+![After string enum](images/string_enum_after.png)
+
+You can right-click the node to add or remove items.
+
+![Adding and removing items](images/string_enum_add_remove.png)
 
 ## Keeping the graph neat and tidy
 
