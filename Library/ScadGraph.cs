@@ -24,7 +24,42 @@ namespace OpenScadGraphEditor.Library
         public string Render()
         {
             // we render all nodes which have either no output at all or a single disconnected flow output
-            var candidates = _nodes.Where(it =>
+            var candidates = GetOutputRoots();
+            
+            // sort the candidates by their position in the graph
+            // top to bottom, then left to right; e.g.
+            // nodes with a lower y value will be rendered first
+            // nodes with the same y value will be sorted by their x value
+            var sortedCandidates = candidates
+                .OrderBy(it => it.Offset.y)
+                .ThenBy(it => it.Offset.x)
+                .ToList();
+            
+            var content = sortedCandidates.Select(it =>
+            {
+                var nodeContent = it.Render(this, 0);
+                
+                var renderModifier = it.BuildRenderModifier();
+                return !renderModifier.Empty() ? string.Format(renderModifier, nodeContent) : nodeContent;
+            }).JoinToString("\n");
+            // now check if the graph has an entrypoint if, so render the entry point with the given content
+            if (TryGetEntryPoint(out var entryPoint))
+            {
+                content = entryPoint.RenderEntryPoint( content);
+            }
+
+            return content;
+        }
+
+        /// <summary>
+        /// Returns all nodes of the graph which are the starting point of a renderable path. A node is a starting
+        /// point, when it has no output at all or a single disconnected flow output. Comment and Reroute nodes are
+        /// ignored.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ScadNode> GetOutputRoots()
+        {
+            return _nodes.Where(it =>
             {
                 // helper nodes will not be used as render target.
                 if (it is Comment || it is RerouteNode)
@@ -53,30 +88,6 @@ namespace OpenScadGraphEditor.Library
 
                 return hasFlowOutput;
             });
-            
-            // sort the candidates by their position in the graph
-            // top to bottom, then left to right; e.g.
-            // nodes with a lower y value will be rendered first
-            // nodes with the same y value will be sorted by their x value
-            var sortedCandidates = candidates
-                .OrderBy(it => it.Offset.y)
-                .ThenBy(it => it.Offset.x)
-                .ToList();
-            
-            var content = sortedCandidates.Select(it =>
-            {
-                var nodeContent = it.Render(this, 0);
-                
-                var renderModifier = it.BuildRenderModifier();
-                return !renderModifier.Empty() ? string.Format(renderModifier, nodeContent) : nodeContent;
-            }).JoinToString("\n");
-            // now check if the graph has an entrypoint if, so render the entry point with the given content
-            if (TryGetEntryPoint(out var entryPoint))
-            {
-                content = entryPoint.RenderEntryPoint( content);
-            }
-
-            return content;
         }
 
         /// <summary>

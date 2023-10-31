@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenScadGraphEditor.Library;
 using OpenScadGraphEditor.Nodes;
+using OpenScadGraphEditor.Utils;
 using static System.Text.RegularExpressions.Regex;
 
 namespace OpenScadGraphEditor.Refactorings
@@ -20,7 +21,7 @@ namespace OpenScadGraphEditor.Refactorings
                 foreach (var node in graph.GetAllNodes().OfType<IReferToAnInvokable>()
                              .Where(it => it.InvokableDescription == description))
                 {
-                    yield return new ReferencingNode<IReferToAnInvokable, ScadGraph>(graph, (ScadNode) node, node);
+                    yield return new ReferencingNode<IReferToAnInvokable, ScadGraph>(graph, (ScadNode)node, node);
                 }
             }
         }
@@ -38,7 +39,7 @@ namespace OpenScadGraphEditor.Refactorings
                 foreach (var node in graph.GetAllNodes().OfType<IReferToAVariable>()
                              .Where(it => it.VariableDescription == description))
                 {
-                    yield return new ReferencingNode<IReferToAVariable, ScadGraph>(graph, (ScadNode) node, node);
+                    yield return new ReferencingNode<IReferToAVariable, ScadGraph>(graph, (ScadNode)node, node);
                 }
             }
         }
@@ -55,32 +56,31 @@ namespace OpenScadGraphEditor.Refactorings
             {
                 return "_";
             }
-            
+
             var result = identifier;
             if (!char.IsLetter(result[0]) && result[0] != '$')
             {
                 result = "_" + result;
             }
-            
+
             // at this point the first character is guaranteed to be a letter or a $.
             // for the rest of the string regex replace any character that is not a letter, number or underscore with an underscore
             result = result.Substring(0, 1) + Replace(result.Substring(1), "[^a-zA-Z0-9_]", "_");
             return result;
-            
         }
-        
+
         /// <summary>
         /// Generates a safe name for any member of the project. If the name is already used, a number is appended to the name.
         /// </summary>
         public static string SafeName(this ScadProject project, string name)
         {
             var safeIdentifier = name.AsSafeIdentifier();
-            
+
             if (!project.IsNameUsed(safeIdentifier))
             {
                 return safeIdentifier;
             }
-            
+
             var result = safeIdentifier;
             var i = 2;
             while (project.IsNameUsed(result))
@@ -99,12 +99,12 @@ namespace OpenScadGraphEditor.Refactorings
         public static string SafeParameterName(this InvokableDescription invokableDescription, string name)
         {
             var safeIdentifier = name.AsSafeIdentifier();
-            
+
             if (invokableDescription.Parameters.All(it => it.Name != safeIdentifier))
             {
                 return safeIdentifier;
             }
-            
+
             var result = safeIdentifier;
             var i = 2;
             while (invokableDescription.Parameters.Any(it => it.Name == result))
@@ -112,20 +112,21 @@ namespace OpenScadGraphEditor.Refactorings
                 result = $"{safeIdentifier}{i}";
                 i++;
             }
-            
+
             return result;
         }
-        
+
         /// <summary>
         /// Creates a new ScadGraph by cloning the selected nodes and the connections between them. Will not clone
         /// entry and return nodes (e.g. all nodes that cannot be deleted). Returns a dictionary which maps the original
         /// node ids to the new node ids (useful for post processing).
         /// </summary>
-        public static ScadGraph CloneSelection(this ScadGraph source,IReferenceResolver referenceResolver, IEnumerable<ScadNode> selection,
+        public static ScadGraph CloneSelection(this ScadGraph source, IReferenceResolver referenceResolver,
+            IEnumerable<ScadNode> selection,
             out Dictionary<string, string> mappedIds)
         {
             var result = new ScadGraph();
-            
+
             // when we make a copy we need to take special care about bound nodes
             // each bound node needs to have its partner within the copy even if it was not originally selected.
             // so we look up all bound nodes in the selection and if its partner is not in the
@@ -136,7 +137,7 @@ namespace OpenScadGraphEditor.Refactorings
             var boundNodes = correctedSelection.Where(it => it is IAmBoundToOtherNode).ToList();
             foreach (var boundNode in boundNodes)
             {
-                var boundTo = (IAmBoundToOtherNode) boundNode;
+                var boundTo = (IAmBoundToOtherNode)boundNode;
                 var partner = source.ById(boundTo.OtherNodeId);
 
                 if (!correctedSelection.Contains(partner))
@@ -144,7 +145,7 @@ namespace OpenScadGraphEditor.Refactorings
                     correctedSelection.Add(partner);
                 }
             }
-            
+
             // remove all nodes which cannot be deleted (which are usually nodes that are built in so they cannot be copied either).
             var sanitizedSet = correctedSelection
                 .Where(it => !(it is ICannotBeDeleted))
@@ -164,11 +165,11 @@ namespace OpenScadGraphEditor.Refactorings
             // correct the id mappings of any bound nodes
             foreach (var node in result.GetAllNodes().Where(it => it is IAmBoundToOtherNode))
             {
-                var partnerId = ((IAmBoundToOtherNode) node).OtherNodeId;
+                var partnerId = ((IAmBoundToOtherNode)node).OtherNodeId;
                 // find out which id the partner has in the copy
                 var partnerCopyId = idMapping[partnerId];
                 // and set the partner id to the copy id
-                ((IAmBoundToOtherNode) node).OtherNodeId = partnerCopyId;
+                ((IAmBoundToOtherNode)node).OtherNodeId = partnerCopyId;
             }
 
             //  copy all connections which are between the selected nodes
@@ -185,12 +186,64 @@ namespace OpenScadGraphEditor.Refactorings
             return result;
         }
 
+        /// <summary>
+        /// Finds all nodes in the given graph which are not contributing to the output. Nodes that cannot be deleted
+        /// will not be considered unused.
+        /// </summary>
+        public static List<ScadNode> FindUnusedNodes(this ScadGraph graph)
+        {
+            var outputRoots = graph.GetOutputRoots();
+
+            var usedNodes = new HashSet<ScadNode>();
+            var unusedNodes = new HashSet<ScadNode>();
+
+            // add the output roots to the used nodes
+            outputRoots.ForAll(it => usedNodes.Add(it));
+            
+            // add all nodes of the graph to the unused nodes, except the output roots
+            graph.GetAllNodes()
+                .Where(it => !usedNodes.Contains(it))
+                .ForAll(it => unusedNodes.Add(it));
+
+            var allConnections = graph.GetAllConnections().ToList();
+            
+            while (unusedNodes.Count > 0)
+            {
+                
+                // find all unused nodes 
+                var newUsedNodes = unusedNodes
+                    .Where(it => 
+                        // which are bound to a used node
+                        (it is IAmBoundToOtherNode boundToOtherNode && usedNodes.Any(n => n.Id == boundToOtherNode.OtherNodeId)) 
+                        // or have an output connection to a used node
+                        || allConnections.Any(c => c.From == it && c.InvolvesAnyNode(usedNodes)))
+                    .ToList();
+                
+                // add the new used nodes to the used nodes
+                newUsedNodes.ForAll(it => usedNodes.Add(it));
+                
+                // remove the new used nodes from the unused nodes
+                newUsedNodes.ForAll(it => unusedNodes.Remove(it));
+                
+                // if we did not find any new used nodes, we are done
+                if (newUsedNodes.Count == 0)
+                {
+                    break;
+                }
+            }
+
+            // remove all nodes which cannot be deleted from the list of unused nodes
+            unusedNodes.RemoveWhere(it => it is ICannotBeDeleted);
+            
+            return unusedNodes.ToList();
+        }
+
         public readonly struct ReferencingNode<T, TGraphType> where TGraphType : ScadGraph
         {
             public TGraphType Graph { get; }
             public ScadNode Node { get; }
             public T NodeAsReference { get; }
-            
+
             public ReferencingNode(TGraphType graph, ScadNode node, T nodeAsReference)
             {
                 Node = node;

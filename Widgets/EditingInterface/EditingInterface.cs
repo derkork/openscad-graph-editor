@@ -47,6 +47,8 @@ namespace OpenScadGraphEditor.Widgets.EditingInterface
             this.WithName<IconButton.IconButton>("AlignTopButton").ButtonPressed += _graphEdit.AlignSelectionTop;
             this.WithName<IconButton.IconButton>("AlignBottomButton").ButtonPressed += _graphEdit.AlignSelectionBottom;
             this.WithName<IconButton.IconButton>("ShowHelpButton").ButtonPressed += _graphEdit.ShowHelpForSelection;
+            
+            this.WithName<IconButton.IconButton>("SelectUnusedNodesButton").ButtonPressed += _graphEdit.SelectUnusedNodes;
         }
 
         public void Init(IEditorContext editorContext)

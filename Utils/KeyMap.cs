@@ -97,6 +97,10 @@ namespace OpenScadGraphEditor.Utils
 
         public static bool IsKeepConnectionsPressed()=> Input.IsKeyPressed((int)KeyList.Shift);
 
+        
+        // select unused (Ctrl+U)
+        public static bool IsSelectUnused(this InputEvent inputEvent) => inputEvent.IsCmdOrControlPressed() && inputEvent.IsKeyPressed(KeyList.U);
+        
         // we allow both backspace and delete to remove nodes
         public static bool IsRemoveNodePressed(InputEventKey evt)
         {

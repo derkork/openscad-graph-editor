@@ -10,6 +10,11 @@ namespace OpenScadGraphEditor.Nodes
             return connection.From == node || connection.To == node;
         }
 
+        public static bool InvolvesAnyNode(this ScadConnection connection, IEnumerable<ScadNode> nodes)
+        {
+            return nodes.Any(connection.InvolvesNode);
+        }
+
         public static bool InvolvesPort(this ScadConnection connection, ScadNode node, PortId port)
         {
             if (port.IsInput)

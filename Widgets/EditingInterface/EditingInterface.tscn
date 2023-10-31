@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Widgets/EditingInterface/EditingInterface.cs" type="Script" id=1]
 [ext_resource path="res://Widgets/ScadGraphEdit.cs" type="Script" id=2]
@@ -17,6 +17,7 @@
 [ext_resource path="res://Icons/cut0000.png" type="Texture" id=15]
 [ext_resource path="res://Icons/paste0000.png" type="Texture" id=16]
 [ext_resource path="res://Icons/duplicate0000.png" type="Texture" id=17]
+[ext_resource path="res://Icons/unused0000.png" type="Texture" id=18]
 
 [node name="EditingInterface" type="HBoxContainer"]
 anchor_right = 1.0
@@ -180,6 +181,21 @@ margin_right = 32.0
 margin_bottom = 600.0
 Icon = ExtResource( 7 )
 HintTooltip = "Align Bottom (S)"
+Padding = Vector2( 6, 6 )
+
+[node name="HSeparator4" type="HSeparator" parent="ButtonBar"]
+margin_top = 608.0
+margin_right = 32.0
+margin_bottom = 616.0
+
+[node name="SelectUnusedNodesButton" parent="ButtonBar" instance=ExtResource( 3 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 624.0
+margin_right = 32.0
+margin_bottom = 656.0
+Icon = ExtResource( 18 )
+HintTooltip = "Select unused nodes (Ctrl+U / Cmd+U)"
 Padding = Vector2( 6, 6 )
 
 [node name="GraphEdit" type="GraphEdit" parent="."]

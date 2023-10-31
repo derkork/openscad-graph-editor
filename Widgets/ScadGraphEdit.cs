@@ -444,6 +444,12 @@ namespace OpenScadGraphEditor.Widgets
                 return;
             }
 
+            if (evt.IsSelectUnused())
+            {
+                SelectUnusedNodes();
+                return;
+            }
+
             if (evt is InputEventMouseButton { Pressed: false } &&
                 _pendingDisconnect != null)
             {
@@ -639,6 +645,15 @@ namespace OpenScadGraphEditor.Widgets
             _graphLayout.AlignNodesLeft(GetSelectedWidgets());
         }
 
+
+        public void SelectUnusedNodes()
+        {
+            var unusedNodes = Graph.FindUnusedNodes();
+            SelectNodes(unusedNodes);
+            _context.ShowInfo(unusedNodes.Count > 0
+                ? "Selected all nodes which do not contribute to the output."
+                : "All nodes in this graph currently contribute to the output.");
+        }
 
         private void ClearHighlightedConnection()
         {
