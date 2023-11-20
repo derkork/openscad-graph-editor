@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2023-11-20
+### Added
+- Connections from and to disabled nodes are now dimmed to see more easily which connections are unused when a node is disabled ([#68](https://github.com/derkork/openscad-graph-editor/issues/68)).
+
 ## [0.12.0] - 2023-10-31
 ### Added
 - There is a new _String Enum_ node which makes it easier to compare a string to various fixed values ([#63](https://github.com/derkork/openscad-graph-editor/issues/63)).

@@ -100,6 +100,7 @@ namespace OpenScadGraphEditor.Widgets
 
             this.Connect("scroll_offset_changed")
                 .To(this, nameof(OnScrollOffsetChanged));
+            
         }
 
         public override bool CanDropData(Vector2 position, object data)
@@ -235,6 +236,14 @@ namespace OpenScadGraphEditor.Widgets
                 // the widget and then connect these widgets.
                 ConnectNode(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name,
                     connection.ToPort);
+                
+                // if the connection is from or to a deactivated node, make it less visible
+                if (connection.From.GetModifiers().HasFlag(ScadNodeModifier.Disable) ||
+                    connection.To.GetModifiers().HasFlag(ScadNodeModifier.Disable))
+                {
+                    SetConnectionActivity(_widgets[connection.From.Id].Name, connection.FromPort, _widgets[connection.To.Id].Name,
+                        connection.ToPort, 0.9f);
+                }
             }
 
 

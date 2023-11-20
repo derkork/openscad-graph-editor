@@ -204,5 +204,6 @@ margin_right = 1920.0
 margin_bottom = 1080.0
 mouse_filter = 1
 size_flags_horizontal = 3
+custom_colors/activity = Color( 1, 1, 1, 0 )
 scroll_offset = Vector2( -32, 0 )
 script = ExtResource( 2 )
