@@ -3,9 +3,6 @@
 <!--suppress HtmlDeprecatedAttribute -->
 <p align="center"><img height="128" src="Icons/logo0000.png" width="128"/></p>
 
-_This is an early version. It works reasonably well but it has not seen a lot of use and testing so it is not yet recommended for productive use.  You are welcome to [try it out](https://github.com/derkork/openscad-graph-editor/releases/latest) and give feedback at this stage. There is a [Discord](https://discord.gg/AsxWyczCJF) server for discussion. Please also check the [FAQ](manual/faq.md) if you have problems._
-
-
 ## Quick Links
 
 <p align="center">
