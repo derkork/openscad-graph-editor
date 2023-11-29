@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.1] - 2023-11-29
+### Fixed
+- Adding/Removing single nodes to/from the selection with `Cmd` should now work properly on OSX ([#70](https://github.com/derkork/openscad-graph-editor/issues/70)).
+
 ## [0.13.0] - 2023-11-20
 ### Added
 - Connections from and to disabled nodes are now dimmed to see more easily which connections are unused when a node is disabled ([#68](https://github.com/derkork/openscad-graph-editor/issues/68)).
