@@ -373,6 +373,21 @@ namespace OpenScadGraphEditor.Widgets
         }
 
 
+        public override void _Input(InputEvent evt)
+        {
+            // whenever meta is pressed eat it and inject a copy with control instead
+            if (OS.GetName() == "OSX" && evt is InputEventKey key && key.Scancode == (uint) KeyList.Meta)
+            {
+                // eat it 
+                GetViewport().SetInputAsHandled();
+                // inject a copy with Control
+                var copy = new InputEventKey();
+                copy.Scancode = (uint)KeyList.Control;
+                copy.Pressed = key.Pressed;
+                Input.ParseInputEvent(copy);
+            }
+        }
+
         public override void _GuiInput(InputEvent evt)
         {
             if (evt.IsSelectAll())
